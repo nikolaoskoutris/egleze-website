@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Egleze — The Podcast Intelligence Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=Roboto+Condensed:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#bb1919;
+  --dark:#111;
+  --mid:#444;
+  --muted:#888;
+  --light:#f5f5f0;
+  --white:#ffffff;
+  --border:#e0e0da;
+  --gold:#b8860b;
+}
+html{scroll-behavior:smooth}
+body{background:var(--white);color:var(--dark);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden}
+
+/* TICKER */
+.ticker-wrap{background:#1c1c1c;overflow:hidden;padding:6px 0}
+.ticker-inner{display:flex;align-items:center}
+.ticker-tag{background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 14px;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.ticker-scroll{overflow:hidden;flex:1}
+.ticker-track{display:flex;white-space:nowrap;animation:scroll 50s linear infinite}
+.ticker-item{font-family:'Roboto Condensed',sans-serif;font-size:12px;color:#ccc;padding:0 28px}
+.ticker-item::before{content:'◆';margin-right:10px;font-size:7px;opacity:.5;vertical-align:middle}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* HEADER */
+header{background:var(--white);border-bottom:3px solid var(--red)}
+.header-top{max-width:1320px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.logo-wrap{display:flex;align-items:center;gap:0}
+.logo-block{display:flex;flex-direction:column}
+.logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;letter-spacing:5px;color:var(--dark);line-height:1}
+.logo .e-red{color:var(--red)}
+.logo-rule{width:100%;height:3px;background:var(--red);margin:4px 0 3px}
+.logo-sub{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:3.5px;color:var(--muted);text-transform:uppercase;line-height:1}
+.header-right{display:flex;align-items:center;gap:16px}
+.live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;padding:4px 12px;font-weight:700;text-transform:uppercase}
+.live-dot{width:6px;height:6px;background:#fff;border-radius:50%;animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.header-date{font-size:11px;color:var(--muted);letter-spacing:.3px}
+.search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border);padding:6px 12px;background:var(--light)}
+.search-box input{border:none;background:none;outline:none;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--dark);width:160px}
+.search-box input::placeholder{color:var(--muted)}
+
+/* NAV */
+nav{max-width:1320px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:0}
+.nav-item{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:11px 14px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+.nav-item:hover{color:var(--dark)}
+.nav-item.active{color:var(--dark);border-bottom-color:var(--red)}
+.nav-item.hot{color:var(--red)}
+.nav-subscribe{margin-left:auto;background:var(--dark);color:#fff;padding:8px 18px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:background .2s}
+.nav-subscribe:hover{background:var(--red)}
+
+/* PAGE */
+.page{max-width:1320px;margin:0 auto;padding:28px 32px}
+
+/* SECTION LABEL */
+.sec-label{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sec-bar{width:3px;height:16px;background:var(--red)}
+.sec-title{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.sec-line{flex:1;height:1px;background:var(--border)}
+
+/* HERO GRID */
+.hero{display:grid;grid-template-columns:1fr 1fr 300px;grid-template-rows:auto auto;gap:1px;background:var(--border);margin-bottom:32px}
+.hero-main{grid-column:1;grid-row:1/3;background:var(--white);cursor:pointer;transition:background .15s}
+.hero-main:hover{background:var(--light)}
+.hero-img{width:100%;height:260px;background:linear-gradient(135deg,#1a0a2e 0%,#0d1a3a 60%,#0a2210 100%);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.hero-img-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.5) 100%)}
+.wave-bg{display:flex;align-items:center;gap:3px;opacity:.2}
+.wave-bg span{width:3px;background:#fff;border-radius:2px;animation:wavebg 1.6s ease-in-out infinite}
+.wave-bg span:nth-child(1){height:20px;animation-delay:0s}
+.wave-bg span:nth-child(2){height:50px;animation-delay:.1s}
+.wave-bg span:nth-child(3){height:80px;animation-delay:.2s}
+.wave-bg span:nth-child(4){height:110px;animation-delay:.3s}
+.wave-bg span:nth-child(5){height:70px;animation-delay:.4s}
+.wave-bg span:nth-child(6){height:130px;animation-delay:.5s}
+.wave-bg span:nth-child(7){height:90px;animation-delay:.4s}
+.wave-bg span:nth-child(8){height:60px;animation-delay:.3s}
+.wave-bg span:nth-child(9){height:85px;animation-delay:.2s}
+.wave-bg span:nth-child(10){height:45px;animation-delay:.1s}
+.wave-bg span:nth-child(11){height:25px;animation-delay:0s}
+@keyframes wavebg{0%,100%{transform:scaleY(1);opacity:.2}50%{transform:scaleY(.4);opacity:.5}}
+.hero-badge{position:absolute;top:14px;left:14px;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);padding:4px 10px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;color:#f0b429;text-transform:uppercase;border:1px solid rgba(255,255,255,.1)}
+.hero-play{position:absolute;bottom:14px;right:14px;width:42px;height:42px;background:var(--red);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;cursor:pointer}
+.hero-body{padding:20px 22px 24px}
+.story-tag{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px;display:block}
+.hero-title{font-family:'Playfair Display',serif;font-size:24px;line-height:1.2;color:var(--dark);margin-bottom:10px}
+.hero-title em{font-style:italic;color:var(--red)}
+.hero-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:14px}
+.hero-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.hero-meta strong{color:var(--dark)}
+.meta-dot{color:var(--border)}
+
+/* SECONDARY */
+.hero-sec{background:var(--white);cursor:pointer;transition:background .15s;padding:0}
+.hero-sec:hover{background:var(--light)}
+.sec-img{width:100%;height:120px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.sec-img-1{background:linear-gradient(135deg,#1e0a3c,#3a1060)}
+.sec-img-2{background:linear-gradient(135deg,#0a1e3c,#102e50)}
+.sec-lbl{position:absolute;bottom:8px;left:10px;background:rgba(0,0,0,.6);border-left:2px solid #f0b429;padding:3px 8px;font-size:9px;color:#f0b429;font-family:'Roboto Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase}
+.sec-body{padding:14px 16px 18px}
+.sec-title{font-family:'Playfair Display',serif;font-size:16px;line-height:1.3;color:var(--dark);margin-bottom:7px}
+.sec-meta{font-size:11px;color:var(--muted)}
+.sec-meta strong{color:var(--dark)}
+
+/* SIDEBAR */
+.hero-side{grid-column:3;grid-row:1/3;background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column}
+.side-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.side-head-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.side-item{padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.side-item:hover{background:var(--light)}
+.side-item.featured{border-left:3px solid var(--red)}
+.si-show{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;color:var(--red);text-transform:uppercase;margin-bottom:4px}
+.si-title{font-size:12px;line-height:1.4;color:var(--dark);margin-bottom:4px;font-weight:500}
+.si-time{font-size:10px;color:var(--muted)}
+
+/* TOPIC STRIP */
+.topic-strip{display:flex;gap:6px;margin-bottom:28px;flex-wrap:wrap}
+.topic-btn{padding:7px 16px;border:1px solid var(--border);background:var(--white);font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .2s}
+.topic-btn:hover{background:var(--light);color:var(--dark)}
+.topic-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+
+/* NEWSCAST */
+.newscast-band{background:var(--light);border:1px solid var(--border);padding:20px 24px;margin-bottom:28px;display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center}
+.nc-badge{background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;padding:6px 14px;font-weight:700;text-transform:uppercase;white-space:nowrap;align-self:flex-start;margin-top:2px}
+.nc-body{}
+.nc-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--dark);margin-bottom:4px}
+.nc-sub{font-size:12px;color:var(--muted)}
+.nc-play{width:52px;height:52px;background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;transition:background .2s}
+.nc-play:hover{background:var(--red)}
+
+/* CLIP GRID */
+.clips-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:32px}
+.clip-card{background:var(--white);cursor:pointer;transition:background .15s}
+.clip-card:hover{background:var(--light)}
+.clip-thumb{height:90px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.ct1{background:linear-gradient(135deg,#1a1a2e,#16213e)}
+.ct2{background:linear-gradient(135deg,#1a0a0a,#2e1010)}
+.ct3{background:linear-gradient(135deg,#0a1a0a,#102e10)}
+.ct4{background:linear-gradient(135deg,#1a1400,#2e2400)}
+.ct5{background:linear-gradient(135deg,#0a0a1a,#10102e)}
+.ct6{background:linear-gradient(135deg,#1a0a1a,#2e102e)}
+.ct7{background:linear-gradient(135deg,#001a1a,#002e2e)}
+.ct8{background:linear-gradient(135deg,#1a0a00,#2e1800)}
+.mini-w{display:flex;align-items:center;gap:2px;opacity:.25}
+.mini-w span{width:2px;background:#fff;border-radius:1px}
+.clip-dur{position:absolute;bottom:6px;right:8px;font-size:9px;color:rgba(255,255,255,.7);font-family:'Roboto Condensed',sans-serif}
+.clip-hover{position:absolute;inset:0;background:rgba(187,25,25,.2);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;font-size:18px;color:#fff}
+.clip-card:hover .clip-hover{opacity:1}
+.clip-body{padding:10px 12px 12px}
+.clip-show{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:3px}
+.clip-title{font-size:11px;line-height:1.4;color:var(--dark);font-weight:500;margin-bottom:4px}
+.clip-guest{font-size:10px;color:var(--muted)}
+
+/* BOTTOM */
+.bottom-grid{display:grid;grid-template-columns:1fr 320px;gap:28px}
+.feed-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.feed-item:hover .feed-title{color:var(--red)}
+.feed-n{font-family:'Bebas Neue',sans-serif;font-size:34px;color:var(--border);line-height:1;width:32px;flex-shrink:0;padding-top:2px}
+.feed-tag{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:4px}
+.feed-title{font-family:'Playfair Display',serif;font-size:16px;line-height:1.3;color:var(--dark);margin-bottom:5px;transition:color .2s}
+.feed-meta{font-size:11px;color:var(--muted)}
+.feed-meta strong{color:var(--dark)}
+
+/* SHOWS PANEL */
+.shows-panel{background:var(--light);border:1px solid var(--border);padding:18px}
+.sp-title{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.show-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.show-row:hover .show-name{color:var(--red)}
+.show-av{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;color:#fff}
+.av1{background:linear-gradient(135deg,#1a0a2e,#6a1aff)}
+.av2{background:linear-gradient(135deg,#0a1a2e,#1a6aff)}
+.av3{background:linear-gradient(135deg,#1a1a0a,#a08000)}
+.av4{background:linear-gradient(135deg,#0a1a0a,#1a7a1a)}
+.av5{background:linear-gradient(135deg,#2e0a0a,#cc2222)}
+.av6{background:linear-gradient(135deg,#0a0a2e,#2244cc)}
+.show-info{flex:1;min-width:0}
+.show-name{font-size:12px;font-weight:500;color:var(--dark);transition:color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.show-host{font-size:10px;color:var(--muted)}
+.show-count{text-align:right;font-size:10px;color:var(--muted);line-height:1.4}
+.show-count strong{display:block;font-size:15px;color:var(--dark);font-weight:600}
+
+/* FOOTER */
+footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;background:var(--white)}
+.footer-inner{max-width:1320px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:4px;color:var(--dark)}
+.footer-logo span{color:var(--red)}
+.footer-text{font-size:11px;color:var(--muted)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--dark)}
+
+/* SUBSCRIBE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-top:4px solid var(--red);padding:36px 40px;width:460px;position:relative}
+.modal-close{position:absolute;top:14px;right:18px;font-size:20px;cursor:pointer;color:var(--muted);background:none;border:none}
+.modal-close:hover{color:var(--dark)}
+.modal-title{font-family:'Playfair Display',serif;font-size:26px;color:var(--dark);margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.5}
+.modal-input{width:100%;border:1px solid var(--border);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:10px}
+.modal-input:focus{border-color:var(--dark)}
+.modal-btn{width:100%;background:var(--dark);color:#fff;border:none;padding:12px;font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.modal-btn:hover{background:var(--red)}
+.modal-note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center}
+
+/* ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(16px);animation:fadeup .55s ease forwards}
+@keyframes fadeup{to{opacity:1;transform:translateY(0)}}
+.fade-up:nth-child(1){animation-delay:.05s}
+.fade-up:nth-child(2){animation-delay:.12s}
+.fade-up:nth-child(3){animation-delay:.19s}
+.fade-up:nth-child(4){animation-delay:.26s}
+.fade-up:nth-child(5){animation-delay:.33s}
+.fade-up:nth-child(6){animation-delay:.4s}
+.fade-up:nth-child(7){animation-delay:.47s}
+.fade-up:nth-child(8){animation-delay:.54s}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <div class="ticker-tag">Breaking</div>
+    <div class="ticker-scroll">
+      <div class="ticker-track">
+        <span class="ticker-item">Joe Rogan #2187 — Retired Navy SEAL reveals classified submarine operation details</span>
+        <span class="ticker-item">Lex Fridman — Elon Musk: "Mars colony self-sustaining by 2040, no question"</span>
+        <span class="ticker-item">Tucker Carlson — Former CIA Director: "There are things the public will never be told about Ukraine"</span>
+        <span class="ticker-item">Huberman Lab — New protocol for reversing metabolic syndrome in under 90 days</span>
+        <span class="ticker-item">Shawn Ryan Show — Green Beret describes never-before-disclosed Syria mission</span>
+        <span class="ticker-item">Jordan Peterson — "The collapse of the Western family unit is the defining crisis of our time"</span>
+        <span class="ticker-item">Joe Rogan #2187 — Retired Navy SEAL reveals classified submarine operation details</span>
+        <span class="ticker-item">Lex Fridman — Elon Musk: "Mars colony self-sustaining by 2040, no question"</span>
+        <span class="ticker-item">Tucker Carlson — Former CIA Director: "There are things the public will never be told about Ukraine"</span>
+        <span class="ticker-item">Huberman Lab — New protocol for reversing metabolic syndrome in under 90 days</span>
+        <span class="ticker-item">Shawn Ryan Show — Green Beret describes never-before-disclosed Syria mission</span>
+        <span class="ticker-item">Jordan Peterson — "The collapse of the Western family unit is the defining crisis of our time"</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="logo-wrap">
+      <div class="logo-block">
+        <div class="logo"><span class="e-red">E</span>GLEZE</div>
+        <div class="logo-rule"></div>
+        <div class="logo-sub">Podcast Intelligence Network</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <span style="color:var(--muted);font-size:14px">⌕</span>
+        <input type="text" placeholder="Search topics, guests, shows…">
+      </div>
+      <div>
+        <div class="live-pill"><span class="live-dot"></span> Live Coverage</div>
+        <div class="header-date" style="margin-top:4px;text-align:right">Thursday, April 30, 2026 · egleze.news</div>
+      </div>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-item active">Today's Reveals</div>
+    <div class="nav-item hot">🔥 Trending</div>
+    <div class="nav-item">Politics</div>
+    <div class="nav-item">Health & Science</div>
+    <div class="nav-item">Intelligence</div>
+    <div class="nav-item">Tech & AI</div>
+    <div class="nav-item">Finance</div>
+    <div class="nav-item">UFO / Fringe</div>
+    <div class="nav-item">Clip Library</div>
+    <button class="nav-subscribe" onclick="document.querySelector('.modal-overlay').classList.add('open')">Subscribe Free</button>
+  </nav>
+</header>
+
+<div class="page">
+
+  <!-- SECTION LABEL -->
+  <div class="sec-label">
+    <div class="sec-bar"></div>
+    <div class="sec-title">Top Stories · April 30, 2026</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <!-- HERO GRID -->
+  <div class="hero">
+    <!-- MAIN -->
+    <div class="hero-main fade-up">
+      <div class="hero-img">
+        <div class="wave-bg"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="hero-img-overlay"></div>
+        <div class="hero-badge">Joe Rogan Experience · #2187</div>
+        <div class="hero-play">▶</div>
+      </div>
+      <div class="hero-body">
+        <span class="story-tag">Intelligence · Exclusive · 🔥 Trending #1</span>
+        <h1 class="hero-title">Retired Navy SEAL: <em>"What we found on that submarine was never supposed to be public"</em></h1>
+        <p class="hero-desc">In a 3-hour conversation, former SEAL Team 6 operator Mike Ritland detailed covert operations that have never been disclosed, including a 2019 underwater retrieval mission that he says changed the entire classification framework for special operations.</p>
+        <div class="hero-meta">
+          <strong>Joe Rogan Experience</strong>
+          <span class="meta-dot">·</span>
+          <span>2h 47m episode</span>
+          <span class="meta-dot">·</span>
+          <span>4 hours ago</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECONDARY 1 -->
+    <div class="hero-sec fade-up">
+      <div class="sec-img sec-img-1">
+        <div class="sec-lbl">Lex Fridman #487</div>
+      </div>
+      <div class="sec-body">
+        <span class="story-tag">Technology · AI</span>
+        <div class="sec-title">Elon Musk: "Grok 4 will make every human-level job obsolete within 18 months"</div>
+        <div class="sec-meta"><strong>Lex Fridman Podcast</strong> · 6 hours ago · 4h 12m</div>
+      </div>
+    </div>
+
+    <!-- SECONDARY 2 -->
+    <div class="hero-sec fade-up">
+      <div class="sec-img sec-img-2">
+        <div class="sec-lbl">Tucker Carlson · Ep.312</div>
+      </div>
+      <div class="sec-body">
+        <span class="story-tag">Geopolitics · Classified</span>
+        <div class="sec-title">Former CIA Director: "The official narrative on the 2022 pipeline explosion is completely false"</div>
+        <div class="sec-meta"><strong>Tucker Carlson Network</strong> · 9 hours ago · 1h 55m</div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="hero-side fade-up">
+      <div class="side-head">
+        <span class="live-dot" style="background:var(--red)"></span>
+        <span class="side-head-label">Latest Reveals Today</span>
+      </div>
+      <div class="side-item featured">
+        <div class="si-show">Huberman Lab</div>
+        <div class="si-title">"GLP-1 drugs permanently alter dopamine pathways — this is the part no one is discussing"</div>
+        <div class="si-time">12 min ago · Episode 398</div>
+      </div>
+      <div class="side-item">
+        <div class="si-show">Shawn Ryan Show</div>
+        <div class="si-title">Green Beret describes undisclosed Syria mission: "We were never there officially"</div>
+        <div class="si-time">1 hr ago · Episode #201</div>
+      </div>
+      <div class="side-item">
+        <div class="si-show">Jordan Peterson</div>
+        <div class="si-title">"The WHO pandemic treaty grants powers that would have been considered totalitarian 10 years ago"</div>
+        <div class="si-time">2 hrs ago · Ep. 445</div>
+      </div>
+      <div class="side-item">
+        <div class="si-show">Patrick Bet-David</div>
+        <div class="si-title">Hedge fund insider: "Three major banks are technically insolvent right now"</div>
+        <div class="si-time">3 hrs ago · PBD #603</div>
+      </div>
+      <div class="side-item">
+        <div class="si-show">Danny Jones</div>
+        <div class="si-title">Former intelligence officer: "UAP programs have been privately funded since 1987"</div>
+        <div class="si-time">5 hrs ago · Ep. 189</div>
+      </div>
+      <div class="side-item">
+        <div class="si-show">Diary of a CEO</div>
+        <div class="si-title">Billionaire reveals: "I lost $800M in one afternoon — what it taught me about identity"</div>
+        <div class="si-time">7 hrs ago · Ep. 512</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWSCAST BAND -->
+  <div class="newscast-band fade-up">
+    <div class="nc-badge">▶ Today's Newscast</div>
+    <div class="nc-body">
+      <div class="nc-title">Egleze Daily — April 30, 2026</div>
+      <div class="nc-sub">Presented by your AI anchors · 6 top podcast revelations in under 5 minutes · New episode every morning at 9AM</div>
+    </div>
+    <div class="nc-play">▶</div>
+  </div>
+
+  <!-- TOPIC FILTER -->
+  <div class="topic-strip">
+    <button class="topic-btn active">All Topics</button>
+    <button class="topic-btn">🧠 Intelligence</button>
+    <button class="topic-btn">🏥 Health</button>
+    <button class="topic-btn">🤖 AI & Tech</button>
+    <button class="topic-btn">💰 Finance</button>
+    <button class="topic-btn">🌍 Geopolitics</button>
+    <button class="topic-btn">👽 UFO</button>
+    <button class="topic-btn">⚔️ Military</button>
+    <button class="topic-btn">🧬 Science</button>
+    <button class="topic-btn">🏛️ Politics</button>
+  </div>
+
+  <!-- CLIP LIBRARY -->
+  <div class="sec-label">
+    <div class="sec-bar"></div>
+    <div class="sec-title">Clip Library · Best Moments Today</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="clips-grid">
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct1"><div class="mini-w"><span style="height:18px"></span><span style="height:28px"></span><span style="height:20px"></span><span style="height:34px"></span><span style="height:22px"></span><span style="height:14px"></span></div><div class="clip-dur">2:34</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">Joe Rogan · #2187</div><div class="clip-title">"The mission was never supposed to exist on paper"</div><div class="clip-guest">Mike Ritland, Navy SEAL</div></div>
+    </div>
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct2"><div class="mini-w"><span style="height:22px"></span><span style="height:14px"></span><span style="height:30px"></span><span style="height:18px"></span><span style="height:26px"></span><span style="height:16px"></span></div><div class="clip-dur">1:47</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">Tucker Carlson · Ep.312</div><div class="clip-title">"I've seen the intelligence. The public version is fiction."</div><div class="clip-guest">Fmr. CIA Director</div></div>
+    </div>
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct3"><div class="mini-w"><span style="height:18px"></span><span style="height:32px"></span><span style="height:14px"></span><span style="height:26px"></span><span style="height:20px"></span><span style="height:28px"></span></div><div class="clip-dur">3:12</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">Huberman Lab · Ep.398</div><div class="clip-title">The dopamine reset protocol nobody is talking about</div><div class="clip-guest">Dr. Andrew Huberman</div></div>
+    </div>
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct4"><div class="mini-w"><span style="height:26px"></span><span style="height:16px"></span><span style="height:34px"></span><span style="height:20px"></span><span style="height:14px"></span><span style="height:24px"></span></div><div class="clip-dur">2:08</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">Lex Fridman · #487</div><div class="clip-title">"AGI is not 10 years away. It's closer than people think."</div><div class="clip-guest">Elon Musk</div></div>
+    </div>
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct5"><div class="mini-w"><span style="height:14px"></span><span style="height:28px"></span><span style="height:22px"></span><span style="height:16px"></span><span style="height:32px"></span><span style="height:18px"></span></div><div class="clip-dur">1:55</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">Jordan Peterson · Ep.445</div><div class="clip-title">"Sovereignty is being quietly dissolved through multilateral agreements"</div><div class="clip-guest">Jordan B. Peterson</div></div>
+    </div>
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct6"><div class="mini-w"><span style="height:20px"></span><span style="height:34px"></span><span style="height:12px"></span><span style="height:28px"></span><span style="height:22px"></span><span style="height:16px"></span></div><div class="clip-dur">4:01</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">Danny Jones · Ep.189</div><div class="clip-title">Insider describes the black budget UAP retrieval program</div><div class="clip-guest">Intelligence Officer (Anon)</div></div>
+    </div>
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct7"><div class="mini-w"><span style="height:28px"></span><span style="height:18px"></span><span style="height:14px"></span><span style="height:32px"></span><span style="height:24px"></span><span style="height:12px"></span></div><div class="clip-dur">2:22</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">PBD Podcast · #603</div><div class="clip-title">"Three banks are holding assets marked at fantasy prices"</div><div class="clip-guest">Anonymous Fund Manager</div></div>
+    </div>
+    <div class="clip-card fade-up">
+      <div class="clip-thumb ct8"><div class="mini-w"><span style="height:12px"></span><span style="height:26px"></span><span style="height:18px"></span><span style="height:34px"></span><span style="height:14px"></span><span style="height:28px"></span></div><div class="clip-dur">1:38</div><div class="clip-hover">▶</div></div>
+      <div class="clip-body"><div class="clip-show">Diary of a CEO · Ep.512</div><div class="clip-title">Losing $800 million: "I had to rebuild who I was, not just the company"</div><div class="clip-guest">Anonymous Billionaire</div></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="bottom-grid">
+    <div>
+      <div class="sec-label"><div class="sec-bar"></div><div class="sec-title">More Stories Today</div><div class="sec-line"></div></div>
+      <div class="feed-item fade-up">
+        <div class="feed-n">01</div>
+        <div>
+          <div class="feed-tag">Health · Nutrition</div>
+          <div class="feed-title">Paul Saladino reverses position on carnivore diet: "I was missing something critical for 5 years"</div>
+          <div class="feed-meta"><strong>Shawn Baker MD Podcast</strong> · Episode 301 · 11 hours ago · 1h 20m</div>
+        </div>
+      </div>
+      <div class="feed-item fade-up">
+        <div class="feed-n">02</div>
+        <div>
+          <div class="feed-tag">Finance · Crypto</div>
+          <div class="feed-title">Michael Saylor: "Bitcoin will hit $1M before the next US election. That's not a prediction, it's arithmetic."</div>
+          <div class="feed-meta"><strong>What Bitcoin Did</strong> · Episode 744 · 13 hours ago · 2h 05m</div>
+        </div>
+      </div>
+      <div class="feed-item fade-up">
+        <div class="feed-n">03</div>
+        <div>
+          <div class="feed-tag">Science · Space</div>
+          <div class="feed-title">Astrophysicist on Lex Fridman: "The James Webb data contains anomalies that challenge the standard model"</div>
+          <div class="feed-meta"><strong>Lex Fridman Podcast</strong> · Episode 488 · 14 hours ago · 3h 18m</div>
+        </div>
+      </div>
+      <div class="feed-item fade-up">
+        <div class="feed-n">04</div>
+        <div>
+          <div class="feed-tag">Military · Geopolitics</div>
+          <div class="feed-title">Colonel Douglas Macgregor: "NATO's eastern flank strategy is a catastrophic miscalculation"</div>
+          <div class="feed-meta"><strong>Shawn Ryan Show</strong> · Episode 202 · 16 hours ago · 1h 45m</div>
+        </div>
+      </div>
+      <div class="feed-item fade-up">
+        <div class="feed-n">05</div>
+        <div>
+          <div class="feed-tag">Tech · Society</div>
+          <div class="feed-title">Tristan Harris returns: "The next generation of social media is engineered for full psychological capture"</div>
+          <div class="feed-meta"><strong>The Tim Ferriss Show</strong> · Episode 720 · 18 hours ago · 2h 30m</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOWS PANEL -->
+    <div>
+      <div class="shows-panel">
+        <div class="sp-title">Top Shows This Week</div>
+        <div class="show-row"><div class="show-av av1">JRE</div><div class="show-info"><div class="show-name">Joe Rogan Experience</div><div class="show-host">Joe Rogan</div></div><div class="show-count"><strong>12</strong>clips</div></div>
+        <div class="show-row"><div class="show-av av2">LF</div><div class="show-info"><div class="show-name">Lex Fridman Podcast</div><div class="show-host">Lex Fridman</div></div><div class="show-count"><strong>9</strong>clips</div></div>
+        <div class="show-row"><div class="show-av av3">TC</div><div class="show-info"><div class="show-name">Tucker Carlson Network</div><div class="show-host">Tucker Carlson</div></div><div class="show-count"><strong>7</strong>clips</div></div>
+        <div class="show-row"><div class="show-av av4">HL</div><div class="show-info"><div class="show-name">Huberman Lab</div><div class="show-host">Andrew Huberman</div></div><div class="show-count"><strong>6</strong>clips</div></div>
+        <div class="show-row"><div class="show-av av5">SR</div><div class="show-info"><div class="show-name">Shawn Ryan Show</div><div class="show-host">Shawn Ryan</div></div><div class="show-count"><strong>5</strong>clips</div></div>
+        <div class="show-row"><div class="show-av av6">PBD</div><div class="show-info"><div class="show-name">PBD Podcast</div><div class="show-host">Patrick Bet-David</div></div><div class="show-count"><strong>4</strong>clips</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo"><span>E</span>GLEZE</div>
+    <div class="footer-text">© 2026 Egleze · The Podcast Intelligence Network · Where podcasts become news</div>
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Advertise</a>
+      <a href="#">Submit a Show</a>
+      <a href="#">Newsletter</a>
+    </div>
+  </div>
+</footer>
+
+<!-- SUBSCRIBE MODAL -->
+<div class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-close" onclick="document.querySelector('.modal-overlay').classList.remove('open')">✕</button>
+    <div class="modal-title">Never miss a reveal.</div>
+    <div class="modal-sub">Get the 5 biggest podcast moments of the day delivered to your inbox every morning at 8AM. Free, always.</div>
+    <input class="modal-input" type="text" placeholder="Your name">
+    <input class="modal-input" type="email" placeholder="Your email address">
+    <button class="modal-btn">Subscribe to Egleze Daily</button>
+    <div class="modal-note">No spam. No ads. Unsubscribe any time.</div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.topic-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',function(){
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
