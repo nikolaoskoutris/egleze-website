@@ -563,14 +563,91 @@ async function loadStories(topic = null) {
     let query = db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
+      .order('score', { ascending: false })
       .limit(20);
-    if (topic) query = query.eq('topic', topic);
+    if (topic) query = query.ilike('topic', `%${topic}%`);
     const { data, error } = await query;
     if (error || !data || data.length === 0) return;
     renderStories(data);
+    renderHeroSection(data);
+    renderSidebarFromData(data);
     updateTicker(data);
   } catch(e) { console.log('DB not yet configured', e); }
+}
+
+// ── RENDER HERO SECTION FROM DATABASE ────────────────────────────
+function renderHeroSection(stories) {
+  if (!stories || stories.length === 0) return;
+  const top = stories[0];
+  const second = stories[1];
+  const third = stories[2];
+
+  // Update main hero title and description
+  const heroTitle = document.querySelector('.hero-title');
+  const heroDesc = document.querySelector('.hero-desc');
+  const heroMeta = document.querySelector('.hero-meta');
+  const heroTag = document.querySelector('.hero-main .story-tag');
+  const heroBadge = document.querySelector('.hero-badge');
+
+  if (heroTitle && top) {
+    heroTitle.innerHTML = top.headline;
+    if (heroDesc) heroDesc.textContent = top.summary || '';
+    if (heroMeta) heroMeta.innerHTML = `<strong>${top.show_name}</strong><span class="meta-dot">·</span><span>${top.episode || ''}</span><span class="meta-dot">·</span><span>${timeAgo(top.created_at)}</span>`;
+    if (heroTag) heroTag.textContent = (top.topic || 'Podcast Reveal') + ' · 🔥 Trending #1';
+    if (heroBadge) heroBadge.textContent = `${top.show_name} · ${top.episode || ''}`;
+  }
+
+  // Update secondary hero cards
+  const secTitles = document.querySelectorAll('.sec-title');
+  const secMetas = document.querySelectorAll('.sec-meta');
+  const secTags = document.querySelectorAll('.hero-sec .story-tag');
+  const secLabels = document.querySelectorAll('.sec-lbl');
+
+  if (second && secTitles[0]) {
+    secTitles[0].textContent = second.headline;
+    if (secMetas[0]) secMetas[0].innerHTML = `<strong>${second.show_name}</strong> · ${timeAgo(second.created_at)}`;
+    if (secTags[0]) secTags[0].textContent = second.topic || 'Podcast Reveal';
+    if (secLabels[0]) secLabels[0].textContent = `${second.show_name} · ${second.episode || ''}`;
+  }
+
+  if (third && secTitles[1]) {
+    secTitles[1].textContent = third.headline;
+    if (secMetas[1]) secMetas[1].innerHTML = `<strong>${third.show_name}</strong> · ${timeAgo(third.created_at)}`;
+    if (secTags[1]) secTags[1].textContent = third.topic || 'Podcast Reveal';
+    if (secLabels[1]) secLabels[1].textContent = `${third.show_name} · ${third.episode || ''}`;
+  }
+}
+
+// ── RENDER SIDEBAR FROM DATA ──────────────────────────────────────
+function renderSidebarFromData(stories) {
+  if (!stories || stories.length === 0) return;
+  const items = document.querySelectorAll('.side-item');
+  stories.slice(0, 6).forEach((s, i) => {
+    if (items[i]) {
+      const showEl = items[i].querySelector('.si-show');
+      const titleEl = items[i].querySelector('.si-title');
+      const timeEl = items[i].querySelector('.si-time');
+      if (showEl) showEl.textContent = s.show_name || '';
+      if (titleEl) titleEl.textContent = s.headline || '';
+      if (timeEl) timeEl.textContent = timeAgo(s.created_at);
+    }
+  });
+}
+
+// ── REAL-TIME UPDATES ─────────────────────────────────────────────
+function setupRealtime() {
+  try {
+    db.channel('stories-changes')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'stories' },
+        (payload) => {
+          console.log('Story updated — refreshing content');
+          loadStories();
+          loadSidebar();
+        }
+      )
+      .subscribe();
+  } catch(e) { console.log('Realtime not configured', e); }
 }
 
 // ── RENDER STORIES INTO FEED ─────────────────────────────────────
@@ -677,6 +754,13 @@ document.querySelector('.header-date').textContent =
 // ── INITIALISE ────────────────────────────────────────────────────
 loadStories();
 loadSidebar();
+setupRealtime();
+
+// Auto-refresh every 5 minutes to catch new approved stories
+setInterval(() => {
+  loadStories();
+  loadSidebar();
+}, 5 * 60 * 1000);
 </script>
 </body>
 </html>
