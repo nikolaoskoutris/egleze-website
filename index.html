@@ -534,11 +534,20 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ── SUPABASE CONNECTION ──────────────────────────────────────────
+const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_3I2jAyKsQyMLvxuQG47rBw_UW_QSZLs';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── TOPIC FILTER & NAV ──────────────────────────────────────────
 document.querySelectorAll('.topic-btn').forEach(btn=>{
   btn.addEventListener('click',function(){
     document.querySelectorAll('.topic-btn').forEach(b=>b.classList.remove('active'));
     this.classList.add('active');
+    const topic = this.textContent.trim();
+    loadStories(topic === 'All Topics' ? null : topic);
   });
 });
 document.querySelectorAll('.nav-item').forEach(item=>{
@@ -547,6 +556,127 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     this.classList.add('active');
   });
 });
+
+// ── LOAD APPROVED STORIES FROM DATABASE ─────────────────────────
+async function loadStories(topic = null) {
+  try {
+    let query = db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (topic) query = query.eq('topic', topic);
+    const { data, error } = await query;
+    if (error || !data || data.length === 0) return;
+    renderStories(data);
+    updateTicker(data);
+  } catch(e) { console.log('DB not yet configured', e); }
+}
+
+// ── RENDER STORIES INTO FEED ─────────────────────────────────────
+function renderStories(stories) {
+  const feed = document.querySelector('.bottom-grid > div:first-child');
+  if (!feed || stories.length === 0) return;
+  const sectionLabel = feed.querySelector('.sec-label');
+  const existingItems = feed.querySelectorAll('.feed-item');
+  existingItems.forEach(i => i.remove());
+  stories.slice(0, 8).forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'feed-item';
+    div.innerHTML = `
+      <div class="feed-n">0${i+1}</div>
+      <div>
+        <div class="feed-tag">${s.topic || 'Podcast Reveal'}</div>
+        <div class="feed-title">${s.headline}</div>
+        <div class="feed-meta"><strong>${s.show_name || ''}</strong> · ${s.episode || ''} · ${timeAgo(s.created_at)}</div>
+      </div>`;
+    feed.appendChild(div);
+  });
+}
+
+// ── UPDATE BREAKING NEWS TICKER ──────────────────────────────────
+function updateTicker(stories) {
+  const track = document.querySelector('.ticker-track');
+  if (!track || stories.length === 0) return;
+  const items = stories.slice(0, 8).map(s =>
+    `<span class="ticker-item">${s.show_name} — ${s.headline}</span>`
+  ).join('');
+  track.innerHTML = items + items; // duplicate for seamless loop
+}
+
+// ── LOAD SIDEBAR LATEST REVEALS ──────────────────────────────────
+async function loadSidebar() {
+  try {
+    const { data } = await db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(6);
+    if (!data || data.length === 0) return;
+    const items = document.querySelectorAll('.side-item');
+    data.forEach((s, i) => {
+      if (items[i]) {
+        items[i].querySelector('.si-show').textContent = s.show_name || '';
+        items[i].querySelector('.si-title').textContent = s.headline || '';
+        items[i].querySelector('.si-time').textContent = timeAgo(s.created_at);
+      }
+    });
+  } catch(e) { console.log('Sidebar load skipped', e); }
+}
+
+// ── NEWSLETTER SUBSCRIBE ─────────────────────────────────────────
+document.querySelector('.modal-btn').addEventListener('click', async function() {
+  const inputs = document.querySelectorAll('.modal-input');
+  const name = inputs[0].value.trim();
+  const email = inputs[1].value.trim();
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid email address.'); return;
+  }
+  try {
+    const { error } = await db.from('subscribers').insert([{ name, email, created_at: new Date().toISOString() }]);
+    if (error) throw error;
+    document.querySelector('.modal').innerHTML = `
+      <div style="text-align:center;padding:40px 20px">
+        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);margin-bottom:10px">You're in. ✓</div>
+        <div style="font-size:13px;color:var(--muted)">Your first Egleze Daily arrives tomorrow at 8AM.</div>
+      </div>`;
+  } catch(e) {
+    alert('Something went wrong. Please try again.'); console.log(e);
+  }
+});
+
+// ── SEARCH ────────────────────────────────────────────────────────
+document.querySelector('.search-box input').addEventListener('keyup', async function(e) {
+  if (e.key !== 'Enter') return;
+  const term = this.value.trim();
+  if (!term) return;
+  try {
+    const { data } = await db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .ilike('headline', `%${term}%`)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (data && data.length > 0) renderStories(data);
+  } catch(e) { console.log('Search error', e); }
+});
+
+// ── HELPER: TIME AGO ─────────────────────────────────────────────
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((new Date() - new Date(dateStr)) / 60000);
+  if (diff < 60) return `${diff} min ago`;
+  if (diff < 1440) return `${Math.floor(diff/60)} hrs ago`;
+  return `${Math.floor(diff/1440)} days ago`;
+}
+
+// ── UPDATE DATE IN HEADER ─────────────────────────────────────────
+document.querySelector('.header-date').textContent =
+  new Date().toLocaleDateString('en-IE', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) + ' · egleze.com';
+
+// ── INITIALISE ────────────────────────────────────────────────────
+loadStories();
+loadSidebar();
 </script>
 </body>
 </html>
