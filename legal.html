@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Egleze — Legal & Editorial Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#bb1919;--dark:#111;--muted:#888;--border:#e0e0da;--light:#f5f5f0}
+body{font-family:'DM Sans',sans-serif;color:var(--dark);background:#fff;font-size:15px;line-height:1.7}
+
+/* ── COOKIE BANNER ── */
+#cookie-banner{position:fixed;bottom:0;left:0;right:0;background:#111;color:#fff;padding:16px 24px;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:3px solid var(--red);font-size:13px}
+#cookie-banner p{flex:1;color:rgba(255,255,255,0.8);line-height:1.5}
+#cookie-banner a{color:var(--red);text-decoration:none}
+.cookie-btns{display:flex;gap:10px;flex-shrink:0}
+.btn-accept{background:var(--red);color:#fff;border:none;padding:8px 20px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:700}
+.btn-reject{background:transparent;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.2);padding:8px 20px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer}
+.btn-reject:hover{border-color:#fff;color:#fff}
+
+/* ── HEADER ── */
+.site-header{border-bottom:3px solid var(--red);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:#fff;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:4px;color:var(--dark);text-decoration:none}
+.logo span{color:var(--red)}
+.back-link{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none}
+.back-link:hover{color:var(--red)}
+
+/* ── NAV TABS ── */
+.legal-nav{background:var(--light);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0}
+.legal-tab{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:14px 20px;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);background:none;border-top:none;border-left:none;border-right:none;transition:all 0.2s}
+.legal-tab.active{color:var(--red);border-bottom-color:var(--red)}
+.legal-tab:hover{color:var(--dark)}
+
+/* ── CONTENT ── */
+.legal-content{max-width:800px;margin:0 auto;padding:60px 40px 120px}
+.legal-page{display:none}
+.legal-page.active{display:block}
+
+.legal-hero{margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border)}
+.legal-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+.legal-title{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--dark);line-height:1.2;margin-bottom:12px}
+.legal-date{font-size:12px;color:var(--muted)}
+
+h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark);margin:40px 0 12px;padding-top:8px;border-top:1px solid var(--border)}
+h3{font-family:'Roboto Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin:24px 0 8px}
+p{margin-bottom:16px;color:#333;line-height:1.8}
+ul{margin:12px 0 20px 20px}
+ul li{margin-bottom:8px;color:#333;line-height:1.7}
+a{color:var(--red);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.highlight-box{background:var(--light);border-left:3px solid var(--red);padding:20px 24px;margin:24px 0}
+.highlight-box p{margin:0;font-size:14px}
+
+.contact-box{background:#111;color:#fff;padding:24px;margin:32px 0}
+.contact-box h3{color:var(--red);margin-top:0}
+.contact-box p{color:rgba(255,255,255,0.7);margin:0}
+.contact-box a{color:#fff}
+
+/* ── FOOTER ── */
+.legal-footer{background:var(--light);border-top:1px solid var(--border);padding:40px;text-align:center;margin-top:80px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--dark);margin-bottom:8px}
+.footer-logo span{color:var(--red)}
+.footer-links{display:flex;gap:20px;justify-content:center;margin:16px 0}
+.footer-links a{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none}
+.footer-links a:hover{color:var(--red)}
+.footer-copy{font-size:11px;color:var(--muted)}
+
+/* Guest disclaimer */
+.guest-disclaimer{background:var(--light);border:1px solid var(--border);padding:12px 16px;font-size:12px;color:var(--muted);margin:20px 0;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- COOKIE CONSENT BANNER -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="cookie-banner">
+  <p>
+    We use essential cookies to operate this site. We do not use advertising or tracking cookies.
+    By clicking "Accept" you consent to our use of essential cookies only.
+    <a href="#" onclick="showPage('cookie')">Cookie Policy</a> ·
+    <a href="#" onclick="showPage('privacy')">Privacy Policy</a>
+  </p>
+  <div class="cookie-btns">
+    <button class="btn-reject" onclick="rejectCookies()">Reject All</button>
+    <button class="btn-accept" onclick="acceptCookies()">Accept</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<header class="site-header">
+  <a href="https://egleze.com" class="logo"><span>E</span>GLEZE</a>
+  <a href="https://egleze.com" class="back-link">← Back to Egleze</a>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- LEGAL NAVIGATION -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<nav class="legal-nav">
+  <button class="legal-tab active" onclick="showPage('editorial')">Editorial & Fair Use</button>
+  <button class="legal-tab" onclick="showPage('privacy')">Privacy Policy</button>
+  <button class="legal-tab" onclick="showPage('cookie')">Cookie Policy</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 1: EDITORIAL & FAIR USE -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="legal-content">
+
+<div id="page-editorial" class="legal-page active">
+  <div class="legal-hero">
+    <div class="legal-label">Legal Framework</div>
+    <h1 class="legal-title">Editorial Notice &amp; Fair Use Statement</h1>
+    <p class="legal-date">Egleze Limited · Effective Date: May 2026 · Last Updated: May 2026</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Summary:</strong> Egleze operates as a registered digital news agency. We report on, summarise and provide editorial commentary on publicly available podcast content. Our use of short excerpts constitutes fair use under US law and journalistic exemption under EU/Irish law.</p>
+  </div>
+
+  <h2>1. Who We Are</h2>
+  <p>Egleze Limited is a digital news agency and information service provider, incorporated in Dublin, Ireland (registered under NACE code 6391 — News Agency Activities). We operate egleze.com — the Podcast Intelligence Network — a platform dedicated to news reporting, commentary and synthesis of long-form public discourse.</p>
+  <p>We provide a newsroom service for the creator economy: identifying, contextualising and reporting on the most important revelations, announcements and moments from the world's leading podcasts.</p>
+
+  <h2>2. Journalistic Purpose</h2>
+  <p>All content published on egleze.com is produced for journalistic and editorial purposes. Our editorial team reviews, contextualises and adds significant transformative value to the content we report on. We do not republish content in full — we report on it, as any news organisation would report on a press conference, interview or public statement.</p>
+  <p>Under GDPR Article 85 and the Irish Data Protection Act 2018 (Section 43), Irish law provides specific exemptions for the processing of personal data for journalistic purposes in the public interest. Our analysis of transcripts featuring public figures who have voluntarily made public statements falls within this exemption.</p>
+
+  <h2>3. Fair Use Compliance (US Copyright Law)</h2>
+  <p>Egleze operates in compliance with Section 107 of the United States Copyright Act (17 U.S.C. § 107), which provides for fair use of copyrighted material for the purposes of criticism, comment, news reporting, teaching, scholarship and research.</p>
+
+  <h3>Our Fair Use Position</h3>
+  <ul>
+    <li><strong>Purpose and character:</strong> Our use is highly transformative. We synthesise, categorise, score for newsworthiness and provide unique editorial context that does not exist in the original source material.</li>
+    <li><strong>Nature of the work:</strong> We report exclusively on publicly distributed content — podcasts made freely available by their creators to the general public.</li>
+    <li><strong>Amount used:</strong> We use short excerpts only — video clips are limited to 60 seconds maximum from episodes typically 1–4 hours in length, representing less than 2% of total content.</li>
+    <li><strong>Effect on the market:</strong> Our service supplements, not substitutes, the original content. Every report includes a direct link to the full original episode, actively driving traffic back to the original creator.</li>
+  </ul>
+
+  <h2>4. Non-Substitution Policy</h2>
+  <p>Egleze is explicitly designed to drive traffic to original creators, not to replace them. Every story published on egleze.com includes:</p>
+  <ul>
+    <li>A direct link to the full original episode</li>
+    <li>Clear attribution of the source show and host</li>
+    <li>The name of the guest or speaker</li>
+    <li>Context that encourages readers to listen to the full episode</li>
+  </ul>
+  <p>We actively send traffic to the creators whose content we report on. This is central to our editorial mission and our legal position.</p>
+
+  <h2>5. DMCA Takedown Policy</h2>
+  <p>Egleze respects intellectual property rights. We have registered a DMCA agent with the United States Copyright Office in accordance with 17 U.S.C. § 512(c)(2), providing Egleze with Safe Harbor protection under US law.</p>
+  <p>If you are a copyright owner and believe your content has been used in a manner that does not constitute fair use, please contact our registered agent with the following information:</p>
+  <ul>
+    <li>Identification of the copyrighted work claimed to have been infringed</li>
+    <li>Identification of the material on our site you believe infringes your copyright</li>
+    <li>Your contact information</li>
+    <li>A statement of good faith belief that the use is not authorised</li>
+    <li>A statement, under penalty of perjury, that the information is accurate</li>
+  </ul>
+
+  <div class="contact-box">
+    <h3>DMCA Registered Agent &amp; Contact</h3>
+    <p>Egleze Limited<br>
+    c/o Company Formations International<br>
+    22 Northumberland Road, Ballsbridge, Dublin 4, Ireland<br>
+    Email: <a href="mailto:hello@egleze.com">hello@egleze.com</a></p>
+  </div>
+
+  <h2>6. Guest Disclaimer</h2>
+  <div class="guest-disclaimer">
+    The views, opinions and statements expressed by podcast hosts and guests summarised on this platform are their own and do not represent the editorial stance, opinions or positions of Egleze Limited, its directors, employees or affiliates. Egleze reports on public statements as a news agency — we do not endorse, validate or verify the accuracy of statements made by third parties.
+  </div>
+
+  <h2>7. Editorial Standards</h2>
+  <p>Egleze maintains the following editorial standards in all published content:</p>
+  <ul>
+    <li>All quotes are accurately transcribed and presented in context</li>
+    <li>Headlines accurately represent the content of the story</li>
+    <li>Summaries do not misrepresent or distort the original statements</li>
+    <li>All sources are clearly attributed</li>
+    <li>Corrections are published promptly when errors are identified</li>
+  </ul>
+  <p>To report an editorial concern or request a correction, contact us at <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 2: PRIVACY POLICY -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="page-privacy" class="legal-page">
+  <div class="legal-hero">
+    <div class="legal-label">Legal Framework</div>
+    <h1 class="legal-title">Global Privacy Policy</h1>
+    <p class="legal-date">GDPR &amp; CCPA Compliant · Egleze Limited · Effective: May 2026</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Plain English Summary:</strong> We collect your email address if you subscribe to our newsletter. We do not sell your data. We do not use advertising trackers. We store your data securely in Europe and the US using encrypted services. You can unsubscribe or delete your data at any time.</p>
+  </div>
+
+  <h2>1. Data Controller</h2>
+  <p>The controller of your personal data is:</p>
+  <p><strong>Egleze Limited</strong><br>
+  Registered in Ireland under the Companies Act 2014<br>
+  Registered Office: c/o Company Formations International, 22 Northumberland Road, Ballsbridge, Dublin 4, Ireland<br>
+  Contact: <a href="mailto:hello@egleze.com">hello@egleze.com</a></p>
+
+  <h2>2. What Data We Collect</h2>
+  <h3>Data you provide directly</h3>
+  <ul>
+    <li><strong>Email address</strong> — when you subscribe to Egleze Daily newsletter</li>
+    <li><strong>Name</strong> — optional, if provided during newsletter signup</li>
+  </ul>
+
+  <h3>Data collected automatically</h3>
+  <ul>
+    <li><strong>Analytics data</strong> — page views, session duration, referral source (anonymised, no personal identifiers)</li>
+    <li><strong>Technical data</strong> — browser type, device type, approximate location (country level only)</li>
+  </ul>
+
+  <h3>Data we do NOT collect</h3>
+  <ul>
+    <li>We do not collect payment information</li>
+    <li>We do not collect social media profiles</li>
+    <li>We do not use advertising tracking pixels</li>
+    <li>We do not fingerprint your device</li>
+  </ul>
+
+  <h2>3. Legal Basis for Processing</h2>
+  <h3>Newsletter subscribers (GDPR Article 6(1)(a))</h3>
+  <p>We process your email address on the basis of your explicit consent, given when you subscribe to Egleze Daily. You may withdraw this consent at any time by clicking "Unsubscribe" in any email we send you.</p>
+
+  <h3>News aggregation (GDPR Article 6(1)(f) + Section 43 DPA 2018)</h3>
+  <p>For our core news aggregation service — analysing publicly available podcast transcripts — we rely on Legitimate Interest and the Journalistic Exemption under the Irish Data Protection Act 2018 (Section 43). We process publicly available audio and visual data to inform the public on matters of politics, health, finance, science and general interest.</p>
+
+  <h3>Analytics (GDPR Article 6(1)(f))</h3>
+  <p>We use anonymised analytics to understand how our platform is used and to improve our service. This processing is based on our legitimate interest in operating and improving egleze.com.</p>
+
+  <h2>4. How We Use Your Data</h2>
+  <ul>
+    <li>To send you the Egleze Daily newsletter (if subscribed)</li>
+    <li>To improve our platform based on anonymised usage data</li>
+    <li>To comply with legal obligations</li>
+  </ul>
+  <p>We do not use your data for advertising. We do not sell your data to third parties. We do not share your data with any third party except as described in this policy.</p>
+
+  <h2>5. Data Storage &amp; Security</h2>
+  <p>Your data is stored using the following services, all of which maintain industry-standard security practices:</p>
+  <ul>
+    <li><strong>Supabase</strong> — database hosted on AWS (encrypted at rest and in transit)</li>
+    <li><strong>Beehiiv</strong> — newsletter platform (SOC 2 compliant)</li>
+    <li><strong>Cloudflare R2</strong> — media storage (encrypted at rest)</li>
+  </ul>
+  <p>Data may be stored in the European Union and/or the United States. Where data is transferred outside the EU, we ensure appropriate safeguards are in place including Standard Contractual Clauses.</p>
+
+  <h2>6. Your Rights (EU/EEA Residents — GDPR)</h2>
+  <p>Under GDPR you have the following rights:</p>
+  <ul>
+    <li><strong>Right of access</strong> — request a copy of your personal data</li>
+    <li><strong>Right to rectification</strong> — correct inaccurate data</li>
+    <li><strong>Right to erasure</strong> — request deletion of your data</li>
+    <li><strong>Right to restrict processing</strong> — limit how we use your data</li>
+    <li><strong>Right to data portability</strong> — receive your data in a portable format</li>
+    <li><strong>Right to object</strong> — object to processing based on legitimate interest</li>
+    <li><strong>Right to withdraw consent</strong> — unsubscribe at any time</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at <a href="mailto:hello@egleze.com">hello@egleze.com</a>. We will respond within 30 days.</p>
+  <p>You also have the right to lodge a complaint with the Irish Data Protection Commission at <a href="https://www.dataprotection.ie" target="_blank">dataprotection.ie</a>.</p>
+
+  <h2>7. US Resident Rights (CCPA/CPRA)</h2>
+  <p>If you are a California resident, you have the following additional rights under the California Consumer Privacy Act:</p>
+  <ul>
+    <li><strong>Right to know</strong> — what personal information we collect and how we use it</li>
+    <li><strong>Right to delete</strong> — request deletion of your personal information</li>
+    <li><strong>Right to opt-out of sale</strong> — we do not sell personal information</li>
+    <li><strong>Right to non-discrimination</strong> — we will not discriminate against you for exercising your rights</li>
+  </ul>
+  <p>Egleze does not sell personal information to third parties. To exercise your CCPA rights, contact <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
+
+  <h2>8. Data Retention</h2>
+  <ul>
+    <li><strong>Newsletter subscribers</strong> — retained until you unsubscribe or request deletion</li>
+    <li><strong>Analytics data</strong> — retained for 12 months in anonymised form</li>
+    <li><strong>Legal records</strong> — retained for 7 years as required by Irish law</li>
+  </ul>
+
+  <h2>9. Children's Privacy</h2>
+  <p>Egleze is not directed at children under the age of 16. We do not knowingly collect personal data from children. If you believe we have inadvertently collected data from a child, please contact us immediately at <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
+
+  <h2>10. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. We will notify newsletter subscribers of any material changes by email. The date of the most recent update is shown at the top of this page.</p>
+
+  <div class="contact-box">
+    <h3>Privacy Contact</h3>
+    <p>For all privacy-related enquiries:<br>
+    <a href="mailto:hello@egleze.com">hello@egleze.com</a><br><br>
+    Egleze Limited<br>
+    22 Northumberland Road, Ballsbridge, Dublin 4, Ireland</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- PAGE 3: COOKIE POLICY -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="page-cookie" class="legal-page">
+  <div class="legal-hero">
+    <div class="legal-label">Legal Framework</div>
+    <h1 class="legal-title">Cookie Policy</h1>
+    <p class="legal-date">Egleze Limited · Effective: May 2026 · Irish DPC Compliant</p>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>Plain English:</strong> We use only essential cookies required to operate this website. We do not use advertising cookies, tracking cookies or social media cookies. You can reject all non-essential cookies and the site will still work perfectly.</p>
+  </div>
+
+  <h2>1. What Are Cookies</h2>
+  <p>Cookies are small text files stored on your device when you visit a website. They help websites remember your preferences and understand how you use the site.</p>
+
+  <h2>2. Cookies We Use</h2>
+  <h3>Essential Cookies (Always Active)</h3>
+  <p>These cookies are necessary for the website to function and cannot be switched off. They are usually set in response to actions you take such as setting your cookie preferences.</p>
+
+  <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">
+    <tr style="background:var(--light)">
+      <th style="padding:10px;text-align:left;border:1px solid var(--border)">Cookie</th>
+      <th style="padding:10px;text-align:left;border:1px solid var(--border)">Purpose</th>
+      <th style="padding:10px;text-align:left;border:1px solid var(--border)">Duration</th>
+    </tr>
+    <tr>
+      <td style="padding:10px;border:1px solid var(--border)">egleze_cookie_consent</td>
+      <td style="padding:10px;border:1px solid var(--border)">Stores your cookie preference</td>
+      <td style="padding:10px;border:1px solid var(--border)">1 year</td>
+    </tr>
+    <tr style="background:var(--light)">
+      <td style="padding:10px;border:1px solid var(--border)">egleze_session</td>
+      <td style="padding:10px;border:1px solid var(--border)">Maintains your session</td>
+      <td style="padding:10px;border:1px solid var(--border)">Session</td>
+    </tr>
+  </table>
+
+  <h3>Analytics Cookies (Optional)</h3>
+  <p>If you accept cookies, we use anonymised analytics to understand how visitors use egleze.com. No personal data is collected — we only see aggregate, anonymised statistics.</p>
+
+  <h3>What We Do NOT Use</h3>
+  <ul>
+    <li>Advertising or targeting cookies</li>
+    <li>Social media tracking cookies (Facebook Pixel, Twitter Pixel etc)</li>
+    <li>Third-party marketing cookies</li>
+    <li>Cross-site tracking</li>
+  </ul>
+
+  <h2>3. Your Cookie Choices</h2>
+  <p>Under Irish Data Protection Commission guidelines, you have the right to reject all non-essential cookies. You can change your preference at any time:</p>
+
+  <div style="display:flex;gap:12px;margin:20px 0">
+    <button onclick="acceptCookies()" style="background:var(--red);color:#fff;border:none;padding:10px 24px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700">Accept Cookies</button>
+    <button onclick="rejectCookies()" style="background:#fff;color:var(--dark);border:1px solid var(--border);padding:10px 24px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">Reject All</button>
+  </div>
+
+  <h2>4. Managing Cookies in Your Browser</h2>
+  <p>You can also control cookies through your browser settings. Here are links to cookie management instructions for major browsers:</p>
+  <ul>
+    <li><a href="https://support.google.com/chrome/answer/95647" target="_blank">Google Chrome</a></li>
+    <li><a href="https://support.mozilla.org/en-US/kb/cookies-information-websites-store-on-your-computer" target="_blank">Mozilla Firefox</a></li>
+    <li><a href="https://support.apple.com/en-ie/guide/safari/sfri11471/mac" target="_blank">Apple Safari</a></li>
+    <li><a href="https://support.microsoft.com/en-us/windows/manage-cookies-in-microsoft-edge" target="_blank">Microsoft Edge</a></li>
+  </ul>
+
+  <h2>5. Contact</h2>
+  <p>For questions about our use of cookies, contact <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
+  <p>To make a complaint about our cookie practices, you may contact the Irish Data Protection Commission at <a href="https://www.dataprotection.ie" target="_blank">dataprotection.ie</a>.</p>
+</div>
+
+</div><!-- end legal-content -->
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<footer class="legal-footer">
+  <div class="footer-logo"><span>E</span>GLEZE</div>
+  <div class="footer-links">
+    <a href="#" onclick="showPage('editorial')">Editorial Notice</a>
+    <a href="#" onclick="showPage('privacy')">Privacy Policy</a>
+    <a href="#" onclick="showPage('cookie')">Cookie Policy</a>
+    <a href="mailto:hello@egleze.com">hello@egleze.com</a>
+  </div>
+  <p class="footer-copy">© 2026 Egleze Limited · Registered in Ireland · 22 Northumberland Road, Ballsbridge, Dublin 4</p>
+</footer>
+
+<script>
+// ── TAB NAVIGATION ────────────────────────────────────────────
+function showPage(page) {
+  document.querySelectorAll('.legal-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.legal-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const tabs = document.querySelectorAll('.legal-tab');
+  const map = {editorial:0, privacy:1, cookie:2};
+  if(tabs[map[page]]) tabs[map[page]].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── COOKIE CONSENT ────────────────────────────────────────────
+function acceptCookies() {
+  localStorage.setItem('egleze_cookie_consent', 'accepted');
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+
+function rejectCookies() {
+  localStorage.setItem('egleze_cookie_consent', 'rejected');
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+
+// Hide banner if already decided
+window.addEventListener('load', function() {
+  const consent = localStorage.getItem('egleze_cookie_consent');
+  if (consent) document.getElementById('cookie-banner').style.display = 'none';
+
+  // Check URL hash for direct page links
+  const hash = window.location.hash.replace('#','');
+  if(hash && ['editorial','privacy','cookie'].includes(hash)) showPage(hash);
+});
+</script>
+</body>
+</html>
