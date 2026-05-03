@@ -968,69 +968,37 @@ function timeAgo(dateStr) {
   return `${Math.floor(diff/1440)} days ago`;
 }
 
-// ── PODCAST ARTWORK — RELIABLE CDN URLS ─────────────────────────
+// ── PODCAST ARTWORK — PRELOADED FROM SUPABASE shows.artwork_url ────
+// Populated once at init by loadShowsArtwork(); subsequent lookups are
+// synchronous. Replaces an earlier runtime iTunes JSONP scheme.
 const artworkCache = {};
+let artworkReady = false;
 
-function fetchArtworkJSONP(showName) {
-  return new Promise(function(resolve) {
-    var cbName = 'itcb' + Date.now() + Math.floor(Math.random()*9999);
-    var q = encodeURIComponent(showName);
-    var timer = setTimeout(function() {
-      try { delete window[cbName]; } catch(e){}
-      var el = document.getElementById(cbName);
-      if (el) el.parentNode.removeChild(el);
-      resolve(null);
-    }, 8000);
-    window[cbName] = function(data) {
-      clearTimeout(timer);
-      try { delete window[cbName]; } catch(e){}
-      var el = document.getElementById(cbName);
-      if (el) el.parentNode.removeChild(el);
-      if (data && data.results && data.results.length > 0) {
-        var art = data.results[0].artworkUrl600 || data.results[0].artworkUrl100;
-        resolve(art || null);
-      } else {
-        resolve(null);
+async function loadShowsArtwork() {
+  if (!db && !initDB()) return;
+  try {
+    const { data, error } = await db.from('shows')
+      .select('name, artwork_url')
+      .not('artwork_url', 'is', null);
+    if (error) { console.log('Artwork preload error:', error.message || error); return; }
+    if (!data) return;
+    data.forEach(function(row) {
+      if (row.name && row.artwork_url) {
+        artworkCache[row.name] = row.artwork_url;
       }
-    };
-    var script = document.createElement('script');
-    script.id = cbName;
-    script.onerror = function() {
-      clearTimeout(timer);
-      try { delete window[cbName]; } catch(e){}
-      resolve(null);
-    };
-    script.src = 'https://itunes.apple.com/search?term=' + q + '&media=podcast&limit=1&callback=' + cbName;
-    document.head.appendChild(script);
-  });
+    });
+    artworkReady = true;
+  } catch(e) { console.log('Artwork preload skipped:', e); }
 }
 
-function normalizeShowQuery(name) {
-  if (!name) return '';
-  // iTunes Search matches better with simplified queries — strip episode/punctuation noise
-  return String(name)
-    .replace(/^The\s+/i, '')                  // "The Joe Rogan Experience" -> "Joe Rogan Experience"
-    .replace(/\s*\(podcast\)\s*$/i, '')       // strip trailing "(Podcast)"
-    .replace(/\s*[-\u2013\u2014]\s*.+$/, '')  // strip trailing " - subtitle" / em-dash subtitle
-    .replace(/[^\w\s']/g, ' ')                // remove punctuation that confuses search
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-async function getShowArtwork(showName) {
+function getShowArtwork(showName) {
   if (!showName) return null;
-  if (artworkCache[showName] !== undefined) return artworkCache[showName];
-  var query = normalizeShowQuery(showName);
-  if (!query) { artworkCache[showName] = null; return null; }
-  var url = await fetchArtworkJSONP(query);
-  artworkCache[showName] = url || null;
-  if (url) artworkCache[query] = url;
-  return url;
+  return artworkCache[showName] || null;
 }
 
 
-async function applyArtworkToHero(showName) {
-  const url = await getShowArtwork(showName);
+function applyArtworkToHero(showName) {
+  const url = getShowArtwork(showName);
   if (!url) return;
   const heroImg = document.querySelector('.hero-img');
   if (!heroImg) return;
@@ -1050,8 +1018,8 @@ async function applyArtworkToHero(showName) {
   if (waveBg) waveBg.style.display = 'none';
 }
 
-async function applyArtworkToSecondary(showName, index) {
-  const url = await getShowArtwork(showName);
+function applyArtworkToSecondary(showName, index) {
+  const url = getShowArtwork(showName);
   if (!url) return;
   const secImgs = document.querySelectorAll('.sec-img');
   const target = secImgs[index];
@@ -1069,19 +1037,19 @@ async function applyArtworkToSecondary(showName, index) {
   if (wave) wave.style.display = 'none';
 }
 
-async function applyArtworkToFeedItems(stories) {
+function applyArtworkToFeedItems(stories) {
   // Add show artwork to feed items
   const feedItems = document.querySelectorAll('.feed-item');
-  feedItems.forEach(async (item, i) => {
+  feedItems.forEach(function(item, i) {
     const story = stories[i];
     if (!story) return;
-    const url = await getShowArtwork(story.show_name);
+    const url = getShowArtwork(story.show_name);
     if (!url) return;
     // Add thumbnail if not already there
     if (!item.querySelector('.feed-thumb')) {
       const thumb = document.createElement('div');
       thumb.className = 'feed-thumb';
-      thumb.style.cssText = `width:48px;height:48px;background:url(${url}) center/cover;flex-shrink:0;border-radius:2px`;
+      thumb.style.cssText = 'width:48px;height:48px;background:url(' + url + ') center/cover;flex-shrink:0;border-radius:2px';
       item.insertBefore(thumb, item.firstChild);
     }
   });
@@ -1149,13 +1117,19 @@ document.querySelector('.header-date').textContent =
   new Date().toLocaleDateString('en-IE', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) + ' · egleze.com';
 
 // ── INITIALISE ────────────────────────────────────────────────────
-loadStories();
-loadSidebar();
-loadClips();
-setupRealtime();
+// Preload artwork from shows table before rendering, so the first paint
+// has hero/secondary/feed artwork without a flicker.
+(async function init() {
+  await loadShowsArtwork();
+  loadStories();
+  loadSidebar();
+  loadClips();
+  setupRealtime();
+})();
 
 
-// Auto-refresh every 5 minutes to catch new approved stories
+// Auto-refresh every 5 minutes to catch new approved stories.
+// Artwork cache persists in memory — no need to re-fetch the shows table.
 setInterval(() => {
   loadStories();
   loadSidebar();
