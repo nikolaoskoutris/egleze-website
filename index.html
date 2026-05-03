@@ -973,12 +973,28 @@ document.addEventListener('DOMContentLoaded', () => {
 async function bannerSubscribe() {
   const email = document.getElementById('lb-email').value.trim();
   if (!email || !email.includes('@')) return;
-  if (!db && !initDB()) return;
   try {
-    await db.from('subscribers').upsert([{email, source:'launch_banner', status:'active', created_at: new Date().toISOString()}], {onConflict:'email'});
-    document.getElementById('lb-email').value = '';
-    document.querySelector('.lb-form').innerHTML = '<div style="font-family:\'Roboto Condensed\',sans-serif;font-size:10px;letter-spacing:1px;color:#fff;padding:6px 12px;background:rgba(255,255,255,.1)">✓ You\'re on the list!</div>';
-  } catch(e) { console.log(e); }
+    // Use direct fetch to Supabase REST API — works without login
+    const res = await fetch('https://kerijdhiasrvaxssjqqg.supabase.co/rest/v1/subscribers', {
+      method: 'POST',
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+        'Accept-Profile': 'public',
+        'Content-Profile': 'public'
+      },
+      body: JSON.stringify({email, source:'launch_banner', status:'active', created_at: new Date().toISOString()})
+    });
+    if (res.ok || res.status === 409) {
+      document.getElementById('lb-email').value = '';
+      document.querySelector('.lb-form').innerHTML = '<div style="font-family:Roboto Condensed,sans-serif;font-size:11px;letter-spacing:1px;color:#fff;padding:6px 14px;background:rgba(255,255,255,.1)">✓ You are on the list!</div>';
+    } else {
+      const err = await res.text();
+      console.log('Subscribe error:', err);
+    }
+  } catch(e) { console.log('Subscribe error:', e); }
 }
 </script>
 </body>
