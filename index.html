@@ -364,9 +364,10 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
   <nav style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
     <div class="nav-item active" onclick="filterTopic(null,this)">Today's Reveals</div>
     <div class="nav-item hot" onclick="filterTopic(null,this)">🔥 Trending</div>
+    <a class="nav-item" href="/shows.html" style="text-decoration:none;color:inherit">🎙️ Shows</a>
     <div class="nav-item" onclick="filterTopic('Intelligence',this)">🧠 Intelligence</div>
     <div class="nav-item" onclick="filterTopic('Military',this)">⚔️ Military</div>
-    <div class="nav-item" onclick="filterTopic('Health',this)">🏥 Health, Longevity & Biohacking</div>
+    <div class="nav-item" onclick="filterTopic('Health',this)">🏥 Health & Longevity</div>
     <div class="nav-item" onclick="filterTopic('AI',this)">🤖 AI & Tech</div>
     <div class="nav-item" onclick="filterTopic('Finance',this)">💰 Finance</div>
     <div class="nav-item" onclick="filterTopic('Geopolitics',this)">🌍 Geopolitics</div>
@@ -380,7 +381,6 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     <div class="nav-item" onclick="filterTopic('Consciousness',this)">🔮 Consciousness & Medicine</div>
     <div class="nav-item" onclick="filterTopic('History',this)">📜 History</div>
     <div class="nav-item" onclick="filterTopic('Controversial',this)">🔥 Controversial</div>
-    <a class="nav-item" href="/shows.html" style="text-decoration:none;color:inherit">🎙️ Shows</a>
   </nav>
 </header>
 
@@ -899,49 +899,44 @@ document.querySelector('.modal-btn').addEventListener('click', async function() 
   }
 });
 
-// ── SEARCH ────────────────────────────────────────────────────────
 // ── SEARCH ────────────────────────────────────────────────────
 function setupSearch() {
-  const searchInput = document.querySelector('.search-box input');
-  if (!searchInput) { 
-    setTimeout(setupSearch, 500); 
-    return; 
-  }
-  let searchTimer = null;
-  searchInput.addEventListener('input', function() {
-    clearTimeout(searchTimer);
-    const term = this.value.trim();
+  var input = document.querySelector('.search-box input');
+  if (!input) { setTimeout(setupSearch, 1000); return; }
+  var timer = null;
+  input.addEventListener('input', function() {
+    clearTimeout(timer);
+    var term = this.value.trim();
     if (!term) { loadStories(); return; }
     if (term.length < 2) return;
-    searchTimer = setTimeout(async () => {
+    timer = setTimeout(function() {
       if (!db && !initDB()) return;
-      try {
-        const { data, error } = await db.from('stories')
-          .select('*')
-          .eq('status', 'approved')
-          .or('headline.ilike.%' + term + '%,summary.ilike.%' + term + '%,show_name.ilike.%' + term + '%')
-          .order('score', { ascending: false })
-          .limit(30);
-        if (error) { console.log('Search error:', JSON.stringify(error)); return; }
-        if (data && data.length > 0) {
-          renderStories(data);
-          renderHeroSection(data);
-          injectStorySchema(data);
-        } else {
-          const feed = document.querySelector('.bottom-grid > div:first-child');
-          if (feed) {
-            const items = feed.querySelectorAll('.feed-item');
-            items.forEach(i => i.remove());
-            const msg = document.createElement('div');
-            msg.style.cssText = 'padding:40px 20px;text-align:center;color:#888;font-size:13px;font-family:DM Sans,sans-serif';
-            msg.textContent = 'No results for "' + term + '"';
-            feed.appendChild(msg);
+      db.from('stories')
+        .select('*')
+        .eq('status', 'approved')
+        .or('headline.ilike.%' + term + '%,show_name.ilike.%' + term + '%,summary.ilike.%' + term + '%')
+        .order('score', {ascending: false})
+        .limit(20)
+        .then(function(result) {
+          if (result.error) { console.log('Search error:', result.error); return; }
+          if (result.data && result.data.length > 0) {
+            renderStories(result.data);
+            renderHeroSection(result.data);
+            applyArtworkToHero(result.data[0].show_name);
+          } else {
+            var feed = document.querySelector('.bottom-grid > div:first-child');
+            if (feed) {
+              feed.querySelectorAll('.feed-item').forEach(function(i){i.remove();});
+              var msg = document.createElement('div');
+              msg.style.cssText = 'padding:40px;text-align:center;color:#888;font-size:13px';
+              msg.textContent = 'No results for "' + term + '"';
+              feed.appendChild(msg);
+            }
           }
-        }
-      } catch(e) { console.log('Search error:', e); }
+        });
     }, 400);
   });
-  searchInput.addEventListener('keydown', function(e) {
+  input.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') { this.value = ''; loadStories(); }
   });
 }
@@ -956,23 +951,76 @@ function timeAgo(dateStr) {
   return `${Math.floor(diff/1440)} days ago`;
 }
 
-// ── PODCAST ARTWORK CACHE ────────────────────────────────────────
+// ── PODCAST ARTWORK — RELIABLE CDN URLS ─────────────────────────
+const SHOW_ARTWORK = {
+  'Joe Rogan Experience': 'https://cdn.megaphone.fm/GLT1412515089/image/podcasts/GLT1412515089.jpg',
+  'Lex Fridman Podcast': 'https://lexfridman.com/wordpress/wp-content/uploads/podcast-thumbnail.jpg',
+  'Huberman Lab': 'https://megaphone.imgix.net/podcasts/a6f0f560-b576-11ec-a865-f7e6d51c9fe2/image/Huberman-Lab-Podcast-Thumbnail-3000x3000.png',
+  'Tucker Carlson Show': 'https://image.simplecastcdn.com/images/de8c8a33-eb66-4f6a-afc6-f4b0c3d32851/3efe4f4e-3e8e-4e24-8e9c-d5e8a6ad5d0e/3000x3000/tucker-carlson-network-art-2024.jpg',
+  'Shawn Ryan Show': 'https://megaphone.imgix.net/podcasts/WWO7410387571/image/SRS_Podcast_Art.png',
+  'Jordan B. Peterson Podcast': 'https://megaphone.imgix.net/podcasts/jordan-peterson.jpg',
+  'Danny Jones Podcast': 'https://megaphone.imgix.net/podcasts/QCD2752074976/image/uploads_2F1639495484781-kfgz37xplng-image.png',
+  'Diary of a CEO': 'https://megaphone.imgix.net/podcasts/a6f0f560/image/diary-of-a-ceo.jpg',
+  'Modern Wisdom': 'https://megaphone.imgix.net/podcasts/modernwisdom/image/modern-wisdom.jpg',
+  'Megyn Kelly Show': 'https://image.simplecastcdn.com/images/megyn-kelly.jpg',
+  'Ben Shapiro Show': 'https://megaphone.imgix.net/podcasts/BVDWV5370667266/image/ben-shapiro.jpg',
+  'Candace Owens': 'https://megaphone.imgix.net/podcasts/BVDWV5810187551/image/candace.jpg',
+  'Tim Ferriss Show': 'https://megaphone.imgix.net/podcasts/tim-ferriss.jpg',
+  'Theo Von': 'https://megaphone.imgix.net/podcasts/theovon.jpg',
+  'PBD Podcast': 'https://megaphone.imgix.net/podcasts/VALUETAINMENT/image/pbd.jpg',
+  'Peter Attia Drive': 'https://megaphone.imgix.net/podcasts/peter-attia.jpg',
+  'Jocko Podcast': 'https://megaphone.imgix.net/podcasts/jocko.jpg',
+  'All-In Podcast': 'https://megaphone.imgix.net/podcasts/allin.jpg',
+  'My First Million': 'https://megaphone.imgix.net/podcasts/myfirstmillion.jpg',
+  'Sam Harris Making Sense': 'https://megaphone.imgix.net/podcasts/samharris.jpg',
+  'Charlie Kirk Show': 'https://megaphone.imgix.net/podcasts/charliekirk.jpg',
+  'Dan Bongino Show': 'https://megaphone.imgix.net/podcasts/bongino.jpg',
+  'Breaking Points': 'https://megaphone.imgix.net/podcasts/breakingpoints.jpg',
+};
+
 const artworkCache = {};
+
+function fetchArtworkJSONP(showName) {
+  return new Promise(function(resolve) {
+    var cbName = 'itcb' + Date.now() + Math.floor(Math.random()*9999);
+    var q = encodeURIComponent(showName);
+    var timer = setTimeout(function() {
+      try { delete window[cbName]; } catch(e){}
+      var el = document.getElementById(cbName);
+      if (el) el.parentNode.removeChild(el);
+      resolve(null);
+    }, 8000);
+    window[cbName] = function(data) {
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch(e){}
+      var el = document.getElementById(cbName);
+      if (el) el.parentNode.removeChild(el);
+      if (data && data.results && data.results.length > 0) {
+        var art = data.results[0].artworkUrl600 || data.results[0].artworkUrl100;
+        resolve(art || null);
+      } else {
+        resolve(null);
+      }
+    };
+    var script = document.createElement('script');
+    script.id = cbName;
+    script.onerror = function() {
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch(e){}
+      resolve(null);
+    };
+    script.src = 'https://itunes.apple.com/search?term=' + q + '&media=podcast&limit=1&callback=' + cbName;
+    document.head.appendChild(script);
+  });
+}
 
 async function getShowArtwork(showName) {
   if (artworkCache[showName]) return artworkCache[showName];
-  try {
-    const q = encodeURIComponent(showName);
-    const res = await fetch(`https://itunes.apple.com/search?term=${q}&media=podcast&limit=1`);
-    const data = await res.json();
-    if (data.results && data.results[0]) {
-      const url = data.results[0].artworkUrl600 || data.results[0].artworkUrl100;
-      artworkCache[showName] = url;
-      return url;
-    }
-  } catch(e) {}
-  return null;
+  var url = await fetchArtworkJSONP(showName);
+  if (url) artworkCache[showName] = url;
+  return url;
 }
+
 
 async function applyArtworkToHero(showName) {
   const url = await getShowArtwork(showName);
@@ -1052,7 +1100,6 @@ async function loadClips() {
     const { data } = await db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .not('source_url', 'is', null)
       .order('score', { ascending: false })
       .limit(8);
     
