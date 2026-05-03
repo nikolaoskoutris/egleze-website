@@ -483,16 +483,21 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
 
   <!-- TOPIC FILTER -->
   <div class="topic-strip">
-    <button class="topic-btn active">All Topics</button>
-    <button class="topic-btn">🧠 Intelligence</button>
-    <button class="topic-btn">🏥 Health</button>
-    <button class="topic-btn">🤖 AI & Tech</button>
-    <button class="topic-btn">💰 Finance</button>
-    <button class="topic-btn">🌍 Geopolitics</button>
-    <button class="topic-btn">👽 UFO</button>
-    <button class="topic-btn">⚔️ Military</button>
-    <button class="topic-btn">🧬 Science</button>
-    <button class="topic-btn">🏛️ Politics</button>
+    <button class="topic-btn active" onclick="filterTopicStrip(null,this)">All Topics</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Intelligence',this)">🧠 Intelligence</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Military',this)">⚔️ Military</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Health',this)">🏥 Health</button>
+    <button class="topic-btn" onclick="filterTopicStrip('AI',this)">🤖 AI & Tech</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Finance',this)">💰 Finance</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Geopolitics',this)">🌍 Geopolitics</button>
+    <button class="topic-btn" onclick="filterTopicStrip('UFO',this)">👽 UFO</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Politics',this)">🏛️ Politics</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Debates',this)">⚖️ Debates</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Psychedelics',this)">💊 Psychedelics</button>
+    <button class="topic-btn" onclick="filterTopicStrip('History',this)">📜 History</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Science',this)">🔬 Science</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Faith',this)">🙏 Faith</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Business',this)">💼 Business</button>
   </div>
 
   <!-- CLIP LIBRARY -->
@@ -677,6 +682,15 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 function filterTopic(topic, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
+  // Also reset topic strip
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.topic-btn')?.classList.add('active');
+  loadStories(topic);
+}
+
+function filterTopicStrip(topic, el) {
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
   loadStories(topic);
 }
 
@@ -689,24 +703,43 @@ async function loadStories(topic = null) {
       .order('score', { ascending: false })
       .limit(50);
 
-    // Filter by topic OR categories array
+    // Filter by topic field
     if (topic) {
-      query = query.or(`topic.ilike.%${topic}%,categories.cs.{${topic}}`);
+      query = query.ilike('topic', `%${topic}%`);
     }
 
     const { data, error } = await query;
-    if (error) { console.log('Query error:', error); return; }
-    if (!data || data.length === 0) {
-      // Show empty state
+    if (error) { console.log('Query error:', JSON.stringify(error)); return; }
+    
+    let combined = data || [];
+    
+    // Also fetch by categories array if filtering by topic
+    if (topic && db) {
+      try {
+        const { data: catData } = await db.from('stories')
+          .select('*')
+          .eq('status', 'approved')
+          .contains('categories', [topic])
+          .order('score', { ascending: false })
+          .limit(50);
+        if (catData && catData.length > 0) {
+          // Merge and deduplicate by id
+          const ids = new Set(combined.map(s => s.id));
+          catData.forEach(s => { if (!ids.has(s.id)) combined.push(s); });
+        }
+      } catch(e) {}
+    }
+
+    if (combined.length === 0) {
       const grid = document.getElementById('stories-grid');
       if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888;font-size:13px">No stories in this category yet — check back soon.</div>';
       return;
     }
-    renderStories(data);
-    renderHeroSection(data);
-    injectStorySchema(data);
-    renderSidebarFromData(data);
-    updateTicker(data);
+    renderStories(combined);
+    renderHeroSection(combined);
+    injectStorySchema(combined);
+    renderSidebarFromData(combined);
+    updateTicker(combined);
   } catch(e) { console.log('Load error:', e); }
 }
 
@@ -861,18 +894,26 @@ document.querySelector('.modal-btn').addEventListener('click', async function() 
 
 // ── SEARCH ────────────────────────────────────────────────────────
 document.querySelector('.search-box input').addEventListener('keyup', async function(e) {
-  if (e.key !== 'Enter') return;
   const term = this.value.trim();
-  if (!term) return;
+  if (!term) { loadStories(); return; }
+  if (e.key !== 'Enter' && term.length < 3) return;
+  if (!db && !initDB()) return;
   try {
-    const { data } = await db.from('stories')
+    const { data, error } = await db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .ilike('headline', `%${term}%`)
-      .order('created_at', { ascending: false })
-      .limit(10);
-    if (data && data.length > 0) renderStories(data);
-  } catch(e) { console.log('Search error', e); }
+      .or(`headline.ilike.%${term}%,summary.ilike.%${term}%,show_name.ilike.%${term}%,quote.ilike.%${term}%`)
+      .order('score', { ascending: false })
+      .limit(30);
+    if (error) { console.log('Search error:', JSON.stringify(error)); return; }
+    if (data && data.length > 0) {
+      renderStories(data);
+      renderHeroSection(data);
+    } else {
+      const grid = document.getElementById('stories-grid');
+      if (grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#888;font-size:13px">No results for "${term}"</div>`;
+    }
+  } catch(e) { console.log('Search error:', e); }
 });
 
 // ── HELPER: TIME AGO ─────────────────────────────────────────────
