@@ -1357,10 +1357,26 @@ function closeClipPlayer(event) {
   }
 }
 
-// Wire close button + Esc key
-document.getElementById('cp-close-btn').addEventListener('click', function() { closeClipPlayer(); });
+// Wire close button + Esc key. Guarded — modal HTML may not be in the DOM
+// when this script runs (it lives further down the body), and a null
+// addEventListener call here would halt every init step below it.
+function wireClipCloseButton() {
+  var btn = document.getElementById('cp-close-btn');
+  if (!btn || btn.dataset.wired === '1') return;
+  btn.addEventListener('click', function() { closeClipPlayer(); });
+  btn.dataset.wired = '1';
+}
+wireClipCloseButton();
+// Re-attempt after the rest of the body parses, in case the modal HTML
+// was below this script tag and the first attempt found nothing.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', wireClipCloseButton);
+} else {
+  setTimeout(wireClipCloseButton, 0);
+}
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && document.getElementById('cp-overlay').classList.contains('open')) {
+  var ov = document.getElementById('cp-overlay');
+  if (e.key === 'Escape' && ov && ov.classList.contains('open')) {
     closeClipPlayer();
   }
 });
