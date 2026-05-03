@@ -353,7 +353,7 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     <div class="header-right">
       <div class="search-box">
         <span style="color:var(--muted);font-size:14px">⌕</span>
-        <input type="text" placeholder="Search topics, guests, shows…">
+        <input type="text" placeholder="Search topics, guests, shows…" id="main-search-input" oninput="handleSearch(this.value)">
       </div>
       <div>
         <div class="live-pill"><span class="live-dot"></span> Live Coverage</div>
@@ -899,48 +899,42 @@ document.querySelector('.modal-btn').addEventListener('click', async function() 
   }
 });
 
-// ── SEARCH ────────────────────────────────────────────────────
-function setupSearch() {
-  var input = document.querySelector('.search-box input');
-  if (!input) { setTimeout(setupSearch, 1000); return; }
-  var timer = null;
-  input.addEventListener('input', function() {
-    clearTimeout(timer);
-    var term = this.value.trim();
-    if (!term) { loadStories(); return; }
-    if (term.length < 2) return;
-    timer = setTimeout(function() {
-      if (!db && !initDB()) return;
-      db.from('stories')
-        .select('*')
-        .eq('status', 'approved')
-        .or('headline.ilike.%' + term + '%,show_name.ilike.%' + term + '%,summary.ilike.%' + term + '%')
-        .order('score', {ascending: false})
-        .limit(20)
-        .then(function(result) {
-          if (result.error) { console.log('Search error:', result.error); return; }
-          if (result.data && result.data.length > 0) {
-            renderStories(result.data);
-            renderHeroSection(result.data);
-            applyArtworkToHero(result.data[0].show_name);
-          } else {
-            var feed = document.querySelector('.bottom-grid > div:first-child');
-            if (feed) {
-              feed.querySelectorAll('.feed-item').forEach(function(i){i.remove();});
-              var msg = document.createElement('div');
-              msg.style.cssText = 'padding:40px;text-align:center;color:#888;font-size:13px';
-              msg.textContent = 'No results for "' + term + '"';
-              feed.appendChild(msg);
-            }
+// Search handled by handleSearch() via oninput attribute
+
+
+// ── SEARCH HANDLER ───────────────────────────────────────────
+var searchTimer = null;
+function handleSearch(val) {
+  clearTimeout(searchTimer);
+  var term = val.trim();
+  if (!term || term.length < 2) { if (!term) loadStories(); return; }
+  searchTimer = setTimeout(function() {
+    if (!db && !initDB()) return;
+    db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .or('headline.ilike.%' + term + '%,show_name.ilike.%' + term + '%,summary.ilike.%' + term + '%')
+      .order('score', {ascending: false})
+      .limit(20)
+      .then(function(result) {
+        if (result.error || !result.data) return;
+        if (result.data.length > 0) {
+          renderStories(result.data);
+          renderHeroSection(result.data);
+          applyArtworkToHero(result.data[0].show_name);
+        } else {
+          var feed = document.querySelector('.bottom-grid > div:first-child');
+          if (feed) {
+            feed.querySelectorAll('.feed-item').forEach(function(i){i.remove();});
+            var msg = document.createElement('div');
+            msg.style.cssText = 'padding:40px;text-align:center;color:#888;font-size:13px;font-family:DM Sans,sans-serif';
+            msg.textContent = 'No results for "' + term + '"';
+            feed.appendChild(msg);
           }
-        });
-    }, 400);
-  });
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { this.value = ''; loadStories(); }
-  });
+        }
+      });
+  }, 400);
 }
-setupSearch();
 
 // ── HELPER: TIME AGO ─────────────────────────────────────────────
 function timeAgo(dateStr) {
@@ -952,32 +946,6 @@ function timeAgo(dateStr) {
 }
 
 // ── PODCAST ARTWORK — RELIABLE CDN URLS ─────────────────────────
-const SHOW_ARTWORK = {
-  'Joe Rogan Experience': 'https://cdn.megaphone.fm/GLT1412515089/image/podcasts/GLT1412515089.jpg',
-  'Lex Fridman Podcast': 'https://lexfridman.com/wordpress/wp-content/uploads/podcast-thumbnail.jpg',
-  'Huberman Lab': 'https://megaphone.imgix.net/podcasts/a6f0f560-b576-11ec-a865-f7e6d51c9fe2/image/Huberman-Lab-Podcast-Thumbnail-3000x3000.png',
-  'Tucker Carlson Show': 'https://image.simplecastcdn.com/images/de8c8a33-eb66-4f6a-afc6-f4b0c3d32851/3efe4f4e-3e8e-4e24-8e9c-d5e8a6ad5d0e/3000x3000/tucker-carlson-network-art-2024.jpg',
-  'Shawn Ryan Show': 'https://megaphone.imgix.net/podcasts/WWO7410387571/image/SRS_Podcast_Art.png',
-  'Jordan B. Peterson Podcast': 'https://megaphone.imgix.net/podcasts/jordan-peterson.jpg',
-  'Danny Jones Podcast': 'https://megaphone.imgix.net/podcasts/QCD2752074976/image/uploads_2F1639495484781-kfgz37xplng-image.png',
-  'Diary of a CEO': 'https://megaphone.imgix.net/podcasts/a6f0f560/image/diary-of-a-ceo.jpg',
-  'Modern Wisdom': 'https://megaphone.imgix.net/podcasts/modernwisdom/image/modern-wisdom.jpg',
-  'Megyn Kelly Show': 'https://image.simplecastcdn.com/images/megyn-kelly.jpg',
-  'Ben Shapiro Show': 'https://megaphone.imgix.net/podcasts/BVDWV5370667266/image/ben-shapiro.jpg',
-  'Candace Owens': 'https://megaphone.imgix.net/podcasts/BVDWV5810187551/image/candace.jpg',
-  'Tim Ferriss Show': 'https://megaphone.imgix.net/podcasts/tim-ferriss.jpg',
-  'Theo Von': 'https://megaphone.imgix.net/podcasts/theovon.jpg',
-  'PBD Podcast': 'https://megaphone.imgix.net/podcasts/VALUETAINMENT/image/pbd.jpg',
-  'Peter Attia Drive': 'https://megaphone.imgix.net/podcasts/peter-attia.jpg',
-  'Jocko Podcast': 'https://megaphone.imgix.net/podcasts/jocko.jpg',
-  'All-In Podcast': 'https://megaphone.imgix.net/podcasts/allin.jpg',
-  'My First Million': 'https://megaphone.imgix.net/podcasts/myfirstmillion.jpg',
-  'Sam Harris Making Sense': 'https://megaphone.imgix.net/podcasts/samharris.jpg',
-  'Charlie Kirk Show': 'https://megaphone.imgix.net/podcasts/charliekirk.jpg',
-  'Dan Bongino Show': 'https://megaphone.imgix.net/podcasts/bongino.jpg',
-  'Breaking Points': 'https://megaphone.imgix.net/podcasts/breakingpoints.jpg',
-};
-
 const artworkCache = {};
 
 function fetchArtworkJSONP(showName) {
@@ -1102,52 +1070,52 @@ async function loadClips() {
       .eq('status', 'approved')
       .order('score', { ascending: false })
       .limit(8);
-    
     const grid = document.getElementById('clips-grid');
     if (!grid) return;
-    
     if (!data || data.length === 0) {
-      grid.innerHTML = '<div style="grid-column:1/-1;padding:40px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:Roboto Condensed,sans-serif;letter-spacing:1px;text-transform:uppercase">Clips coming soon — pipeline building library</div>';
+      grid.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);font-size:12px">Clips coming soon</div>';
       return;
     }
-
-    grid.innerHTML = data.map((s, i) => {
-      const colors = ['#1a1a2e','#1a0a0a','#0a1a0a','#1a1400','#0a0a1a','#1a0a1a','#0a1a1a','#1a1a0a'];
-      const bg = colors[i % colors.length];
-      
-      // Check if source_url is a YouTube link
-      const isYT = s.source_url && (s.source_url.includes('youtube.com') || s.source_url.includes('youtu.be'));
-      let ytId = null;
-      if (isYT) {
-        const m = s.source_url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    var colors = ['#1a1a2e','#1a0a0a','#0a1a0a','#1a1400','#0a0a1a','#1a0a1a','#0a1a1a','#1a1a0a'];
+    var html = '';
+    data.forEach(function(s, i) {
+      var bg = colors[i % colors.length];
+      var ytId = '';
+      if (s.source_url) {
+        var m = s.source_url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
         if (m) ytId = m[1];
       }
-
-      return \`<div class="clip-card" onclick="openClip('\${s.id}','\${s.source_url || ''}','\${ytId || ''}')">
-        <div class="clip-thumb" style="background:\${bg};position:relative">
-          \${ytId ? \`<img src="https://img.youtube.com/vi/\${ytId}/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover;opacity:0.7" onerror="this.style.display='none'">\` : ''}
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-            <div style="width:28px;height:28px;background:rgba(187,25,25,.9);border-radius:50%;display:flex;align-items:center;justify-content:center">
-              <span style="color:#fff;font-size:10px;margin-left:2px">▶</span>
-            </div>
-          </div>
-          <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.7);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 5px">\${s.topic || 'Clip'}</div>
-        </div>
-        <div class="clip-body" style="padding:8px 10px">
-          <div style="font-size:10px;font-weight:600;color:var(--dark);line-height:1.3;margin-bottom:3px">\${(s.headline || '').substring(0,60)}\${s.headline?.length > 60 ? '...' : ''}</div>
-          <div style="font-size:9px;color:var(--muted);font-family:'Roboto Condensed',sans-serif;letter-spacing:.5px">\${s.show_name || ''}</div>
-        </div>
-      </div>\`;
-    }).join('');
+      var thumb = ytId ? '<img src="https://img.youtube.com/vi/' + ytId + '/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover;opacity:0.7">' : '';
+      var headline = (s.headline || '').substring(0, 60);
+      var topic = s.topic || 'Clip';
+      var showName = s.show_name || '';
+      var srcUrl = (s.source_url || '').replace(/"/g, '&quot;');
+      html += '<div class="clip-card" onclick="openClipEl(this)" data-ytid="' + ytId + '" data-url="' + srcUrl + '">' +
+        '<div class="clip-thumb" style="background:' + bg + ';position:relative">' +
+          thumb +
+          '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">' +
+            '<div style="width:28px;height:28px;background:rgba(187,25,25,.9);border-radius:50%;display:flex;align-items:center;justify-content:center">' +
+              '<span style="color:#fff;font-size:10px;margin-left:2px">&#9654;</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.7);color:#fff;font-family:Roboto Condensed,sans-serif;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 5px">' + topic + '</div>' +
+        '</div>' +
+        '<div style="padding:8px 10px">' +
+          '<div style="font-size:10px;font-weight:600;color:var(--dark);line-height:1.3;margin-bottom:3px">' + headline + '</div>' +
+          '<div style="font-size:9px;color:var(--muted);font-family:Roboto Condensed,sans-serif">' + showName + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    grid.innerHTML = html;
   } catch(e) { console.log('Clips error:', e); }
 }
 
-function openClip(id, url, ytId) {
-  if (ytId) {
-    window.open('https://www.youtube.com/watch?v=' + ytId, '_blank');
-  } else if (url) {
-    window.open(url, '_blank');
-  }
+
+function openClipEl(el) {
+  var ytId = el.getAttribute('data-ytid');
+  var url = el.getAttribute('data-url');
+  if (ytId) window.open('https://www.youtube.com/watch?v=' + ytId, '_blank');
+  else if (url) window.open(url, '_blank');
 }
 
 // ── UPDATE DATE IN HEADER ─────────────────────────────────────────
