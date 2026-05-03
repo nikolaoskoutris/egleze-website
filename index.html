@@ -687,16 +687,27 @@ async function loadStories(topic = null) {
       .select('*')
       .eq('status', 'approved')
       .order('score', { ascending: false })
-      .limit(20);
-    if (topic) query = query.ilike('topic', `%${topic}%`);
+      .limit(50);
+
+    // Filter by topic OR categories array
+    if (topic) {
+      query = query.or(`topic.ilike.%${topic}%,categories.cs.{${topic}}`);
+    }
+
     const { data, error } = await query;
-    if (error || !data || data.length === 0) return;
+    if (error) { console.log('Query error:', error); return; }
+    if (!data || data.length === 0) {
+      // Show empty state
+      const grid = document.getElementById('stories-grid');
+      if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888;font-size:13px">No stories in this category yet — check back soon.</div>';
+      return;
+    }
     renderStories(data);
     renderHeroSection(data);
     injectStorySchema(data);
     renderSidebarFromData(data);
     updateTicker(data);
-  } catch(e) { console.log('DB not yet configured', e); }
+  } catch(e) { console.log('Load error:', e); }
 }
 
 // ── RENDER HERO SECTION FROM DATABASE ────────────────────────────
