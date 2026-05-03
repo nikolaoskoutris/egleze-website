@@ -703,9 +703,29 @@ async function loadStories(topic = null) {
       .order('score', { ascending: false })
       .limit(50);
 
-    // Filter by topic field
+    // Filter by topic field — map short category names to broader search terms
     if (topic) {
-      query = query.ilike('topic', `%${topic}%`);
+      const topicMap = {
+        'AI': 'AI',
+        'UFO': 'UFO',
+        'Faith': 'Faith',
+        'Health': 'Health',
+        'Military': 'Military',
+        'Politics': 'Politics',
+        'Finance': 'Finance',
+        'Science': 'Science',
+        'Business': 'Business',
+        'Society': 'Society',
+        'Debates': 'Debate',
+        'History': 'History',
+        'Intelligence': 'Intelligence',
+        'Geopolitics': 'Geopolit',
+        'Performance': 'Performance',
+        'Psychedelics': 'Psychedel',
+        'Controversial': 'Controvers',
+      };
+      const searchTerm = topicMap[topic] || topic;
+      query = query.ilike('topic', `%${searchTerm}%`);
     }
 
     const { data, error } = await query;
