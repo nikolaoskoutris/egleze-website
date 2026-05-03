@@ -366,7 +366,7 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     <div class="nav-item hot" onclick="filterTopic(null,this)">🔥 Trending</div>
     <div class="nav-item" onclick="filterTopic('Intelligence',this)">🧠 Intelligence</div>
     <div class="nav-item" onclick="filterTopic('Military',this)">⚔️ Military</div>
-    <div class="nav-item" onclick="filterTopic('Health',this)">🏥 Health & Longevity</div>
+    <div class="nav-item" onclick="filterTopic('Health',this)">🏥 Health, Longevity & Biohacking</div>
     <div class="nav-item" onclick="filterTopic('AI',this)">🤖 AI & Tech</div>
     <div class="nav-item" onclick="filterTopic('Finance',this)">💰 Finance</div>
     <div class="nav-item" onclick="filterTopic('Geopolitics',this)">🌍 Geopolitics</div>
@@ -900,9 +900,14 @@ document.querySelector('.modal-btn').addEventListener('click', async function() 
 });
 
 // ── SEARCH ────────────────────────────────────────────────────────
-const searchInput = document.querySelector('.search-box input');
-let searchTimer = null;
-if (searchInput) {
+// ── SEARCH ────────────────────────────────────────────────────
+function setupSearch() {
+  const searchInput = document.querySelector('.search-box input');
+  if (!searchInput) { 
+    setTimeout(setupSearch, 500); 
+    return; 
+  }
+  let searchTimer = null;
   searchInput.addEventListener('input', function() {
     clearTimeout(searchTimer);
     const term = this.value.trim();
@@ -914,7 +919,7 @@ if (searchInput) {
         const { data, error } = await db.from('stories')
           .select('*')
           .eq('status', 'approved')
-          .or(`headline.ilike.%${term}%,summary.ilike.%${term}%,show_name.ilike.%${term}%,quote.ilike.%${term}%`)
+          .or('headline.ilike.%' + term + '%,summary.ilike.%' + term + '%,show_name.ilike.%' + term + '%')
           .order('score', { ascending: false })
           .limit(30);
         if (error) { console.log('Search error:', JSON.stringify(error)); return; }
@@ -928,7 +933,7 @@ if (searchInput) {
             const items = feed.querySelectorAll('.feed-item');
             items.forEach(i => i.remove());
             const msg = document.createElement('div');
-            msg.style.cssText = 'padding:40px 20px;text-align:center;color:#888;font-size:13px';
+            msg.style.cssText = 'padding:40px 20px;text-align:center;color:#888;font-size:13px;font-family:DM Sans,sans-serif';
             msg.textContent = 'No results for "' + term + '"';
             feed.appendChild(msg);
           }
@@ -940,6 +945,7 @@ if (searchInput) {
     if (e.key === 'Escape') { this.value = ''; loadStories(); }
   });
 }
+setupSearch();
 
 // ── HELPER: TIME AGO ─────────────────────────────────────────────
 function timeAgo(dateStr) {
@@ -972,13 +978,40 @@ async function applyArtworkToHero(showName) {
   const url = await getShowArtwork(showName);
   if (!url) return;
   const heroImg = document.querySelector('.hero-img');
-  if (heroImg) {
-    heroImg.style.backgroundImage = `url(${url})`;
-    heroImg.style.backgroundSize = 'cover';
-    heroImg.style.backgroundPosition = 'center';
-    const waveBg = heroImg.querySelector('.wave-bg');
-    if (waveBg) waveBg.style.display = 'none';
-  }
+  if (!heroImg) return;
+  // Remove existing artwork img if any
+  const existing = heroImg.querySelector('.artwork-img');
+  if (existing) existing.remove();
+  // Inject real img element
+  const img = document.createElement('img');
+  img.className = 'artwork-img';
+  img.src = url;
+  img.alt = showName;
+  img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;opacity:0.75';
+  img.onerror = function() { this.remove(); };
+  heroImg.insertBefore(img, heroImg.firstChild);
+  // Hide wave animation
+  const waveBg = heroImg.querySelector('.wave-bg');
+  if (waveBg) waveBg.style.display = 'none';
+}
+
+async function applyArtworkToSecondary(showName, index) {
+  const url = await getShowArtwork(showName);
+  if (!url) return;
+  const secImgs = document.querySelectorAll('.sec-img, .hero-sec .hero-img');
+  const target = secImgs[index];
+  if (!target) return;
+  const existing = target.querySelector('.artwork-img');
+  if (existing) existing.remove();
+  const img = document.createElement('img');
+  img.className = 'artwork-img';
+  img.src = url;
+  img.alt = showName;
+  img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;opacity:0.75';
+  img.onerror = function() { this.remove(); };
+  target.insertBefore(img, target.firstChild);
+  const wave = target.querySelector('.mini-waveform,.wave-bg');
+  if (wave) wave.style.display = 'none';
 }
 
 async function applyArtworkToSecondary(showName, index) {
