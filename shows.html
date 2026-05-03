@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Egleze — The Podcasts We Monitor | 69 Shows</title>
+<meta name="description" content="Egleze monitors 69 of the world's most influential podcasts — from Joe Rogan and Lex Fridman to Huberman Lab and Tucker Carlson. Every revelation, every breaking moment, surfaced as news.">
+<meta property="og:title" content="Egleze — The Podcasts We Monitor">
+<meta property="og:description" content="69 of the world's most influential podcasts — monitored 24/7 for breaking intelligence.">
+<meta property="og:url" content="https://egleze.com/shows">
+<link rel="canonical" href="https://egleze.com/shows">
+
+<!-- JSON-LD: ItemList of Shows (SEO) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Podcasts Monitored by Egleze",
+  "description": "69 of the world's most influential podcasts monitored by Egleze for breaking news and revelations",
+  "numberOfItems": 69,
+  "url": "https://egleze.com/shows",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Joe Rogan Experience","url":"https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk"},
+    {"@type":"ListItem","position":2,"name":"Lex Fridman Podcast","url":"https://lexfridman.com/podcast"},
+    {"@type":"ListItem","position":3,"name":"Huberman Lab","url":"https://www.hubermanlab.com"},
+    {"@type":"ListItem","position":4,"name":"Tucker Carlson Show","url":"https://tuckercarlson.com"},
+    {"@type":"ListItem","position":5,"name":"Shawn Ryan Show","url":"https://www.shawnryanshow.com"}
+  ]
+}
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#bb1919;--dark:#111;--mid:#444;--muted:#888;
+  --light:#f5f5f0;--border:#e0e0da;--white:#fff;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);min-height:100vh}
+
+/* ── HEADER ─────────────────────────────────────────────────── */
+.site-header{background:#fff;border-bottom:1px solid var(--border);border-top:3px solid var(--red);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1400px;margin:0 auto;padding:0 32px;height:52px;display:flex;align-items:center;gap:16px}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:4px;color:var(--dark);text-decoration:none}
+.logo span{color:var(--red)}
+.header-divider{width:1px;height:20px;background:var(--border)}
+.header-nav{display:flex;gap:20px;align-items:center;margin-left:auto}
+.header-nav a{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.header-nav a:hover,.header-nav a.active{color:var(--red)}
+.header-cta{background:var(--red);color:#fff !important;padding:6px 14px}
+
+/* ── HERO ────────────────────────────────────────────────────── */
+.shows-hero{background:var(--dark);padding:60px 32px 48px;position:relative;overflow:hidden}
+.shows-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px)}
+.hero-inner{max-width:1400px;margin:0 auto;position:relative;z-index:1}
+.hero-eyebrow{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.hero-eyebrow::before{content:'';width:24px;height:2px;background:var(--red)}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,56px);font-weight:900;color:#fff;line-height:1.1;margin-bottom:16px}
+.hero-title em{color:var(--red);font-style:normal}
+.hero-subtitle{font-size:15px;color:rgba(255,255,255,.55);max-width:560px;line-height:1.7;margin-bottom:28px}
+.hero-stats{display:flex;gap:32px}
+.hero-stat{text-align:left}
+.hero-stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#fff;line-height:1}
+.hero-stat-num span{color:var(--red)}
+.hero-stat-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:3px}
+
+/* ── FILTER BAR ──────────────────────────────────────────────── */
+.filter-bar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:90}
+.filter-inner{max-width:1400px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.filter-inner::-webkit-scrollbar{display:none}
+.filter-tab{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .2s;flex-shrink:0}
+.filter-tab:hover{color:var(--dark)}
+.filter-tab.active{color:var(--red);border-bottom-color:var(--red)}
+.filter-count{font-size:8px;background:var(--light);padding:1px 5px;border-radius:8px;margin-left:4px;color:var(--muted)}
+.filter-tab.active .filter-count{background:rgba(187,25,25,.1);color:var(--red)}
+
+/* ── SEARCH ──────────────────────────────────────────────────── */
+.search-bar{max-width:1400px;margin:0 auto;padding:20px 32px 0}
+.search-input{width:100%;max-width:400px;border:1px solid var(--border);padding:10px 16px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:#fff;color:var(--dark)}
+.search-input:focus{border-color:var(--dark)}
+.search-input::placeholder{color:var(--muted)}
+
+/* ── SHOWS GRID ──────────────────────────────────────────────── */
+.shows-container{max-width:1400px;margin:0 auto;padding:20px 32px 80px}
+.shows-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.show-count{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+
+/* ── SHOW CARD ───────────────────────────────────────────────── */
+.show-card{background:#fff;border:1px solid var(--border);overflow:hidden;transition:all .25s;cursor:pointer;position:relative;display:flex;flex-direction:column}
+.show-card:hover{border-color:var(--dark);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.08)}
+.show-card:hover .show-img-overlay{opacity:1}
+.show-card:hover .show-visit{opacity:1;transform:translateY(0)}
+
+.show-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:var(--dark)}
+.show-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.show-card:hover .show-img{transform:scale(1.05)}
+.show-img-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:rgba(255,255,255,.15);background:var(--dark);position:relative}
+.show-img-fallback::after{content:attr(data-initial);position:absolute;font-size:72px;color:rgba(255,255,255,.08)}
+
+.show-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 60%);opacity:0;transition:opacity .3s}
+.show-visit{position:absolute;bottom:10px;left:10px;right:10px;background:var(--red);color:#fff;text-align:center;padding:6px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;opacity:0;transform:translateY(6px);transition:all .3s;text-decoration:none}
+
+.show-cat-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;backdrop-filter:blur(4px)}
+
+.show-body{padding:12px;flex:1;display:flex;flex-direction:column;gap:4px}
+.show-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--dark);line-height:1.25}
+.show-host{font-size:11px;color:var(--muted)}
+.show-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid var(--border)}
+.show-stories{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--red)}
+.show-link{font-size:10px;color:var(--muted);text-decoration:none}
+.show-link:hover{color:var(--dark)}
+
+/* ── FEATURED ROW ────────────────────────────────────────────── */
+.featured-section{max-width:1400px;margin:0 auto;padding:32px 32px 0}
+.section-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.featured-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:32px}
+.featured-card{background:var(--dark);position:relative;aspect-ratio:3/4;overflow:hidden;cursor:pointer;text-decoration:none;display:block}
+.featured-card:hover .fc-img{transform:scale(1.08)}
+.featured-card:hover .fc-overlay{background:linear-gradient(to top,rgba(0,0,0,.95) 0%,rgba(0,0,0,.3) 100%)}
+.fc-img{width:100%;height:100%;object-fit:cover;transition:transform .5s;display:block}
+.fc-img-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:80px;font-weight:900;color:rgba(255,255,255,.06)}
+.fc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.1) 60%);transition:background .3s}
+.fc-content{position:absolute;bottom:0;left:0;right:0;padding:14px}
+.fc-cat{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+.fc-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fff;line-height:1.2}
+.fc-host{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
+
+/* ── CATEGORY SECTION HEADERS ────────────────────────────────── */
+.cat-section{margin-bottom:32px}
+.cat-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.cat-icon{font-size:20px}
+.cat-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--dark)}
+.cat-desc{font-size:11px;color:var(--muted);margin-left:4px}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+.site-footer{background:var(--dark);padding:40px 32px;margin-top:0}
+.footer-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:3px;color:#fff}
+.footer-logo span{color:var(--red)}
+.footer-links{display:flex;gap:16px}
+.footer-links a{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);text-decoration:none}
+.footer-links a:hover{color:#fff}
+.footer-copy{font-size:11px;color:rgba(255,255,255,.3);width:100%}
+
+/* ── NO RESULTS ──────────────────────────────────────────────── */
+.no-results{text-align:center;padding:60px 20px;color:var(--muted)}
+.no-results-icon{font-size:40px;margin-bottom:12px;opacity:.3}
+
+/* ── ANIMATIONS ──────────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.show-card{animation:fadeUp .4s ease both}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media(max-width:768px){
+  .shows-hero{padding:40px 20px 32px}
+  .shows-container,.featured-section,.search-bar{padding-left:20px;padding-right:20px}
+  .shows-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .featured-grid{grid-template-columns:repeat(2,1fr)}
+  .featured-grid .featured-card:last-child{display:none}
+  .hero-stats{gap:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="https://egleze.com" class="logo"><span>E</span>GLEZE</a>
+    <div class="header-divider"></div>
+    <nav class="header-nav">
+      <a href="https://egleze.com">Home</a>
+      <a href="/shows.html" class="active">Shows</a>
+      <a href="https://egleze.com/#intelligence">Intelligence</a>
+      <a href="https://egleze.com/#health">Health</a>
+      <a href="https://egleze.com/#politics">Politics</a>
+      <a href="https://egleze.beehiiv.com/subscribe" class="header-cta">Subscribe Free</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── HERO ───────────────────────────────────────────────────── -->
+<section class="shows-hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Intelligence Sources</div>
+    <h1 class="hero-title">The Podcasts<br>We <em>Monitor</em></h1>
+    <p class="hero-subtitle">Every episode. Every revelation. Every moment that matters — surfaced and delivered as breaking news. These are our sources.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">69<span>+</span></div>
+        <div class="hero-stat-label">Shows Monitored</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">16</div>
+        <div class="hero-stat-label">Categories</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">24<span>/7</span></div>
+        <div class="hero-stat-label">Automated Scanning</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FILTER BAR ─────────────────────────────────────────────── -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <button class="filter-tab active" onclick="filterShows('all',this)">All <span class="filter-count">69</span></button>
+    <button class="filter-tab" onclick="filterShows('Intelligence',this)">🧠 Intelligence</button>
+    <button class="filter-tab" onclick="filterShows('Military',this)">⚔️ Military</button>
+    <button class="filter-tab" onclick="filterShows('Health',this)">🏥 Health</button>
+    <button class="filter-tab" onclick="filterShows('Psychedelics',this)">💊 Psychedelics</button>
+    <button class="filter-tab" onclick="filterShows('Performance',this)">💪 Performance</button>
+    <button class="filter-tab" onclick="filterShows('AI',this)">🤖 AI & Tech</button>
+    <button class="filter-tab" onclick="filterShows('Finance',this)">💰 Finance</button>
+    <button class="filter-tab" onclick="filterShows('Geopolitics',this)">🌍 Geopolitics</button>
+    <button class="filter-tab" onclick="filterShows('UFO',this)">👽 UFO</button>
+    <button class="filter-tab" onclick="filterShows('Politics',this)">🏛️ Politics</button>
+    <button class="filter-tab" onclick="filterShows('Debates',this)">⚖️ Debates</button>
+    <button class="filter-tab" onclick="filterShows('Faith',this)">🙏 Faith</button>
+    <button class="filter-tab" onclick="filterShows('Science',this)">🔬 Science</button>
+    <button class="filter-tab" onclick="filterShows('Business',this)">💼 Business</button>
+    <button class="filter-tab" onclick="filterShows('Society',this)">🎭 Society</button>
+    <button class="filter-tab" onclick="filterShows('Controversial',this)">🔥 Controversial</button>
+  </div>
+</div>
+
+<!-- ── SEARCH ─────────────────────────────────────────────────── -->
+<div class="search-bar">
+  <input class="search-input" type="text" placeholder="Search shows, hosts..." oninput="searchShows(this.value)" id="search-input">
+</div>
+
+<!-- ── FEATURED TOP 5 ─────────────────────────────────────────── -->
+<div class="featured-section" id="featured-section">
+  <div class="section-label">Featured Shows</div>
+  <div class="featured-grid" id="featured-grid"></div>
+</div>
+
+<!-- ── ALL SHOWS ──────────────────────────────────────────────── -->
+<div class="shows-container">
+  <div class="show-count" id="show-count">Showing all 69 shows</div>
+  <div class="shows-grid" id="shows-grid"></div>
+  <div class="no-results" id="no-results" style="display:none">
+    <div class="no-results-icon">🎙️</div>
+    <div>No shows found matching your search</div>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo"><span>E</span>GLEZE</div>
+    <div class="footer-links">
+      <a href="https://egleze.com">Home</a>
+      <a href="/shows.html">Shows</a>
+      <a href="/legal.html#editorial">Editorial Notice</a>
+      <a href="/legal.html#privacy">Privacy Policy</a>
+      <a href="mailto:hello@egleze.com">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 Egleze Limited · Registered in Ireland · The Podcast Intelligence Network</div>
+  </div>
+</footer>
+
+<script>
+// ── ALL 69 SHOWS DATA ─────────────────────────────────────────
+const SHOWS = [
+  {id:1,name:'Joe Rogan Experience',host:'Joe Rogan',category:'Interview',website:'https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk',img:'https://i.scdn.co/image/ab6765630000ba8a9e06d69b23d5b90a45f37f5a',featured:true},
+  {id:2,name:'Lex Fridman Podcast',host:'Lex Fridman',category:'AI',website:'https://lexfridman.com/podcast',img:'https://lexfridman.com/wordpress/wp-content/uploads/2022/12/lex_fridman_podcast_thumbnail.jpg',featured:true},
+  {id:3,name:'Tucker Carlson Show',host:'Tucker Carlson',category:'Politics',website:'https://tuckercarlson.com',img:'https://image.simplecastcdn.com/images/de/tucker-carlson.jpg',featured:true},
+  {id:4,name:'Huberman Lab',host:'Andrew Huberman',category:'Health',website:'https://www.hubermanlab.com',img:'https://megaphone.imgix.net/podcasts/a6f0f560-b576-11ec-a865-f7e6d51c9fe2/image/Huberman-Lab-Podcast-Thumbnail-3000x3000.png',featured:true},
+  {id:5,name:'Shawn Ryan Show',host:'Shawn Ryan',category:'Military',website:'https://www.shawnryanshow.com',img:'https://megaphone.imgix.net/podcasts/shawnryanshow.jpg',featured:true},
+  {id:6,name:'Jordan B. Peterson Podcast',host:'Jordan Peterson',category:'Society',website:'https://www.jordanbpeterson.com/podcast',img:'https://megaphone.imgix.net/podcasts/jordan-peterson.jpg'},
+  {id:8,name:'Danny Jones Podcast',host:'Danny Jones',category:'Intelligence',website:'https://www.youtube.com/@dannyjones',img:'https://yt3.googleusercontent.com/ytc/dannyjones.jpg'},
+  {id:9,name:'Diary of a CEO',host:'Steven Bartlett',category:'Business',website:'https://www.diaryofaceo.com',img:'https://megaphone.imgix.net/podcasts/diary-of-a-ceo.jpg'},
+  {id:10,name:'Modern Wisdom',host:'Chris Williamson',category:'Health',website:'https://chriswilliamson.com',img:'https://megaphone.imgix.net/podcasts/modern-wisdom.jpg'},
+  {id:12,name:'Megyn Kelly Show',host:'Megyn Kelly',category:'Politics',website:'https://www.megynkelly.com',img:'https://image.simplecastcdn.com/images/megynkelly.jpg'},
+  {id:13,name:'Ben Shapiro Show',host:'Ben Shapiro',category:'Politics',website:'https://www.dailywire.com/show/the-ben-shapiro-show',img:'https://megaphone.imgix.net/podcasts/ben-shapiro.jpg'},
+  {id:14,name:'Candace Owens',host:'Candace Owens',category:'Politics',website:'https://www.dailywire.com/show/candace',img:'https://megaphone.imgix.net/podcasts/candace.jpg'},
+  {id:15,name:'Tim Ferriss Show',host:'Tim Ferriss',category:'Business',website:'https://tim.blog/podcast',img:'https://megaphone.imgix.net/podcasts/tim-ferriss.jpg'},
+  {id:16,name:'Theo Von',host:'Theo Von',category:'Comedy',website:'https://www.theovon.com',img:'https://megaphone.imgix.net/podcasts/theo-von.jpg'},
+  {id:17,name:'Redacted',host:'Clayton Morris',category:'Politics',website:'https://www.youtube.com/@Redacted',img:'https://yt3.googleusercontent.com/ytc/redacted.jpg'},
+  {id:18,name:'Triggernometry',host:'Konstantin Kisin',category:'Politics',website:'https://www.youtube.com/@triggerpod',img:'https://megaphone.imgix.net/podcasts/triggernometry.jpg'},
+  {id:19,name:'Full Send Podcast',host:'NELK Boys',category:'Entertainment',website:'https://www.youtube.com/@FullSend',img:'https://megaphone.imgix.net/podcasts/fullsend.jpg'},
+  {id:20,name:'Kill Tony',host:'Tony Hinchcliffe',category:'Comedy',website:'https://www.killtony.com',img:'https://megaphone.imgix.net/podcasts/killtony.jpg'},
+  {id:21,name:'Tom Bilyeu Impact Theory',host:'Tom Bilyeu',category:'Business',website:'https://impacttheory.com',img:'https://megaphone.imgix.net/podcasts/impact-theory.jpg'},
+  {id:22,name:'Timcast IRL',host:'Tim Pool',category:'Politics',website:'https://timcast.com',img:'https://megaphone.imgix.net/podcasts/timcast.jpg'},
+  {id:23,name:'Glenn Beck Program',host:'Glenn Beck',category:'Politics',website:'https://www.glennbeck.com',img:'https://megaphone.imgix.net/podcasts/glennbeck.jpg'},
+  {id:24,name:'Dave Rubin Report',host:'Dave Rubin',category:'Politics',website:'https://rubinreport.com',img:'https://megaphone.imgix.net/podcasts/davereport.jpg'},
+  {id:25,name:"Your Mom's House",host:'Tom Segura',category:'Comedy',website:'https://www.ymhstudios.com',img:'https://megaphone.imgix.net/podcasts/yourmoms.jpg'},
+  {id:26,name:'PBD Podcast',host:'Patrick Bet-David',category:'Finance',website:'https://valuetainment.com/podcasts/pbd-podcast',img:'https://megaphone.imgix.net/podcasts/valuetainment.jpg'},
+  {id:27,name:'Peter Attia Drive',host:'Peter Attia',category:'Health',website:'https://peterattiamd.com/podcast',img:'https://megaphone.imgix.net/podcasts/peter-attia.jpg'},
+  {id:28,name:'Jocko Podcast',host:'Jocko Willink',category:'Military',website:'https://jockopodcast.com',img:'https://megaphone.imgix.net/podcasts/jocko.jpg'},
+  {id:29,name:'Found My Fitness',host:'Rhonda Patrick',category:'Health',website:'https://www.foundmyfitness.com',img:'https://megaphone.imgix.net/podcasts/foundmyfitness.jpg'},
+  {id:30,name:'All-In Podcast',host:'Chamath Palihapitiya',category:'Finance',website:'https://www.allinpodcast.co',img:'https://megaphone.imgix.net/podcasts/allin.jpg'},
+  {id:31,name:'My First Million',host:'Sam Parr',category:'Business',website:'https://www.mfmpod.com',img:'https://megaphone.imgix.net/podcasts/myfirstmillion.jpg'},
+  {id:32,name:'Acquired Podcast',host:'Ben Gilbert',category:'Business',website:'https://www.acquired.fm',img:'https://megaphone.imgix.net/podcasts/acquired.jpg'},
+  {id:33,name:'We Study Billionaires',host:'Trey Lockerbie',category:'Finance',website:'https://www.theinvestorspodcast.com',img:'https://megaphone.imgix.net/podcasts/investorspodcast.jpg'},
+  {id:34,name:'Dwarkesh Patel Podcast',host:'Dwarkesh Patel',category:'AI',website:'https://www.dwarkeshpatel.com',img:'https://megaphone.imgix.net/podcasts/dwarkesh.jpg'},
+  {id:35,name:'No Priors Podcast',host:'Sarah Guo',category:'AI',website:'https://www.nopriorspod.com',img:'https://megaphone.imgix.net/podcasts/nopriors.jpg'},
+  {id:36,name:'Sam Harris Making Sense',host:'Sam Harris',category:'Debates',website:'https://www.samharris.org/podcasts/making-sense',img:'https://megaphone.imgix.net/podcasts/samharris.jpg'},
+  {id:37,name:'Bari Weiss Honestly',host:'Bari Weiss',category:'Society',website:'https://www.thefp.com/podcast',img:'https://megaphone.imgix.net/podcasts/honestly.jpg'},
+  {id:38,name:'Rich Roll Podcast',host:'Rich Roll',category:'Performance',website:'https://www.richroll.com/podcast',img:'https://megaphone.imgix.net/podcasts/richroll.jpg'},
+  {id:39,name:'Ed Mylett Show',host:'Ed Mylett',category:'Performance',website:'https://www.edmylett.com/podcast',img:'https://megaphone.imgix.net/podcasts/edmylett.jpg'},
+  {id:40,name:'Lewis Howes School of Greatness',host:'Lewis Howes',category:'Performance',website:'https://lewishowes.com/podcast',img:'https://megaphone.imgix.net/podcasts/lewishowes.jpg'},
+  {id:41,name:'Charlie Kirk Show',host:'Charlie Kirk',category:'Politics',website:'https://www.charliekirk.com/podcast',img:'https://megaphone.imgix.net/podcasts/charliekirk.jpg'},
+  {id:42,name:'Dan Bongino Show',host:'Dan Bongino',category:'Politics',website:'https://bongino.com',img:'https://megaphone.imgix.net/podcasts/bongino.jpg'},
+  {id:43,name:'Destiny',host:'Steven Bonnell',category:'Debates',website:'https://www.destiny.gg',img:'https://megaphone.imgix.net/podcasts/destiny.jpg'},
+  {id:44,name:'Third Wave Podcast',host:'Paul Austin',category:'Psychedelics',website:'https://thethirdwave.co/podcast',img:'https://megaphone.imgix.net/podcasts/thirdwave.jpg'},
+  {id:45,name:'Psychedelics Today',host:'Joe Moore',category:'Psychedelics',website:'https://psychedelicstoday.com',img:'https://megaphone.imgix.net/podcasts/psychedelicstoday.jpg'},
+  {id:46,name:'Duncan Trussell Family Hour',host:'Duncan Trussell',category:'Psychedelics',website:'https://www.duncantrussell.com',img:'https://megaphone.imgix.net/podcasts/duncantrussell.jpg'},
+  {id:47,name:'Bishop Barron Word on Fire',host:'Bishop Robert Barron',category:'Faith',website:'https://www.wordonfire.org/podcast',img:'https://megaphone.imgix.net/podcasts/wordonfire.jpg'},
+  {id:48,name:'Pints with Aquinas',host:'Matt Fradd',category:'Faith',website:'https://pintswithaquinas.com',img:'https://megaphone.imgix.net/podcasts/pintswithaquinas.jpg'},
+  {id:49,name:'How I Built This',host:'Guy Raz',category:'Business',website:'https://www.npr.org/podcasts/510313/how-i-built-this',img:'https://media.npr.org/assets/img/2022/09/23/hibt_podcasttile_sq.jpg'},
+  {id:50,name:'Masters of Scale',host:'Reid Hoffman',category:'Business',website:'https://mastersofscale.com',img:'https://megaphone.imgix.net/podcasts/mastersofscale.jpg'},
+  {id:51,name:'StarTalk Radio',host:'Neil deGrasse Tyson',category:'Science',website:'https://startalkradio.net',img:'https://megaphone.imgix.net/podcasts/startalk.jpg'},
+  {id:52,name:'Sean Carroll Mindscape',host:'Sean Carroll',category:'Science',website:'https://www.preposterousuniverse.com/podcast',img:'https://megaphone.imgix.net/podcasts/mindscape.jpg'},
+  {id:53,name:'The Portal',host:'Eric Weinstein',category:'Society',website:'https://www.ericweinstein.org/podcast',img:'https://megaphone.imgix.net/podcasts/theportal.jpg'},
+  {id:54,name:'Matt Walsh Show',host:'Matt Walsh',category:'Controversial',website:'https://www.dailywire.com/show/the-matt-walsh-show',img:'https://megaphone.imgix.net/podcasts/matwalsh.jpg'},
+  {id:55,name:'Louder with Crowder',host:'Steven Crowder',category:'Controversial',website:'https://www.louderwithcrowder.com',img:'https://megaphone.imgix.net/podcasts/crowder.jpg'},
+  {id:56,name:'Jordan Harbinger Show',host:'Jordan Harbinger',category:'Intelligence',website:'https://www.jordanharbinger.com',img:'https://megaphone.imgix.net/podcasts/jordanharbinger.jpg'},
+  {id:57,name:'Spycraft 101',host:'Justin Black',category:'Intelligence',website:'https://spycraft101.com',img:'https://megaphone.imgix.net/podcasts/spycraft.jpg'},
+  {id:58,name:'Danger Close',host:'Jack Carr',category:'Military',website:'https://www.jackcarrusa.com/danger-close-podcast',img:'https://megaphone.imgix.net/podcasts/dangerclose.jpg'},
+  {id:59,name:'Cognitive Revolution',host:'Nathan Labenz',category:'AI',website:'https://www.cognitiverevolution.ai',img:'https://megaphone.imgix.net/podcasts/cogrev.jpg'},
+  {id:60,name:'Forward Guidance',host:'Jack Farley',category:'Finance',website:'https://blockworks.co/podcast/forward-guidance',img:'https://megaphone.imgix.net/podcasts/forwardguidance.jpg'},
+  {id:61,name:'The Red Line',host:'Michael Clarke',category:'Geopolitics',website:'https://www.theredlinepodcast.com',img:'https://megaphone.imgix.net/podcasts/redline.jpg'},
+  {id:62,name:'Peter Zeihan Podcast',host:'Peter Zeihan',category:'Geopolitics',website:'https://zeihan.com/podcast',img:'https://megaphone.imgix.net/podcasts/zeihan.jpg'},
+  {id:63,name:'Weaponized',host:'Jeremy Corbell',category:'UFO',website:'https://www.weaponizedpodcast.com',img:'https://megaphone.imgix.net/podcasts/weaponized.jpg'},
+  {id:64,name:'Need to Know',host:'Whitley Strieber',category:'UFO',website:'https://www.unknowncountry.com',img:'https://megaphone.imgix.net/podcasts/needtoknow.jpg'},
+  {id:65,name:'Breaking Points',host:'Krystal Ball',category:'Politics',website:'https://www.breakingpoints.com',img:'https://megaphone.imgix.net/podcasts/breakingpoints.jpg'},
+  {id:66,name:'Modern Day Debates',host:'Various',category:'Debates',website:'https://www.youtube.com/@ModernDayDebates',img:'https://yt3.googleusercontent.com/ytc/moderndaydebates.jpg'},
+  {id:67,name:'Bible in a Year',host:'Father Mike Schmitz',category:'Faith',website:'https://media.ascensionpress.com/category/ascension-podcasts/bibleinayear',img:'https://megaphone.imgix.net/podcasts/bibleinyear.jpg'},
+  {id:68,name:'Quanta Science Podcast',host:'Quanta Magazine',category:'Science',website:'https://www.quantamagazine.org/podcast',img:'https://megaphone.imgix.net/podcasts/quanta.jpg'},
+  {id:69,name:'Alex Jones InfoWars',host:'Alex Jones',category:'Controversial',website:'https://www.infowars.com',img:'https://megaphone.imgix.net/podcasts/alexjones.jpg'},
+];
+
+const CAT_INFO = {
+  'Interview':{icon:'🎙️',desc:'Long-form conversations'},
+  'Intelligence':{icon:'🧠',desc:'CIA, NSA, espionage, classified programs'},
+  'Military':{icon:'⚔️',desc:'Special forces, veterans, operations'},
+  'Health':{icon:'🏥',desc:'Medicine, biology, nutrition'},
+  'Psychedelics':{icon:'💊',desc:'Psilocybin, DMT, consciousness'},
+  'Performance':{icon:'💪',desc:'TRT, biohacking, longevity, fitness'},
+  'AI':{icon:'🤖',desc:'AGI, robotics, future of work'},
+  'Finance':{icon:'💰',desc:'Markets, investing, crypto, economy'},
+  'Geopolitics':{icon:'🌍',desc:'Wars, diplomacy, world affairs'},
+  'UFO':{icon:'👽',desc:'UAP disclosure, paranormal'},
+  'Politics':{icon:'🏛️',desc:'US politics, policy, elections'},
+  'Debates':{icon:'⚖️',desc:'Structured debates and confrontations'},
+  'Faith':{icon:'🙏',desc:'Religion, God, meaning, spirituality'},
+  'Science':{icon:'🔬',desc:'Physics, space, evolution'},
+  'Business':{icon:'💼',desc:'Entrepreneurship, startups, wealth'},
+  'Society':{icon:'🎭',desc:'Social trends, culture, relationships'},
+  'Comedy':{icon:'😂',desc:'Comedy and entertainment'},
+  'Entertainment':{icon:'🎬',desc:'Pop culture and entertainment'},
+  'Controversial':{icon:'🔥',desc:'Edgy and banned topics'},
+};
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function getInitial(name) {
+  return name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+}
+
+function getCatColor(cat) {
+  const colors = {
+    Intelligence:'#1a3a5c',Military:'#2d1a1a',Health:'#1a3a2d',
+    Psychedelics:'#2d1a3a',Performance:'#3a2d1a',AI:'#1a2d3a',
+    Finance:'#2d3a1a',Geopolitics:'#3a1a2d',UFO:'#1a1a3a',
+    Politics:'#3a1a1a',Debates:'#2d2d1a',Faith:'#1a2d2d',
+    Science:'#1a3a3a',Business:'#2d1a2d',Society:'#3a2d1a',
+    Comedy:'#3a3a1a',Entertainment:'#1a3a1a',Controversial:'#3a1a1a',
+  };
+  return colors[cat] || '#1a1a1a';
+}
+
+function renderFeatured() {
+  const featured = SHOWS.filter(s => s.featured).slice(0,5);
+  document.getElementById('featured-grid').innerHTML = featured.map(s => `
+    <a class="featured-card" href="${s.website}" target="_blank" rel="noopener" aria-label="${s.name}">
+      <div class="fc-img-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
+      <img class="fc-img" src="${s.img}" alt="${s.name}" onerror="this.style.display='none'" style="position:absolute;inset:0">
+      <div class="fc-overlay"></div>
+      <div class="fc-content">
+        <div class="fc-cat">${CAT_INFO[s.category]?.icon || ''} ${s.category}</div>
+        <div class="fc-name">${s.name}</div>
+        <div class="fc-host">${s.host}</div>
+      </div>
+    </a>`).join('');
+}
+
+function renderShows(shows) {
+  const grid = document.getElementById('shows-grid');
+  const noResults = document.getElementById('no-results');
+  const count = document.getElementById('show-count');
+  if (shows.length === 0) {
+    grid.innerHTML = '';
+    noResults.style.display = 'block';
+    count.textContent = 'No shows found';
+    return;
+  }
+  noResults.style.display = 'none';
+  count.textContent = `Showing ${shows.length} show${shows.length !== 1 ? 's' : ''}`;
+  grid.innerHTML = shows.map((s, i) => `
+    <div class="show-card" style="animation-delay:${Math.min(i*0.03,0.6)}s">
+      <div class="show-img-wrap">
+        <div class="show-img-fallback" style="background:${getCatColor(s.category)}" data-initial="${getInitial(s.name)}">
+          ${getInitial(s.name)}
+        </div>
+        <img class="show-img" src="${s.img}" alt="${s.name}"
+          onerror="this.style.display='none'"
+          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+        <div class="show-cat-badge">${CAT_INFO[s.category]?.icon || ''} ${s.category}</div>
+        <div class="show-img-overlay"></div>
+        <a class="show-visit" href="${s.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+          Visit Show →
+        </a>
+      </div>
+      <div class="show-body">
+        <div class="show-name">${s.name}</div>
+        <div class="show-host">${s.host}</div>
+        <div class="show-footer">
+          <span class="show-stories">● Monitored</span>
+          <a class="show-link" href="${s.website}" target="_blank" rel="noopener">Source →</a>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function filterShows(cat, el) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const featured = document.getElementById('featured-section');
+  featured.style.display = cat === 'all' ? 'block' : 'none';
+  applyFilters();
+}
+
+function searchShows(val) {
+  currentSearch = val.toLowerCase();
+  applyFilters();
+}
+
+function applyFilters() {
+  let filtered = SHOWS;
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(s =>
+      s.category.toLowerCase().includes(currentFilter.toLowerCase())
+    );
+  }
+  if (currentSearch) {
+    filtered = filtered.filter(s =>
+      s.name.toLowerCase().includes(currentSearch) ||
+      s.host.toLowerCase().includes(currentSearch) ||
+      s.category.toLowerCase().includes(currentSearch)
+    );
+  }
+  renderShows(filtered);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+renderFeatured();
+renderShows(SHOWS);
+</script>
+</body>
+</html>
