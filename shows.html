@@ -207,25 +207,24 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
 <!-- ── FILTER BAR ─────────────────────────────────────────────── -->
 <div class="filter-bar">
   <div class="filter-inner">
-    <button class="filter-tab active" onclick="filterShows('all',this)">All <span class="filter-count">69</span></button>
-    <button class="filter-tab" onclick="filterShows('Intelligence',this)">🧠 Intelligence</button>
-    <button class="filter-tab" onclick="filterShows('Military',this)">⚔️ Military</button>
-    <button class="filter-tab" onclick="filterShows('Health',this)">🏥 Health</button>
-    <button class="filter-tab" onclick="filterShows('Consciousness',this)">💊 Consciousness & Medicine</button>
-    <button class="filter-tab" onclick="filterShows('Health',this)">💪 Performance</button>
-    <button class="filter-tab" onclick="filterShows('AI',this)">🤖 AI & Tech</button>
-    <button class="filter-tab" onclick="filterShows('Finance',this)">💰 Finance</button>
-    <button class="filter-tab" onclick="filterShows('Geopolitics',this)">🌍 Geopolitics</button>
-    <button class="filter-tab" onclick="filterShows('UFO',this)">👽 UFO</button>
-    <button class="filter-tab" onclick="filterShows('Politics',this)">🏛️ Politics</button>
-    <button class="filter-tab" onclick="filterShows('Debates',this)">⚖️ Debates</button>
-    <button class="filter-tab" onclick="filterShows('Faith',this)">🙏 Faith</button>
-    <button class="filter-tab" onclick="filterShows('Science',this)">🔬 Science</button>
-    <button class="filter-tab" onclick="filterShows('Business',this)">💼 Business</button>
-    <button class="filter-tab" onclick="filterShows('Society',this)">🎭 Society</button>
-    <button class="filter-tab" onclick="filterShows('Controversial',this)">🔥 Controversial</button>
-    <button class="filter-tab" onclick="filterShows('History',this)">📜 History</button>
-  </div>
+  <button class="filter-tab active" onclick="filterShows('all',this)">All <span class="filter-count">69</span></button>
+  <button class="filter-tab" onclick="filterShows('Intelligence',this)">🧠 Intelligence</button>
+  <button class="filter-tab" onclick="filterShows('Military',this)">⚔️ Military</button>
+  <button class="filter-tab" onclick="filterShows('Health',this)">🏥 Health & Longevity</button>
+  <button class="filter-tab" onclick="filterShows('AI',this)">🤖 AI & Tech</button>
+  <button class="filter-tab" onclick="filterShows('Finance',this)">💰 Finance</button>
+  <button class="filter-tab" onclick="filterShows('Geopolitics',this)">🌍 Geopolitics</button>
+  <button class="filter-tab" onclick="filterShows('UFO',this)">👽 UFO & Paranormal</button>
+  <button class="filter-tab" onclick="filterShows('Politics',this)">🏛️ Politics</button>
+  <button class="filter-tab" onclick="filterShows('Debates',this)">⚖️ Debates</button>
+  <button class="filter-tab" onclick="filterShows('Faith',this)">🙏 Faith & Spirituality</button>
+  <button class="filter-tab" onclick="filterShows('Business',this)">💼 Business</button>
+  <button class="filter-tab" onclick="filterShows('Science',this)">🔬 Science</button>
+  <button class="filter-tab" onclick="filterShows('Society',this)">🎭 Society & Culture</button>
+  <button class="filter-tab" onclick="filterShows('Consciousness',this)">🔮 Consciousness & Medicine</button>
+  <button class="filter-tab" onclick="filterShows('History',this)">📜 History</button>
+  <button class="filter-tab" onclick="filterShows('Controversial',this)">🔥 Controversial</button>
+</div>
 </div>
 
 <!-- ── SEARCH ─────────────────────────────────────────────────── -->
@@ -337,26 +336,25 @@ const SHOWS = [
 ];
 
 const CAT_INFO = {
-  'Interview':{icon:'🎙️',desc:'Long-form conversations'},
   'Intelligence':{icon:'🧠',desc:'CIA, NSA, espionage, classified programs'},
   'Military':{icon:'⚔️',desc:'Special forces, veterans, operations'},
   'Health':{icon:'🏥',desc:'Health, longevity, biohacking, TRT, peptides'},
-  'Consciousness':{icon:'💊',desc:'Psilocybin, DMT, consciousness'},
-  'Performance':{icon:'💪',desc:'TRT, biohacking, longevity, fitness'},
-  'AI':{icon:'🤖',desc:'AGI, robotics, future of work'},
+  'AI':{icon:'🤖',desc:'AGI, robotics, future of work, crypto'},
   'Finance':{icon:'💰',desc:'Markets, investing, crypto, economy'},
   'Geopolitics':{icon:'🌍',desc:'Wars, diplomacy, world affairs'},
-  'UFO':{icon:'👽',desc:'UAP disclosure, paranormal'},
+  'UFO':{icon:'👽',desc:'UAP disclosure, paranormal, aliens'},
   'Politics':{icon:'🏛️',desc:'US politics, policy, elections'},
   'Debates':{icon:'⚖️',desc:'Structured debates and confrontations'},
   'Faith':{icon:'🙏',desc:'Religion, God, meaning, spirituality'},
-  'Science':{icon:'🔬',desc:'Physics, space, evolution'},
   'Business':{icon:'💼',desc:'Entrepreneurship, startups, wealth'},
+  'Science':{icon:'🔬',desc:'Physics, space, evolution, research'},
   'Society':{icon:'🎭',desc:'Social trends, culture, relationships'},
+  'Consciousness':{icon:'🔮',desc:'Psychedelics, consciousness, medicine'},
+  'History':{icon:'📜',desc:'Historical events, civilisations, legacy'},
+  'Controversial':{icon:'🔥',desc:'Edgy, banned topics, censored content'},
+  'Interview':{icon:'🎙️',desc:'Long-form conversations'},
   'Comedy':{icon:'😂',desc:'Comedy and entertainment'},
   'Entertainment':{icon:'🎬',desc:'Pop culture and entertainment'},
-  'Controversial':{icon:'🔥',desc:'Edgy and banned topics'},
-  'History':{icon:'📜',desc:'Historical events, civilisations and legacy'},
 };
 
 let currentFilter = 'all';

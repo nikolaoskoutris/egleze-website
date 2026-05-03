@@ -102,7 +102,8 @@ header{background:var(--white);border-bottom:3px solid var(--red)}
 .search-box input::placeholder{color:var(--muted)}
 
 /* NAV */
-nav{max-width:1320px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:0}
+nav{max-width:1320px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
 .nav-item{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:11px 14px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
 .nav-item:hover{color:var(--dark)}
 .nav-item.active{color:var(--dark);border-bottom-color:var(--red)}
@@ -360,18 +361,26 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
       </div>
     </div>
   </div>
-  <nav>
+  <nav style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
     <div class="nav-item active" onclick="filterTopic(null,this)">Today's Reveals</div>
     <div class="nav-item hot" onclick="filterTopic(null,this)">🔥 Trending</div>
-    <div class="nav-item" onclick="filterTopic('Politics',this)">Politics</div>
-    <div class="nav-item" onclick="filterTopic('Health',this)">Health, Longevity & Biohacking</div>
-    <div class="nav-item" onclick="filterTopic('Intelligence',this)">Intelligence</div>
-    <div class="nav-item" onclick="filterTopic('AI',this)">Tech & AI</div>
-    <div class="nav-item" onclick="filterTopic('Finance',this)">Finance</div>
-    <div class="nav-item" onclick="filterTopic('UFO',this)">UFO / Fringe</div>
+    <div class="nav-item" onclick="filterTopic('Intelligence',this)">🧠 Intelligence</div>
+    <div class="nav-item" onclick="filterTopic('Military',this)">⚔️ Military</div>
+    <div class="nav-item" onclick="filterTopic('Health',this)">🏥 Health & Longevity</div>
+    <div class="nav-item" onclick="filterTopic('AI',this)">🤖 AI & Tech</div>
+    <div class="nav-item" onclick="filterTopic('Finance',this)">💰 Finance</div>
+    <div class="nav-item" onclick="filterTopic('Geopolitics',this)">🌍 Geopolitics</div>
+    <div class="nav-item" onclick="filterTopic('UFO',this)">👽 UFO & Paranormal</div>
+    <div class="nav-item" onclick="filterTopic('Politics',this)">🏛️ Politics</div>
+    <div class="nav-item" onclick="filterTopic('Debates',this)">⚖️ Debates</div>
+    <div class="nav-item" onclick="filterTopic('Faith',this)">🙏 Faith & Spirituality</div>
+    <div class="nav-item" onclick="filterTopic('Business',this)">💼 Business</div>
+    <div class="nav-item" onclick="filterTopic('Science',this)">🔬 Science</div>
+    <div class="nav-item" onclick="filterTopic('Society',this)">🎭 Society & Culture</div>
+    <div class="nav-item" onclick="filterTopic('Consciousness',this)">🔮 Consciousness & Medicine</div>
     <div class="nav-item" onclick="filterTopic('History',this)">📜 History</div>
+    <div class="nav-item" onclick="filterTopic('Controversial',this)">🔥 Controversial</div>
     <a class="nav-item" href="/shows.html" style="text-decoration:none;color:inherit">🎙️ Shows</a>
-    <button class="nav-subscribe" onclick="document.querySelector('.modal-overlay').classList.add('open')">Subscribe Free</button>
   </nav>
 </header>
 
@@ -486,18 +495,20 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     <button class="topic-btn active" onclick="filterTopicStrip(null,this)">All Topics</button>
     <button class="topic-btn" onclick="filterTopicStrip('Intelligence',this)">🧠 Intelligence</button>
     <button class="topic-btn" onclick="filterTopicStrip('Military',this)">⚔️ Military</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Health',this)">🏥 Health</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Health',this)">🏥 Health & Longevity</button>
     <button class="topic-btn" onclick="filterTopicStrip('AI',this)">🤖 AI & Tech</button>
     <button class="topic-btn" onclick="filterTopicStrip('Finance',this)">💰 Finance</button>
     <button class="topic-btn" onclick="filterTopicStrip('Geopolitics',this)">🌍 Geopolitics</button>
-    <button class="topic-btn" onclick="filterTopicStrip('UFO',this)">👽 UFO</button>
+    <button class="topic-btn" onclick="filterTopicStrip('UFO',this)">👽 UFO & Paranormal</button>
     <button class="topic-btn" onclick="filterTopicStrip('Politics',this)">🏛️ Politics</button>
     <button class="topic-btn" onclick="filterTopicStrip('Debates',this)">⚖️ Debates</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Consciousness',this)">💊 Consciousness & Medicine</button>
-    <button class="topic-btn" onclick="filterTopicStrip('History',this)">📜 History</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Science',this)">🔬 Science</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Faith',this)">🙏 Faith</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Faith',this)">🙏 Faith & Spirituality</button>
     <button class="topic-btn" onclick="filterTopicStrip('Business',this)">💼 Business</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Science',this)">🔬 Science</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Society',this)">🎭 Society & Culture</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Consciousness',this)">🔮 Consciousness & Medicine</button>
+    <button class="topic-btn" onclick="filterTopicStrip('History',this)">📜 History</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Controversial',this)">🔥 Controversial</button>
   </div>
 
   <!-- CLIP LIBRARY -->
@@ -507,38 +518,9 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     <div class="sec-line"></div>
   </div>
 
-  <div class="clips-grid">
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct1"><div class="mini-w"><span style="height:18px"></span><span style="height:28px"></span><span style="height:20px"></span><span style="height:34px"></span><span style="height:22px"></span><span style="height:14px"></span></div><div class="clip-dur">2:34</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">Joe Rogan · #2187</div><div class="clip-title">"The mission was never supposed to exist on paper"</div><div class="clip-guest">Mike Ritland, Navy SEAL</div></div>
-    </div>
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct2"><div class="mini-w"><span style="height:22px"></span><span style="height:14px"></span><span style="height:30px"></span><span style="height:18px"></span><span style="height:26px"></span><span style="height:16px"></span></div><div class="clip-dur">1:47</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">Tucker Carlson · Ep.312</div><div class="clip-title">"I've seen the intelligence. The public version is fiction."</div><div class="clip-guest">Fmr. CIA Director</div></div>
-    </div>
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct3"><div class="mini-w"><span style="height:18px"></span><span style="height:32px"></span><span style="height:14px"></span><span style="height:26px"></span><span style="height:20px"></span><span style="height:28px"></span></div><div class="clip-dur">3:12</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">Huberman Lab · Ep.398</div><div class="clip-title">The dopamine reset protocol nobody is talking about</div><div class="clip-guest">Dr. Andrew Huberman</div></div>
-    </div>
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct4"><div class="mini-w"><span style="height:26px"></span><span style="height:16px"></span><span style="height:34px"></span><span style="height:20px"></span><span style="height:14px"></span><span style="height:24px"></span></div><div class="clip-dur">2:08</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">Lex Fridman · #487</div><div class="clip-title">"AGI is not 10 years away. It's closer than people think."</div><div class="clip-guest">Elon Musk</div></div>
-    </div>
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct5"><div class="mini-w"><span style="height:14px"></span><span style="height:28px"></span><span style="height:22px"></span><span style="height:16px"></span><span style="height:32px"></span><span style="height:18px"></span></div><div class="clip-dur">1:55</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">Jordan Peterson · Ep.445</div><div class="clip-title">"Sovereignty is being quietly dissolved through multilateral agreements"</div><div class="clip-guest">Jordan B. Peterson</div></div>
-    </div>
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct6"><div class="mini-w"><span style="height:20px"></span><span style="height:34px"></span><span style="height:12px"></span><span style="height:28px"></span><span style="height:22px"></span><span style="height:16px"></span></div><div class="clip-dur">4:01</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">Danny Jones · Ep.189</div><div class="clip-title">Insider describes the black budget UAP retrieval program</div><div class="clip-guest">Intelligence Officer (Anon)</div></div>
-    </div>
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct7"><div class="mini-w"><span style="height:28px"></span><span style="height:18px"></span><span style="height:14px"></span><span style="height:32px"></span><span style="height:24px"></span><span style="height:12px"></span></div><div class="clip-dur">2:22</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">PBD Podcast · #603</div><div class="clip-title">"Three banks are holding assets marked at fantasy prices"</div><div class="clip-guest">Anonymous Fund Manager</div></div>
-    </div>
-    <div class="clip-card fade-up">
-      <div class="clip-thumb ct8"><div class="mini-w"><span style="height:12px"></span><span style="height:26px"></span><span style="height:18px"></span><span style="height:34px"></span><span style="height:14px"></span><span style="height:28px"></span></div><div class="clip-dur">1:38</div><div class="clip-hover">▶</div></div>
-      <div class="clip-body"><div class="clip-show">Diary of a CEO · Ep.512</div><div class="clip-title">Losing $800 million: "I had to rebuild who I was, not just the company"</div><div class="clip-guest">Anonymous Billionaire</div></div>
+  <div class="clips-grid" id="clips-grid">
+    <div style="grid-column:1/-1;padding:40px 20px;text-align:center;color:var(--muted);font-size:12px">
+      Loading clips...
     </div>
   </div>
 
@@ -918,28 +900,46 @@ document.querySelector('.modal-btn').addEventListener('click', async function() 
 });
 
 // ── SEARCH ────────────────────────────────────────────────────────
-document.querySelector('.search-box input').addEventListener('keyup', async function(e) {
-  const term = this.value.trim();
-  if (!term) { loadStories(); return; }
-  if (e.key !== 'Enter' && term.length < 3) return;
-  if (!db && !initDB()) return;
-  try {
-    const { data, error } = await db.from('stories')
-      .select('*')
-      .eq('status', 'approved')
-      .or(`headline.ilike.%${term}%,summary.ilike.%${term}%,show_name.ilike.%${term}%,quote.ilike.%${term}%`)
-      .order('score', { ascending: false })
-      .limit(30);
-    if (error) { console.log('Search error:', JSON.stringify(error)); return; }
-    if (data && data.length > 0) {
-      renderStories(data);
-      renderHeroSection(data);
-    } else {
-      const grid = document.getElementById('stories-grid');
-      if (grid) grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#888;font-size:13px">No results for "${term}"</div>`;
-    }
-  } catch(e) { console.log('Search error:', e); }
-});
+const searchInput = document.querySelector('.search-box input');
+let searchTimer = null;
+if (searchInput) {
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    const term = this.value.trim();
+    if (!term) { loadStories(); return; }
+    if (term.length < 2) return;
+    searchTimer = setTimeout(async () => {
+      if (!db && !initDB()) return;
+      try {
+        const { data, error } = await db.from('stories')
+          .select('*')
+          .eq('status', 'approved')
+          .or(`headline.ilike.%${term}%,summary.ilike.%${term}%,show_name.ilike.%${term}%,quote.ilike.%${term}%`)
+          .order('score', { ascending: false })
+          .limit(30);
+        if (error) { console.log('Search error:', JSON.stringify(error)); return; }
+        if (data && data.length > 0) {
+          renderStories(data);
+          renderHeroSection(data);
+          injectStorySchema(data);
+        } else {
+          const feed = document.querySelector('.bottom-grid > div:first-child');
+          if (feed) {
+            const items = feed.querySelectorAll('.feed-item');
+            items.forEach(i => i.remove());
+            const msg = document.createElement('div');
+            msg.style.cssText = 'padding:40px 20px;text-align:center;color:#888;font-size:13px';
+            msg.textContent = 'No results for "' + term + '"';
+            feed.appendChild(msg);
+          }
+        }
+      } catch(e) { console.log('Search error:', e); }
+    }, 400);
+  });
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { this.value = ''; loadStories(); }
+  });
+}
 
 // ── HELPER: TIME AGO ─────────────────────────────────────────────
 function timeAgo(dateStr) {
@@ -1010,6 +1010,64 @@ async function applyArtworkToFeedItems(stories) {
       item.insertBefore(thumb, item.firstChild);
     }
   });
+}
+
+// ── RENDER CLIP LIBRARY ──────────────────────────────────────────
+async function loadClips() {
+  if (!db && !initDB()) return;
+  try {
+    const { data } = await db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .not('source_url', 'is', null)
+      .order('score', { ascending: false })
+      .limit(8);
+    
+    const grid = document.getElementById('clips-grid');
+    if (!grid) return;
+    
+    if (!data || data.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;padding:40px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:Roboto Condensed,sans-serif;letter-spacing:1px;text-transform:uppercase">Clips coming soon — pipeline building library</div>';
+      return;
+    }
+
+    grid.innerHTML = data.map((s, i) => {
+      const colors = ['#1a1a2e','#1a0a0a','#0a1a0a','#1a1400','#0a0a1a','#1a0a1a','#0a1a1a','#1a1a0a'];
+      const bg = colors[i % colors.length];
+      
+      // Check if source_url is a YouTube link
+      const isYT = s.source_url && (s.source_url.includes('youtube.com') || s.source_url.includes('youtu.be'));
+      let ytId = null;
+      if (isYT) {
+        const m = s.source_url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (m) ytId = m[1];
+      }
+
+      return \`<div class="clip-card" onclick="openClip('\${s.id}','\${s.source_url || ''}','\${ytId || ''}')">
+        <div class="clip-thumb" style="background:\${bg};position:relative">
+          \${ytId ? \`<img src="https://img.youtube.com/vi/\${ytId}/mqdefault.jpg" style="width:100%;height:100%;object-fit:cover;opacity:0.7" onerror="this.style.display='none'">\` : ''}
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <div style="width:28px;height:28px;background:rgba(187,25,25,.9);border-radius:50%;display:flex;align-items:center;justify-content:center">
+              <span style="color:#fff;font-size:10px;margin-left:2px">▶</span>
+            </div>
+          </div>
+          <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.7);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 5px">\${s.topic || 'Clip'}</div>
+        </div>
+        <div class="clip-body" style="padding:8px 10px">
+          <div style="font-size:10px;font-weight:600;color:var(--dark);line-height:1.3;margin-bottom:3px">\${(s.headline || '').substring(0,60)}\${s.headline?.length > 60 ? '...' : ''}</div>
+          <div style="font-size:9px;color:var(--muted);font-family:'Roboto Condensed',sans-serif;letter-spacing:.5px">\${s.show_name || ''}</div>
+        </div>
+      </div>\`;
+    }).join('');
+  } catch(e) { console.log('Clips error:', e); }
+}
+
+function openClip(id, url, ytId) {
+  if (ytId) {
+    window.open('https://www.youtube.com/watch?v=' + ytId, '_blank');
+  } else if (url) {
+    window.open(url, '_blank');
+  }
 }
 
 // ── UPDATE DATE IN HEADER ─────────────────────────────────────────
