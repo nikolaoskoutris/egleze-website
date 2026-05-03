@@ -987,12 +987,15 @@ async function bannerSubscribe() {
       },
       body: JSON.stringify({email, source:'launch_banner', status:'active', created_at: new Date().toISOString()})
     });
-    if (res.ok || res.status === 409) {
-      document.getElementById('lb-email').value = '';
-      document.querySelector('.lb-form').innerHTML = '<div style="font-family:Roboto Condensed,sans-serif;font-size:11px;letter-spacing:1px;color:#fff;padding:6px 14px;background:rgba(255,255,255,.1)">✓ You are on the list!</div>';
+    if (res.ok || res.status === 409 || res.status === 201) {
+      const emailInput = document.getElementById('lb-email');
+      const notifyBtn = document.querySelector('[onclick="bannerSubscribe()"]');
+      if (emailInput) emailInput.value = '';
+      if (notifyBtn) notifyBtn.textContent = '✓ Done!';
+      if (notifyBtn) notifyBtn.style.background = '#1a7a2a';
     } else {
       const err = await res.text();
-      console.log('Subscribe error:', err);
+      console.log('Subscribe error:', res.status, err);
     }
   } catch(e) { console.log('Subscribe error:', e); }
 }
