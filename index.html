@@ -364,7 +364,7 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     <div class="nav-item active" onclick="filterTopic(null,this)">Today's Reveals</div>
     <div class="nav-item hot" onclick="filterTopic(null,this)">🔥 Trending</div>
     <div class="nav-item" onclick="filterTopic('Politics',this)">Politics</div>
-    <div class="nav-item" onclick="filterTopic('Health',this)">Health & Science</div>
+    <div class="nav-item" onclick="filterTopic('Health',this)">Health, Longevity & Biohacking</div>
     <div class="nav-item" onclick="filterTopic('Intelligence',this)">Intelligence</div>
     <div class="nav-item" onclick="filterTopic('AI',this)">Tech & AI</div>
     <div class="nav-item" onclick="filterTopic('Finance',this)">Finance</div>
@@ -493,7 +493,7 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     <button class="topic-btn" onclick="filterTopicStrip('UFO',this)">👽 UFO</button>
     <button class="topic-btn" onclick="filterTopicStrip('Politics',this)">🏛️ Politics</button>
     <button class="topic-btn" onclick="filterTopicStrip('Debates',this)">⚖️ Debates</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Psychedelics',this)">💊 Psychedelics</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Consciousness',this)">💊 Consciousness & Medicine</button>
     <button class="topic-btn" onclick="filterTopicStrip('History',this)">📜 History</button>
     <button class="topic-btn" onclick="filterTopicStrip('Science',this)">🔬 Science</button>
     <button class="topic-btn" onclick="filterTopicStrip('Faith',this)">🙏 Faith</button>
@@ -721,7 +721,7 @@ async function loadStories(topic = null) {
         'Intelligence': 'Intelligence',
         'Geopolitics': 'Geopolit',
         'Performance': 'Performance',
-        'Psychedelics': 'Psychedel',
+        'Consciousness': 'Psychedel',
         'Controversial': 'Controvers',
       };
       const searchTerm = topicMap[topic] || topic;
@@ -783,6 +783,8 @@ function renderHeroSection(stories) {
     if (heroMeta) heroMeta.innerHTML = `<strong>${top.show_name}</strong><span class="meta-dot">·</span><span>${top.episode || ''}</span><span class="meta-dot">·</span><span>${timeAgo(top.created_at)}</span>`;
     if (heroTag) heroTag.textContent = (top.topic || 'Podcast Reveal') + ' · 🔥 Trending #1';
     if (heroBadge) heroBadge.textContent = `${top.show_name} · ${top.episode || ''}`;
+    // Load show artwork for hero
+    applyArtworkToHero(top.show_name);
   }
 
   // Update secondary hero cards
@@ -793,6 +795,7 @@ function renderHeroSection(stories) {
 
   if (second && secTitles[0]) {
     secTitles[0].textContent = second.headline;
+    applyArtworkToSecondary(second.show_name, 0);
     if (secMetas[0]) secMetas[0].innerHTML = `<strong>${second.show_name}</strong> · ${timeAgo(second.created_at)}`;
     if (secTags[0]) secTags[0].textContent = second.topic || 'Podcast Reveal';
     if (secLabels[0]) secLabels[0].textContent = `${second.show_name} · ${second.episode || ''}`;
@@ -858,6 +861,8 @@ function renderStories(stories) {
       </div>`;
     feed.appendChild(div);
   });
+  // Apply artwork to feed items
+  applyArtworkToFeedItems(stories);
 }
 
 // ── UPDATE BREAKING NEWS TICKER ──────────────────────────────────
@@ -943,6 +948,68 @@ function timeAgo(dateStr) {
   if (diff < 60) return `${diff} min ago`;
   if (diff < 1440) return `${Math.floor(diff/60)} hrs ago`;
   return `${Math.floor(diff/1440)} days ago`;
+}
+
+// ── PODCAST ARTWORK CACHE ────────────────────────────────────────
+const artworkCache = {};
+
+async function getShowArtwork(showName) {
+  if (artworkCache[showName]) return artworkCache[showName];
+  try {
+    const q = encodeURIComponent(showName);
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&media=podcast&limit=1`);
+    const data = await res.json();
+    if (data.results && data.results[0]) {
+      const url = data.results[0].artworkUrl600 || data.results[0].artworkUrl100;
+      artworkCache[showName] = url;
+      return url;
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function applyArtworkToHero(showName) {
+  const url = await getShowArtwork(showName);
+  if (!url) return;
+  const heroImg = document.querySelector('.hero-img');
+  if (heroImg) {
+    heroImg.style.backgroundImage = `url(${url})`;
+    heroImg.style.backgroundSize = 'cover';
+    heroImg.style.backgroundPosition = 'center';
+    const waveBg = heroImg.querySelector('.wave-bg');
+    if (waveBg) waveBg.style.display = 'none';
+  }
+}
+
+async function applyArtworkToSecondary(showName, index) {
+  const url = await getShowArtwork(showName);
+  if (!url) return;
+  const secImgs = document.querySelectorAll('.sec-img');
+  if (secImgs[index]) {
+    secImgs[index].style.backgroundImage = `url(${url})`;
+    secImgs[index].style.backgroundSize = 'cover';
+    secImgs[index].style.backgroundPosition = 'center';
+    const mini = secImgs[index].querySelector('.mini-waveform');
+    if (mini) mini.style.display = 'none';
+  }
+}
+
+async function applyArtworkToFeedItems(stories) {
+  // Add show artwork to feed items
+  const feedItems = document.querySelectorAll('.feed-item');
+  feedItems.forEach(async (item, i) => {
+    const story = stories[i];
+    if (!story) return;
+    const url = await getShowArtwork(story.show_name);
+    if (!url) return;
+    // Add thumbnail if not already there
+    if (!item.querySelector('.feed-thumb')) {
+      const thumb = document.createElement('div');
+      thumb.className = 'feed-thumb';
+      thumb.style.cssText = `width:48px;height:48px;background:url(${url}) center/cover;flex-shrink:0;border-radius:2px`;
+      item.insertBefore(thumb, item.firstChild);
+    }
+  });
 }
 
 // ── UPDATE DATE IN HEADER ─────────────────────────────────────────

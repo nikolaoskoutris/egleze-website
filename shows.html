@@ -211,8 +211,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
     <button class="filter-tab" onclick="filterShows('Intelligence',this)">🧠 Intelligence</button>
     <button class="filter-tab" onclick="filterShows('Military',this)">⚔️ Military</button>
     <button class="filter-tab" onclick="filterShows('Health',this)">🏥 Health</button>
-    <button class="filter-tab" onclick="filterShows('Psychedelics',this)">💊 Psychedelics</button>
-    <button class="filter-tab" onclick="filterShows('Performance',this)">💪 Performance</button>
+    <button class="filter-tab" onclick="filterShows('Consciousness',this)">💊 Consciousness & Medicine</button>
+    <button class="filter-tab" onclick="filterShows('Health',this)">💪 Performance</button>
     <button class="filter-tab" onclick="filterShows('AI',this)">🤖 AI & Tech</button>
     <button class="filter-tab" onclick="filterShows('Finance',this)">💰 Finance</button>
     <button class="filter-tab" onclick="filterShows('Geopolitics',this)">🌍 Geopolitics</button>
@@ -308,9 +308,9 @@ const SHOWS = [
   {id:41,name:'Charlie Kirk Show',host:'Charlie Kirk',category:'Politics',website:'https://www.charliekirk.com/podcast',img:'https://megaphone.imgix.net/podcasts/charliekirk.jpg'},
   {id:42,name:'Dan Bongino Show',host:'Dan Bongino',category:'Politics',website:'https://bongino.com',img:'https://megaphone.imgix.net/podcasts/bongino.jpg'},
   {id:43,name:'Destiny',host:'Steven Bonnell',category:'Debates',website:'https://www.destiny.gg',img:'https://megaphone.imgix.net/podcasts/destiny.jpg'},
-  {id:44,name:'Third Wave Podcast',host:'Paul Austin',category:'Psychedelics',website:'https://thethirdwave.co/podcast',img:'https://megaphone.imgix.net/podcasts/thirdwave.jpg'},
-  {id:45,name:'Psychedelics Today',host:'Joe Moore',category:'Psychedelics',website:'https://psychedelicstoday.com',img:'https://megaphone.imgix.net/podcasts/psychedelicstoday.jpg'},
-  {id:46,name:'Duncan Trussell Family Hour',host:'Duncan Trussell',category:'Psychedelics',website:'https://www.duncantrussell.com',img:'https://megaphone.imgix.net/podcasts/duncantrussell.jpg'},
+  {id:44,name:'Third Wave Podcast',host:'Paul Austin',category:'Consciousness',website:'https://thethirdwave.co/podcast',img:'https://megaphone.imgix.net/podcasts/thirdwave.jpg'},
+  {id:45,name:'Consciousness & Medicine Today',host:'Joe Moore',category:'Consciousness',website:'https://psychedelicstoday.com',img:'https://megaphone.imgix.net/podcasts/psychedelicstoday.jpg'},
+  {id:46,name:'Duncan Trussell Family Hour',host:'Duncan Trussell',category:'Consciousness',website:'https://www.duncantrussell.com',img:'https://megaphone.imgix.net/podcasts/duncantrussell.jpg'},
   {id:47,name:'Bishop Barron Word on Fire',host:'Bishop Robert Barron',category:'Faith',website:'https://www.wordonfire.org/podcast',img:'https://megaphone.imgix.net/podcasts/wordonfire.jpg'},
   {id:48,name:'Pints with Aquinas',host:'Matt Fradd',category:'Faith',website:'https://pintswithaquinas.com',img:'https://megaphone.imgix.net/podcasts/pintswithaquinas.jpg'},
   {id:49,name:'How I Built This',host:'Guy Raz',category:'Business',website:'https://www.npr.org/podcasts/510313/how-i-built-this',img:'https://media.npr.org/assets/img/2022/09/23/hibt_podcasttile_sq.jpg'},
@@ -340,8 +340,8 @@ const CAT_INFO = {
   'Interview':{icon:'🎙️',desc:'Long-form conversations'},
   'Intelligence':{icon:'🧠',desc:'CIA, NSA, espionage, classified programs'},
   'Military':{icon:'⚔️',desc:'Special forces, veterans, operations'},
-  'Health':{icon:'🏥',desc:'Medicine, biology, nutrition'},
-  'Psychedelics':{icon:'💊',desc:'Psilocybin, DMT, consciousness'},
+  'Health':{icon:'🏥',desc:'Health, longevity, biohacking, TRT, peptides'},
+  'Consciousness':{icon:'💊',desc:'Psilocybin, DMT, consciousness'},
   'Performance':{icon:'💪',desc:'TRT, biohacking, longevity, fitness'},
   'AI':{icon:'🤖',desc:'AGI, robotics, future of work'},
   'Finance':{icon:'💰',desc:'Markets, investing, crypto, economy'},
@@ -369,7 +369,7 @@ function getInitial(name) {
 function getCatColor(cat) {
   const colors = {
     Intelligence:'#1a3a5c',Military:'#2d1a1a',Health:'#1a3a2d',
-    Psychedelics:'#2d1a3a',Performance:'#3a2d1a',AI:'#1a2d3a',
+    Consciousness & Medicine:'#2d1a3a',Performance:'#3a2d1a',AI:'#1a2d3a',
     Finance:'#2d3a1a',Geopolitics:'#3a1a2d',UFO:'#1a1a3a',
     Politics:'#3a1a1a',Debates:'#2d2d1a',Faith:'#1a2d2d',
     Science:'#1a3a3a',Business:'#2d1a2d',Society:'#3a2d1a',
