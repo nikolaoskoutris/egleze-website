@@ -381,7 +381,7 @@ function renderFeatured() {
   document.getElementById('featured-grid').innerHTML = featured.map(s => `
     <a class="featured-card" href="${s.website}" target="_blank" rel="noopener" aria-label="${s.name}">
       <div class="fc-img-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
-      <img class="fc-img" src="${s.img}" alt="${s.name}" onerror="this.style.display='none'" style="position:absolute;inset:0">
+      <img class="fc-img" src="${s.img}" alt="${s.name}" data-show-id="${s.id}" onerror="this.style.display='none'" style="position:absolute;inset:0">
       <div class="fc-overlay"></div>
       <div class="fc-content">
         <div class="fc-cat">${CAT_INFO[s.category]?.icon || ''} ${s.category}</div>
@@ -410,6 +410,7 @@ function renderShows(shows) {
           ${getInitial(s.name)}
         </div>
         <img class="show-img" src="${s.img}" alt="${s.name}"
+          data-show-id="${s.id}"
           onerror="this.style.display='none'"
           style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
         <div class="show-cat-badge">${CAT_INFO[s.category]?.icon || ''} ${s.category}</div>
@@ -460,9 +461,46 @@ function applyFilters() {
   renderShows(filtered);
 }
 
+// ── FETCH REAL ARTWORK FROM ITUNES API ───────────────────────
+async function fetchArtwork(showName) {
+  try {
+    const q = encodeURIComponent(showName);
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&media=podcast&limit=1`);
+    const data = await res.json();
+    if (data.results && data.results[0]) {
+      return data.results[0].artworkUrl600 || data.results[0].artworkUrl100;
+    }
+  } catch(e) {}
+  return null;
+}
+
+async function loadAllArtwork() {
+  // Load artwork in batches to avoid rate limiting
+  const batch = 5;
+  for (let i = 0; i < SHOWS.length; i += batch) {
+    const chunk = SHOWS.slice(i, i + batch);
+    await Promise.all(chunk.map(async (show) => {
+      const url = await fetchArtwork(show.name);
+      if (url) {
+        show.img = url;
+        // Update any visible images
+        const imgs = document.querySelectorAll(`[data-show-id="${show.id}"]`);
+        imgs.forEach(img => {
+          img.src = url;
+          img.style.display = 'block';
+        });
+      }
+    }));
+    // Small delay between batches
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
 // ── INIT ──────────────────────────────────────────────────────
 renderFeatured();
 renderShows(SHOWS);
+// Load real artwork after render
+loadAllArtwork();
 </script>
 </body>
 </html>

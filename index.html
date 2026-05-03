@@ -323,15 +323,15 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
     </div>
   </div>
   <nav>
-    <div class="nav-item active">Today's Reveals</div>
-    <div class="nav-item hot">🔥 Trending</div>
-    <div class="nav-item">Politics</div>
-    <div class="nav-item">Health & Science</div>
-    <div class="nav-item">Intelligence</div>
-    <div class="nav-item">Tech & AI</div>
-    <div class="nav-item">Finance</div>
-    <div class="nav-item">UFO / Fringe</div>
-    <div class="nav-item">Clip Library</div>
+    <div class="nav-item active" onclick="filterTopic(null,this)">Today's Reveals</div>
+    <div class="nav-item hot" onclick="filterTopic(null,this)">🔥 Trending</div>
+    <div class="nav-item" onclick="filterTopic('Politics',this)">Politics</div>
+    <div class="nav-item" onclick="filterTopic('Health',this)">Health & Science</div>
+    <div class="nav-item" onclick="filterTopic('Intelligence',this)">Intelligence</div>
+    <div class="nav-item" onclick="filterTopic('AI',this)">Tech & AI</div>
+    <div class="nav-item" onclick="filterTopic('Finance',this)">Finance</div>
+    <div class="nav-item" onclick="filterTopic('UFO',this)">UFO / Fringe</div>
+    <a class="nav-item" href="/shows.html" style="text-decoration:none;color:inherit">🎙️ Shows</a>
     <button class="nav-subscribe" onclick="document.querySelector('.modal-overlay').classList.add('open')">Subscribe Free</button>
   </nav>
 </header>
@@ -634,6 +634,12 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 });
 
 // ── LOAD APPROVED STORIES FROM DATABASE ─────────────────────────
+function filterTopic(topic, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  loadStories(topic);
+}
+
 async function loadStories(topic = null) {
   if (!db && !initDB()) return;
   try {
