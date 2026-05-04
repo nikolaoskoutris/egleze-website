@@ -1834,13 +1834,17 @@ async function loadBroadcastQueue() {
       .select('*')
       .eq('status', 'approved')
       .not('source_url', 'is', null)
+      .not('clip_start_seconds', 'is', null)
+      .not('clip_end_seconds', 'is', null)
       .order('score', { ascending: false })
       .limit(16);
     if (result.error) {
       console.log('[broadcast] queue load error:', result.error.message || result.error);
       return;
     }
-    var stories = (result.data || []).filter(function(s){ return s.source_url; });
+    var stories = (result.data || []).filter(function(s){
+      return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
+    });
     bcState.queue = stories;
     renderBroadcastQueue();
     // Update poster pretitle/title with the first story
@@ -1850,9 +1854,14 @@ async function loadBroadcastQueue() {
       var ptitle = document.getElementById('bc-postertitle');
       if (pretitle) pretitle.textContent = (first.topic || 'Top Story') + ' · ' + (first.show_name || 'Today\'s broadcast');
       if (ptitle) ptitle.textContent = first.headline || 'Press play to start';
+    } else {
+      var pretitle2 = document.getElementById('bc-pretitle');
+      var ptitle2 = document.getElementById('bc-postertitle');
+      if (pretitle2) pretitle2.textContent = 'Broadcast queue · empty';
+      if (ptitle2) ptitle2.textContent = 'No precision-clipped stories available yet.';
     }
     var qhTime = document.getElementById('bc-qh-time');
-    if (qhTime) qhTime.textContent = 'Updated ' + new Date().toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'});
+    if (qhTime) qhTime.textContent = stories.length + ' bulletins · Updated ' + new Date().toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'});
   } catch(e) {
     console.log('[broadcast] queue exception:', e);
   }
@@ -1932,12 +1941,19 @@ function bcStartStory(story) {
           try { e.target.playVideo(); } catch(_) {}
           bcUpdateLowerThird(story);
           bcStartProgressTracking(story);
-          // Schedule end-of-clip handler
-          if (endSec) {
-            if (bcState.endTimer) clearTimeout(bcState.endTimer);
-            var durationMs = (endSec - startSec) * 1000 + 800; // small buffer
-            bcState.endTimer = setTimeout(bcAdvance, durationMs);
-          }
+          // Schedule end-of-clip handler. Always set a timer so the queue keeps advancing
+          // even if end/start metadata is missing — fallback to 60s.
+          if (bcState.endTimer) clearTimeout(bcState.endTimer);
+          var clipLenSec = (typeof endSec === 'number' && endSec > startSec)
+            ? (endSec - startSec)
+            : 60; // safety fallback
+          bcState.endTimer = setTimeout(function() {
+            // Hard-stop: pause + trigger advance, in case YouTube's `end` param drifted.
+            if (bcState.player) {
+              try { bcState.player.pauseVideo(); } catch(_) {}
+            }
+            bcAdvance();
+          }, clipLenSec * 1000 + 600);
         },
         onStateChange: function(e) {
           // 0 = ended; if we hit ended naturally, advance
