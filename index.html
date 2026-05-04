@@ -232,6 +232,111 @@ nav::-webkit-scrollbar{display:none}
 .clip-guest{font-size:10px;color:var(--muted)}
 
 /* BOTTOM */
+/* ── BROADCAST SECTION ─────────────────────────────────────── */
+.broadcast{display:grid;grid-template-columns:1fr 360px;gap:0;background:var(--ink, #1a1a1a);color:#fafafa;margin:0 -28px 28px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;z-index:1}
+@media (min-width:1340px){
+  .broadcast{margin:0 calc((100vw - 1284px) / -2 - 28px) 28px}
+}
+.bc-player{position:relative;background:#000;aspect-ratio:16/9;overflow:hidden}
+.bc-player .bc-yt-host{position:absolute;inset:0;background:#000}
+.bc-player .bc-yt-host iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.bc-player .bc-poster{position:absolute;inset:0;background:linear-gradient(135deg,#0d0d0d 0%,#1f1612 50%,#1a0e0e 100%);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+.bc-player .bc-poster.gone{display:none}
+.bc-player .bc-poster::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center bottom,rgba(187,25,25,.18) 0%,transparent 60%);pointer-events:none}
+.bc-poster .bc-station{position:absolute;top:18px;left:24px;display:flex;align-items:center;gap:8px;color:#fff;opacity:.92}
+.bc-poster .bc-e-mark{width:30px;height:30px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;font-size:18px;border-radius:50%}
+.bc-poster .bc-station-name{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2.6px;text-transform:uppercase}
+.bc-poster .bc-clock{position:absolute;top:18px;right:24px;color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;background:rgba(0,0,0,.55);padding:5px 11px}
+.bc-poster .bc-press-play{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#d6c79e;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);text-align:center}
+.bc-poster .bc-pretitle{position:absolute;left:36px;bottom:90px;color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.bc-poster .bc-postertitle{position:absolute;left:36px;bottom:48px;right:36px;color:#fff;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;line-height:1.18;max-width:80%}
+.bc-poster .bc-postertitle em{font-style:italic;color:#ffd687}
+.bc-play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;background:rgba(187,25,25,.92);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 8px rgba(187,25,25,.18);z-index:3}
+.bc-play-btn:hover{transform:translate(-50%,-50%) scale(1.06);background:var(--red)}
+.bc-play-btn::after{content:"";border-style:solid;border-width:14px 0 14px 22px;border-color:transparent transparent transparent #fff;margin-left:5px}
+
+/* Lower third overlay during playback */
+.bc-lower-third{position:absolute;left:24px;bottom:54px;max-width:62%;display:flex;flex-direction:column;z-index:4;pointer-events:none;opacity:0;transition:opacity .25s}
+.bc-lower-third.show{opacity:1}
+.bc-lower-third .lt-stripe{display:inline-block;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;width:fit-content;font-weight:700}
+.bc-lower-third .lt-headline{background:rgba(20,12,8,.92);color:#fff;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.2;padding:9px 14px;max-width:100%;border-left:3px solid var(--red);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bc-lower-third .lt-meta{background:rgba(20,12,8,.78);color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;padding:4px 14px;text-transform:uppercase}
+
+/* Bottom progress overlay */
+.bc-progress-row{position:absolute;left:0;right:0;bottom:0;height:34px;display:flex;align-items:center;gap:12px;padding:0 18px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.85) 100%);z-index:5;pointer-events:none}
+.bc-progress-row .bc-dur{color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px}
+.bc-progress-row .bc-bar{flex:1;height:3px;background:rgba(255,255,255,.22);position:relative}
+.bc-progress-row .bc-bar .bc-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--red);transition:width .3s}
+.bc-progress-row .bc-total{color:#bbb;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px}
+
+/* Audio-only mode hides video, keeps poster + lower-third */
+.bc-player.audio-only .bc-yt-host{visibility:hidden}
+.bc-player.audio-only .bc-poster{display:flex}
+.bc-player.audio-only .bc-poster.gone{display:flex}
+
+/* QUEUE PANEL */
+.bc-queue{padding:0;background:#16110d;border-left:1px solid #2a2018;display:flex;flex-direction:column;max-height:none}
+.bc-queue-header{padding:14px 20px;border-bottom:1px solid #2a2018;display:flex;align-items:baseline;gap:10px;background:#0e0a07}
+.bc-queue-header .bc-qh-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;color:#d6c79e;text-transform:uppercase}
+.bc-queue-header .bc-qh-time{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;color:#7a6f5d;margin-left:auto;text-transform:uppercase}
+
+.bc-queue-list{flex:1;overflow-y:auto;max-height:calc(100% - 100px)}
+.bc-q-item{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:12px 18px;border-bottom:1px solid #2a2018;cursor:pointer;transition:background .15s}
+.bc-q-item:hover{background:#1f1814}
+.bc-q-item.now-playing{background:linear-gradient(90deg,rgba(187,25,25,.18) 0%,transparent 100%);border-left:3px solid var(--red);padding-left:15px}
+.bc-q-item .bc-qi-thumb{width:48px;height:48px;background:var(--light) center/cover no-repeat;position:relative;flex-shrink:0;border:1px solid #2a2018}
+.bc-q-item .bc-qi-meta{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bc-q-item .bc-qi-cat{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.2px;color:#d6b878;text-transform:uppercase;font-weight:700}
+.bc-q-item.now-playing .bc-qi-cat{color:#ffb4b4}
+.bc-q-item .bc-qi-title{font-family:'Playfair Display',serif;font-size:12px;color:#fafafa;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bc-q-item .bc-qi-when{font-family:'Roboto Condensed',sans-serif;font-size:9px;color:#7a6f5d;letter-spacing:.5px;text-transform:uppercase}
+
+.bc-queue-footer{padding:12px 18px;background:#0e0a07;border-top:1px solid #2a2018;display:flex;gap:8px;align-items:center;flex-shrink:0}
+.bc-queue-footer .bc-mode-label{flex:1;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:#d6c79e;text-transform:uppercase}
+.bc-toggle{display:inline-flex;align-items:center;gap:5px;background:#1f1814;color:#d6c79e;padding:6px 11px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid #2a2018;user-select:none}
+.bc-toggle.on{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* Mobile */
+@media (max-width:920px){
+  .broadcast{grid-template-columns:1fr;margin:0 -28px 28px}
+  .bc-queue{max-height:340px;border-left:none;border-top:1px solid #2a2018}
+  .bc-queue-list{max-height:240px}
+  .bc-poster .bc-postertitle{font-size:16px}
+  .bc-lower-third .lt-headline{font-size:14px}
+}
+
+/* ── INSTITUTIONAL FOOTER ──────────────────────────────────── */
+.eg-footer{background:#0e0a07;color:#bcb09a;padding:48px 0 0;margin-top:60px;border-top:3px solid var(--red, #bb1919)}
+.eg-footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;max-width:1284px;margin:0 auto;padding:0 28px 36px;border-bottom:1px solid #2a2018}
+.eg-footer .eg-brand{display:flex;flex-direction:column;gap:14px}
+.eg-footer .eg-brand-mark{display:flex;align-items:center;gap:10px}
+.eg-footer .eg-brand-e{width:38px;height:38px;background:var(--red, #bb1919);color:#fff;font-family:'Playfair Display',serif;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.eg-footer .eg-brand-name{font-family:'Playfair Display',serif;font-size:26px;color:#fff;letter-spacing:-.5px;font-weight:700}
+.eg-footer .eg-brand-tag{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#d6c79e;line-height:1.45}
+.eg-footer .eg-brand-blurb{font-size:12px;line-height:1.6;color:#9a8e7a;max-width:340px}
+.eg-footer .eg-col h4{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:#fff;text-transform:uppercase;margin-bottom:14px;font-weight:700}
+.eg-footer .eg-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.eg-footer .eg-col a{color:#bcb09a;text-decoration:none;font-size:12px;font-family:'DM Sans',sans-serif;transition:color .15s}
+.eg-footer .eg-col a:hover{color:#fff}
+.eg-footer .eg-social{display:flex;gap:10px;margin-top:16px}
+.eg-footer .eg-social a{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#1f1814;color:#d6c79e;border-radius:50%;font-size:13px;transition:all .15s}
+.eg-footer .eg-social a:hover{background:var(--red, #bb1919);color:#fff}
+.eg-footer .eg-fineprint{max-width:1284px;margin:0 auto;padding:24px 28px 32px;font-size:11px;color:#7a6f5d;line-height:1.7}
+.eg-footer .eg-fineprint .eg-disclaimer{margin-bottom:14px;font-style:italic;color:#9a8e7a}
+.eg-footer .eg-bottombar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding-top:14px;border-top:1px solid #2a2018}
+.eg-footer .eg-bottombar .eg-copy{color:#9a8e7a}
+.eg-footer .eg-bottombar nav{display:flex;gap:18px;flex-wrap:wrap}
+.eg-footer .eg-bottombar nav a{color:#7a6f5d;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;font-family:'Roboto Condensed',sans-serif;text-decoration:none}
+.eg-footer .eg-bottombar nav a:hover{color:#fff}
+@media (max-width:920px){
+  .eg-footer-grid{grid-template-columns:1fr 1fr;gap:24px}
+  .eg-footer .eg-brand{grid-column:1/-1}
+  .eg-footer .eg-bottombar{justify-content:flex-start}
+}
+@media (max-width:520px){
+  .eg-footer-grid{grid-template-columns:1fr}
+}
+
 .bottom-grid{display:grid;grid-template-columns:1fr 320px;gap:28px}
 .feed-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);cursor:pointer}
 .feed-item:hover .feed-title{color:var(--red)}
@@ -259,15 +364,7 @@ nav::-webkit-scrollbar{display:none}
 .show-count{text-align:right;font-size:10px;color:var(--muted);line-height:1.4}
 .show-count strong{display:block;font-size:15px;color:var(--dark);font-weight:600}
 
-/* FOOTER */
-footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;background:var(--white)}
-.footer-inner{max-width:1320px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px}
-.footer-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:4px;color:var(--dark)}
-.footer-logo span{color:var(--red)}
-.footer-text{font-size:11px;color:var(--muted)}
-.footer-links{display:flex;gap:20px}
-.footer-links a{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
-.footer-links a:hover{color:var(--dark)}
+/* OLD FOOTER STYLES — superseded by .eg-footer below; left blank for safety */
 
 /* SUBSCRIBE MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
@@ -440,6 +537,48 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
 </header>
 
 <div class="page">
+
+  <!-- ── BROADCAST SECTION ────────────────────────────────────── -->
+  <div class="broadcast" id="broadcast">
+    <div class="bc-player" id="bc-player">
+      <div class="bc-yt-host" id="bc-yt-host"></div>
+      <div class="bc-poster" id="bc-poster">
+        <div class="bc-station">
+          <div class="bc-e-mark">E</div>
+          <div class="bc-station-name">Egleze · Broadcast</div>
+        </div>
+        <div class="bc-clock" id="bc-clock">Live · —</div>
+        <div class="bc-pretitle" id="bc-pretitle">Today's Broadcast · Loading queue…</div>
+        <div class="bc-postertitle" id="bc-postertitle">Press play to start the day's revelations</div>
+        <div class="bc-play-btn" id="bc-play-btn" aria-label="Start broadcast"></div>
+        <div class="bc-press-play">Press play to start the broadcast queue</div>
+      </div>
+      <div class="bc-lower-third" id="bc-lower-third">
+        <span class="lt-stripe" id="bc-lt-stripe">Egleze Brief</span>
+        <h2 class="lt-headline" id="bc-lt-headline">—</h2>
+        <div class="lt-meta" id="bc-lt-meta">—</div>
+      </div>
+      <div class="bc-progress-row">
+        <span class="bc-dur" id="bc-cur">0:00</span>
+        <div class="bc-bar"><div class="bc-fill" id="bc-fill"></div></div>
+        <span class="bc-total" id="bc-total">0:00</span>
+      </div>
+    </div>
+    <div class="bc-queue">
+      <div class="bc-queue-header">
+        <span class="bc-qh-label">Today's Broadcast Queue</span>
+        <span class="bc-qh-time" id="bc-qh-time">Updated just now</span>
+      </div>
+      <div class="bc-queue-list" id="bc-queue-list">
+        <div style="padding:24px;text-align:center;color:#7a6f5d;font-family:DM Sans,sans-serif;font-size:12px">Loading queue…</div>
+      </div>
+      <div class="bc-queue-footer">
+        <span class="bc-mode-label">Continuous Play</span>
+        <span class="bc-toggle on" id="bc-toggle-auto" role="button" aria-pressed="true">Auto · On</span>
+        <span class="bc-toggle" id="bc-toggle-audio" role="button" aria-pressed="false">Audio Only</span>
+      </div>
+    </div>
+  </div>
 
   <!-- SECTION LABEL -->
   <div class="sec-label">
@@ -642,32 +781,79 @@ footer{border-top:3px solid var(--dark);margin-top:48px;padding:24px 0;backgroun
 </div>
 
 <!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-logo"><span>E</span>GLEZE</div>
-    <div class="footer-text">© 2026 Egleze Limited · Registered in Ireland · The Podcast Intelligence Network</div>
-    <div style="font-size:11px;color:var(--muted);max-width:700px;margin:8px auto;line-height:1.5;text-align:center">
-      The views expressed by podcast guests summarised on this platform are their own and do not represent the editorial stance of Egleze Limited. Short excerpts used for news reporting under fair use (17 U.S.C. § 107) and GDPR Article 85.
+<footer class="eg-footer">
+  <div class="eg-footer-grid">
+    <div class="eg-brand">
+      <div class="eg-brand-mark">
+        <div class="eg-brand-e">E</div>
+        <div class="eg-brand-name">Egleze</div>
+      </div>
+      <div class="eg-brand-tag">Where Conversation Becomes the Headline.</div>
+      <div class="eg-brand-blurb">
+        Egleze (from the Greek <em>Ekklisia</em>) is an international news institution dedicated to the curation and reporting of long-form digital media — extracting the world's most important spoken-word revelations into a permanent, searchable record.
+      </div>
+      <div class="eg-social" aria-label="Egleze on social platforms">
+        <a href="#" title="X" aria-label="Egleze on X">𝕏</a>
+        <a href="#" title="YouTube" aria-label="Egleze on YouTube">▶</a>
+        <a href="#" title="Spotify Podcasts" aria-label="Egleze on Spotify">♫</a>
+        <a href="#" title="Apple Podcasts" aria-label="Egleze on Apple Podcasts">⌬</a>
+        <a href="#" title="Substack" aria-label="Egleze on Substack">✍</a>
+      </div>
     </div>
-    <div class="footer-links">
-      <a href="/legal.html#editorial">Editorial Notice</a>
-      <a href="/legal.html#privacy">Privacy Policy</a>
-      <a href="/legal.html#cookie">Cookie Policy</a>
-      <a href="#">Advertise</a>
-      <a href="mailto:hello@egleze.com">Contact</a>
+
+    <div class="eg-col">
+      <h4>The Newsroom</h4>
+      <ul>
+        <li><a href="/about">About Egleze</a></li>
+        <li><a href="/legal.html#editorial">Editorial Standards</a></li>
+        <li><a href="/legal.html#editorial">Corrections Policy</a></li>
+        <li><a href="/shows.html">Shows We Cover</a></li>
+        <li><a href="mailto:editorial@egleze.com">Editorial Desk</a></li>
+        <li><a href="mailto:hello@egleze.com">Contact</a></li>
+      </ul>
     </div>
-    <nav aria-label="Topic Navigation" style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-      <a href="/topic/intelligence" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">Intelligence</a>
-      <a href="/topic/military" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">Military</a>
-      <a href="/topic/health" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">Health</a>
-      <a href="/topic/ai-tech" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">AI &amp; Tech</a>
-      <a href="/topic/finance" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">Finance</a>
-      <a href="/topic/geopolitics" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">Geopolitics</a>
-      <a href="/topic/ufo" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">UFO</a>
-      <a href="/topic/politics" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">Politics</a>
-      <a href="/topic/debates" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">Debates</a>
-      <a href="/topic/history" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-decoration:none">History</a>
-    </nav>
+
+    <div class="eg-col">
+      <h4>Sections</h4>
+      <ul>
+        <li><a href="/topic/intelligence">Intelligence</a></li>
+        <li><a href="/topic/military">Military</a></li>
+        <li><a href="/topic/health">Health &amp; Longevity</a></li>
+        <li><a href="/topic/ai">AI &amp; Tech</a></li>
+        <li><a href="/topic/finance">Finance</a></li>
+        <li><a href="/topic/geopolitics">Geopolitics</a></li>
+        <li><a href="/topic/politics">Politics</a></li>
+        <li><a href="/topic/science">Science</a></li>
+      </ul>
+    </div>
+
+    <div class="eg-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/legal.html#privacy">Privacy Policy</a></li>
+        <li><a href="/legal.html#cookie">Cookie Policy</a></li>
+        <li><a href="/legal.html#terms">Terms of Service</a></li>
+        <li><a href="/legal.html#copyright">Copyright Policy</a></li>
+        <li><a href="/legal.html#takedown">Takedown Requests</a></li>
+        <li><a href="/legal.html#gdpr">GDPR Notice</a></li>
+        <li><a href="mailto:press@egleze.com">Press Inquiries</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="eg-fineprint">
+    <div class="eg-disclaimer">
+      The views expressed by podcast guests summarised on this platform are their own and do not represent the editorial stance of Egleze Limited. Short excerpts used for news reporting under fair use (17 U.S.C. § 107) and GDPR Article 85. Egleze maintains a 24-hour response policy for takedown and correction requests.
+    </div>
+    <div class="eg-bottombar">
+      <div class="eg-copy">© 2026 <strong style="color:#d6c79e">Egleze Limited</strong> · Registered in Ireland · All rights reserved</div>
+      <nav aria-label="Footer secondary navigation">
+        <a href="/about">About</a>
+        <a href="/legal.html">Legal</a>
+        <a href="mailto:hello@egleze.com">Contact</a>
+        <a href="/shows.html">Shows</a>
+      </nav>
+    </div>
   </div>
 </footer>
 
@@ -1627,6 +1813,281 @@ document.body.addEventListener('click', function(e) {
 document.querySelector('.header-date').textContent =
   new Date().toLocaleDateString('en-IE', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) + ' · egleze.com';
 
+// ── BROADCAST CONTROLLER ──────────────────────────────────────────
+// The broadcast section is a TV-news-style auto-advancing queue.
+// It plays approved stories with source_url back-to-back, optionally
+// audio-only, optionally continuous. When a clip ends, the next plays.
+var bcState = {
+  queue: [],         // array of stories (in editorial order)
+  currentIndex: -1,  // which queue item is playing
+  player: null,      // YouTube iframe API player instance
+  autoAdvance: true, // continuous-play toggle (default ON)
+  audioOnly: false,  // audio-only toggle (default OFF)
+  endTimer: null,    // timeout that fires at clip_end_seconds
+  progressTimer: null
+};
+
+async function loadBroadcastQueue() {
+  if (!db && !initDB()) return;
+  try {
+    var result = await db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .not('source_url', 'is', null)
+      .order('score', { ascending: false })
+      .limit(16);
+    if (result.error) {
+      console.log('[broadcast] queue load error:', result.error.message || result.error);
+      return;
+    }
+    var stories = (result.data || []).filter(function(s){ return s.source_url; });
+    bcState.queue = stories;
+    renderBroadcastQueue();
+    // Update poster pretitle/title with the first story
+    if (stories.length > 0) {
+      var first = stories[0];
+      var pretitle = document.getElementById('bc-pretitle');
+      var ptitle = document.getElementById('bc-postertitle');
+      if (pretitle) pretitle.textContent = (first.topic || 'Top Story') + ' · ' + (first.show_name || 'Today\'s broadcast');
+      if (ptitle) ptitle.textContent = first.headline || 'Press play to start';
+    }
+    var qhTime = document.getElementById('bc-qh-time');
+    if (qhTime) qhTime.textContent = 'Updated ' + new Date().toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) {
+    console.log('[broadcast] queue exception:', e);
+  }
+}
+
+function renderBroadcastQueue() {
+  var list = document.getElementById('bc-queue-list');
+  if (!list) return;
+  if (!bcState.queue.length) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:#7a6f5d;font-family:DM Sans,sans-serif;font-size:12px">No approved stories available yet.<br>Approve stories in the dashboard to populate the broadcast queue.</div>';
+    return;
+  }
+  var html = '';
+  bcState.queue.forEach(function(s, i) {
+    var artwork = (window.artworkCache && s.show_name) ? window.artworkCache[s.show_name] : null;
+    var thumbStyle = artwork ? ' style="background-image:url(' + JSON.stringify(artwork) + ')"' : '';
+    var when = timeAgo(s.created_at);
+    var isPlaying = (i === bcState.currentIndex);
+    var label = isPlaying ? '▶ Now Playing · ' + (s.topic || 'Story') : (i === bcState.currentIndex + 1 ? 'Up Next · ' + (s.topic || 'Story') : (s.topic || 'Story'));
+    html += '<div class="bc-q-item' + (isPlaying ? ' now-playing' : '') + '" data-bc-index="' + i + '">' +
+      '<div class="bc-qi-thumb"' + thumbStyle + '></div>' +
+      '<div class="bc-qi-meta">' +
+        '<span class="bc-qi-cat">' + escapeHtml(label) + '</span>' +
+        '<span class="bc-qi-title">' + escapeHtml(s.headline || '') + '</span>' +
+        '<span class="bc-qi-when"><strong style="color:#bcb09a">' + escapeHtml(s.show_name || '') + '</strong> · ' + escapeHtml(when) + '</span>' +
+      '</div>' +
+    '</div>';
+  });
+  list.innerHTML = html;
+}
+
+// YouTube IFrame API: the existing modal-player code owns
+// window.onYouTubeIframeAPIReady and exposes whenYTReady() which we use here.
+// (Don't declare our own onYouTubeIframeAPIReady — it would conflict.)
+
+function bcStartStory(story) {
+  if (!story || !story.source_url) return;
+  var videoId = extractYouTubeId(story.source_url);
+  if (!videoId) {
+    console.log('[broadcast] could not parse YouTube ID from', story.source_url);
+    return bcAdvance();
+  }
+  var startSec = (typeof story.clip_start_seconds === 'number' && story.clip_start_seconds >= 0) ? story.clip_start_seconds : 0;
+  var endSec = (typeof story.clip_end_seconds === 'number' && story.clip_end_seconds > startSec) ? story.clip_end_seconds : null;
+
+  // Hide the poster, show the iframe
+  var poster = document.getElementById('bc-poster');
+  if (poster) poster.classList.add('gone');
+
+  // Use the existing modal player's API-ready callback registry
+  whenYTReady(function() {
+    // Tear down any existing player
+    if (bcState.player) {
+      try { bcState.player.destroy(); } catch(e) {}
+      bcState.player = null;
+    }
+    // Re-mount the host element (YouTube replaces the element it gets)
+    var host = document.getElementById('bc-yt-host');
+    if (host) {
+      host.innerHTML = '<div id="bc-yt-iframe"></div>';
+    }
+
+    bcState.player = new YT.Player('bc-yt-iframe', {
+      videoId: videoId,
+      playerVars: {
+        autoplay: 1,
+        start: startSec,
+        end: endSec || undefined,
+        modestbranding: 1,
+        rel: 0,
+        playsinline: 1,
+        controls: 1,
+        iv_load_policy: 3
+      },
+      events: {
+        onReady: function(e) {
+          try { e.target.playVideo(); } catch(_) {}
+          bcUpdateLowerThird(story);
+          bcStartProgressTracking(story);
+          // Schedule end-of-clip handler
+          if (endSec) {
+            if (bcState.endTimer) clearTimeout(bcState.endTimer);
+            var durationMs = (endSec - startSec) * 1000 + 800; // small buffer
+            bcState.endTimer = setTimeout(bcAdvance, durationMs);
+          }
+        },
+        onStateChange: function(e) {
+          // 0 = ended; if we hit ended naturally, advance
+          if (e.data === YT.PlayerState.ENDED) bcAdvance();
+        },
+        onError: function(e) {
+          console.log('[broadcast] player error:', e.data);
+          bcAdvance();
+        }
+      }
+    });
+  });
+}
+
+function bcUpdateLowerThird(story) {
+  var lt = document.getElementById('bc-lower-third');
+  var stripe = document.getElementById('bc-lt-stripe');
+  var headline = document.getElementById('bc-lt-headline');
+  var meta = document.getElementById('bc-lt-meta');
+  if (stripe) stripe.textContent = (story.topic || 'Egleze Brief') + ' · Top Reveal';
+  if (headline) headline.textContent = story.headline || '';
+  if (meta) meta.textContent = (story.show_name || '') + ' · ' + (story.episode || '') + ' · ' + ((bcState.currentIndex + 1) + ' of ' + bcState.queue.length + ' in today\'s broadcast');
+  if (lt) lt.classList.add('show');
+}
+
+function bcStartProgressTracking(story) {
+  if (bcState.progressTimer) clearInterval(bcState.progressTimer);
+  var fill = document.getElementById('bc-fill');
+  var cur = document.getElementById('bc-cur');
+  var total = document.getElementById('bc-total');
+  var startSec = story.clip_start_seconds || 0;
+  var endSec = story.clip_end_seconds || (startSec + 30);
+  var clipLen = Math.max(1, endSec - startSec);
+  if (total) total.textContent = bcFmtTime(clipLen);
+  bcState.progressTimer = setInterval(function() {
+    if (!bcState.player || !bcState.player.getCurrentTime) return;
+    try {
+      var t = bcState.player.getCurrentTime();
+      var rel = Math.max(0, t - startSec);
+      if (cur) cur.textContent = bcFmtTime(rel);
+      if (fill) fill.style.width = Math.min(100, (rel / clipLen) * 100) + '%';
+    } catch(_) {}
+  }, 250);
+}
+
+function bcFmtTime(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function bcAdvance() {
+  if (bcState.endTimer) { clearTimeout(bcState.endTimer); bcState.endTimer = null; }
+  if (bcState.progressTimer) { clearInterval(bcState.progressTimer); bcState.progressTimer = null; }
+  if (!bcState.autoAdvance) {
+    bcStop();
+    return;
+  }
+  var nextIndex = bcState.currentIndex + 1;
+  if (nextIndex >= bcState.queue.length) {
+    // Reached end — stop and reset to poster
+    bcStop();
+    return;
+  }
+  bcState.currentIndex = nextIndex;
+  renderBroadcastQueue();
+  bcStartStory(bcState.queue[nextIndex]);
+}
+
+function bcStop() {
+  if (bcState.player) {
+    try { bcState.player.stopVideo(); } catch(_) {}
+  }
+  if (bcState.endTimer) { clearTimeout(bcState.endTimer); bcState.endTimer = null; }
+  if (bcState.progressTimer) { clearInterval(bcState.progressTimer); bcState.progressTimer = null; }
+  // Show the poster again
+  var poster = document.getElementById('bc-poster');
+  if (poster) poster.classList.remove('gone');
+  var lt = document.getElementById('bc-lower-third');
+  if (lt) lt.classList.remove('show');
+  var fill = document.getElementById('bc-fill');
+  if (fill) fill.style.width = '0%';
+}
+
+function bcStartFromBeginning() {
+  if (!bcState.queue.length) {
+    console.log('[broadcast] queue empty — nothing to play');
+    return;
+  }
+  bcState.currentIndex = 0;
+  renderBroadcastQueue();
+  bcStartStory(bcState.queue[0]);
+}
+
+function bcWireControls() {
+  // Big red play button
+  var playBtn = document.getElementById('bc-play-btn');
+  if (playBtn) playBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    bcStartFromBeginning();
+  });
+  // Click anywhere on poster also starts
+  var poster = document.getElementById('bc-poster');
+  if (poster) poster.addEventListener('click', function(e) {
+    if (e.target.closest('.bc-station') || e.target.closest('.bc-clock')) return;
+    bcStartFromBeginning();
+  });
+  // Queue items: clicking jumps the broadcast to that index
+  var list = document.getElementById('bc-queue-list');
+  if (list) list.addEventListener('click', function(e) {
+    var item = e.target.closest('.bc-q-item');
+    if (!item) return;
+    var idx = parseInt(item.getAttribute('data-bc-index'), 10);
+    if (isNaN(idx) || !bcState.queue[idx]) return;
+    bcState.currentIndex = idx;
+    renderBroadcastQueue();
+    bcStartStory(bcState.queue[idx]);
+  });
+  // Auto-advance toggle
+  var autoBtn = document.getElementById('bc-toggle-auto');
+  if (autoBtn) autoBtn.addEventListener('click', function() {
+    bcState.autoAdvance = !bcState.autoAdvance;
+    autoBtn.classList.toggle('on', bcState.autoAdvance);
+    autoBtn.textContent = bcState.autoAdvance ? 'Auto · On' : 'Auto · Off';
+    autoBtn.setAttribute('aria-pressed', bcState.autoAdvance ? 'true' : 'false');
+  });
+  // Audio-only toggle
+  var audioBtn = document.getElementById('bc-toggle-audio');
+  if (audioBtn) audioBtn.addEventListener('click', function() {
+    bcState.audioOnly = !bcState.audioOnly;
+    audioBtn.classList.toggle('on', bcState.audioOnly);
+    audioBtn.setAttribute('aria-pressed', bcState.audioOnly ? 'true' : 'false');
+    var player = document.getElementById('bc-player');
+    if (player) player.classList.toggle('audio-only', bcState.audioOnly);
+  });
+  // Update clock in poster
+  function tickClock() {
+    var clock = document.getElementById('bc-clock');
+    if (clock) {
+      var now = new Date();
+      var hh = String(now.getUTCHours()).padStart(2, '0');
+      var mm = String(now.getUTCMinutes()).padStart(2, '0');
+      clock.textContent = 'Live · ' + hh + ':' + mm + ' UTC';
+    }
+  }
+  tickClock();
+  setInterval(tickClock, 30000);
+}
+
 // ── INITIALISE ────────────────────────────────────────────────────
 // Preload artwork from shows table before rendering, so the first paint
 // has hero/secondary/feed artwork without a flicker.
@@ -1635,6 +2096,8 @@ document.querySelector('.header-date').textContent =
   loadStories();
   loadSidebar();
   loadClips();
+  loadBroadcastQueue();
+  bcWireControls();
   setupRealtime();
 })();
 
@@ -1645,6 +2108,7 @@ setInterval(() => {
   loadStories();
   loadSidebar();
   loadClips();
+  loadBroadcastQueue();
 }, 5 * 60 * 1000);
 
 // ── DYNAMIC NEWS ARTICLE SCHEMA ───────────────────────────────
