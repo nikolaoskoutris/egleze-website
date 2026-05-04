@@ -721,16 +721,45 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 function filterTopic(topic, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
-  // Also reset topic strip
+  // Sync the topic strip below
   document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.topic-btn')?.classList.add('active');
+  const stripBtns = document.querySelectorAll('.topic-btn');
+  if (topic === null) {
+    // "Today's Reveals" / "Trending" — activate "All Topics" in strip
+    stripBtns[0]?.classList.add('active');
+  } else {
+    // Find matching strip button
+    stripBtns.forEach(b => {
+      if (b.textContent.includes(topic) || b.textContent.toLowerCase().includes(topic.toLowerCase())) {
+        b.classList.add('active');
+      }
+    });
+  }
   loadStories(topic);
+  scrollToResults();
 }
 
 function filterTopicStrip(topic, el) {
   document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
+  // Sync the top nav too
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItems = document.querySelectorAll('.nav-item');
+  if (topic === null) {
+    navItems[0]?.classList.add('active');
+  } else {
+    navItems.forEach(n => {
+      if (n.textContent.includes(topic)) n.classList.add('active');
+    });
+  }
   loadStories(topic);
+  scrollToResults();
+}
+
+function scrollToResults() {
+  // After a category click, scroll the hero into view so users see content change
+  const hero = document.querySelector('.hero-grid') || document.querySelector('.hero-main');
+  if (hero) hero.scrollIntoView({behavior: 'smooth', block: 'start'});
 }
 
 async function loadStories(topic = null) {
@@ -789,9 +818,25 @@ async function loadStories(topic = null) {
       } catch(e) {}
     }
 
+    // Also try matching against headline/summary as a fallback for niche topics
+    if (topic && combined.length < 3 && db) {
+      try {
+        const { data: textData } = await db.from('stories')
+          .select('*')
+          .eq('status', 'approved')
+          .or(`headline.ilike.%${topic}%,summary.ilike.%${topic}%`)
+          .order('score', { ascending: false })
+          .limit(20);
+        if (textData && textData.length > 0) {
+          const ids = new Set(combined.map(s => s.id));
+          textData.forEach(s => { if (!ids.has(s.id)) combined.push(s); });
+        }
+      } catch(e) {}
+    }
+
     if (combined.length === 0) {
-      const grid = document.getElementById('stories-grid');
-      if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888;font-size:13px">No stories in this category yet — check back soon.</div>';
+      // No results — show an empty state in the feed area and clear the hero
+      showEmptyState(topic);
       return;
     }
     renderStories(combined);
@@ -800,6 +845,33 @@ async function loadStories(topic = null) {
     renderSidebarFromData(combined);
     updateTicker(combined);
   } catch(e) { console.log('Load error:', e); }
+}
+
+function showEmptyState(topic) {
+  const label = topic || 'this section';
+  // Clear the feed
+  const feed = document.querySelector('.bottom-grid > div:first-child');
+  if (feed) {
+    feed.querySelectorAll('.feed-item').forEach(i => i.remove());
+    let msg = feed.querySelector('.empty-state');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.className = 'empty-state';
+      feed.appendChild(msg);
+    }
+    msg.style.cssText = 'padding:60px 30px;text-align:center;color:#888;font-size:13px;font-family:DM Sans,sans-serif;line-height:1.6';
+    msg.innerHTML = '<div style="font-family:Playfair Display,serif;font-size:22px;color:#222;margin-bottom:8px">No stories in ' + label + ' yet</div>' +
+      '<div>This category is being curated. Check back soon — Egleze covers the world\'s top podcasts continuously.</div>';
+  }
+  // Soften hero — don't leave stale hero from previous category
+  const heroTitle = document.querySelector('.hero-title');
+  if (heroTitle) {
+    heroTitle.innerHTML = '<span style="color:#888;font-size:0.7em;font-style:italic">No top story in ' + label + ' yet</span>';
+  }
+  const heroDesc = document.querySelector('.hero-desc');
+  if (heroDesc) heroDesc.textContent = '';
+  const heroMeta = document.querySelector('.hero-meta');
+  if (heroMeta) heroMeta.innerHTML = '';
 }
 
 // ── RENDER HERO SECTION FROM DATABASE ────────────────────────────
@@ -931,6 +1003,9 @@ function renderStories(stories) {
   stories.forEach(function(s) { if (s && s.id) window._storyCache[s.id] = s; });
 
   const sectionLabel = feed.querySelector('.sec-label');
+  // Clear any empty-state message from a previous filter
+  const empty = feed.querySelector('.empty-state');
+  if (empty) empty.remove();
   const existingItems = feed.querySelectorAll('.feed-item');
   existingItems.forEach(i => i.remove());
   stories.slice(0, 8).forEach((s, i) => {
@@ -1038,7 +1113,10 @@ function handleSearch(val) {
           var feed = document.querySelector('.bottom-grid > div:first-child');
           if (feed) {
             feed.querySelectorAll('.feed-item').forEach(function(i){i.remove();});
+            var prev = feed.querySelector('.empty-state');
+            if (prev) prev.remove();
             var msg = document.createElement('div');
+            msg.className = 'empty-state';
             msg.style.cssText = 'padding:40px;text-align:center;color:#888;font-size:13px;font-family:DM Sans,sans-serif';
             msg.textContent = 'No results for "' + term + '"';
             feed.appendChild(msg);
