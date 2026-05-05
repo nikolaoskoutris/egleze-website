@@ -220,6 +220,22 @@ html,body{
 @media(max-width:767px){.tap-hint{display:block}}
 @keyframes hint-fade{0%{opacity:0}15%{opacity:1}85%{opacity:1}100%{opacity:0}}
 
+/* Play indicator on stories that haven't started — only on mobile */
+.play-hint{
+  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+  z-index:9;width:80px;height:80px;
+  border-radius:50%;background:rgba(0,0,0,0.55);
+  display:none;align-items:center;justify-content:center;
+  color:#fff;font-size:32px;backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,0.3);
+  pointer-events:none;
+  animation:play-pulse 2s ease-in-out infinite;
+}
+@media(max-width:767px){
+  .story.active:not(.has-played) .play-hint{display:flex}
+}
+@keyframes play-pulse{50%{transform:translate(-50%,-50%) scale(1.05);opacity:0.7}}
+
 /* LOADING */
 .loading{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -453,7 +469,8 @@ function storyHTML(s, idx) {
       <div class="audio-art ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
       <div class="overlay"></div>
       <div class="tap-zone" onclick="onTapZone(${idx})"></div>
-      ${idx === 0 ? '<div class="tap-hint">Tap anywhere to advance</div>' : ''}
+      <div class="play-hint">▶</div>
+      ${idx === 0 ? '<div class="tap-hint">Tap to play · tap again to skip</div>' : ''}
       <div class="clip-dur">▸ ${dur}</div>
       <div class="progress"><div class="progress-fill" id="progress-${idx}"></div></div>
       <div class="actions">
@@ -561,6 +578,11 @@ function createPlayerForStory(idx, story) {
         startProgressTimer(idx, start, end, story.id);
       },
       onStateChange: ev => {
+        // Mark as played once it actually starts
+        if (ev.data === window.YT.PlayerState.PLAYING) {
+          const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
+          if (storyEl) storyEl.classList.add('has-played');
+        }
         if (ev.data === window.YT.PlayerState.ENDED) {
           // Verify we played to end (not insta-end from autoplay block)
           try {
@@ -614,17 +636,41 @@ function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
 
 // ─── TAP-ZONE HANDLER (mobile) ─────────────────────────────────────
 function onTapZone(idx) {
-  // On first tap, if sound not yet unlocked, this acts as Start Watching
+  const story = state.filteredStories[idx];
+  if (!story) return;
+
+  // First-time tap on first story = unlock sound globally
   if (!state.soundUnlocked) {
     state.soundUnlocked = true;
     document.getElementById('tap-unmute')?.classList.add('hidden');
-    const player = state.players.get(state.filteredStories[idx]?.id);
+    const player = state.players.get(story.id);
     if (player) {
       try { player.unMute(); player.playVideo(); } catch(_) {}
     }
     return;
   }
-  // Otherwise, advance to next
+
+  // Otherwise, decide: is current video playing? If not, play it. If yes, advance.
+  const player = state.players.get(story.id);
+  let isPlaying = false;
+  if (player) {
+    try {
+      const s = player.getPlayerState();
+      // YT.PlayerState: -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
+      isPlaying = (s === window.YT.PlayerState.PLAYING || s === window.YT.PlayerState.BUFFERING);
+    } catch(_) {}
+  }
+
+  if (!isPlaying && player) {
+    // First tap on this story → play it (synchronous, counts as user gesture)
+    try {
+      player.unMute();
+      player.playVideo();
+    } catch(_) {}
+    return;
+  }
+
+  // Already playing → advance to next
   advanceTo(idx + 1);
 }
 
