@@ -33,13 +33,9 @@ html,body{
   width:100%;
 }
 
-/* ───────── DESKTOP STAGE (renders phone frame on wide screens) ───────── */
 .app{
-  position:fixed;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
   background:radial-gradient(ellipse at 30% 20%,#1a1208 0%,#0a0a0a 50%,#000 100%);
 }
 @media(min-width:768px){
@@ -52,58 +48,88 @@ html,body{
   }
 }
 .shell{
-  width:100%;
-  height:100%;
-  height:100dvh;
-  position:relative;
-  overflow:hidden;
-  background:var(--bg-feed);
+  width:100%;height:100%;height:100dvh;
+  position:relative;overflow:hidden;background:var(--bg-feed);
 }
 @media(min-width:768px){
   .shell{
-    width:420px;
-    height:840px;
-    border-radius:42px;
-    overflow:hidden;
+    width:420px;height:840px;border-radius:42px;overflow:hidden;
     box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 90px rgba(187,25,25,0.08),0 0 0 14px #1a1a1a,0 0 0 16px #2a2a2a;
   }
 }
 
-/* ───────── HEADER ───────── */
+/* PERSISTENT VIDEO LAYER — single iframe, never destroyed */
+.video-layer{
+  position:absolute;inset:0;z-index:2;
+  background:#000;pointer-events:none;
+  opacity:0;transition:opacity .25s ease;
+}
+.video-layer.visible{opacity:1}
+.video-layer iframe{width:100%;height:100%;border:0;pointer-events:none}
+.audio-mode-active .video-layer{opacity:0 !important}
+
+/* TAP-TO-ADVANCE overlay — captures taps on mobile so each tap is a user gesture */
+.tap-advance{
+  position:absolute;inset:0;z-index:6;
+  background:transparent;
+  display:none; /* enabled only on mobile */
+  cursor:pointer;
+}
+@media(max-width:767px){
+  .tap-advance{display:block}
+}
+/* Subtle tap hint on first mobile story */
+.tap-advance-hint{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  z-index:7;color:rgba(255,255,255,0.85);
+  font-family:'DM Sans',sans-serif;font-size:13px;
+  text-align:center;pointer-events:none;
+  background:rgba(0,0,0,0.55);padding:10px 16px;border-radius:24px;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.2);
+  opacity:0;
+  animation:tap-hint-fade 4s ease 1s forwards;
+}
+@keyframes tap-hint-fade{
+  0%{opacity:0}
+  15%{opacity:1}
+  85%{opacity:1}
+  100%{opacity:0}
+}
+.tap-advance-hint .icon{font-size:22px;margin-bottom:4px;display:block}
+@media(min-width:768px){.tap-advance-hint{display:none}}
+
+/* HEADER */
 .shorts-header{
   position:absolute;top:0;left:0;right:0;
   padding:max(env(safe-area-inset-top),14px) 18px 10px;
   display:flex;align-items:center;justify-content:space-between;
-  z-index:30;
-  background:linear-gradient(180deg,rgba(0,0,0,0.85),rgba(0,0,0,0));
+  z-index:30;background:linear-gradient(180deg,rgba(0,0,0,0.85),rgba(0,0,0,0));
   pointer-events:none;
 }
 .shorts-header > *{pointer-events:auto}
 .brand{display:flex;align-items:center;gap:8px}
 .brand-e{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--red);color:#fff;
+  width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;
   font-family:'Playfair Display',serif;font-weight:900;font-size:20px;
   display:flex;align-items:center;justify-content:center;
 }
-.brand-name{
-  font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:-.3px;
-}
+.brand-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:-.3px}
 .brand-name em{font-style:italic;color:var(--gold);font-weight:400}
 .header-actions{display:flex;gap:8px}
 .icon-btn{
-  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;
-  font-size:16px;border:1px solid rgba(255,255,255,0.1);
-  backdrop-filter:blur(10px);cursor:pointer;
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;font-size:18px;
+  border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px);cursor:pointer;
+  transition:transform .15s ease;
 }
-.icon-btn.active{background:var(--red);border-color:var(--red)}
+.icon-btn:active{transform:scale(0.9)}
 
-/* ───────── CATEGORY STRIP ───────── */
+/* CATEGORIES */
 .cat-strip{
-  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 50px);left:0;right:0;
-  display:flex;gap:6px;overflow-x:auto;
-  padding:4px 14px;z-index:25;
+  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 54px);left:0;right:0;
+  display:flex;gap:6px;overflow-x:auto;padding:4px 14px;z-index:25;
   scrollbar-width:none;
 }
 .cat-strip::-webkit-scrollbar{display:none}
@@ -116,117 +142,56 @@ html,body{
 }
 .cat-pill.active{background:var(--red);border-color:var(--red);font-weight:700}
 .cat-pill:active{transform:scale(0.95)}
-.cat-pill .count{
-  display:inline-block;margin-left:4px;
-  font-size:9px;opacity:0.6;font-weight:400;
-}
+.cat-pill .count{display:inline-block;margin-left:4px;font-size:9px;opacity:0.6;font-weight:400}
 .cat-pill.active .count{opacity:0.85}
 
-/* ───────── FEED ───────── */
+/* FEED */
 .feed{
-  position:absolute;inset:0;
-  scroll-snap-type:y mandatory;
-  overflow-y:scroll;
-  scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
+  position:absolute;inset:0;z-index:5;
+  scroll-snap-type:y mandatory;overflow-y:scroll;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
 }
 .feed::-webkit-scrollbar{display:none}
-
 .story{
-  height:100%;
-  scroll-snap-align:start;
-  scroll-snap-stop:always;
-  position:relative;
-  display:flex;flex-direction:column;
-  background:#000;
-  overflow:hidden;
+  height:100%;scroll-snap-align:start;scroll-snap-stop:always;
+  position:relative;display:flex;flex-direction:column;overflow:hidden;
 }
-
-/* poster background while video loads */
 .story .poster{
   position:absolute;inset:0;
   background-size:cover;background-position:center;
-  filter:brightness(0.55) blur(2px);
-  z-index:1;
-  transition:opacity .3s ease;
+  filter:brightness(0.55) blur(2px);z-index:1;transition:opacity .3s ease;
 }
-.story .poster.fallback{
-  background:linear-gradient(135deg,#1f1612 0%,#3a2818 50%,#0d0a07 100%);
-}
-
-/* video iframe fills the screen */
-.story .video-wrap{
-  position:absolute;inset:0;
-  z-index:2;
-  display:flex;align-items:center;justify-content:center;
-  background:#000;
-  opacity:0;
-  transition:opacity .25s ease;
-}
-.story .video-wrap.visible{opacity:1}
-.story .video-wrap iframe{
-  width:100%;height:100%;border:0;
-  pointer-events:none; /* user controls go through our UI */
-}
-
-/* gradient overlay for readability */
+.story .poster.fallback{background:linear-gradient(135deg,#1f1612 0%,#3a2818 50%,#0d0a07 100%)}
 .story .overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(180deg,
-    rgba(0,0,0,0.7) 0%,
-    rgba(0,0,0,0.0) 22%,
-    rgba(0,0,0,0.0) 45%,
-    rgba(0,0,0,0.85) 75%,
-    rgba(0,0,0,0.95) 100%
-  );
-  z-index:3;
-  pointer-events:none;
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 45%,rgba(0,0,0,0.85) 75%,rgba(0,0,0,0.95) 100%);
 }
 
-/* audio mode shows show artwork big in center */
-.story.audio-mode .video-wrap iframe{visibility:hidden}
-.story .audio-art{
+/* AUDIO ART (visible only in audio mode for active story) */
+.audio-art{
   position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
-  width:240px;height:240px;
-  background-size:cover;background-position:center;
+  width:240px;height:240px;background-size:cover;background-position:center;
   border-radius:18px;
   box-shadow:0 30px 60px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.1);
-  z-index:4;
-  display:none;
-  border:2px solid rgba(214,199,158,0.3);
+  z-index:4;display:none;border:2px solid rgba(214,199,158,0.3);
 }
-.story.audio-mode .audio-art{display:block}
-.story.audio-mode .audio-art.fallback{
-  background:linear-gradient(135deg,var(--red) 0%,var(--red-deep) 100%);
-}
-.story.audio-mode .audio-icon{
-  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
-  z-index:5;font-size:80px;color:#fff;
-  display:none;text-shadow:0 4px 30px rgba(0,0,0,0.8);
-  pointer-events:none;
-}
-.story.audio-mode .audio-art.fallback ~ .audio-icon{display:block}
+.audio-mode-active .story.active .audio-art{display:block}
+.audio-art.fallback{background:linear-gradient(135deg,var(--red) 0%,var(--red-deep) 100%)}
 
-/* clip duration / live tag */
 .clip-dur{
-  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 96px);left:18px;z-index:6;
+  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 100px);left:18px;z-index:6;
   display:inline-flex;align-items:center;gap:5px;
   background:rgba(0,0,0,0.6);color:#fff;
   font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1px;
   padding:4px 9px;border-radius:3px;backdrop-filter:blur(10px);
 }
-.clip-dur.audio{background:rgba(214,199,158,0.85);color:#1a1a1a}
-
-/* progress bar at top */
 .story .progress{
-  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 90px);right:18px;left:auto;
+  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 94px);right:18px;
   width:120px;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;
   z-index:6;overflow:hidden;
 }
 .story .progress-fill{height:100%;background:var(--red);width:0%;transition:width .2s linear}
 
-/* ───────── BODY (lower third) ───────── */
 .story .body{
   position:absolute;bottom:0;left:0;right:80px;
   padding:18px 18px calc(max(env(safe-area-inset-bottom),12px) + 12px);
@@ -235,13 +200,11 @@ html,body{
 .topic-line{
   display:inline-block;margin-bottom:12px;
   font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;
-  color:var(--gold);
-  padding:4px 9px;background:rgba(0,0,0,0.6);border-left:3px solid var(--red);
+  color:var(--gold);padding:4px 9px;background:rgba(0,0,0,0.6);border-left:3px solid var(--red);
 }
 .headline{
   font-family:'Playfair Display',serif;font-weight:700;font-size:21px;line-height:1.18;
-  margin-bottom:10px;letter-spacing:-.3px;
-  text-shadow:0 2px 12px rgba(0,0,0,0.7);
+  margin-bottom:10px;letter-spacing:-.3px;text-shadow:0 2px 12px rgba(0,0,0,0.7);
 }
 .show-line{
   font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.8px;text-transform:uppercase;
@@ -255,62 +218,46 @@ html,body{
 }
 .ctas{display:flex;gap:8px;flex-wrap:wrap}
 .cta{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:8px 13px;
+  display:inline-flex;align-items:center;gap:6px;padding:8px 13px;
   font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
-  border-radius:20px;cursor:pointer;border:none;color:#fff;
-  text-decoration:none;
+  border-radius:20px;cursor:pointer;border:none;color:#fff;text-decoration:none;
 }
 .cta.primary{background:var(--red)}
 .cta.secondary{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);backdrop-filter:blur(10px)}
 .cta:active{transform:scale(0.95)}
 
-/* ───────── ACTION RAIL ───────── */
 .actions{
-  position:absolute;right:14px;bottom:max(env(safe-area-inset-bottom),12px);
-  z-index:6;
-  display:flex;flex-direction:column;gap:14px;align-items:center;
-  padding-bottom:120px;
+  position:absolute;right:14px;bottom:max(env(safe-area-inset-bottom),12px);z-index:6;
+  display:flex;flex-direction:column;gap:14px;align-items:center;padding-bottom:120px;
 }
 .action-btn{
-  width:46px;height:46px;border-radius:50%;
-  background:rgba(0,0,0,0.55);
+  width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,0.55);
   display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:20px;cursor:pointer;
-  backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.1);
-  transition:transform .15s ease;
+  color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.1);transition:transform .15s ease;
 }
 .action-btn:active{transform:scale(0.85)}
 .action-btn.show-mark{
   background-size:cover;background-position:center;border:2px solid #fff;
   font-family:'Playfair Display',serif;font-weight:900;
 }
-.action-label{
-  font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:.6px;color:#fff;text-align:center;
-  margin-top:-8px;
-}
+.action-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:.6px;color:#fff;text-align:center;margin-top:-8px}
 
-/* ───────── LOADING / EMPTY STATES ───────── */
 .loading{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:50;color:#fff;
-  background:#000;
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:50;color:#fff;background:#000;
 }
 .loading .brand-e{width:54px;height:54px;font-size:32px;margin-bottom:18px;animation:pulse 1.4s infinite}
 .loading p{font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
 @keyframes pulse{50%{opacity:0.4;transform:scale(0.95)}}
 
 .empty{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:40px;color:#fff;z-index:40;
 }
 .empty h2{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:12px}
 .empty p{color:#bcb09a;font-size:14px;line-height:1.6;margin-bottom:18px}
 
-/* ───────── SWIPE HINT (first-time) ───────── */
 .swipe-hint{
   position:absolute;bottom:140px;left:50%;transform:translateX(-50%);
   z-index:7;color:rgba(255,255,255,0.7);
@@ -321,46 +268,42 @@ html,body{
 @keyframes bob{50%{transform:translateX(-50%) translateY(-6px)}}
 .swipe-hint.hidden{display:none}
 
-/* small text fade-in when story becomes active */
-.story:not(.active) .body,
-.story:not(.active) .actions{opacity:0.4;transition:opacity .3s ease}
-.story.active .body,
-.story.active .actions{opacity:1}
+.story:not(.active) .body, .story:not(.active) .actions{opacity:0.4;transition:opacity .3s ease}
+.story.active .body, .story.active .actions{opacity:1}
 
-/* ───────── TAP TO UNMUTE OVERLAY ───────── */
 .tap-unmute{
-  position:absolute;inset:0;z-index:200;
-  background:rgba(0,0,0,0.85);
-  display:flex;align-items:center;justify-content:center;
-  padding:24px;
-  backdrop-filter:blur(20px);
-  animation:fade-in .3s ease;
+  position:absolute;inset:0;z-index:200;background:rgba(0,0,0,0.85);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  backdrop-filter:blur(20px);animation:fade-in .3s ease;
 }
 .tap-unmute.hidden{display:none}
 @keyframes fade-in{from{opacity:0}to{opacity:1}}
-.tap-card{
-  text-align:center;color:#fff;max-width:300px;
-}
-.tap-card .speaker{
-  font-size:54px;margin-bottom:16px;
-  animation:speaker-pulse 1.5s ease-in-out infinite;
-}
+.tap-card{text-align:center;color:#fff;max-width:300px}
+.tap-card .speaker{font-size:54px;margin-bottom:16px;animation:speaker-pulse 1.5s ease-in-out infinite}
 @keyframes speaker-pulse{50%{transform:scale(1.15)}}
-.tap-card h3{
-  font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:10px;
-}
-.tap-card p{
-  font-size:13px;line-height:1.5;color:#bcb09a;margin-bottom:18px;
-}
+.tap-card h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:10px}
+.tap-card p{font-size:13px;line-height:1.5;color:#bcb09a;margin-bottom:18px}
 .tap-card .cta{margin:0 auto;display:inline-flex;font-size:11px;padding:12px 24px}
-.tap-card .muted-tip{
-  font-size:11px;color:#7a6f5d;margin-top:14px;margin-bottom:0;font-style:italic;
+.mobile-only{display:none}
+@media(max-width:767px){.mobile-only{display:inline}}
+
+.sound-toast{
+  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 60px);right:18px;z-index:35;
+  background:rgba(0,0,0,0.85);color:#fff;
+  font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:600;
+  padding:6px 12px;border-radius:14px;
+  opacity:0;transform:translateY(-6px);transition:all .25s ease;
+  pointer-events:none;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);
 }
+.sound-toast.visible{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="shell">
+  <div class="shell" id="shell">
+
+    <!-- PERSISTENT VIDEO LAYER -->
+    <div class="video-layer" id="video-layer"><div id="yt-player"></div></div>
 
     <!-- HEADER -->
     <div class="shorts-header">
@@ -369,28 +312,21 @@ html,body{
         <div class="brand-name">Egleze<em>Shorts</em></div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" id="mode-toggle" title="Toggle audio/video">📺</button>
-        <button class="icon-btn" id="install-btn" style="display:none" title="Install app">⊕</button>
+        <button class="icon-btn" id="sound-toggle" title="Sound mode">📺</button>
       </div>
     </div>
 
-    <!-- CATEGORY STRIP -->
-    <div class="cat-strip" id="cat-strip">
-      <!-- Categories injected by JS -->
-    </div>
+    <div class="sound-toast" id="sound-toast">Video + Sound</div>
 
-    <!-- LOADING -->
+    <div class="cat-strip" id="cat-strip"></div>
+
     <div class="loading" id="loading">
       <div class="brand-e">E</div>
       <p>Loading conversations…</p>
     </div>
 
-    <!-- FEED -->
-    <div class="feed" id="feed">
-      <!-- Stories injected by JS -->
-    </div>
+    <div class="feed" id="feed"></div>
 
-    <!-- EMPTY STATE -->
     <div class="empty" id="empty" style="display:none">
       <div class="brand-e" style="width:54px;height:54px;font-size:32px;margin-bottom:18px"></div>
       <h2>No stories in this category</h2>
@@ -398,20 +334,14 @@ html,body{
       <button class="cta primary" onclick="document.querySelector('.cat-pill[data-cat=all]').click()">View all</button>
     </div>
 
-    <!-- SWIPE HINT -->
-    <div class="swipe-hint hidden" id="swipe-hint">
-      <span>↑</span>
-      <span>Swipe up</span>
-    </div>
+    <div class="swipe-hint hidden" id="swipe-hint"><span>↑</span><span>Swipe up</span></div>
 
-    <!-- TAP TO UNMUTE OVERLAY -->
     <div class="tap-unmute" id="tap-unmute">
       <div class="tap-card">
         <div class="speaker">🔊</div>
         <h3>Tap to start with sound</h3>
-        <p>Browser blocks autoplay with sound until you tap. One tap unlocks audio for the whole session.</p>
+        <p>One tap unlocks audio for the whole session. <span class="mobile-only">On phone: tap any story to advance to the next one.</span></p>
         <button class="cta primary" id="unmute-btn">▸ Start watching</button>
-        <p class="muted-tip">or browse silently — tap anywhere to start</p>
       </div>
     </div>
 
@@ -420,14 +350,12 @@ html,body{
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// EGLEZE SHORTS V1 — STAGE 1
-// Functional swipe feed pulling from Supabase
+// EGLEZE SHORTS V1.1 — Single Persistent Player
 // ═══════════════════════════════════════════════════════════════════
 
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
 
-// Categories with display info
 const CATEGORIES = [
   { id: 'all', label: 'For You', emoji: '' },
   { id: 'Intelligence', label: 'Intelligence', emoji: '🧠' },
@@ -450,94 +378,63 @@ const CATEGORIES = [
   { id: 'Sports', label: 'Sports', emoji: '🏆' }
 ];
 
-// State
+const SOUND_MODES = [
+  { id: 'video',  icon: '📺', label: 'Video + Sound' },
+  { id: 'audio',  icon: '🎧', label: 'Audio Only' },
+  { id: 'silent', icon: '🔇', label: 'Silent (Browse)' }
+];
+
 const state = {
   allStories: [],
   shows: {},
   filteredStories: [],
   currentCategory: 'all',
   currentIndex: 0,
-  audioMode: false,
-  soundUnlocked: false, // user must tap once to enable sound
-  players: new Map(), // YT players keyed by story id
+  soundMode: 'video',
+  player: null,
+  ytReady: false,
+  currentLoadedStoryId: null,
+  progressTimer: null,
+  startedSession: false,
 };
 
-// ─── INIT ──────────────────────────────────────────────────────────
 async function init() {
-  setupModeToggle();
+  setupSoundToggle();
   setupUnmuteOverlay();
+  loadYouTubeAPI();
   await Promise.all([loadShows(), loadStories()]);
-  renderCategories(); // must run AFTER stories are loaded so we know counts
+  renderCategories();
   applyFilter();
   document.getElementById('loading').style.display = 'none';
   setupScrollObserver();
   showSwipeHintIfNeeded();
 }
 
-// ─── UNMUTE OVERLAY ────────────────────────────────────────────────
-function setupUnmuteOverlay() {
-  const overlay = document.getElementById('tap-unmute');
-  const btn = document.getElementById('unmute-btn');
-
-  // Primary "Start watching" button = unlock sound for everyone
-  btn.addEventListener('click', () => {
-    state.soundUnlocked = true;
-    overlay.classList.add('hidden');
-    // Unmute current player(s)
-    state.players.forEach(p => { try { p.unMute(); } catch(_) {} });
-  });
-
-  // Tap anywhere on overlay = browse silently (just close, don't unmute)
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay || e.target.classList.contains('tap-card')) {
-      overlay.classList.add('hidden');
-      // user chose silent browsing — leave videos muted, don't auto-advance
-    }
-  });
-}
-
-// ─── DATA ──────────────────────────────────────────────────────────
 async function fetchSupabase(path) {
   const url = `${SUPABASE_URL}/rest/v1/${path}`;
   const res = await fetch(url, {
-    headers: {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'Accept-Profile': 'public'
-    }
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Accept-Profile': 'public' }
   });
   if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
   return res.json();
 }
-
 async function loadShows() {
   try {
     const shows = await fetchSupabase('shows?select=name,artwork_url,website_url&active=eq.true');
     shows.forEach(s => state.shows[s.name] = s);
-  } catch (e) {
-    console.warn('[shorts] could not load shows:', e);
-  }
+  } catch (e) { console.warn('[shorts] shows failed:', e); }
 }
-
 async function loadStories() {
   try {
     const path = `stories?select=*&status=eq.approved&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&source_url=not.is.null&order=created_at.desc&limit=80`;
     state.allStories = await fetchSupabase(path);
-  } catch (e) {
-    console.error('[shorts] failed to load stories:', e);
-    state.allStories = [];
-  }
+  } catch (e) { console.error('[shorts] stories failed:', e); state.allStories = []; }
 }
 
-// ─── CATEGORIES ────────────────────────────────────────────────────
 function renderCategories() {
   const strip = document.getElementById('cat-strip');
-  // Count stories per topic
   const topicCounts = {};
-  state.allStories.forEach(s => {
-    if (s.topic) topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1;
-  });
-  // Filter to "For You" + only categories with at least one story
+  state.allStories.forEach(s => { if (s.topic) topicCounts[s.topic] = (topicCounts[s.topic] || 0) + 1; });
   const visible = CATEGORIES.filter(c => c.id === 'all' || topicCounts[c.id] > 0);
   strip.innerHTML = visible.map(c => {
     const count = c.id === 'all' ? state.allStories.length : (topicCounts[c.id] || 0);
@@ -554,45 +451,33 @@ function renderCategories() {
     pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   });
 }
-
 function applyFilter() {
-  if (state.currentCategory === 'all') {
-    state.filteredStories = [...state.allStories];
-  } else {
-    state.filteredStories = state.allStories.filter(s => s.topic === state.currentCategory);
-  }
+  state.filteredStories = state.currentCategory === 'all'
+    ? [...state.allStories]
+    : state.allStories.filter(s => s.topic === state.currentCategory);
   state.currentIndex = 0;
+  state.currentLoadedStoryId = null; // force reload of player
   renderFeed();
   document.getElementById('feed').scrollTo({ top: 0 });
+  setTimeout(() => loadStoryIntoPlayer(0), 100);
 }
 
-// ─── RENDER ────────────────────────────────────────────────────────
 function renderFeed() {
   const feed = document.getElementById('feed');
   const empty = document.getElementById('empty');
-
-  // Tear down existing players to avoid leaks
-  state.players.forEach(p => { try { p.destroy(); } catch (_) {} });
-  state.players.clear();
-
   if (state.filteredStories.length === 0) {
     feed.innerHTML = '';
     empty.style.display = 'flex';
     return;
   }
   empty.style.display = 'none';
-
   feed.innerHTML = state.filteredStories.map((s, idx) => storyHTML(s, idx)).join('');
-
-  // First story is active by default
   feed.querySelector('.story')?.classList.add('active');
-  startPlayerForIndex(0);
 }
-
 function storyHTML(s, idx) {
   const show = state.shows[s.show_name] || {};
   const artwork = show.artwork_url || '';
-  const youtubeId = extractYouTubeId(s.source_url);
+  const ytId = extractYouTubeId(s.source_url);
   const showInitials = (s.show_name || 'E').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
   const clipLen = (s.clip_end_seconds && s.clip_start_seconds) ? (s.clip_end_seconds - s.clip_start_seconds) : 60;
   const clipMins = Math.floor(clipLen / 60);
@@ -600,231 +485,243 @@ function storyHTML(s, idx) {
   const clipDisplay = clipMins > 0 ? `${clipMins}:${String(clipSecs).padStart(2,'0')}` : `0:${String(clipSecs).padStart(2,'0')}`;
   const summary = (s.summary || '').replace(/"/g,'&quot;');
   const headline = (s.headline || '').replace(/"/g,'&quot;');
-
   return `
-    <div class="story" data-idx="${idx}" data-id="${s.id}" data-yt="${youtubeId || ''}" data-start="${s.clip_start_seconds||0}" data-end="${s.clip_end_seconds||0}">
+    <div class="story" data-idx="${idx}" data-id="${s.id}" data-yt="${ytId || ''}" data-start="${s.clip_start_seconds||0}" data-end="${s.clip_end_seconds||0}">
       <div class="poster ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
-      <div class="video-wrap" id="video-${idx}"></div>
       <div class="audio-art ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
-      <div class="audio-icon">🎧</div>
       <div class="overlay"></div>
-
+      <div class="tap-advance" onclick="handleTapAdvance(${idx})"></div>
+      ${idx === 0 ? '<div class="tap-advance-hint"><span class="icon">⊕</span>Tap anywhere to advance</div>' : ''}
       <div class="clip-dur">▸ ${clipDisplay}</div>
       <div class="progress"><div class="progress-fill" id="progress-${idx}"></div></div>
-
       <div class="actions">
         <div class="action-btn" title="Save">⊕</div>
-        <div class="action-btn" title="Share" onclick="shareStory(${s.id}, '${headline.replace(/'/g,"\\'")}')">↗</div>
+        <div class="action-btn" title="Share" onclick="event.stopPropagation();shareStory(${s.id}, '${headline.replace(/'/g,"\\'")}')">↗</div>
         <div class="action-btn show-mark" title="${s.show_name}" style="${artwork?`background-image:url('${artwork}')`:`background:linear-gradient(135deg,#3a2818,#1a1208);font-size:14px;color:#fff;`}">${!artwork?showInitials:''}</div>
         <div class="action-label">Show</div>
       </div>
-
-      <div class="body">
+      <div class="body" onclick="event.stopPropagation()">
         <div class="topic-line">${s.topic || 'Story'}</div>
         <h2 class="headline">${headline}</h2>
         <div class="show-line"><strong>${s.show_name || ''}</strong>${s.episode ? ' · ' + truncate(s.episode, 50) : ''}</div>
         <p class="summary">${summary}</p>
         <div class="ctas">
-          ${s.source_url ? `<a class="cta primary" href="${s.source_url}" target="_blank" rel="noopener">▸ Watch full episode</a>` : ''}
-          <a class="cta secondary" href="https://egleze.com/?story=${s.id}" target="_blank" rel="noopener">Read on Egleze</a>
+          ${s.source_url ? `<a class="cta primary" href="${s.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▸ Watch full episode</a>` : ''}
+          <a class="cta secondary" href="https://egleze.com/?story=${s.id}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Egleze</a>
         </div>
       </div>
     </div>
   `;
 }
-
 function truncate(s, n) { return s && s.length > n ? s.slice(0,n) + '…' : s; }
-
 function extractYouTubeId(url) {
   if (!url) return null;
-  const patterns = [
-    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
-  }
+  const patterns = [/youtu\.be\/([a-zA-Z0-9_-]{11})/, /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/];
+  for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
   return null;
 }
 
-// ─── YT PLAYER ─────────────────────────────────────────────────────
-let ytApiReady = false;
-const ytApiQueue = [];
+// ─── PERSISTENT YT PLAYER ───────────────────────────────────────
 function loadYouTubeAPI() {
-  if (window.YT && window.YT.Player) { ytApiReady = true; return; }
+  if (window.YT && window.YT.Player) { onYTReady(); return; }
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
   document.head.appendChild(tag);
-  window.onYouTubeIframeAPIReady = () => {
-    ytApiReady = true;
-    while (ytApiQueue.length) ytApiQueue.shift()();
-  };
+  window.onYouTubeIframeAPIReady = onYTReady;
 }
-loadYouTubeAPI();
-
-function startPlayerForIndex(idx) {
-  const story = document.querySelector(`.story[data-idx="${idx}"]`);
-  if (!story) return;
-  const ytId = story.dataset.yt;
-  if (!ytId) return;
-  const start = parseInt(story.dataset.start, 10) || 0;
-  const end = parseInt(story.dataset.end, 10) || (start + 60);
-  const id = parseInt(story.dataset.id, 10);
-  const wrap = story.querySelector('.video-wrap');
-
-  // Stop other players
-  state.players.forEach((p, key) => {
-    if (key !== id) { try { p.pauseVideo(); } catch(_) {} }
-  });
-
-  const create = () => {
-    if (state.players.has(id)) {
-      try {
-        state.players.get(id).playVideo();
-        if (state.soundUnlocked) state.players.get(id).unMute();
-      } catch(_) {}
-      return;
-    }
-    wrap.innerHTML = `<div id="yt-${idx}"></div>`;
-    new window.YT.Player(`yt-${idx}`, {
-      videoId: ytId,
-      playerVars: { autoplay: 1, controls: 0, modestbranding: 1, playsinline: 1, mute: 1, start, end, rel: 0, iv_load_policy: 3 },
-      events: {
-        onReady: e => {
-          state.players.set(id, e.target);
-          // Start muted always (browsers require this for autoplay)
-          try { e.target.mute(); } catch(_) {}
-          try { e.target.playVideo(); } catch(_) {}
-          // If user has already unlocked sound this session, unmute now
-          if (state.soundUnlocked) try { e.target.unMute(); } catch(_) {}
-          wrap.classList.add('visible');
-          startProgressTimer(idx, start, end);
-        },
-        onStateChange: e => {
-          // Only advance on natural ENDED if we've played past start (avoid instant-end false trigger)
-          if (e.data === window.YT.PlayerState.ENDED) {
-            try {
-              const cur = e.target.getCurrentTime();
-              if (cur >= end - 1) advanceTo(idx + 1);
-            } catch(_) {}
-          }
-        },
-        onError: () => {
-          // Don't auto-advance on error; let user manually swipe
-          console.warn('[shorts] YT player error for story', id);
+function onYTReady() {
+  if (state.player) return;
+  state.player = new window.YT.Player('yt-player', {
+    height: '100%', width: '100%',
+    videoId: 'M7lc1UVf-VE', // YouTube developer placeholder, embeddable
+    playerVars: {
+      autoplay: 0, controls: 0, modestbranding: 1, playsinline: 1, mute: 1, rel: 0, iv_load_policy: 3,
+      origin: window.location.origin
+    },
+    events: {
+      onReady: () => {
+        state.ytReady = true;
+        if (state.filteredStories.length > 0) loadStoryIntoPlayer(state.currentIndex);
+      },
+      onStateChange: e => {
+        if (e.data === window.YT.PlayerState.ENDED) {
+          try {
+            const story = state.filteredStories[state.currentIndex];
+            if (story && state.player.getCurrentTime() >= (story.clip_end_seconds || 0) - 1) {
+              advanceTo(state.currentIndex + 1);
+            }
+          } catch(_) {}
         }
       }
-    });
-  };
-  if (ytApiReady) create(); else ytApiQueue.push(create);
-}
-
-const progressTimers = new Map();
-function startProgressTimer(idx, start, end) {
-  if (progressTimers.has(idx)) { clearInterval(progressTimers.get(idx)); }
-  const fill = document.getElementById(`progress-${idx}`);
-  const story = document.querySelector(`.story[data-idx="${idx}"]`);
-  if (!story) return;
-  const id = parseInt(story.dataset.id, 10);
-  const total = (end - start) || 60;
-  let lastSeenTime = start;
-  let stalledTicks = 0;
-  const timer = setInterval(() => {
-    const player = state.players.get(id);
-    if (!player) return;
-    let cur;
-    try { cur = player.getCurrentTime(); } catch(_) { return; }
-    if (typeof cur !== 'number' || cur < start - 5) {
-      // player not actually playing yet — don't advance
-      return;
     }
-    // Detect stall (video not progressing for many ticks)
-    if (Math.abs(cur - lastSeenTime) < 0.05) stalledTicks++;
-    else stalledTicks = 0;
-    lastSeenTime = cur;
-
+  });
+}
+function loadStoryIntoPlayer(idx) {
+  const story = state.filteredStories[idx];
+  if (!story || !state.player || !state.ytReady) return;
+  if (state.currentLoadedStoryId === story.id) return;
+  const ytId = extractYouTubeId(story.source_url);
+  if (!ytId) return;
+  const start = story.clip_start_seconds || 0;
+  const end = story.clip_end_seconds || (start + 60);
+  state.currentLoadedStoryId = story.id;
+  try {
+    if (state.soundMode === 'silent') {
+      state.player.cueVideoById({ videoId: ytId, startSeconds: start, endSeconds: end });
+    } else {
+      state.player.loadVideoById({ videoId: ytId, startSeconds: start, endSeconds: end });
+    }
+    applySoundModeToPlayer();
+    document.getElementById('video-layer').classList.add('visible');
+  } catch (e) { console.warn('[shorts] loadVideoById failed:', e); }
+  startProgressTimer(idx, start, end);
+}
+function startProgressTimer(idx, start, end) {
+  if (state.progressTimer) clearInterval(state.progressTimer);
+  // Reset all progress bars
+  document.querySelectorAll('.progress-fill').forEach(f => f.style.width = '0%');
+  const fill = document.getElementById(`progress-${idx}`);
+  const total = (end - start) || 60;
+  state.progressTimer = setInterval(() => {
+    if (!state.player) return;
+    let cur;
+    try { cur = state.player.getCurrentTime(); } catch(_) { return; }
+    if (typeof cur !== 'number') return;
     const elapsed = Math.max(0, cur - start);
     const pct = Math.min(100, (elapsed / total) * 100);
     if (fill) fill.style.width = pct + '%';
-
-    // Advance only when truly past the clip end
     if (elapsed >= total) {
-      clearInterval(timer);
-      progressTimers.delete(idx);
-      try { player.pauseVideo(); } catch(_) {}
-      // Only auto-advance if user has unlocked sound (they're actively engaging)
-      if (state.soundUnlocked) advanceTo(idx + 1);
-      return;
-    }
-    // Stalled too long (8 seconds with no progress) — stop the timer but DON'T auto-advance
-    if (stalledTicks > 32) {
-      clearInterval(timer);
-      progressTimers.delete(idx);
+      clearInterval(state.progressTimer);
+      state.progressTimer = null;
+      try { state.player.pauseVideo(); } catch(_) {}
+      if (state.startedSession && state.soundMode !== 'silent') {
+        advanceTo(idx + 1);
+      }
     }
   }, 250);
-  progressTimers.set(idx, timer);
 }
-
 function advanceTo(idx) {
   const next = document.querySelector(`.story[data-idx="${idx}"]`);
-  if (next) {
-    next.scrollIntoView({ behavior: 'smooth' });
-  }
+  if (next) next.scrollIntoView({ behavior: 'smooth' });
 }
 
-// ─── SCROLL OBSERVER (changes active story when user swipes) ───────
+// MOBILE: tap anywhere on video to advance. Each tap is a fresh user gesture,
+// which iOS treats as permission to autoplay the next video.
+function handleTapAdvance(currentIdx) {
+  // First tap on first story = unlock sound (same as Start watching button)
+  if (!state.startedSession) {
+    state.startedSession = true;
+    document.getElementById('tap-unmute')?.classList.add('hidden');
+    if (state.player) {
+      try { state.player.unMute(); state.player.playVideo(); } catch(_) {}
+    }
+    return; // first tap just starts, doesn't advance
+  }
+  // Subsequent taps advance to next story
+  const nextIdx = currentIdx + 1;
+  if (nextIdx >= state.filteredStories.length) return;
+  // Pre-prime the player with the next video AT THIS TAP MOMENT
+  // so iOS sees this gesture as the trigger for the next play
+  const nextStory = state.filteredStories[nextIdx];
+  if (nextStory && state.player && state.ytReady) {
+    const ytId = extractYouTubeId(nextStory.source_url);
+    const start = nextStory.clip_start_seconds || 0;
+    const end = nextStory.clip_end_seconds || (start + 60);
+    if (ytId) {
+      try {
+        state.player.loadVideoById({ videoId: ytId, startSeconds: start, endSeconds: end });
+        if (state.soundMode !== 'silent') state.player.unMute();
+        state.currentLoadedStoryId = nextStory.id;
+      } catch(_) {}
+    }
+  }
+  // Then scroll to the next story
+  advanceTo(nextIdx);
+}
+
 function setupScrollObserver() {
   const feed = document.getElementById('feed');
+  let scrollDebounce;
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      const story = entry.target;
       if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-        // This story is now active
+        const story = entry.target;
         document.querySelectorAll('.story').forEach(s => s.classList.remove('active'));
         story.classList.add('active');
         const idx = parseInt(story.dataset.idx, 10);
         state.currentIndex = idx;
-        startPlayerForIndex(idx);
+        clearTimeout(scrollDebounce);
+        scrollDebounce = setTimeout(() => loadStoryIntoPlayer(idx), 80);
         hideSwipeHint();
       }
     });
   }, { root: feed, threshold: [0.6] });
   document.querySelectorAll('.story').forEach(s => obs.observe(s));
-  // Re-observe when feed re-renders
   const mo = new MutationObserver(() => {
     document.querySelectorAll('.story').forEach(s => obs.observe(s));
   });
   mo.observe(feed, { childList: true });
 }
 
-// ─── AUDIO/VIDEO TOGGLE ────────────────────────────────────────────
-function setupModeToggle() {
-  const btn = document.getElementById('mode-toggle');
+function setupSoundToggle() {
+  const btn = document.getElementById('sound-toggle');
   btn.addEventListener('click', () => {
-    state.audioMode = !state.audioMode;
-    btn.textContent = state.audioMode ? '🎧' : '📺';
-    btn.classList.toggle('active', state.audioMode);
-    document.querySelectorAll('.story').forEach(s => s.classList.toggle('audio-mode', state.audioMode));
+    const i = SOUND_MODES.findIndex(m => m.id === state.soundMode);
+    const next = SOUND_MODES[(i + 1) % SOUND_MODES.length];
+    state.soundMode = next.id;
+    btn.textContent = next.icon;
+    showSoundToast(next.label);
+    document.getElementById('shell').classList.toggle('audio-mode-active', state.soundMode === 'audio');
+    applySoundModeToPlayer();
+  });
+}
+function applySoundModeToPlayer() {
+  if (!state.player || !state.ytReady) return;
+  try {
+    if (state.soundMode === 'silent') {
+      state.player.mute();
+      state.player.pauseVideo();
+    } else {
+      // video or audio: play with sound (if user has unlocked)
+      if (state.startedSession) state.player.unMute();
+      state.player.playVideo();
+    }
+  } catch(_) {}
+}
+function showSoundToast(label) {
+  const t = document.getElementById('sound-toast');
+  t.textContent = label;
+  t.classList.add('visible');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.remove('visible'), 1500);
+}
+
+function setupUnmuteOverlay() {
+  const overlay = document.getElementById('tap-unmute');
+  const btn = document.getElementById('unmute-btn');
+  btn.addEventListener('click', () => {
+    state.startedSession = true;
+    overlay.classList.add('hidden');
+    if (state.player) {
+      try { state.player.unMute(); state.player.playVideo(); } catch(_) {}
+    }
   });
 }
 
-// ─── SHARE ────────────────────────────────────────────────────────
 function shareStory(id, headline) {
   const url = `https://egleze.com/?story=${id}`;
   if (navigator.share) {
     navigator.share({ title: headline, url }).catch(()=>{});
   } else {
     navigator.clipboard?.writeText(url);
-    const btn = event.target;
-    const orig = btn.textContent;
-    btn.textContent = '✓';
-    setTimeout(() => btn.textContent = orig, 1500);
+    if (event && event.target) {
+      const orig = event.target.textContent;
+      event.target.textContent = '✓';
+      setTimeout(() => event.target.textContent = orig, 1500);
+    }
   }
 }
 
-// ─── SWIPE HINT ──────────────────────────────────────────────────
 function showSwipeHintIfNeeded() {
   if (localStorage.getItem('egleze-shorts-onboarded') === '1') return;
   if (state.filteredStories.length < 2) return;
@@ -835,9 +732,7 @@ function hideSwipeHint() {
   localStorage.setItem('egleze-shorts-onboarded', '1');
 }
 
-// ─── BOOT ─────────────────────────────────────────────────────────
 init();
 </script>
-
 </body>
 </html>
