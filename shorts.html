@@ -58,15 +58,23 @@ html,body{
   }
 }
 
-/* PERSISTENT VIDEO LAYER — single iframe, never destroyed */
+/* PERSISTENT VIDEO LAYER — kept off-screen as a holding spot */
 .video-layer{
+  position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;
+  z-index:-1;pointer-events:none;overflow:hidden;
+}
+.video-layer iframe{width:100%;height:100%;border:0}
+
+/* VIDEO SLOT inside each story — where iframe gets reparented when active */
+.video-slot{
   position:absolute;inset:0;z-index:2;
   background:#000;pointer-events:none;
   opacity:0;transition:opacity .25s ease;
+  overflow:hidden;
 }
-.video-layer.visible{opacity:1}
-.video-layer iframe{width:100%;height:100%;border:0;pointer-events:none}
-.audio-mode-active .video-layer{opacity:0 !important}
+.video-slot.visible{opacity:1}
+.video-slot iframe{width:100%;height:100%;border:0;pointer-events:none}
+.audio-mode-active .video-slot{opacity:0 !important}
 
 /* TAP-TO-ADVANCE overlay — captures taps on mobile so each tap is a user gesture */
 .tap-advance{
@@ -488,6 +496,7 @@ function storyHTML(s, idx) {
   return `
     <div class="story" data-idx="${idx}" data-id="${s.id}" data-yt="${ytId || ''}" data-start="${s.clip_start_seconds||0}" data-end="${s.clip_end_seconds||0}">
       <div class="poster ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
+      <div class="video-slot"></div>
       <div class="audio-art ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
       <div class="overlay"></div>
       <div class="tap-advance" onclick="handleTapAdvance(${idx})"></div>
@@ -565,6 +574,15 @@ function loadStoryIntoPlayer(idx) {
   const start = story.clip_start_seconds || 0;
   const end = story.clip_end_seconds || (start + 60);
   state.currentLoadedStoryId = story.id;
+
+  // REPARENT the iframe into this story's video slot for proper layering
+  const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
+  const slot = storyEl?.querySelector('.video-slot');
+  const iframe = document.querySelector('#yt-player') || document.querySelector('.video-layer iframe');
+  if (slot && iframe && iframe.parentElement !== slot) {
+    slot.appendChild(iframe);
+  }
+
   try {
     if (state.soundMode === 'silent') {
       state.player.cueVideoById({ videoId: ytId, startSeconds: start, endSeconds: end });
@@ -572,7 +590,7 @@ function loadStoryIntoPlayer(idx) {
       state.player.loadVideoById({ videoId: ytId, startSeconds: start, endSeconds: end });
     }
     applySoundModeToPlayer();
-    document.getElementById('video-layer').classList.add('visible');
+    if (slot) slot.classList.add('visible');
   } catch (e) { console.warn('[shorts] loadVideoById failed:', e); }
   startProgressTimer(idx, start, end);
 }
