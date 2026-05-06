@@ -979,7 +979,7 @@ async function loadStories(topic = null) {
     let query = db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('score', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(50);
 
     // Filter by topic field — map short category names to broader search terms
@@ -1019,7 +1019,7 @@ async function loadStories(topic = null) {
           .select('*')
           .eq('status', 'approved')
           .contains('categories', [topic])
-          .order('score', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(50);
         if (catData && catData.length > 0) {
           // Merge and deduplicate by id
@@ -1036,7 +1036,7 @@ async function loadStories(topic = null) {
           .select('*')
           .eq('status', 'approved')
           .or(`headline.ilike.%${topic}%,summary.ilike.%${topic}%`)
-          .order('score', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(20);
         if (textData && textData.length > 0) {
           const ids = new Set(combined.map(s => s.id));
@@ -1521,7 +1521,7 @@ async function loadClips() {
     const { data } = await db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('score', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(8);
     const grid = document.getElementById('clips-grid');
     if (!grid) return;
@@ -1836,7 +1836,7 @@ async function loadBroadcastQueue() {
       .not('source_url', 'is', null)
       .not('clip_start_seconds', 'is', null)
       .not('clip_end_seconds', 'is', null)
-      .order('score', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(16);
     if (result.error) {
       console.log('[broadcast] queue load error:', result.error.message || result.error);
