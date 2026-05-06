@@ -1605,11 +1605,11 @@ function whenYTReady(cb) {
   ytApiReadyCallbacks.push(cb);
 }
 
-// Extract YouTube video ID from any YouTube URL form (youtu.be, watch?v=, embed/, shorts/)
+// Extract YouTube video ID from any YouTube URL form (youtu.be, watch?v=, embed/, shorts/, live/)
 function extractYouTubeId(url) {
   if (!url) return null;
   var s = String(url);
-  var m = s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|v\/))([a-zA-Z0-9_-]{11})/);
+  var m = s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{11})/);
   return m ? m[1] : null;
 }
 
