@@ -43,7 +43,7 @@
   "name": "Egleze",
   "alternateName": "Egleze — Podcast Intelligence Network",
   "url": "https://egleze.com",
-  "sameAs": ["https://x.com/egleze_news","https://instagram.com/egleze.media","https://youtube.com/@egleze","https://linkedin.com/company/egleze"],
+  "sameAs": ["https://x.com/egleze_news","https://www.instagram.com/eglezemedia/","https://www.tiktok.com/@egleze.media","https://www.youtube.com/@Egleze","https://www.linkedin.com/company/egleze-the-podcast-intelligence-network/"],
   "foundingDate": "2026",
   "description": "Egleze is the Podcast Intelligence Network — surfacing the most important revelations from the world top podcasts and presenting them as breaking news.",
   "publishingPrinciples": "https://egleze.com/legal#editorial"
@@ -793,11 +793,14 @@ nav::-webkit-scrollbar{display:none}
         Egleze (from the Greek <em>Ekklisia</em>) is an international news institution dedicated to the curation and reporting of long-form digital media — extracting the world's most important spoken-word revelations into a permanent, searchable record.
       </div>
       <div class="eg-social" aria-label="Egleze on social platforms">
-        <a href="#" title="X" aria-label="Egleze on X">𝕏</a>
-        <a href="#" title="YouTube" aria-label="Egleze on YouTube">▶</a>
-        <a href="#" title="Spotify Podcasts" aria-label="Egleze on Spotify">♫</a>
-        <a href="#" title="Apple Podcasts" aria-label="Egleze on Apple Podcasts">⌬</a>
-        <a href="#" title="Substack" aria-label="Egleze on Substack">✍</a>
+        <a href="https://x.com/egleze_news" target="_blank" rel="noopener" title="X" aria-label="Egleze on X">𝕏</a>
+        <a href="https://www.youtube.com/@Egleze" target="_blank" rel="noopener" title="YouTube" aria-label="Egleze on YouTube">▶</a>
+        <a href="https://www.instagram.com/eglezemedia/" target="_blank" rel="noopener" title="Instagram" aria-label="Egleze on Instagram">◉</a>
+        <a href="https://www.tiktok.com/@egleze.media" target="_blank" rel="noopener" title="TikTok" aria-label="Egleze on TikTok">♪</a>
+        <a href="https://www.linkedin.com/company/egleze-the-podcast-intelligence-network/" target="_blank" rel="noopener" title="LinkedIn" aria-label="Egleze on LinkedIn">in</a>
+        <a href="#" title="Spotify Podcasts" aria-label="Egleze on Spotify (coming soon)">♫</a>
+        <a href="#" title="Apple Podcasts" aria-label="Egleze on Apple Podcasts (coming soon)">⌬</a>
+        <a href="#" title="Substack" aria-label="Egleze on Substack (coming soon)">✍</a>
       </div>
     </div>
 
@@ -2256,6 +2259,39 @@ async function bannerSubscribe() {
     </div>
   </div>
 </div>
+
+<!-- ── DESKTOP-ONLY: SHORTS / SWIPE VIEW FAB ──────────────────── -->
+<style>
+  #shorts-fab{
+    position:fixed;right:24px;bottom:24px;z-index:9998;
+    display:flex;align-items:center;gap:10px;
+    background:var(--red,#bb1919);color:#fff;
+    padding:12px 18px;border-radius:999px;
+    font-family:'Roboto Condensed',sans-serif;font-size:12px;
+    letter-spacing:1.5px;text-transform:uppercase;font-weight:700;
+    text-decoration:none;
+    box-shadow:0 6px 24px rgba(187,25,25,.35),0 2px 8px rgba(0,0,0,.18);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  #shorts-fab:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 32px rgba(187,25,25,.45),0 4px 12px rgba(0,0,0,.22);
+    background:#a31515;
+  }
+  #shorts-fab .fab-icon{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.18);
+    font-size:13px;line-height:1;
+  }
+  /* Hide on mobile — already in shorts on mobile */
+  @media (max-width:760px){
+    #shorts-fab{display:none}
+  }
+</style>
+<a id="shorts-fab" href="/shorts.html" aria-label="Switch to mobile shorts view">
+  <span class="fab-icon" aria-hidden="true">▶</span>
+  <span>Shorts View</span>
+</a>
 
 </body>
 </html>
