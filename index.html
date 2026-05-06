@@ -127,6 +127,29 @@ nav::-webkit-scrollbar{display:none}
 .nav-item:hover{color:var(--dark)}
 .nav-item.active{color:var(--dark);border-bottom-color:var(--red)}
 .nav-item.hot{color:var(--red)}
+.nav-item.nav-more-btn{color:var(--dark);border:1px solid var(--border);padding:6px 14px;margin:6px 4px;border-radius:2px}
+.nav-item.nav-more-btn:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+.nav-item.nav-more-btn.open{background:var(--dark);color:#fff;border-color:var(--dark)}
+.topic-btn-more{border-color:var(--dark) !important;color:var(--dark) !important;font-weight:700}
+.topic-btn-more:hover{background:var(--dark) !important;color:#fff !important}
+.topic-btn-more.open{background:var(--dark) !important;color:#fff !important;border-color:var(--dark) !important}
+/* Mega menu dropdown — desktop & mobile */
+.mega-menu{display:none;position:absolute;left:0;right:0;top:100%;background:var(--white);border-bottom:2px solid var(--red);border-top:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.08);z-index:900;animation:megaSlide .18s ease-out}
+.mega-menu.open{display:block}
+@keyframes megaSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.mega-menu-inner{max-width:1320px;margin:0 auto;padding:22px 32px 26px}
+.mega-menu-title{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;font-weight:700}
+.mega-menu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 22px}
+.mega-cat{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--dark);cursor:pointer;padding:7px 8px;transition:all .15s;border-radius:2px}
+.mega-cat:hover{background:var(--dark);color:#fff}
+.mega-cat .mc-em{display:inline-block;width:22px;font-size:13px}
+@media (max-width:760px){
+  .mega-menu-grid{grid-template-columns:repeat(2,1fr);gap:6px 12px}
+  .mega-menu-inner{padding:16px 18px 20px}
+  .mega-cat{font-size:10px;padding:8px 6px}
+}
+/* Header is the positioning context for the mega menu */
+header{position:relative}
 .nav-subscribe{margin-left:auto;background:var(--dark);color:#fff;padding:8px 18px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:background .2s}
 .nav-subscribe:hover{background:var(--red)}
 
@@ -513,27 +536,54 @@ nav::-webkit-scrollbar{display:none}
       </div>
     </div>
   </div>
-  <nav style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+  <nav id="main-nav" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative">
     <div class="nav-item active" onclick="filterTopic(null,this)">Today's Reveals</div>
     <div class="nav-item hot" onclick="filterTopic(null,this)">🔥 Trending</div>
     <a class="nav-item" href="/shows.html" style="text-decoration:none;color:inherit">🎙️ Shows</a>
-    <div class="nav-item" onclick="filterTopic('Intelligence',this)">🧠 Intelligence</div>
-    <div class="nav-item" onclick="filterTopic('Military',this)">⚔️ Military</div>
-    <div class="nav-item" onclick="filterTopic('Health',this)">🏥 Health & Longevity</div>
-    <div class="nav-item" onclick="filterTopic('AI',this)">🤖 AI & Tech</div>
-    <div class="nav-item" onclick="filterTopic('Finance',this)">💰 Finance</div>
-    <div class="nav-item" onclick="filterTopic('Geopolitics',this)">🌍 Geopolitics</div>
-    <div class="nav-item" onclick="filterTopic('UFO',this)">👽 UFO & Paranormal</div>
+    <div class="nav-item" onclick="filterTopic('AI &amp; Tech',this)">🤖 AI &amp; Tech</div>
+    <div class="nav-item" onclick="filterTopic('Health, Longevity &amp; Biohacking',this)">🏥 Health</div>
     <div class="nav-item" onclick="filterTopic('Politics',this)">🏛️ Politics</div>
-    <div class="nav-item" onclick="filterTopic('Debates',this)">⚖️ Debates</div>
-    <div class="nav-item" onclick="filterTopic('Faith',this)">🙏 Faith & Spirituality</div>
-    <div class="nav-item" onclick="filterTopic('Business',this)">💼 Business</div>
-    <div class="nav-item" onclick="filterTopic('Science',this)">🔬 Science</div>
-    <div class="nav-item" onclick="filterTopic('Society',this)">🎭 Society & Culture</div>
-    <div class="nav-item" onclick="filterTopic('Consciousness',this)">🔮 Consciousness & Medicine</div>
-    <div class="nav-item" onclick="filterTopic('History',this)">📜 History</div>
-    <div class="nav-item" onclick="filterTopic('Controversial',this)">🔥 Controversial</div>
+    <div class="nav-item" onclick="filterTopic('Geopolitics',this)">🌍 Geopolitics</div>
+    <div class="nav-item" onclick="filterTopic('Comedy',this)">😂 Comedy</div>
+    <div class="nav-item" onclick="filterTopic('Sports',this)">⚽ Sports</div>
+    <div class="nav-item" onclick="filterTopic('Money',this)">💰 Money</div>
+    <div class="nav-item" onclick="filterTopic('Espionage',this)">🕵️ Espionage</div>
+    <div class="nav-item nav-more-btn" onclick="toggleMegaMenu(event)" id="nav-more-btn">More Topics <span style="font-size:8px">▾</span></div>
   </nav>
+  <!-- Mega-menu dropdown — all 26 categories -->
+  <div id="mega-menu" class="mega-menu" role="menu" aria-hidden="true">
+    <div class="mega-menu-inner">
+      <div class="mega-menu-title">All Topics</div>
+      <div class="mega-menu-grid">
+        <div class="mega-cat" onclick="filterTopic('AI &amp; Tech',null);closeMegaMenu()"><span class="mc-em">🤖</span> AI &amp; Tech</div>
+        <div class="mega-cat" onclick="filterTopic('Combat &amp; UFC',null);closeMegaMenu()"><span class="mc-em">🥊</span> Combat &amp; UFC</div>
+        <div class="mega-cat" onclick="filterTopic('Comedy',null);closeMegaMenu()"><span class="mc-em">😂</span> Comedy</div>
+        <div class="mega-cat" onclick="filterTopic('Consciousness &amp; Medicine',null);closeMegaMenu()"><span class="mc-em">🔮</span> Consciousness &amp; Medicine</div>
+        <div class="mega-cat" onclick="filterTopic('Controversial',null);closeMegaMenu()"><span class="mc-em">🔥</span> Controversial</div>
+        <div class="mega-cat" onclick="filterTopic('Crime &amp; Justice',null);closeMegaMenu()"><span class="mc-em">🔍</span> Crime &amp; Justice</div>
+        <div class="mega-cat" onclick="filterTopic('Debates',null);closeMegaMenu()"><span class="mc-em">⚖️</span> Debates</div>
+        <div class="mega-cat" onclick="filterTopic('Education &amp; Learning',null);closeMegaMenu()"><span class="mc-em">📚</span> Education &amp; Learning</div>
+        <div class="mega-cat" onclick="filterTopic('Energy &amp; Climate',null);closeMegaMenu()"><span class="mc-em">🌱</span> Energy &amp; Climate</div>
+        <div class="mega-cat" onclick="filterTopic('Entertainment',null);closeMegaMenu()"><span class="mc-em">🎬</span> Entertainment</div>
+        <div class="mega-cat" onclick="filterTopic('Espionage',null);closeMegaMenu()"><span class="mc-em">🕵️</span> Espionage</div>
+        <div class="mega-cat" onclick="filterTopic('Faith &amp; Spirituality',null);closeMegaMenu()"><span class="mc-em">🙏</span> Faith &amp; Spirituality</div>
+        <div class="mega-cat" onclick="filterTopic('Geopolitics',null);closeMegaMenu()"><span class="mc-em">🌍</span> Geopolitics</div>
+        <div class="mega-cat" onclick="filterTopic('Health, Longevity &amp; Biohacking',null);closeMegaMenu()"><span class="mc-em">🏥</span> Health, Longevity &amp; Biohacking</div>
+        <div class="mega-cat" onclick="filterTopic('History',null);closeMegaMenu()"><span class="mc-em">📜</span> History</div>
+        <div class="mega-cat" onclick="filterTopic('Media &amp; Journalism',null);closeMegaMenu()"><span class="mc-em">📰</span> Media &amp; Journalism</div>
+        <div class="mega-cat" onclick="filterTopic('Military',null);closeMegaMenu()"><span class="mc-em">⚔️</span> Military</div>
+        <div class="mega-cat" onclick="filterTopic('Money',null);closeMegaMenu()"><span class="mc-em">💰</span> Money</div>
+        <div class="mega-cat" onclick="filterTopic('Monologues',null);closeMegaMenu()"><span class="mc-em">🎙️</span> Monologues</div>
+        <div class="mega-cat" onclick="filterTopic('Politics',null);closeMegaMenu()"><span class="mc-em">🏛️</span> Politics</div>
+        <div class="mega-cat" onclick="filterTopic('Psychology',null);closeMegaMenu()"><span class="mc-em">🧩</span> Psychology</div>
+        <div class="mega-cat" onclick="filterTopic('Relationships &amp; Family',null);closeMegaMenu()"><span class="mc-em">💑</span> Relationships &amp; Family</div>
+        <div class="mega-cat" onclick="filterTopic('Science',null);closeMegaMenu()"><span class="mc-em">🔬</span> Science</div>
+        <div class="mega-cat" onclick="filterTopic('Society',null);closeMegaMenu()"><span class="mc-em">🎭</span> Society</div>
+        <div class="mega-cat" onclick="filterTopic('Sports',null);closeMegaMenu()"><span class="mc-em">⚽</span> Sports</div>
+        <div class="mega-cat" onclick="filterTopic('UFO &amp; Paranormal',null);closeMegaMenu()"><span class="mc-em">👽</span> UFO &amp; Paranormal</div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <div class="page">
@@ -687,22 +737,15 @@ nav::-webkit-scrollbar{display:none}
   <!-- TOPIC FILTER -->
   <div class="topic-strip">
     <button class="topic-btn active" onclick="filterTopicStrip(null,this)">All Topics</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Intelligence',this)">🧠 Intelligence</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Military',this)">⚔️ Military</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Health',this)">🏥 Health & Longevity</button>
-    <button class="topic-btn" onclick="filterTopicStrip('AI',this)">🤖 AI & Tech</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Finance',this)">💰 Finance</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Geopolitics',this)">🌍 Geopolitics</button>
-    <button class="topic-btn" onclick="filterTopicStrip('UFO',this)">👽 UFO & Paranormal</button>
+    <button class="topic-btn" onclick="filterTopicStrip('AI &amp; Tech',this)">🤖 AI &amp; Tech</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Health, Longevity &amp; Biohacking',this)">🏥 Health</button>
     <button class="topic-btn" onclick="filterTopicStrip('Politics',this)">🏛️ Politics</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Debates',this)">⚖️ Debates</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Faith',this)">🙏 Faith & Spirituality</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Business',this)">💼 Business</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Science',this)">🔬 Science</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Society',this)">🎭 Society & Culture</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Consciousness',this)">🔮 Consciousness & Medicine</button>
-    <button class="topic-btn" onclick="filterTopicStrip('History',this)">📜 History</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Controversial',this)">🔥 Controversial</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Geopolitics',this)">🌍 Geopolitics</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Comedy',this)">😂 Comedy</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Sports',this)">⚽ Sports</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Money',this)">💰 Money</button>
+    <button class="topic-btn" onclick="filterTopicStrip('Espionage',this)">🕵️ Espionage</button>
+    <button class="topic-btn topic-btn-more" onclick="toggleMegaMenu(event)">More <span style="font-size:8px">▾</span></button>
   </div>
 
   <!-- CLIP LIBRARY -->
@@ -1095,6 +1138,39 @@ function filterTopic(topic, el) {
   scrollToResults();
 }
 
+// ── MEGA MENU (More Topics dropdown) ─────────────────────────
+function toggleMegaMenu(e) {
+  if (e) e.stopPropagation();
+  var mega = document.getElementById('mega-menu');
+  if (!mega) return;
+  var willOpen = !mega.classList.contains('open');
+  mega.classList.toggle('open', willOpen);
+  mega.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
+  // Highlight all "More" buttons (top nav + topic strip)
+  document.querySelectorAll('.nav-more-btn, .topic-btn-more').forEach(function(b){
+    b.classList.toggle('open', willOpen);
+  });
+}
+function closeMegaMenu() {
+  var mega = document.getElementById('mega-menu');
+  if (!mega) return;
+  mega.classList.remove('open');
+  mega.setAttribute('aria-hidden', 'true');
+  document.querySelectorAll('.nav-more-btn, .topic-btn-more').forEach(function(b){
+    b.classList.remove('open');
+  });
+}
+// Close mega menu on outside click or Escape
+document.addEventListener('click', function(e) {
+  var mega = document.getElementById('mega-menu');
+  if (!mega || !mega.classList.contains('open')) return;
+  if (e.target.closest('.mega-menu') || e.target.closest('.nav-more-btn') || e.target.closest('.topic-btn-more')) return;
+  closeMegaMenu();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeMegaMenu();
+});
+
 function filterTopicStrip(topic, el) {
   document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -1135,26 +1211,37 @@ async function loadStories(topic = null) {
       .order('created_at', { ascending: false })
       .limit(50);
 
-    // Filter by topic field — map short category names to broader search terms
+    // Filter by topic field — map full category names to keyword fragments
+    // because the topic field may have minor variations (e.g. "AI & Tech" vs "AI").
+    // The ilike fuzzy match catches both exact and abbreviated forms.
     if (topic) {
       const topicMap = {
-        'AI': 'AI',
-        'UFO': 'UFO',
-        'Faith': 'Faith',
-        'Health': 'Health',
-        'Military': 'Military',
-        'Politics': 'Politics',
-        'Finance': 'Finance',
-        'Science': 'Science',
-        'Business': 'Business',
-        'Society': 'Society',
-        'Debates': 'Debate',
-        'History': 'History',
-        'Intelligence': 'Intelligence',
-        'Geopolitics': 'Geopolit',
-        'Performance': 'Performance',
-        'Consciousness': 'Psychedel',
+        'AI & Tech': 'AI',
+        'Combat & UFC': 'Combat',
+        'Comedy': 'Comedy',
+        'Consciousness & Medicine': 'Consciousness',
         'Controversial': 'Controvers',
+        'Crime & Justice': 'Crime',
+        'Debates': 'Debate',
+        'Education & Learning': 'Education',
+        'Energy & Climate': 'Energy',
+        'Entertainment': 'Entertainment',
+        'Espionage': 'Espionage',
+        'Faith & Spirituality': 'Faith',
+        'Geopolitics': 'Geopolit',
+        'Health, Longevity & Biohacking': 'Health',
+        'History': 'History',
+        'Media & Journalism': 'Media',
+        'Military': 'Military',
+        'Money': 'Money',
+        'Monologues': 'Monolog',
+        'Politics': 'Politics',
+        'Psychology': 'Psycholog',
+        'Relationships & Family': 'Relationship',
+        'Science': 'Science',
+        'Society': 'Society',
+        'Sports': 'Sports',
+        'UFO & Paranormal': 'UFO',
       };
       const searchTerm = topicMap[topic] || topic;
       query = query.ilike('topic', `%${searchTerm}%`);
