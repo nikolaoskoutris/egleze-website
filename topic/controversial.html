@@ -522,8 +522,103 @@ header{position:relative}
   .cp-body{padding:14px 18px 22px}
 }
 
-/* ── TOPIC PAGE — banner + empty state ─────────────────── */
-.topic-banner{padding:42px 0 30px;margin-bottom:6px}
+/* ═══════════════════════════════════════════════════════════════ */
+/* OPTION D LAYOUT — wire-service top + bold sections bottom        */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* NAV — strengthen active state to red text + red underline */
+.nav-item.active{color:var(--red);border-bottom-color:var(--red);font-weight:700}
+.logo-block{cursor:pointer}
+.logo-block:hover .logo{color:var(--red)}
+
+/* FILTER STATUS BAR — appears when a topic is active */
+.filter-bar{background:#fdf3f3;border-bottom:0.5px solid #f4c0d1;padding:10px 22px;display:flex;justify-content:space-between;align-items:center;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.2px;color:#791f1f;margin:0 -22px 18px;text-transform:uppercase}
+.filter-bar .fb-label strong{color:var(--red);font-weight:700}
+.filter-bar .fb-clear{background:none;border:none;color:#791f1f;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-decoration:underline;cursor:pointer;padding:0;text-transform:uppercase}
+.filter-bar .fb-clear:hover{color:var(--red)}
+
+/* BROADCAST QUEUE — small thumbnails with category badges (Option C style) */
+.bc-queue-list .bcq-row{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;cursor:pointer;border-bottom:0.5px solid var(--border);transition:background .15s}
+.bc-queue-list .bcq-row:last-child{border-bottom:none}
+.bc-queue-list .bcq-row:hover{background:rgba(187,25,25,.05)}
+.bc-queue-list .bcq-row.playing{background:rgba(187,25,25,.08);border-left:3px solid var(--red)}
+.bcq-thumb{width:44px;height:44px;background:var(--dark);border-radius:4px;flex-shrink:0;background-size:cover;background-position:center;background-repeat:no-repeat}
+.bcq-text{flex:1;min-width:0}
+.bcq-cat{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;color:var(--red);font-weight:700;text-transform:uppercase}
+.bcq-headline{font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.35;color:var(--dark);margin-top:3px}
+.bcq-meta{font-family:'DM Sans',sans-serif;font-size:10px;color:var(--muted);margin-top:3px}
+
+/* REVEALS CAROUSEL — replaces hero trio */
+.reveals-section{margin:32px 0 0;padding:28px 22px;background:#f5f1e8}
+.reveals-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--dark);gap:16px}
+.reveals-h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark);margin:0;line-height:1.2}
+.reveals-sub{font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);margin-top:4px}
+.reveals-nav{display:flex;gap:8px;flex-shrink:0}
+.rn-btn{width:36px;height:36px;border:0.5px solid var(--dark);background:transparent;font-size:18px;color:var(--dark);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;line-height:1;padding:0;transition:all .15s}
+.rn-btn:hover{background:var(--dark);color:#fff}
+.rn-btn-primary{background:var(--dark);color:#fff}
+.rn-btn:disabled{opacity:.3;cursor:not-allowed}
+.reveals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.reveal-card{background:#fff;border:0.5px solid var(--border);border-radius:2px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.reveal-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.rc-art{position:relative;aspect-ratio:1/1;background:var(--dark);background-size:cover;background-position:center}
+.rc-art-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.25);font-family:'Playfair Display',serif;font-size:42px;letter-spacing:1px;font-weight:700}
+.rc-cat{position:absolute;top:10px;left:10px;background:rgba(187,25,25,.95);color:#fff;padding:4px 9px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;font-weight:700;border-radius:2px;text-transform:uppercase}
+.rc-dur{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);color:#fff;padding:4px 8px;font-family:'DM Sans',sans-serif;font-size:10px;border-radius:2px}
+.rc-body{padding:14px;display:flex;flex-direction:column;flex:1}
+.rc-title{font-family:'Playfair Display',serif;font-size:15px;line-height:1.3;color:var(--dark);font-weight:700;margin-bottom:8px}
+.rc-summary{font-family:'DM Sans',sans-serif;font-size:12px;color:#444441;line-height:1.5;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rc-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:0.5px solid #f1efe8}
+.rc-show{font-family:'Roboto Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.rc-bookmark{font-size:14px;color:#888780;background:none;border:none;cursor:pointer;padding:0;line-height:1}
+.rc-bookmark:hover{color:var(--red)}
+.reveals-dots{display:flex;justify-content:center;gap:6px;margin-top:22px}
+.reveals-dots .rd-dot{width:8px;height:4px;background:var(--border);border-radius:0;transition:all .2s;cursor:pointer;border:none;padding:0}
+.reveals-dots .rd-dot.active{width:28px;background:var(--dark)}
+
+/* NEWSCAST BAND — bold black with amber accent */
+.newscast-band-d{background:var(--dark);color:#fff;padding:36px 22px;text-align:center;position:relative;overflow:hidden;margin:0}
+.newscast-band-d::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(187,25,25,.15) 100%);pointer-events:none}
+.newscast-band-d > *{position:relative}
+.ncd-eyebrow{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:3px;color:#ef9f27;font-weight:700;margin-bottom:10px;text-transform:uppercase}
+.ncd-headline{font-family:'Playfair Display',serif;font-size:30px;line-height:1.2;font-weight:700;margin:0 0 8px;color:#fff}
+.ncd-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:#b4b2a9;max-width:480px;margin:0 auto 18px;line-height:1.5}
+.ncd-cta{background:var(--red);color:#fff;border:none;padding:14px 32px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;font-weight:700;cursor:pointer;border-radius:2px;text-transform:uppercase;transition:background .15s}
+.ncd-cta:hover{background:#8e1212}
+
+/* BROWSE INTELLIGENCE — dark tiles with icons */
+.browse-section{background:#fff;padding:32px 22px}
+.browse-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.browse-h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--dark);margin:0}
+.browse-all{font-family:'Roboto Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:1.5px;text-decoration:none;text-transform:uppercase}
+.browse-all:hover{color:var(--red)}
+.browse-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.bt{background:var(--dark);color:#fff;aspect-ratio:1/1;padding:18px;display:flex;flex-direction:column;justify-content:space-between;border-radius:4px;text-decoration:none;transition:transform .2s,background .2s;cursor:pointer}
+.bt:hover{transform:translateY(-2px);background:#000}
+.bt:nth-child(2){background:#2c2c2a}
+.bt:nth-child(3){background:#444441}
+.bt:nth-child(4){background:#5f5e5a}
+.bt:nth-child(5){background:var(--dark)}
+.bt:nth-child(6){background:#2c2c2a}
+.bt:nth-child(7){background:#444441}
+.bt:nth-child(8){background:#5f5e5a}
+.bt-icon{font-family:'Playfair Display',serif;font-size:30px;color:#ef9f27;opacity:.9;font-style:normal;line-height:1;display:block}
+.bt-name{font-family:'Playfair Display',serif;font-size:18px;line-height:1.1;font-weight:700;margin-bottom:4px}
+.bt-count{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:#b4b2a9;text-transform:uppercase}
+
+/* MOBILE RESPONSIVE — Option D layout */
+@media (max-width:760px){
+  .reveals-grid{grid-template-columns:1fr;gap:14px}
+  .reveals-section{padding:20px 16px}
+  .reveals-h2{font-size:18px}
+  .ncd-headline{font-size:22px}
+  .browse-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .browse-section{padding:24px 16px}
+  .filter-bar{margin:0 -16px 14px;padding:9px 16px;font-size:10px}
+}
+
+/* TOPIC PAGE — banner + empty state */
+.topic-banner{padding:42px 22px 30px;margin-bottom:6px;background:#fff}
 .topic-breadcrumb{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .topic-breadcrumb a{color:var(--muted);text-decoration:none;transition:color .15s}
 .topic-breadcrumb a:hover{color:var(--dark)}
@@ -535,13 +630,13 @@ header{position:relative}
 .topic-story-count{color:var(--dark);font-weight:700}
 .topic-meta-sep{opacity:.4}
 @media (max-width:760px){
-  .topic-banner{padding:24px 0 18px}
+  .topic-banner{padding:24px 16px 18px}
   .topic-h1{font-size:34px;letter-spacing:-0.3px}
   .topic-h1-sub{font-size:15px}
 }
 
 /* Empty state — Coming Soon panel */
-.topic-empty-state{margin:20px 0 60px;padding:0;background:linear-gradient(180deg,#fafafa 0%,#f3f0e8 100%);border:1px solid var(--border);border-radius:2px;overflow:hidden}
+.topic-empty-state{margin:20px 22px 60px;padding:0;background:linear-gradient(180deg,#fafafa 0%,#f3f0e8 100%);border:1px solid var(--border);border-radius:2px;overflow:hidden}
 .tes-inner{padding:54px 48px 48px;max-width:680px;margin:0 auto;text-align:center}
 .tes-eyebrow{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:18px;display:inline-block;padding:5px 14px;border:1px solid var(--red);border-radius:1px}
 .tes-title{font-family:'Playfair Display',serif;font-size:30px;line-height:1.2;color:var(--dark);margin:0 0 18px;font-weight:700}
@@ -563,6 +658,7 @@ header{position:relative}
 .tes-link-all{background:var(--dark);color:#fff;border-color:var(--dark);font-weight:700}
 .tes-link-all:hover{background:var(--red);border-color:var(--red)}
 @media (max-width:760px){
+  .topic-empty-state{margin:20px 16px 40px}
   .tes-inner{padding:34px 22px 28px}
   .tes-title{font-size:22px}
   .tes-form{flex-direction:column;gap:10px}
@@ -617,11 +713,11 @@ header{position:relative}
 <header>
   <div class="header-top">
     <div class="logo-wrap">
-      <div class="logo-block">
+      <a href="/" class="logo-block" style="text-decoration:none;color:inherit;display:block">
         <div class="logo"><span class="e-red">E</span>GLEZE</div>
         <div class="logo-rule"></div>
-        <div class="logo-sub">Podcast Intelligence Network</div>
-      </div>
+        <div class="logo-sub">Where conversations become headlines</div>
+      </a>
     </div>
     <div class="header-right">
       <div class="search-wrap" style="position:relative;z-index:1100">
@@ -633,7 +729,7 @@ header{position:relative}
       </div>
       <div>
         <div class="live-pill"><span class="live-dot"></span> Live Coverage</div>
-        <div class="header-date" style="margin-top:4px;text-align:right">Thursday, April 30, 2026 · egleze.news</div>
+        <div class="header-date" style="margin-top:4px;text-align:right" id="header-date-stats">Loading…</div>
       </div>
     </div>
   </div>
@@ -689,7 +785,7 @@ header{position:relative}
 
 <div class="page">
 
-  <!-- ── TOPIC HEADER BANNER (replaces homepage broadcast section) ─── -->
+  <!-- ── TOPIC HEADER BANNER (replaces homepage broadcast intro) ─── -->
   <div class="topic-banner" id="topic-banner">
     <nav class="topic-breadcrumb" aria-label="Breadcrumb">
       <a href="/">Home</a>
@@ -737,196 +833,97 @@ header{position:relative}
     </div>
   </div>
 
-  <!-- SECTION LABEL (shown when topic has stories) -->
-  <div class="sec-label" id="topic-stories-label" style="display:none">
-    <div class="sec-bar"></div>
-    <div class="sec-title">Latest in Controversial</div>
-    <div class="sec-line"></div>
+  <!-- ── FILTER STATUS BAR (shown when a topic is selected) ─── -->
+  <div class="filter-bar" id="filter-bar" style="display:none">
+    <span class="fb-label">FILTERED · <strong id="fb-topic-name">—</strong> · <span id="fb-count">—</span></span>
+    <button class="fb-clear" onclick="clearTopicFilter()" type="button">CLEAR FILTER ✕</button>
   </div>
 
-  <!-- HERO GRID -->
-  <div class="hero">
-    <!-- MAIN -->
-    <div class="hero-main fade-up">
-      <div class="hero-img">
-        <div class="wave-bg"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="hero-img-overlay"></div>
-        <div class="hero-badge">Joe Rogan Experience · #2187</div>
-        <div class="hero-play">▶</div>
-      </div>
-      <div class="hero-body">
-        <span class="story-tag">Intelligence · Exclusive · 🔥 Trending #1</span>
-        <h1 class="hero-title">Retired Navy SEAL: <em>"What we found on that submarine was never supposed to be public"</em></h1>
-        <p class="hero-desc">In a 3-hour conversation, former SEAL Team 6 operator Mike Ritland detailed covert operations that have never been disclosed, including a 2019 underwater retrieval mission that he says changed the entire classification framework for special operations.</p>
-        <div class="hero-meta">
-          <strong>Joe Rogan Experience</strong>
-          <span class="meta-dot">·</span>
-          <span>2h 47m episode</span>
-          <span class="meta-dot">·</span>
-          <span>4 hours ago</span>
+  <!-- ── BROADCAST SECTION ────────────────────────────────────── -->
+  <div class="broadcast" id="broadcast">
+    <div class="bc-player" id="bc-player">
+      <div class="bc-yt-host" id="bc-yt-host"></div>
+      <div class="bc-poster" id="bc-poster">
+        <div class="bc-station">
+          <div class="bc-e-mark">E</div>
+          <div class="bc-station-name">Egleze · Broadcast</div>
         </div>
+        <div class="bc-clock" id="bc-clock">Live · —</div>
+        <div class="bc-pretitle" id="bc-pretitle">Today's Broadcast · Loading queue…</div>
+        <div class="bc-postertitle" id="bc-postertitle">Press play to start the day's revelations</div>
+        <div class="bc-play-btn" id="bc-play-btn" aria-label="Start broadcast"></div>
+        <div class="bc-press-play">Press play to start the broadcast queue</div>
+      </div>
+      <div class="bc-lower-third" id="bc-lower-third">
+        <span class="lt-stripe" id="bc-lt-stripe">Egleze Brief</span>
+        <h2 class="lt-headline" id="bc-lt-headline">—</h2>
+        <div class="lt-meta" id="bc-lt-meta">—</div>
+      </div>
+      <div class="bc-progress-row">
+        <span class="bc-dur" id="bc-cur">0:00</span>
+        <div class="bc-bar"><div class="bc-fill" id="bc-fill"></div></div>
+        <span class="bc-total" id="bc-total">0:00</span>
       </div>
     </div>
-
-    <!-- SECONDARY 1 -->
-    <div class="hero-sec fade-up">
-      <div class="sec-img sec-img-1">
-        <div class="sec-lbl">Lex Fridman #487</div>
+    <div class="bc-queue">
+      <div class="bc-queue-header">
+        <span class="bc-qh-label" id="bc-qh-label">Up next in broadcast</span>
+        <span class="bc-qh-time" id="bc-qh-time">Updated just now</span>
       </div>
-      <div class="sec-body">
-        <span class="story-tag">Technology · AI</span>
-        <div class="sec-title">Elon Musk: "Grok 4 will make every human-level job obsolete within 18 months"</div>
-        <div class="sec-meta"><strong>Lex Fridman Podcast</strong> · 6 hours ago · 4h 12m</div>
+      <div class="bc-queue-list" id="bc-queue-list">
+        <div style="padding:24px;text-align:center;color:#7a6f5d;font-family:DM Sans,sans-serif;font-size:12px">Loading queue…</div>
       </div>
-    </div>
-
-    <!-- SECONDARY 2 -->
-    <div class="hero-sec fade-up">
-      <div class="sec-img sec-img-2">
-        <div class="sec-lbl">Tucker Carlson · Ep.312</div>
-      </div>
-      <div class="sec-body">
-        <span class="story-tag">Geopolitics · Classified</span>
-        <div class="sec-title">Former CIA Director: "The official narrative on the 2022 pipeline explosion is completely false"</div>
-        <div class="sec-meta"><strong>Tucker Carlson Network</strong> · 9 hours ago · 1h 55m</div>
-      </div>
-    </div>
-
-    <!-- SIDEBAR -->
-    <div class="hero-side fade-up">
-      <div class="side-head">
-        <span class="live-dot" style="background:var(--red)"></span>
-        <span class="side-head-label">Latest Reveals Today</span>
-      </div>
-      <div class="side-item featured">
-        <div class="si-show">Huberman Lab</div>
-        <div class="si-title">"GLP-1 drugs permanently alter dopamine pathways — this is the part no one is discussing"</div>
-        <div class="si-time">12 min ago · Episode 398</div>
-      </div>
-      <div class="side-item">
-        <div class="si-show">Shawn Ryan Show</div>
-        <div class="si-title">Green Beret describes undisclosed Syria mission: "We were never there officially"</div>
-        <div class="si-time">1 hr ago · Episode #201</div>
-      </div>
-      <div class="side-item">
-        <div class="si-show">Jordan Peterson</div>
-        <div class="si-title">"The WHO pandemic treaty grants powers that would have been considered totalitarian 10 years ago"</div>
-        <div class="si-time">2 hrs ago · Ep. 445</div>
-      </div>
-      <div class="side-item">
-        <div class="si-show">Patrick Bet-David</div>
-        <div class="si-title">Hedge fund insider: "Three major banks are technically insolvent right now"</div>
-        <div class="si-time">3 hrs ago · PBD #603</div>
-      </div>
-      <div class="side-item">
-        <div class="si-show">Danny Jones</div>
-        <div class="si-title">Former intelligence officer: "UAP programs have been privately funded since 1987"</div>
-        <div class="si-time">5 hrs ago · Ep. 189</div>
-      </div>
-      <div class="side-item">
-        <div class="si-show">Diary of a CEO</div>
-        <div class="si-title">Billionaire reveals: "I lost $800M in one afternoon — what it taught me about identity"</div>
-        <div class="si-time">7 hrs ago · Ep. 512</div>
+      <div class="bc-queue-footer">
+        <span class="bc-mode-label">Continuous Play</span>
+        <span class="bc-toggle on" id="bc-toggle-auto" role="button" aria-pressed="true">Auto · On</span>
+        <span class="bc-toggle" id="bc-toggle-audio" role="button" aria-pressed="false">Audio Only</span>
       </div>
     </div>
   </div>
 
-  <!-- NEWSCAST BAND -->
-  <div class="newscast-band fade-up">
-    <div class="nc-badge">▶ Today's Newscast</div>
-    <div class="nc-body">
-      <div class="nc-title">Egleze Daily — April 30, 2026</div>
-      <div class="nc-sub">Presented by your AI anchors · 6 top podcast revelations in under 5 minutes · New episode every morning at 9AM</div>
-    </div>
-    <div class="nc-play">▶</div>
-  </div>
-
-  <!-- TOPIC FILTER -->
-  <div class="topic-strip">
-    <button class="topic-btn active" onclick="filterTopicStrip(null,this)">All Topics</button>
-    <button class="topic-btn" onclick="filterTopicStrip('AI &amp; Tech',this)">AI &amp; Tech</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Health, Longevity &amp; Biohacking',this)">Health</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Politics',this)">Politics</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Geopolitics',this)">Geopolitics</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Comedy',this)">Comedy</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Sports',this)">Sports</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Money',this)">Money</button>
-    <button class="topic-btn" onclick="filterTopicStrip('Espionage',this)">Espionage</button>
-    <button class="topic-btn topic-btn-more" onclick="toggleMegaMenu(event)">More <span style="font-size:8px">▾</span></button>
-  </div>
-
-  <!-- CLIP LIBRARY -->
-  <div class="sec-label">
-    <div class="sec-bar"></div>
-    <div class="sec-title">Clip Library · Best Moments Today</div>
-    <div class="sec-line"></div>
-  </div>
-
-  <div class="clips-grid" id="clips-grid">
-    <div style="grid-column:1/-1;padding:40px 20px;text-align:center;color:var(--muted);font-size:12px">
-      Loading clips...
-    </div>
-  </div>
-
-  <!-- BOTTOM -->
-  <div class="bottom-grid">
-    <div>
-      <div class="sec-label"><div class="sec-bar"></div><div class="sec-title">More Stories Today</div><div class="sec-line"></div></div>
-      <div class="feed-item fade-up">
-        <div class="feed-n">01</div>
-        <div>
-          <div class="feed-tag">Health · Nutrition</div>
-          <div class="feed-title">Paul Saladino reverses position on carnivore diet: "I was missing something critical for 5 years"</div>
-          <div class="feed-meta"><strong>Shawn Baker MD Podcast</strong> · Episode 301 · 11 hours ago · 1h 20m</div>
-        </div>
+  <!-- ── TODAY'S FILED REVEALS — 3-CARD CAROUSEL ─────────────── -->
+  <section class="reveals-section" id="reveals-section">
+    <div class="reveals-header">
+      <div>
+        <h2 class="reveals-h2"><span id="reveals-title-prefix">Today's filed reveals</span></h2>
+        <div class="reveals-sub" id="reveals-sub">Hand-picked stories from the last 24 hours</div>
       </div>
-      <div class="feed-item fade-up">
-        <div class="feed-n">02</div>
-        <div>
-          <div class="feed-tag">Finance · Crypto</div>
-          <div class="feed-title">Michael Saylor: "Bitcoin will hit $1M before the next US election. That's not a prediction, it's arithmetic."</div>
-          <div class="feed-meta"><strong>What Bitcoin Did</strong> · Episode 744 · 13 hours ago · 2h 05m</div>
-        </div>
-      </div>
-      <div class="feed-item fade-up">
-        <div class="feed-n">03</div>
-        <div>
-          <div class="feed-tag">Science · Space</div>
-          <div class="feed-title">Astrophysicist on Lex Fridman: "The James Webb data contains anomalies that challenge the standard model"</div>
-          <div class="feed-meta"><strong>Lex Fridman Podcast</strong> · Episode 488 · 14 hours ago · 3h 18m</div>
-        </div>
-      </div>
-      <div class="feed-item fade-up">
-        <div class="feed-n">04</div>
-        <div>
-          <div class="feed-tag">Military · Geopolitics</div>
-          <div class="feed-title">Colonel Douglas Macgregor: "NATO's eastern flank strategy is a catastrophic miscalculation"</div>
-          <div class="feed-meta"><strong>Shawn Ryan Show</strong> · Episode 202 · 16 hours ago · 1h 45m</div>
-        </div>
-      </div>
-      <div class="feed-item fade-up">
-        <div class="feed-n">05</div>
-        <div>
-          <div class="feed-tag">Tech · Society</div>
-          <div class="feed-title">Tristan Harris returns: "The next generation of social media is engineered for full psychological capture"</div>
-          <div class="feed-meta"><strong>The Tim Ferriss Show</strong> · Episode 720 · 18 hours ago · 2h 30m</div>
-        </div>
+      <div class="reveals-nav">
+        <button class="rn-btn" id="reveals-prev" aria-label="Previous reveals" type="button">‹</button>
+        <button class="rn-btn rn-btn-primary" id="reveals-next" aria-label="More reveals" type="button">›</button>
       </div>
     </div>
-
-    <!-- SHOWS PANEL -->
-    <div>
-      <div class="shows-panel">
-        <div class="sp-title">Top Shows This Week</div>
-        <div class="show-row"><div class="show-av av1">JRE</div><div class="show-info"><div class="show-name">Joe Rogan Experience</div><div class="show-host">Joe Rogan</div></div><div class="show-count"><strong>12</strong>clips</div></div>
-        <div class="show-row"><div class="show-av av2">LF</div><div class="show-info"><div class="show-name">Lex Fridman Podcast</div><div class="show-host">Lex Fridman</div></div><div class="show-count"><strong>9</strong>clips</div></div>
-        <div class="show-row"><div class="show-av av3">TC</div><div class="show-info"><div class="show-name">Tucker Carlson Network</div><div class="show-host">Tucker Carlson</div></div><div class="show-count"><strong>7</strong>clips</div></div>
-        <div class="show-row"><div class="show-av av4">HL</div><div class="show-info"><div class="show-name">Huberman Lab</div><div class="show-host">Andrew Huberman</div></div><div class="show-count"><strong>6</strong>clips</div></div>
-        <div class="show-row"><div class="show-av av5">SR</div><div class="show-info"><div class="show-name">Shawn Ryan Show</div><div class="show-host">Shawn Ryan</div></div><div class="show-count"><strong>5</strong>clips</div></div>
-        <div class="show-row"><div class="show-av av6">PBD</div><div class="show-info"><div class="show-name">PBD Podcast</div><div class="show-host">Patrick Bet-David</div></div><div class="show-count"><strong>4</strong>clips</div></div>
-      </div>
+    <div class="reveals-grid" id="reveals-grid">
+      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading reveals…</div>
     </div>
-  </div>
+    <div class="reveals-dots" id="reveals-dots" aria-hidden="true"></div>
+  </section>
+
+  <!-- ── EGLEZE DAILY NEWSCAST BANNER ─────────────────────────── -->
+  <section class="newscast-band-d" id="newscast-band">
+    <div class="ncd-eyebrow">EGLEZE DAILY · 12 MIN NEWSCAST</div>
+    <h2 class="ncd-headline" id="ncd-headline">Today · 18 essential reveals,<br>delivered from podcasts.</h2>
+    <p class="ncd-sub">Curated by Egleze editors from 100+ shows. The single most important thing said today on each major topic.</p>
+    <button class="ncd-cta" type="button" onclick="alert('Daily newscast launches with the platform on June 15.')">▶ PLAY DAILY NEWSCAST</button>
+  </section>
+
+  <!-- ── BROWSE INTELLIGENCE — TOPIC TILES ────────────────────── -->
+  <section class="browse-section">
+    <div class="browse-header">
+      <h2 class="browse-h2">Browse intelligence</h2>
+      <a href="#" class="browse-all" onclick="event.preventDefault();toggleMegaMenu(event)">SEE ALL 26 →</a>
+    </div>
+    <div class="browse-grid" id="browse-grid">
+      <a class="bt" href="/topic/ai-tech"><i class="bt-icon" data-icon="cpu" aria-hidden="true">⚙</i><div class="bt-name">AI &amp; Tech</div><div class="bt-count" id="bt-c-ai-tech">—</div></a>
+      <a class="bt" href="/topic/politics"><i class="bt-icon" data-icon="bank" aria-hidden="true">⛪</i><div class="bt-name">Politics</div><div class="bt-count" id="bt-c-politics">—</div></a>
+      <a class="bt" href="/topic/money"><i class="bt-icon" data-icon="coin" aria-hidden="true">$</i><div class="bt-name">Money</div><div class="bt-count" id="bt-c-money">—</div></a>
+      <a class="bt" href="/topic/health-longevity-biohacking"><i class="bt-icon" data-icon="heart" aria-hidden="true">♥</i><div class="bt-name">Health</div><div class="bt-count" id="bt-c-health-longevity-biohacking">—</div></a>
+      <a class="bt" href="/topic/military"><i class="bt-icon" data-icon="target" aria-hidden="true">◎</i><div class="bt-name">Military</div><div class="bt-count" id="bt-c-military">—</div></a>
+      <a class="bt" href="/topic/history"><i class="bt-icon" data-icon="history" aria-hidden="true">𝓗</i><div class="bt-name">History</div><div class="bt-count" id="bt-c-history">—</div></a>
+      <a class="bt" href="/topic/ufo-paranormal"><i class="bt-icon" data-icon="ufo" aria-hidden="true">◈</i><div class="bt-name">UFO &amp; Paranormal</div><div class="bt-count" id="bt-c-ufo-paranormal">—</div></a>
+      <a class="bt" href="/topic/geopolitics"><i class="bt-icon" data-icon="globe" aria-hidden="true">◯</i><div class="bt-name">Geopolitics</div><div class="bt-count" id="bt-c-geopolitics">—</div></a>
+    </div>
+  </section>
 
 </div>
 
@@ -934,11 +931,11 @@ header{position:relative}
 <footer class="eg-footer">
   <div class="eg-footer-grid">
     <div class="eg-brand">
-      <div class="eg-brand-mark">
+      <a href="/" class="eg-brand-mark" style="text-decoration:none;color:inherit">
         <div class="eg-brand-e">E</div>
         <div class="eg-brand-name">Egleze</div>
-      </div>
-      <div class="eg-brand-tag">Where Conversation Becomes the Headline.</div>
+      </a>
+      <div class="eg-brand-tag">Where conversations become headlines.</div>
       <div class="eg-brand-blurb">
         Egleze (from the Greek <em>Ekklisia</em>) is an international news institution dedicated to the curation and reporting of long-form digital media — extracting the world's most important spoken-word revelations into a permanent, searchable record.
       </div>
@@ -976,7 +973,7 @@ header{position:relative}
         <li><a href="/topic/money">Money</a></li>
         <li><a href="/topic/military">Military</a></li>
         <li><a href="/topic/history">History</a></li>
-        <li><a href="#" onclick="event.preventDefault();toggleMegaMenu(event);">All Topics →</a></li>
+        <li><a href="#" onclick="event.preventDefault();window.scrollTo({top:0,behavior:'smooth'});setTimeout(function(){toggleMegaMenu(event);},250);">All Topics →</a></li>
       </ul>
     </div>
 
@@ -1401,39 +1398,287 @@ async function loadStories(topic = null) {
       showEmptyState(topic);
       return;
     }
-    renderStories(combined);
-    renderHeroSection(combined);
+    renderRevealsCarousel(combined, topic);
     injectStorySchema(combined);
-    renderSidebarFromData(combined);
     updateTicker(combined);
+    updateBrowseCounts();
+    updateFilterUI(topic, combined.length);
   } catch(e) { console.log('Load error:', e); }
 }
 
+// ── REVEALS CAROUSEL (new Option D layout) ──────────────────────
+// Replaces hero trio. Shows 3 cards per page, paginated, each with
+// summary excerpt + category badge + duration. Cards are clickable
+// (open clip player modal). All state lives on window._revealsState.
+
+window._revealsState = window._revealsState || { allStories: [], page: 0, perPage: 3 };
+
+function renderRevealsCarousel(stories, topic) {
+  if (!stories || stories.length === 0) return;
+  // Cache stories by ID for the click delegate
+  window._storyCache = window._storyCache || {};
+  stories.forEach(function(s) { if (s && s.id) window._storyCache[s.id] = s; });
+
+  // Update reveals title prefix based on filter state
+  var titleEl = document.getElementById('reveals-title-prefix');
+  if (titleEl) {
+    titleEl.textContent = topic ? ("Today's filed reveals · " + topic) : "Today's filed reveals";
+  }
+
+  window._revealsState.allStories = stories;
+  window._revealsState.page = 0;
+  paintReveals();
+}
+
+function paintReveals() {
+  var state = window._revealsState;
+  var grid = document.getElementById('reveals-grid');
+  var dotsHost = document.getElementById('reveals-dots');
+  if (!grid) return;
+
+  var perPage = state.perPage || 3;
+  var totalPages = Math.max(1, Math.ceil(state.allStories.length / perPage));
+  var startIdx = state.page * perPage;
+  var pageStories = state.allStories.slice(startIdx, startIdx + perPage);
+
+  if (pageStories.length === 0) { state.page = 0; return paintReveals(); }
+
+  // Build cards
+  grid.innerHTML = '';
+  pageStories.forEach(function(s) {
+    var card = document.createElement('div');
+    card.className = 'reveal-card';
+    card.setAttribute('data-clip-trigger', '1');
+    card.setAttribute('data-story-id', s.id);
+
+    var artBg = '';
+    var artFallback = '';
+    if (window._artworkCache && window._artworkCache[s.show_name]) {
+      artBg = 'background-image:url("' + window._artworkCache[s.show_name] + '")';
+    } else {
+      var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
+      artFallback = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
+    }
+
+    var clipDur = '';
+    if (s.clip_start_seconds != null && s.clip_end_seconds != null) {
+      var dur = parseInt(s.clip_end_seconds, 10) - parseInt(s.clip_start_seconds, 10);
+      if (dur > 0) clipDur = '<div class="rc-dur">▶ 0:' + (dur < 10 ? '0' + dur : dur) + '</div>';
+    }
+
+    card.innerHTML =
+      '<div class="rc-art" style="' + artBg + '">' +
+        artFallback +
+        '<div class="rc-cat">' + escapeHtmlMini(s.topic || 'Reveal') + '</div>' +
+        clipDur +
+      '</div>' +
+      '<div class="rc-body">' +
+        '<div class="rc-title">' + escapeHtmlMini(s.headline || '') + '</div>' +
+        '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
+        '<div class="rc-foot">' +
+          '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
+          '<button class="rc-bookmark" type="button" aria-label="Save for later" onclick="event.stopPropagation();">★</button>' +
+        '</div>' +
+      '</div>';
+    grid.appendChild(card);
+
+    // Try to load artwork if not cached
+    if (!window._artworkCache || !window._artworkCache[s.show_name]) {
+      tryLoadArtwork(s.show_name, function(url) {
+        var artEl = card.querySelector('.rc-art');
+        if (artEl && url) {
+          artEl.style.backgroundImage = 'url("' + url + '")';
+          var fb = artEl.querySelector('.rc-art-fallback');
+          if (fb) fb.remove();
+        }
+      });
+    }
+  });
+
+  // Update dots
+  if (dotsHost) {
+    dotsHost.innerHTML = '';
+    if (totalPages > 1) {
+      for (var i = 0; i < totalPages; i++) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'rd-dot' + (i === state.page ? ' active' : '');
+        dot.setAttribute('aria-label', 'Page ' + (i + 1));
+        (function(idx){ dot.onclick = function(){ state.page = idx; paintReveals(); }; })(i);
+        dotsHost.appendChild(dot);
+      }
+    }
+  }
+
+  // Wire prev/next buttons (idempotent — replace listeners)
+  var prevBtn = document.getElementById('reveals-prev');
+  var nextBtn = document.getElementById('reveals-next');
+  if (prevBtn) {
+    prevBtn.disabled = state.page === 0;
+    prevBtn.onclick = function() {
+      if (state.page > 0) { state.page--; paintReveals(); }
+    };
+  }
+  if (nextBtn) {
+    nextBtn.disabled = state.page >= totalPages - 1;
+    nextBtn.onclick = function() {
+      if (state.page < totalPages - 1) { state.page++; paintReveals(); }
+    };
+  }
+}
+
+function escapeHtmlMini(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Try to load podcast artwork from iTunes JSONP (best-effort, async)
+function tryLoadArtwork(showName, callback) {
+  if (!showName || !callback) return;
+  window._artworkCache = window._artworkCache || {};
+  if (window._artworkCache[showName]) { callback(window._artworkCache[showName]); return; }
+  if (window._artworkPending && window._artworkPending[showName]) return;
+  window._artworkPending = window._artworkPending || {};
+  window._artworkPending[showName] = true;
+
+  var cbName = '_artCb_' + Math.random().toString(36).substr(2, 9);
+  window[cbName] = function(data) {
+    try {
+      if (data && data.results && data.results[0] && data.results[0].artworkUrl600) {
+        var url = data.results[0].artworkUrl600;
+        window._artworkCache[showName] = url;
+        callback(url);
+      }
+    } catch(e) {}
+    delete window[cbName];
+    if (window._artworkPending) delete window._artworkPending[showName];
+    var s = document.getElementById('artworkScript_' + cbName);
+    if (s) s.remove();
+  };
+  var script = document.createElement('script');
+  script.id = 'artworkScript_' + cbName;
+  script.src = 'https://itunes.apple.com/search?term=' + encodeURIComponent(showName) + '&media=podcast&limit=1&callback=' + cbName;
+  script.onerror = function() {
+    delete window[cbName];
+    if (window._artworkPending) delete window._artworkPending[showName];
+    script.remove();
+  };
+  document.head.appendChild(script);
+  // Timeout
+  setTimeout(function() {
+    if (window[cbName]) {
+      delete window[cbName];
+      if (window._artworkPending) delete window._artworkPending[showName];
+      if (script && script.parentNode) script.remove();
+    }
+  }, 4000);
+}
+
+// ── FILTER STATE UI ─────────────────────────────────────────────
+function updateFilterUI(topic, count) {
+  var bar = document.getElementById('filter-bar');
+  if (!bar) return;
+  if (topic) {
+    var nameEl = document.getElementById('fb-topic-name');
+    var countEl = document.getElementById('fb-count');
+    if (nameEl) nameEl.textContent = topic;
+    if (countEl) countEl.textContent = (count || 0) + ' ' + ((count === 1) ? 'STORY' : 'STORIES');
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function clearTopicFilter() {
+  // Reset all nav active states except "Today's Reveals"
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  var first = document.querySelector('.nav-item');
+  if (first) first.classList.add('active');
+  // Re-load all stories
+  if (typeof window.loadStories === 'function') window.loadStories(null);
+}
+
+// ── BROWSE INTELLIGENCE — fill story counts on tiles ───────────
+async function updateBrowseCounts() {
+  if (!db) return;
+  try {
+    var { data, error } = await db.from('stories')
+      .select('topic')
+      .eq('status', 'approved');
+    if (error || !data) return;
+    var counts = {};
+    data.forEach(function(s) {
+      if (s.topic) counts[s.topic] = (counts[s.topic] || 0) + 1;
+    });
+    // Topic-name → slug mapping for the 8 displayed tiles
+    var tileMap = {
+      'AI & Tech': 'ai-tech',
+      'Politics': 'politics',
+      'Money': 'money',
+      'Health, Longevity & Biohacking': 'health-longevity-biohacking',
+      'Military': 'military',
+      'History': 'history',
+      'UFO & Paranormal': 'ufo-paranormal',
+      'Geopolitics': 'geopolitics'
+    };
+    Object.keys(tileMap).forEach(function(name) {
+      var slug = tileMap[name];
+      var el = document.getElementById('bt-c-' + slug);
+      if (el) {
+        var n = counts[name] || 0;
+        el.textContent = n + ' ' + (n === 1 ? 'STORY' : 'STORIES');
+      }
+    });
+  } catch(e) {}
+}
+
+// ── HEADER DATE + STATS ────────────────────────────────────────
+async function updateHeaderDateStats() {
+  var el = document.getElementById('header-date-stats');
+  if (!el) return;
+  var d = new Date();
+  var weekday = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+  var month = ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()];
+  var dateStr = weekday + ', ' + month + ' ' + d.getDate() + ', ' + d.getFullYear();
+
+  var statsStr = '';
+  if (db) {
+    try {
+      var showsP = db.from('shows').select('id', { count: 'exact', head: true });
+      var storiesP = db.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'approved');
+      var [showsR, storiesR] = await Promise.all([showsP, storiesP]);
+      var sCount = showsR.count || 0;
+      var stCount = storiesR.count || 0;
+      statsStr = sCount + ' shows · ' + stCount + ' reveals';
+    } catch(e) {}
+  }
+  el.innerHTML = dateStr + (statsStr ? ('<br>' + statsStr) : '');
+}
+setTimeout(updateHeaderDateStats, 800);
+
+
 function showEmptyState(topic) {
   const label = topic || 'this section';
-  // Clear the feed
-  const feed = document.querySelector('.bottom-grid > div:first-child');
-  if (feed) {
-    feed.querySelectorAll('.feed-item').forEach(i => i.remove());
-    let msg = feed.querySelector('.empty-state');
-    if (!msg) {
-      msg = document.createElement('div');
-      msg.className = 'empty-state';
-      feed.appendChild(msg);
-    }
-    msg.style.cssText = 'padding:60px 30px;text-align:center;color:#888;font-size:13px;font-family:DM Sans,sans-serif;line-height:1.6';
-    msg.innerHTML = '<div style="font-family:Playfair Display,serif;font-size:22px;color:#222;margin-bottom:8px">No stories in ' + label + ' yet</div>' +
-      '<div>This category is being curated. Check back soon — Egleze covers the world\'s top podcasts continuously.</div>';
+  // Update reveals carousel area with empty state
+  var grid = document.getElementById('reveals-grid');
+  if (grid) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:50px 30px;text-align:center;font-family:DM Sans,sans-serif;line-height:1.6">' +
+      '<div style="font-family:Playfair Display,serif;font-size:22px;color:#222;margin-bottom:8px">No stories in ' + label + ' yet</div>' +
+      '<div style="color:#888;font-size:13px">This category is being curated. Check back soon — Egleze covers the world\'s top podcasts continuously.</div>' +
+      '</div>';
   }
-  // Soften hero — don't leave stale hero from previous category
-  const heroTitle = document.querySelector('.hero-title');
-  if (heroTitle) {
-    heroTitle.innerHTML = '<span style="color:#888;font-size:0.7em;font-style:italic">No top story in ' + label + ' yet</span>';
-  }
-  const heroDesc = document.querySelector('.hero-desc');
-  if (heroDesc) heroDesc.textContent = '';
-  const heroMeta = document.querySelector('.hero-meta');
-  if (heroMeta) heroMeta.innerHTML = '';
+  // Hide pagination dots
+  var dots = document.getElementById('reveals-dots');
+  if (dots) dots.innerHTML = '';
+  // Update title to reflect filter
+  var titleEl = document.getElementById('reveals-title-prefix');
+  if (titleEl) titleEl.textContent = topic ? ("Today's filed reveals · " + topic) : "Today's filed reveals";
+  // Update filter status bar
+  updateFilterUI(topic, 0);
 }
 
 // ── RENDER HERO SECTION FROM DATABASE ────────────────────────────
@@ -2859,48 +3104,35 @@ async function bannerSubscribe() {
   var TOPIC_HAS_STORIES = true;
 
   function hideHomepageOnlySections() {
-    var bc = document.getElementById('broadcast');
-    if (bc) bc.style.display = 'none';
-    var ts = document.querySelector('.topic-strip');
-    if (ts) ts.style.display = 'none';
+    // Topic pages don't show homepage-only sections — broadcast still works,
+    // but it shows topic-filtered content. Keep player + reveals + sections.
   }
 
   function checkAndShowEmptyState() {
     var emptyState = document.getElementById('topic-empty-state');
-    var storiesLabel = document.getElementById('topic-stories-label');
-    var heroDiv = document.querySelector('.hero');
-    var clipsGrid = document.getElementById('clips-grid');
-    var bottomGrid = document.querySelector('.bottom-grid');
+    var broadcast = document.getElementById('broadcast');
+    var reveals = document.getElementById('reveals-section');
+    var newscast = document.getElementById('newscast-band');
 
     if (!TOPIC_HAS_STORIES) {
       if (emptyState) emptyState.style.display = 'block';
-      if (storiesLabel) storiesLabel.style.display = 'none';
-      if (heroDiv) heroDiv.style.display = 'none';
-      if (clipsGrid) clipsGrid.parentElement.style.display = 'none';
-      if (bottomGrid) bottomGrid.style.display = 'none';
-      document.querySelectorAll('.page > .sec-label').forEach(function(el) {
-        if (el.id !== 'topic-stories-label') el.style.display = 'none';
-      });
+      if (broadcast) broadcast.style.display = 'none';
+      if (reveals) reveals.style.display = 'none';
+      if (newscast) newscast.style.display = 'none';
       var sc = document.getElementById('topic-story-count');
       if (sc) sc.textContent = 'Coming Soon';
     } else {
       if (emptyState) emptyState.style.display = 'none';
-      if (storiesLabel) storiesLabel.style.display = 'flex';
     }
   }
 
-  function updateStoryCount() {
-    // Count stories rendered across both the hero section AND the feed area
-    var heroMain = document.querySelector('.hero-main');
-    var heroHasContent = heroMain && heroMain.querySelector('.hero-title') &&
-                         heroMain.querySelector('.hero-title').textContent.trim().length > 0 &&
-                         !heroMain.querySelector('.hero-title').textContent.includes('No top story');
-    var heroSecondaries = document.querySelectorAll('.hero-side .hero-secondary').length;
-    var feedItems = document.querySelectorAll('.bottom-grid .feed-item').length;
-    var count = (heroHasContent ? 1 : 0) + heroSecondaries + feedItems;
+  function updateTopicStoryCount() {
     var sc = document.getElementById('topic-story-count');
-    if (sc && TOPIC_HAS_STORIES) {
-      sc.textContent = count > 0 ? (count + ' ' + (count === 1 ? 'story' : 'stories')) : 'Loading…';
+    var fbCount = document.getElementById('fb-count');
+    if (!sc || !TOPIC_HAS_STORIES) return;
+    // Read from the filter bar count — populated by updateFilterUI
+    if (fbCount && fbCount.textContent && fbCount.textContent !== '—') {
+      sc.textContent = fbCount.textContent;
     }
   }
 
@@ -2910,8 +3142,8 @@ async function bannerSubscribe() {
     } else if (typeof window.loadStories === 'function') {
       window.loadStories(TOPIC_DISPLAY_NAME);
     }
-    setTimeout(updateStoryCount, 1500);
-    setTimeout(updateStoryCount, 3000);
+    setTimeout(updateTopicStoryCount, 1500);
+    setTimeout(updateTopicStoryCount, 3000);
   }
 
   function wireEmptyStateForm() {
@@ -2944,12 +3176,6 @@ async function bannerSubscribe() {
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTopicPage);
-  } else {
-    initTopicPage();
-  }
-
   function initTopicPage() {
     hideHomepageOnlySections();
     checkAndShowEmptyState();
@@ -2958,24 +3184,22 @@ async function bannerSubscribe() {
       var maxAttempts = 60; // 9 seconds total
       var tryFilter = function() {
         attempts++;
-        // Two checks: window.db (set by initDB) OR filterTopic existence
-        // (filterTopic itself calls initDB() internally if needed, so as soon
-        // as its function body is parsed, calling it is safe)
-        var dbReady = (typeof window.db !== 'undefined' && window.db) ||
-                      (typeof db !== 'undefined' && db);
         var fnReady = typeof window.filterTopic === 'function';
         if (fnReady) {
-          // filterTopic handles DB init itself via "if (!db && !initDB()) return;"
           applyTopicFilter();
         } else if (attempts < maxAttempts) {
           setTimeout(tryFilter, 150);
-        } else {
-          console.warn('[topic-page] filterTopic never became available after ' + attempts + ' attempts');
         }
       };
       tryFilter();
     }
     wireEmptyStateForm();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTopicPage);
+  } else {
+    initTopicPage();
   }
 })();
 </script>
