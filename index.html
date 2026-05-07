@@ -553,25 +553,14 @@ header{position:relative}
 .ncd-cta{background:var(--red);color:#fff;border:none;padding:14px 32px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;font-weight:700;cursor:pointer;border-radius:2px;text-transform:uppercase;transition:background .15s}
 .ncd-cta:hover{background:#8e1212}
 
-/* BROWSE INTELLIGENCE — dark tiles with icons */
-.browse-section{background:#fff;padding:32px 22px}
-.browse-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
-.browse-h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--dark);margin:0}
-.browse-all{font-family:'Roboto Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:1.5px;text-decoration:none;text-transform:uppercase}
-.browse-all:hover{color:var(--red)}
-.browse-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.bt{background:var(--dark);color:#fff;aspect-ratio:1/1;padding:18px;display:flex;flex-direction:column;justify-content:space-between;border-radius:4px;text-decoration:none;transition:transform .2s,background .2s;cursor:pointer}
-.bt:hover{transform:translateY(-2px);background:#000}
-.bt:nth-child(2){background:#2c2c2a}
-.bt:nth-child(3){background:#444441}
-.bt:nth-child(4){background:#5f5e5a}
-.bt:nth-child(5){background:var(--dark)}
-.bt:nth-child(6){background:#2c2c2a}
-.bt:nth-child(7){background:#444441}
-.bt:nth-child(8){background:#5f5e5a}
-.bt-icon{font-family:'Playfair Display',serif;font-size:30px;color:#ef9f27;opacity:.9;font-style:normal;line-height:1;display:block}
-.bt-name{font-family:'Playfair Display',serif;font-size:18px;line-height:1.1;font-weight:700;margin-bottom:4px}
-.bt-count{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:#b4b2a9;text-transform:uppercase}
+/* WEEKLY carousel — slightly different bg to distinguish */
+.reveals-section.reveals-week{background:#efe9db;border-top:0.5px solid #d8d1c2}
+
+/* EDITORIAL CHOICE carousel — distinctive cream-with-red-border */
+.reveals-section.reveals-editorial{background:#fff;border-top:3px solid var(--red);position:relative}
+.reveals-section.reveals-editorial .reveals-h2{font-style:italic}
+.reveals-section.reveals-editorial .ed-mark{color:var(--red);font-style:normal;margin-right:6px;font-size:18px}
+.reveals-section.reveals-editorial .reveal-card{border-color:#f0d4d4}
 
 /* MOBILE RESPONSIVE — Option D layout */
 @media (max-width:760px){
@@ -579,8 +568,6 @@ header{position:relative}
   .reveals-section{padding:20px 16px}
   .reveals-h2{font-size:18px}
   .ncd-headline{font-size:22px}
-  .browse-grid{grid-template-columns:repeat(2,1fr);gap:10px}
-  .browse-section{padding:24px 16px}
   .filter-bar{margin:0 -16px 14px;padding:9px 16px;font-size:10px}
 }
 </style>
@@ -778,22 +765,40 @@ header{position:relative}
     <button class="ncd-cta" type="button" onclick="alert('Daily newscast launches with the platform on June 15.')">▶ PLAY DAILY NEWSCAST</button>
   </section>
 
-  <!-- ── BROWSE INTELLIGENCE — TOPIC TILES ────────────────────── -->
-  <section class="browse-section">
-    <div class="browse-header">
-      <h2 class="browse-h2">Browse intelligence</h2>
-      <a href="#" class="browse-all" onclick="event.preventDefault();toggleMegaMenu(event)">SEE ALL 26 →</a>
+  <!-- ── THIS WEEK'S BIGGEST REVEALS — auto-ranked carousel ───── -->
+  <section class="reveals-section reveals-week" id="weekly-section">
+    <div class="reveals-header">
+      <div>
+        <h2 class="reveals-h2">This week's biggest reveals</h2>
+        <div class="reveals-sub">Highest-scoring stories from the last 7 days · auto-curated</div>
+      </div>
+      <div class="reveals-nav">
+        <button class="rn-btn" id="weekly-prev" aria-label="Previous" type="button">‹</button>
+        <button class="rn-btn rn-btn-primary" id="weekly-next" aria-label="More" type="button">›</button>
+      </div>
     </div>
-    <div class="browse-grid" id="browse-grid">
-      <a class="bt" href="/topic/ai-tech"><i class="bt-icon" data-icon="cpu" aria-hidden="true">⚙</i><div class="bt-name">AI &amp; Tech</div><div class="bt-count" id="bt-c-ai-tech">—</div></a>
-      <a class="bt" href="/topic/politics"><i class="bt-icon" data-icon="bank" aria-hidden="true">⛪</i><div class="bt-name">Politics</div><div class="bt-count" id="bt-c-politics">—</div></a>
-      <a class="bt" href="/topic/money"><i class="bt-icon" data-icon="coin" aria-hidden="true">$</i><div class="bt-name">Money</div><div class="bt-count" id="bt-c-money">—</div></a>
-      <a class="bt" href="/topic/health-longevity-biohacking"><i class="bt-icon" data-icon="heart" aria-hidden="true">♥</i><div class="bt-name">Health</div><div class="bt-count" id="bt-c-health-longevity-biohacking">—</div></a>
-      <a class="bt" href="/topic/military"><i class="bt-icon" data-icon="target" aria-hidden="true">◎</i><div class="bt-name">Military</div><div class="bt-count" id="bt-c-military">—</div></a>
-      <a class="bt" href="/topic/history"><i class="bt-icon" data-icon="history" aria-hidden="true">𝓗</i><div class="bt-name">History</div><div class="bt-count" id="bt-c-history">—</div></a>
-      <a class="bt" href="/topic/ufo-paranormal"><i class="bt-icon" data-icon="ufo" aria-hidden="true">◈</i><div class="bt-name">UFO &amp; Paranormal</div><div class="bt-count" id="bt-c-ufo-paranormal">—</div></a>
-      <a class="bt" href="/topic/geopolitics"><i class="bt-icon" data-icon="globe" aria-hidden="true">◯</i><div class="bt-name">Geopolitics</div><div class="bt-count" id="bt-c-geopolitics">—</div></a>
+    <div class="reveals-grid" id="weekly-grid">
+      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading weekly highlights…</div>
     </div>
+    <div class="reveals-dots" id="weekly-dots" aria-hidden="true"></div>
+  </section>
+
+  <!-- ── EDITORIAL CHOICE — hand-picked by editor in dashboard ── -->
+  <section class="reveals-section reveals-editorial" id="editorial-section">
+    <div class="reveals-header">
+      <div>
+        <h2 class="reveals-h2"><span class="ed-mark">✶</span> Editorial choice</h2>
+        <div class="reveals-sub">Hand-picked by the Egleze editor · stories worth your full attention</div>
+      </div>
+      <div class="reveals-nav">
+        <button class="rn-btn" id="editorial-prev" aria-label="Previous" type="button">‹</button>
+        <button class="rn-btn rn-btn-primary" id="editorial-next" aria-label="More" type="button">›</button>
+      </div>
+    </div>
+    <div class="reveals-grid" id="editorial-grid">
+      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading editor's picks…</div>
+    </div>
+    <div class="reveals-dots" id="editorial-dots" aria-hidden="true"></div>
   </section>
 
 </div>
@@ -1097,23 +1102,28 @@ document.querySelectorAll('.nav-item').forEach(item=>{
 function filterTopic(topic, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
-  // Sync the topic strip below
+  // Sync the topic strip below (if it exists)
   document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
   const stripBtns = document.querySelectorAll('.topic-btn');
   if (topic === null) {
-    // "Today's Reveals" / "Trending" — activate "All Topics" in strip
     stripBtns[0]?.classList.add('active');
   } else {
-    // Find matching strip button
     stripBtns.forEach(b => {
       if (b.textContent.includes(topic) || b.textContent.toLowerCase().includes(topic.toLowerCase())) {
         b.classList.add('active');
       }
     });
   }
-  // Clear search bar and search-count badge so user sees a clean filter view
+  // Persist current topic for other render calls (broadcast queue, etc.)
+  window._currentTopic = topic;
+  // Clear search UI
   clearSearchUI();
+  // Load filtered stories for the carousel
   loadStories(topic);
+  // Reload the broadcast queue with topic filter
+  if (typeof loadBroadcastQueue === 'function') {
+    loadBroadcastQueue(topic);
+  }
   scrollToResults();
 }
 
@@ -1272,7 +1282,6 @@ async function loadStories(topic = null) {
     renderRevealsCarousel(combined, topic);
     injectStorySchema(combined);
     updateTicker(combined);
-    updateBrowseCounts();
     updateFilterUI(topic, combined.length);
   } catch(e) { console.log('Load error:', e); }
 }
@@ -1469,43 +1478,174 @@ function clearTopicFilter() {
   document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
   var first = document.querySelector('.nav-item');
   if (first) first.classList.add('active');
+  // Reset global topic state
+  window._currentTopic = null;
   // Re-load all stories
   if (typeof window.loadStories === 'function') window.loadStories(null);
+  // Reset broadcast queue
+  if (typeof loadBroadcastQueue === 'function') loadBroadcastQueue(null);
 }
 
-// ── BROWSE INTELLIGENCE — fill story counts on tiles ───────────
-async function updateBrowseCounts() {
-  if (!db) return;
+// ── GENERIC CAROUSEL PAINT — used by Today, Weekly, Editorial ─
+// Each carousel has its own state object with: allStories, page, perPage,
+// gridId, dotsId, prevId, nextId, emptyMsg.
+function paintCarousel(state) {
+  var grid = document.getElementById(state.gridId);
+  var dotsHost = document.getElementById(state.dotsId);
+  if (!grid) return;
+  var perPage = state.perPage || 3;
+
+  if (!state.allStories || state.allStories.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:13px;font-family:DM Sans,sans-serif;line-height:1.6">' +
+      (state.emptyMsg || 'No stories yet.') + '</div>';
+    if (dotsHost) dotsHost.innerHTML = '';
+    return;
+  }
+
+  var totalPages = Math.max(1, Math.ceil(state.allStories.length / perPage));
+  var startIdx = state.page * perPage;
+  var pageStories = state.allStories.slice(startIdx, startIdx + perPage);
+  if (pageStories.length === 0) { state.page = 0; return paintCarousel(state); }
+
+  // Cache stories
+  window._storyCache = window._storyCache || {};
+  state.allStories.forEach(function(s) { if (s && s.id) window._storyCache[s.id] = s; });
+
+  grid.innerHTML = '';
+  pageStories.forEach(function(s) {
+    var card = document.createElement('div');
+    card.className = 'reveal-card';
+    card.setAttribute('data-clip-trigger', '1');
+    card.setAttribute('data-story-id', s.id);
+
+    var artBg = '';
+    var artFallback = '';
+    if (window._artworkCache && window._artworkCache[s.show_name]) {
+      artBg = 'background-image:url("' + window._artworkCache[s.show_name] + '")';
+    } else {
+      var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
+      artFallback = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
+    }
+
+    var clipDur = '';
+    if (s.clip_start_seconds != null && s.clip_end_seconds != null) {
+      var dur = parseInt(s.clip_end_seconds, 10) - parseInt(s.clip_start_seconds, 10);
+      if (dur > 0) clipDur = '<div class="rc-dur">▶ 0:' + (dur < 10 ? '0' + dur : dur) + '</div>';
+    }
+
+    card.innerHTML =
+      '<div class="rc-art" style="' + artBg + '">' +
+        artFallback +
+        '<div class="rc-cat">' + escapeHtmlMini(s.topic || 'Reveal') + '</div>' +
+        clipDur +
+      '</div>' +
+      '<div class="rc-body">' +
+        '<div class="rc-title">' + escapeHtmlMini(s.headline || '') + '</div>' +
+        '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
+        '<div class="rc-foot">' +
+          '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
+          '<button class="rc-bookmark" type="button" aria-label="Save for later" onclick="event.stopPropagation();">★</button>' +
+        '</div>' +
+      '</div>';
+    grid.appendChild(card);
+
+    if (!window._artworkCache || !window._artworkCache[s.show_name]) {
+      tryLoadArtwork(s.show_name, function(url) {
+        var artEl = card.querySelector('.rc-art');
+        if (artEl && url) {
+          artEl.style.backgroundImage = 'url("' + url + '")';
+          var fb = artEl.querySelector('.rc-art-fallback');
+          if (fb) fb.remove();
+        }
+      });
+    }
+  });
+
+  // Dots
+  if (dotsHost) {
+    dotsHost.innerHTML = '';
+    if (totalPages > 1) {
+      for (var i = 0; i < totalPages; i++) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'rd-dot' + (i === state.page ? ' active' : '');
+        dot.setAttribute('aria-label', 'Page ' + (i + 1));
+        (function(idx){ dot.onclick = function(){ state.page = idx; paintCarousel(state); }; })(i);
+        dotsHost.appendChild(dot);
+      }
+    }
+  }
+
+  // Wire prev/next
+  var prevBtn = document.getElementById(state.prevId);
+  var nextBtn = document.getElementById(state.nextId);
+  if (prevBtn) {
+    prevBtn.disabled = state.page === 0;
+    prevBtn.onclick = function() { if (state.page > 0) { state.page--; paintCarousel(state); } };
+  }
+  if (nextBtn) {
+    nextBtn.disabled = state.page >= totalPages - 1;
+    nextBtn.onclick = function() { if (state.page < totalPages - 1) { state.page++; paintCarousel(state); } };
+  }
+}
+
+// ── WEEKLY BIGGEST REVEALS — auto-ranked, score DESC, last 7 days ─
+window._weeklyState = { allStories: [], page: 0, perPage: 3,
+  gridId: 'weekly-grid', dotsId: 'weekly-dots',
+  prevId: 'weekly-prev', nextId: 'weekly-next',
+  emptyMsg: 'No big reveals from the last 7 days yet — check back tomorrow.' };
+
+async function loadWeeklyReveals() {
+  if (!db && !initDB()) return;
+  try {
+    var weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    var { data, error } = await db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .gte('created_at', weekAgo)
+      .order('score', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(15);
+    if (error) { console.log('[weekly] error:', error.message); return; }
+    window._weeklyState.allStories = data || [];
+    window._weeklyState.page = 0;
+    paintCarousel(window._weeklyState);
+  } catch(e) { console.log('[weekly] exception:', e); }
+}
+
+// ── EDITORIAL CHOICE — hand-picked by editor (is_editorial_pick=true) ─
+window._editorialState = { allStories: [], page: 0, perPage: 3,
+  gridId: 'editorial-grid', dotsId: 'editorial-dots',
+  prevId: 'editorial-prev', nextId: 'editorial-next',
+  emptyMsg: 'Editor\'s picks coming soon. Check back for hand-curated must-reads.' };
+
+async function loadEditorialChoice() {
+  if (!db && !initDB()) return;
   try {
     var { data, error } = await db.from('stories')
-      .select('topic')
-      .eq('status', 'approved');
-    if (error || !data) return;
-    var counts = {};
-    data.forEach(function(s) {
-      if (s.topic) counts[s.topic] = (counts[s.topic] || 0) + 1;
-    });
-    // Topic-name → slug mapping for the 8 displayed tiles
-    var tileMap = {
-      'AI & Tech': 'ai-tech',
-      'Politics': 'politics',
-      'Money': 'money',
-      'Health, Longevity & Biohacking': 'health-longevity-biohacking',
-      'Military': 'military',
-      'History': 'history',
-      'UFO & Paranormal': 'ufo-paranormal',
-      'Geopolitics': 'geopolitics'
-    };
-    Object.keys(tileMap).forEach(function(name) {
-      var slug = tileMap[name];
-      var el = document.getElementById('bt-c-' + slug);
-      if (el) {
-        var n = counts[name] || 0;
-        el.textContent = n + ' ' + (n === 1 ? 'STORY' : 'STORIES');
-      }
-    });
-  } catch(e) {}
+      .select('*')
+      .eq('status', 'approved')
+      .eq('is_editorial_pick', true)
+      .order('created_at', { ascending: false })
+      .limit(15);
+    if (error) {
+      // If column doesn't exist yet (Supabase returns PGRST116/PGRST204), fall back to empty
+      console.log('[editorial] error (likely missing column — run schema migration):', error.message);
+      window._editorialState.allStories = [];
+      paintCarousel(window._editorialState);
+      return;
+    }
+    window._editorialState.allStories = data || [];
+    window._editorialState.page = 0;
+    paintCarousel(window._editorialState);
+  } catch(e) { console.log('[editorial] exception:', e); }
 }
+
+// Wire both carousels to load on page init
+setTimeout(function() {
+  loadWeeklyReveals();
+  loadEditorialChoice();
+}, 1000);
 
 // ── HEADER DATE + STATS ────────────────────────────────────────
 async function updateHeaderDateStats() {
@@ -2479,10 +2619,12 @@ var bcState = {
   progressTimer: null
 };
 
-async function loadBroadcastQueue() {
+async function loadBroadcastQueue(topic) {
   if (!db && !initDB()) return;
+  // If topic param not provided, use the current global topic state
+  if (topic === undefined) topic = window._currentTopic || null;
   try {
-    var result = await db.from('stories')
+    var query = db.from('stories')
       .select('*')
       .eq('status', 'approved')
       .not('source_url', 'is', null)
@@ -2490,6 +2632,11 @@ async function loadBroadcastQueue() {
       .not('clip_end_seconds', 'is', null)
       .order('created_at', { ascending: false })
       .limit(16);
+    // Apply topic filter if set
+    if (topic) {
+      query = query.ilike('topic', '%' + topic + '%');
+    }
+    var result = await query;
     if (result.error) {
       console.log('[broadcast] queue load error:', result.error.message || result.error);
       return;
@@ -2498,6 +2645,7 @@ async function loadBroadcastQueue() {
       return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
     });
     bcState.queue = stories;
+    bcState.currentIndex = 0;
     renderBroadcastQueue();
     // Update poster pretitle/title with the first story
     if (stories.length > 0) {
@@ -2509,9 +2657,12 @@ async function loadBroadcastQueue() {
     } else {
       var pretitle2 = document.getElementById('bc-pretitle');
       var ptitle2 = document.getElementById('bc-postertitle');
-      if (pretitle2) pretitle2.textContent = 'Broadcast queue · empty';
-      if (ptitle2) ptitle2.textContent = 'No precision-clipped stories available yet.';
+      if (pretitle2) pretitle2.textContent = topic ? (topic + ' · No clips yet') : 'Broadcast queue · empty';
+      if (ptitle2) ptitle2.textContent = topic ? ('No precision-clipped ' + topic + ' stories yet.') : 'No precision-clipped stories available yet.';
     }
+    // Update queue header label to reflect filter
+    var qhLabel = document.getElementById('bc-qh-label');
+    if (qhLabel) qhLabel.textContent = topic ? ('Up next · ' + topic) : 'Up next in broadcast';
     var qhTime = document.getElementById('bc-qh-time');
     if (qhTime) qhTime.textContent = stories.length + ' bulletins · Updated ' + new Date().toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'});
   } catch(e) {
