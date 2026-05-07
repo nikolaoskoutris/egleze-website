@@ -257,7 +257,7 @@ header{position:relative}
 
 /* BOTTOM */
 /* ── BROADCAST SECTION ─────────────────────────────────────── */
-.broadcast{display:grid;grid-template-columns:1fr 360px;gap:0;background:var(--ink, #1a1a1a);color:#fafafa;margin:0 -28px 28px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;z-index:1}
+.broadcast{display:grid;grid-template-columns:1fr 360px;gap:0;background:var(--ink, #1a1a1a);color:#fafafa;margin:0 -28px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;z-index:1}
 @media (min-width:1340px){
   .broadcast{margin:0 calc((100vw - 1284px) / -2 - 28px) 28px}
 }
@@ -322,7 +322,7 @@ header{position:relative}
 
 /* Mobile */
 @media (max-width:920px){
-  .broadcast{grid-template-columns:1fr;margin:0 -28px 28px}
+  .broadcast{grid-template-columns:1fr;margin:0 -28px 0}
   .bc-queue{max-height:340px;border-left:none;border-top:1px solid #2a2018}
   .bc-queue-list{max-height:240px}
   .bc-poster .bc-postertitle{font-size:16px}
@@ -1420,42 +1420,71 @@ function escapeHtmlMini(s) {
 function tryLoadArtwork(showName, callback) {
   if (!showName || !callback) return;
   window._artworkCache = window._artworkCache || {};
-  if (window._artworkCache[showName]) { callback(window._artworkCache[showName]); return; }
-  if (window._artworkPending && window._artworkPending[showName]) return;
-  window._artworkPending = window._artworkPending || {};
-  window._artworkPending[showName] = true;
+  window._artworkCallbacks = window._artworkCallbacks || {};
+
+  // Already cached — fire immediately
+  if (window._artworkCache[showName]) {
+    callback(window._artworkCache[showName]);
+    return;
+  }
+
+  // Already in-flight — queue this callback to fire when result arrives
+  if (window._artworkCallbacks[showName]) {
+    window._artworkCallbacks[showName].push(callback);
+    return;
+  }
+
+  // First request for this show — initiate the JSONP fetch
+  window._artworkCallbacks[showName] = [callback];
 
   var cbName = '_artCb_' + Math.random().toString(36).substr(2, 9);
+
+  function fireAllCallbacks(url) {
+    var queued = window._artworkCallbacks[showName] || [];
+    delete window._artworkCallbacks[showName];
+    queued.forEach(function(cb) {
+      try { cb(url); } catch(e) {}
+    });
+  }
+
+  function cleanup() {
+    delete window[cbName];
+    var s = document.getElementById('artworkScript_' + cbName);
+    if (s && s.parentNode) s.remove();
+  }
+
   window[cbName] = function(data) {
     try {
       if (data && data.results && data.results[0] && data.results[0].artworkUrl600) {
         var url = data.results[0].artworkUrl600;
         window._artworkCache[showName] = url;
-        callback(url);
+        fireAllCallbacks(url);
+      } else {
+        // No artwork found — clear the queue so future requests can retry
+        delete window._artworkCallbacks[showName];
       }
-    } catch(e) {}
-    delete window[cbName];
-    if (window._artworkPending) delete window._artworkPending[showName];
-    var s = document.getElementById('artworkScript_' + cbName);
-    if (s) s.remove();
+    } catch(e) {
+      delete window._artworkCallbacks[showName];
+    }
+    cleanup();
   };
+
   var script = document.createElement('script');
   script.id = 'artworkScript_' + cbName;
   script.src = 'https://itunes.apple.com/search?term=' + encodeURIComponent(showName) + '&media=podcast&limit=1&callback=' + cbName;
   script.onerror = function() {
-    delete window[cbName];
-    if (window._artworkPending) delete window._artworkPending[showName];
-    script.remove();
+    delete window._artworkCallbacks[showName];
+    cleanup();
   };
   document.head.appendChild(script);
+
   // Timeout
   setTimeout(function() {
     if (window[cbName]) {
-      delete window[cbName];
-      if (window._artworkPending) delete window._artworkPending[showName];
-      if (script && script.parentNode) script.remove();
+      delete window._artworkCallbacks[showName];
+      cleanup();
     }
-  }, 4000);
+  }, 5000);
 }
 
 // ── FILTER STATE UI ─────────────────────────────────────────────
