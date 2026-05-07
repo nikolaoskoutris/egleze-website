@@ -125,6 +125,20 @@ function generateTopicPage(topic) {
   // Step 2: Replace the boolean placeholder for JS code (no quotes, no escape)
   html = html.replaceAll('{{TOPIC_HAS_STORIES_BOOL}}', topic.hasStories ? 'true' : 'false');
 
+  // Step 2b: Replace the JS-context-safe display name (raw text, JS-string safe)
+  // This goes inside JavaScript string literals like: var TOPIC_DISPLAY_NAME = "...";
+  // We need raw "AI & Tech" here, NOT HTML-escaped "AI &amp; Tech".
+  // Escape only what's needed for JS string safety (backslash, double-quote, newlines).
+  function escapeJs(str) {
+    return String(str || '')
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, '\\n')
+      .replace(/\r/g, '\\r')
+      .replace(/\t/g, '\\t');
+  }
+  html = html.replaceAll('{{TOPIC_DISPLAY_NAME_JS}}', escapeJs(topic.displayName));
+
   // Step 3: Replace the robots directive (plain text, no HTML special chars)
   html = html.replaceAll('{{TOPIC_ROBOTS_DIRECTIVE}}', robotsDirective(topic.hasStories));
 

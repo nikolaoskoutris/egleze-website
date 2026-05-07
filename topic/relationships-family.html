@@ -2855,7 +2855,7 @@ async function bannerSubscribe() {
 <script>
 (function() {
   var TOPIC_SLUG = "relationships-family";
-  var TOPIC_DISPLAY_NAME = "Relationships &amp; Family";
+  var TOPIC_DISPLAY_NAME = "Relationships & Family";
   var TOPIC_HAS_STORIES = true;
 
   function hideHomepageOnlySections() {
@@ -2890,9 +2890,14 @@ async function bannerSubscribe() {
   }
 
   function updateStoryCount() {
-    var heroSection = document.querySelector('.hero');
-    if (!heroSection) return;
-    var count = heroSection.querySelectorAll('.feed-item, .hero-main:not(:empty)').length;
+    // Count stories rendered across both the hero section AND the feed area
+    var heroMain = document.querySelector('.hero-main');
+    var heroHasContent = heroMain && heroMain.querySelector('.hero-title') &&
+                         heroMain.querySelector('.hero-title').textContent.trim().length > 0 &&
+                         !heroMain.querySelector('.hero-title').textContent.includes('No top story');
+    var heroSecondaries = document.querySelectorAll('.hero-side .hero-secondary').length;
+    var feedItems = document.querySelectorAll('.bottom-grid .feed-item').length;
+    var count = (heroHasContent ? 1 : 0) + heroSecondaries + feedItems;
     var sc = document.getElementById('topic-story-count');
     if (sc && TOPIC_HAS_STORIES) {
       sc.textContent = count > 0 ? (count + ' ' + (count === 1 ? 'story' : 'stories')) : 'Loading…';

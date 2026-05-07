@@ -1200,10 +1200,14 @@ function initDB() {
     db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       global: { fetch: safeFetch }
     });
+    // Expose to window so topic-page init scripts can detect readiness
+    try { window.db = db; } catch(e) {}
     return true;
   }
   return false;
 }
+// Initialize as soon as Supabase library loads
+initDB();
 
 // ── TOPIC FILTER & NAV ──────────────────────────────────────────
 document.querySelectorAll('.topic-btn').forEach(btn=>{
@@ -2851,7 +2855,7 @@ async function bannerSubscribe() {
 <script>
 (function() {
   var TOPIC_SLUG = "consciousness-medicine";
-  var TOPIC_DISPLAY_NAME = "Consciousness &amp; Medicine";
+  var TOPIC_DISPLAY_NAME = "Consciousness & Medicine";
   var TOPIC_HAS_STORIES = true;
 
   function hideHomepageOnlySections() {
@@ -2886,9 +2890,14 @@ async function bannerSubscribe() {
   }
 
   function updateStoryCount() {
-    var heroSection = document.querySelector('.hero');
-    if (!heroSection) return;
-    var count = heroSection.querySelectorAll('.feed-item, .hero-main:not(:empty)').length;
+    // Count stories rendered across both the hero section AND the feed area
+    var heroMain = document.querySelector('.hero-main');
+    var heroHasContent = heroMain && heroMain.querySelector('.hero-title') &&
+                         heroMain.querySelector('.hero-title').textContent.trim().length > 0 &&
+                         !heroMain.querySelector('.hero-title').textContent.includes('No top story');
+    var heroSecondaries = document.querySelectorAll('.hero-side .hero-secondary').length;
+    var feedItems = document.querySelectorAll('.bottom-grid .feed-item').length;
+    var count = (heroHasContent ? 1 : 0) + heroSecondaries + feedItems;
     var sc = document.getElementById('topic-story-count');
     if (sc && TOPIC_HAS_STORIES) {
       sc.textContent = count > 0 ? (count + ' ' + (count === 1 ? 'story' : 'stories')) : 'Loading…';
@@ -2946,12 +2955,22 @@ async function bannerSubscribe() {
     checkAndShowEmptyState();
     if (TOPIC_HAS_STORIES) {
       var attempts = 0;
+      var maxAttempts = 60; // 9 seconds total
       var tryFilter = function() {
         attempts++;
-        if (typeof window.db !== 'undefined' && window.db) {
+        // Two checks: window.db (set by initDB) OR filterTopic existence
+        // (filterTopic itself calls initDB() internally if needed, so as soon
+        // as its function body is parsed, calling it is safe)
+        var dbReady = (typeof window.db !== 'undefined' && window.db) ||
+                      (typeof db !== 'undefined' && db);
+        var fnReady = typeof window.filterTopic === 'function';
+        if (fnReady) {
+          // filterTopic handles DB init itself via "if (!db && !initDB()) return;"
           applyTopicFilter();
-        } else if (attempts < 20) {
+        } else if (attempts < maxAttempts) {
           setTimeout(tryFilter, 150);
+        } else {
+          console.warn('[topic-page] filterTopic never became available after ' + attempts + ' attempts');
         }
       };
       tryFilter();
