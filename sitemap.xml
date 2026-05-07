@@ -31,6 +31,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://egleze.com/topic/consciousness-medicine</loc>
+    <lastmod>2026-05-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://egleze.com/topic/controversial</loc>
     <lastmod>2026-05-07</lastmod>
     <changefreq>daily</changefreq>
@@ -68,6 +74,12 @@
   </url>
   <url>
     <loc>https://egleze.com/topic/politics</loc>
+    <lastmod>2026-05-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://egleze.com/topic/relationships-family</loc>
     <lastmod>2026-05-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
