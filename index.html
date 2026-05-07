@@ -890,7 +890,7 @@ header{position:relative}
         <li><a href="/topic/money">Money</a></li>
         <li><a href="/topic/military">Military</a></li>
         <li><a href="/topic/history">History</a></li>
-        <li><a href="#" onclick="event.preventDefault();toggleMegaMenu(event);">All Topics →</a></li>
+        <li><a href="#" onclick="event.preventDefault();window.scrollTo({top:0,behavior:'smooth'});setTimeout(function(){toggleMegaMenu(event);},250);">All Topics →</a></li>
       </ul>
     </div>
 
