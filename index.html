@@ -97,8 +97,8 @@ header{background:var(--white);border-bottom:3px solid var(--red)}
 .logo-block{display:flex;flex-direction:column}
 .logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:900;letter-spacing:-0.8px;color:var(--dark);line-height:1}
 .logo .e-red{color:var(--red)}
-.logo-rule{width:100%;height:3px;background:var(--red);margin:4px 0 3px}
-.logo-sub{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:3.5px;color:var(--muted);text-transform:uppercase;line-height:1}
+.logo-rule{display:none}
+.logo-sub{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:3.5px;color:var(--muted);text-transform:uppercase;line-height:1;margin-top:6px}
 .header-right{display:flex;align-items:center;gap:16px}
 .live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;padding:4px 12px;font-weight:700;text-transform:uppercase}
 .live-dot{width:6px;height:6px;background:#fff;border-radius:50%;animation:blink 1.2s ease-in-out infinite}
@@ -112,7 +112,8 @@ header{background:var(--white);border-bottom:3px solid var(--red)}
 .search-dropdown .sd-item{display:flex;gap:12px;padding:11px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background .12s}
 .search-dropdown .sd-item:hover{background:#fff8f0}
 .search-dropdown .sd-item:last-child{border-bottom:none}
-.search-dropdown .sd-thumb{flex-shrink:0;width:48px;height:48px;background:var(--light) center/cover no-repeat;border:1px solid var(--border)}
+.search-dropdown .sd-thumb{flex-shrink:0;width:48px;height:48px;background:var(--light) center/cover no-repeat;border:1px solid var(--border);overflow:hidden;position:relative}
+.search-dropdown .sd-thumb-img{width:100%;height:100%;object-fit:cover;display:block}
 .search-dropdown .sd-body{flex:1;min-width:0}
 .search-dropdown .sd-headline{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:var(--dark);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .search-dropdown .sd-meta{font-size:11px;color:var(--muted)}
@@ -307,11 +308,12 @@ header{position:relative}
 .bc-queue-header .bc-qh-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;color:#d6c79e;text-transform:uppercase}
 .bc-queue-header .bc-qh-time{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;color:#7a6f5d;margin-left:auto;text-transform:uppercase}
 
-.bc-queue-list{flex:1;overflow-y:auto;min-height:0;max-height:calc(100% - 100px)}
+.bc-queue-list{flex:1;overflow-y:auto;max-height:calc(100% - 100px)}
 .bc-q-item{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:12px 18px;border-bottom:1px solid #2a2018;cursor:pointer;transition:background .15s}
 .bc-q-item:hover{background:#1f1814}
 .bc-q-item.now-playing{background:linear-gradient(90deg,rgba(187,25,25,.18) 0%,transparent 100%);border-left:3px solid var(--red);padding-left:15px}
-.bc-q-item .bc-qi-thumb{width:48px;height:48px;background:var(--light) center/cover no-repeat;position:relative;flex-shrink:0;border:1px solid #2a2018}
+.bc-q-item .bc-qi-thumb{width:48px;height:48px;background:var(--light) center/cover no-repeat;position:relative;flex-shrink:0;border:1px solid #2a2018;overflow:hidden}
+.bc-q-item .bc-qi-thumb-img{width:100%;height:100%;object-fit:cover;display:block}
 .bc-q-item .bc-qi-meta{display:flex;flex-direction:column;gap:3px;min-width:0}
 .bc-q-item .bc-qi-cat{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.2px;color:#d6b878;text-transform:uppercase;font-weight:700}
 .bc-q-item.now-playing .bc-qi-cat{color:#ffb4b4}
@@ -531,7 +533,8 @@ header{position:relative}
 .reveals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .reveal-card{background:#fff;border:0.5px solid var(--border);border-radius:2px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .reveal-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
-.rc-art{position:relative;aspect-ratio:1/1;background:var(--dark);background-size:cover;background-position:center}
+.rc-art{position:relative;aspect-ratio:1/1;background:var(--dark);background-size:cover;background-position:center;overflow:hidden}
+.rc-art-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .rc-art-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.25);font-family:'Playfair Display',serif;font-size:42px;letter-spacing:1px;font-weight:700}
 .rc-cat{position:absolute;top:10px;left:10px;background:rgba(187,25,25,.95);color:#fff;padding:4px 9px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;font-weight:700;border-radius:2px;text-transform:uppercase}
 .rc-dur{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);color:#fff;padding:4px 8px;font-family:'DM Sans',sans-serif;font-size:10px;border-radius:2px}
@@ -1328,20 +1331,21 @@ function paintReveals() {
 
   // Build cards
   grid.innerHTML = '';
+  var _artHits = 0, _artMisses = 0;
   pageStories.forEach(function(s) {
     var card = document.createElement('div');
     card.className = 'reveal-card';
     card.setAttribute('data-clip-trigger', '1');
     card.setAttribute('data-story-id', s.id);
 
-    var artBg = '';
-    var artFallback = '';
     var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+    if (artUrl) { _artHits++; } else { _artMisses++; }
+    var artInner;
     if (artUrl) {
-      artBg = 'background-image:url("' + artUrl + '")';
+      artInner = '<img class="rc-art-img" src="' + escapeHtmlMini(artUrl) + '" alt="' + escapeHtmlMini(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'rc-art-failed\');">';
     } else {
       var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
-      artFallback = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
+      artInner = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
     }
 
     var clipDur = '';
@@ -1351,8 +1355,8 @@ function paintReveals() {
     }
 
     card.innerHTML =
-      '<div class="rc-art" style="' + artBg + '">' +
-        artFallback +
+      '<div class="rc-art">' +
+        artInner +
         '<div class="rc-cat">' + escapeHtmlMini(s.topic || 'Reveal') + '</div>' +
         clipDur +
       '</div>' +
@@ -1366,6 +1370,7 @@ function paintReveals() {
       '</div>';
     grid.appendChild(card);
   });
+  console.log('[reveals] painted ' + pageStories.length + ' cards · artwork hits=' + _artHits + ' misses=' + _artMisses);
 
   // Update dots
   if (dotsHost) {
@@ -1408,7 +1413,9 @@ function escapeHtmlMini(s) {
     .replace(/'/g, '&#39;');
 }
 
-// Legacy iTunes JSONP artwork loader removed — replaced by Supabase preload (see loadShowsArtwork / getShowArtwork below).
+// Legacy iTunes JSONP artwork loader removed. All artwork is now self-hosted —
+// preloaded once at init from Supabase shows.artwork_url via loadShowsArtwork()
+// and served through getShowArtwork(showName). No third-party dependency.
 
 // ── FILTER STATE UI ─────────────────────────────────────────────
 function updateFilterUI(topic, count) {
@@ -1470,14 +1477,13 @@ function paintCarousel(state) {
     card.setAttribute('data-clip-trigger', '1');
     card.setAttribute('data-story-id', s.id);
 
-    var artBg = '';
-    var artFallback = '';
     var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+    var artInner;
     if (artUrl) {
-      artBg = 'background-image:url("' + artUrl + '")';
+      artInner = '<img class="rc-art-img" src="' + escapeHtmlMini(artUrl) + '" alt="' + escapeHtmlMini(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'rc-art-failed\');">';
     } else {
       var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
-      artFallback = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
+      artInner = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
     }
 
     var clipDur = '';
@@ -1487,8 +1493,8 @@ function paintCarousel(state) {
     }
 
     card.innerHTML =
-      '<div class="rc-art" style="' + artBg + '">' +
-        artFallback +
+      '<div class="rc-art">' +
+        artInner +
         '<div class="rc-cat">' + escapeHtmlMini(s.topic || 'Reveal') + '</div>' +
         clipDur +
       '</div>' +
@@ -1950,16 +1956,15 @@ function renderSearchDropdown(term, stories) {
 
   var html = '<div class="sd-section">' + stories.length + ' result' + (stories.length === 1 ? '' : 's') + '</div>';
   stories.forEach(function(s) {
-    var thumb = '';
-    var artwork = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
-    if (artwork) {
-      thumb = ' style="background-image:url(' + JSON.stringify(artwork) + ')"';
-    }
+    var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+    var thumbInner = artUrl
+      ? '<img class="sd-thumb-img" src="' + escapeHtml(artUrl) + '" alt="' + escapeHtml(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';">'
+      : '';
     // Every result is clickable. If no source_url, the click handler will surface a friendly message.
     var clickAttrs = ' data-clip-trigger="1" data-story-id="' + s.id + '"';
     var hasVid = s.source_url ? '' : '<span style="color:var(--muted);font-size:10px;font-style:italic;margin-left:6px">(no video)</span>';
     html += '<div class="sd-item"' + clickAttrs + '>' +
-      '<div class="sd-thumb"' + thumb + '></div>' +
+      '<div class="sd-thumb">' + thumbInner + '</div>' +
       '<div class="sd-body">' +
         '<div class="sd-headline">' + escapeHtml(s.headline || '') + hasVid + '</div>' +
         '<div class="sd-meta"><strong>' + escapeHtml(s.show_name || '') + '</strong>' +
@@ -2621,13 +2626,15 @@ function renderBroadcastQueue() {
   }
   var html = '';
   bcState.queue.forEach(function(s, i) {
-    var artwork = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
-    var thumbStyle = artwork ? ' style="background-image:url(' + JSON.stringify(artwork) + ')"' : '';
+    var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+    var thumbInner = artUrl
+      ? '<img class="bc-qi-thumb-img" src="' + escapeHtml(artUrl) + '" alt="' + escapeHtml(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';">'
+      : '';
     var when = timeAgo(s.created_at);
     var isPlaying = (i === bcState.currentIndex);
     var label = isPlaying ? '▶ Now Playing · ' + (s.topic || 'Story') : (i === bcState.currentIndex + 1 ? 'Up Next · ' + (s.topic || 'Story') : (s.topic || 'Story'));
     html += '<div class="bc-q-item' + (isPlaying ? ' now-playing' : '') + '" data-bc-index="' + i + '">' +
-      '<div class="bc-qi-thumb"' + thumbStyle + '></div>' +
+      '<div class="bc-qi-thumb">' + thumbInner + '</div>' +
       '<div class="bc-qi-meta">' +
         '<span class="bc-qi-cat">' + escapeHtml(label) + '</span>' +
         '<span class="bc-qi-title">' + escapeHtml(s.headline || '') + '</span>' +
@@ -2642,7 +2649,6 @@ function renderBroadcastQueue() {
     try {
       playingEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     } catch(_) {
-      // Fallback for older browsers — instant scroll
       playingEl.scrollIntoView();
     }
   }
@@ -2812,7 +2818,6 @@ function syncBroadcastQueueHeight() {
   var player = document.getElementById('bc-player');
   var queue = document.querySelector('.bc-queue');
   if (!player || !queue) return;
-  // Only set the variable on desktop widths; mobile uses its own cap
   if (window.innerWidth < 921) {
     queue.style.removeProperty('--bc-queue-height');
     return;
