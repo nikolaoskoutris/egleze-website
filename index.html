@@ -107,6 +107,20 @@ header{background:var(--white);border-bottom:3px solid var(--red)}
 .search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border);padding:6px 12px;background:var(--light)}
 .search-box input{border:none;background:none;outline:none;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--dark);width:160px}
 .search-box input::placeholder{color:var(--muted)}
+
+/* ── MOBILE HEADER: stack vertically (Option 1A) ──────────────── */
+@media (max-width:760px){
+  .header-top{flex-direction:column;align-items:stretch;gap:12px;padding:12px 16px}
+  .logo-wrap{justify-content:flex-start}
+  .logo{font-size:34px}
+  .header-right{flex-direction:column;align-items:stretch;gap:10px;width:100%}
+  .search-wrap{width:100%}
+  .search-box{width:100%}
+  .search-box input{width:100%;font-size:14px}
+  .header-right > div:last-child{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .live-pill{flex-shrink:0;letter-spacing:1.2px;padding:4px 10px}
+  .header-date{margin-top:0 !important;text-align:right !important}
+}
 .search-dropdown{position:absolute;top:calc(100% + 6px);right:0;width:380px;max-height:480px;overflow-y:auto;background:#fff;border:1px solid var(--border);box-shadow:0 8px 28px rgba(0,0,0,0.18);font-family:'DM Sans',sans-serif;z-index:1200}
 .search-dropdown .sd-section{padding:10px 14px 6px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:#fafafa}
 .search-dropdown .sd-item{display:flex;gap:12px;padding:11px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background .12s}
@@ -325,13 +339,22 @@ header{position:relative}
 .bc-toggle{display:inline-flex;align-items:center;gap:5px;background:#1f1814;color:#d6c79e;padding:6px 11px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid #2a2018;user-select:none}
 .bc-toggle.on{background:var(--red);color:#fff;border-color:var(--red)}
 
+/* Mobile-only headline block that sits below the video (Option 2A).
+   Hidden on desktop; shown on mobile via the @media block below. */
+.bc-mobile-info{display:none}
+.bc-mobile-info .bc-mobile-stripe{display:inline-block;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;width:fit-content;font-weight:700}
+.bc-mobile-info .bc-mobile-headline{background:none;color:#fafafa;font-family:'Playfair Display',serif;font-size:17px;font-weight:700;line-height:1.25;padding:8px 0 6px;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bc-mobile-info .bc-mobile-meta{color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;line-height:1.5}
+
 /* Mobile */
 @media (max-width:920px){
   .broadcast{grid-template-columns:1fr;margin:0 -28px 0}
   .bc-queue{max-height:340px;border-left:none;border-top:1px solid #2a2018}
   .bc-queue-list{max-height:240px}
   .bc-poster .bc-postertitle{font-size:16px}
-  .bc-lower-third .lt-headline{font-size:14px}
+  /* Hide the over-video overlay on mobile — show the below-video block instead */
+  .bc-lower-third{display:none}
+  .bc-mobile-info{display:block;padding:14px 18px 16px;background:#16110d;border-top:1px solid #2a2018}
 }
 
 /* ── INSTITUTIONAL FOOTER ──────────────────────────────────── */
@@ -728,6 +751,12 @@ header{position:relative}
         <div class="bc-bar"><div class="bc-fill" id="bc-fill"></div></div>
         <span class="bc-total" id="bc-total">0:00</span>
       </div>
+    </div>
+    <!-- Mobile-only: same headline/meta but BELOW the video so it doesn't cover the speaker -->
+    <div class="bc-mobile-info" id="bc-mobile-info" aria-hidden="true">
+      <span class="bc-mobile-stripe" id="bc-mobile-stripe">Egleze Brief</span>
+      <h2 class="bc-mobile-headline" id="bc-mobile-headline">—</h2>
+      <div class="bc-mobile-meta" id="bc-mobile-meta">—</div>
     </div>
     <div class="bc-queue">
       <div class="bc-queue-header">
@@ -2734,10 +2763,20 @@ function bcUpdateLowerThird(story) {
   var stripe = document.getElementById('bc-lt-stripe');
   var headline = document.getElementById('bc-lt-headline');
   var meta = document.getElementById('bc-lt-meta');
-  if (stripe) stripe.textContent = (story.topic || 'Egleze Brief') + ' · Top Reveal';
-  if (headline) headline.textContent = story.headline || '';
-  if (meta) meta.textContent = (story.show_name || '') + ' · ' + (story.episode || '') + ' · ' + ((bcState.currentIndex + 1) + ' of ' + bcState.queue.length + ' in today\'s broadcast');
+  var stripeText = (story.topic || 'Egleze Brief') + ' · Top Reveal';
+  var headlineText = story.headline || '';
+  var metaText = (story.show_name || '') + ' · ' + (story.episode || '') + ' · ' + ((bcState.currentIndex + 1) + ' of ' + bcState.queue.length + ' in today\'s broadcast');
+  if (stripe) stripe.textContent = stripeText;
+  if (headline) headline.textContent = headlineText;
+  if (meta) meta.textContent = metaText;
   if (lt) lt.classList.add('show');
+  // Mirror to the mobile-only block sitting below the video
+  var mStripe = document.getElementById('bc-mobile-stripe');
+  var mHeadline = document.getElementById('bc-mobile-headline');
+  var mMeta = document.getElementById('bc-mobile-meta');
+  if (mStripe) mStripe.textContent = stripeText;
+  if (mHeadline) mHeadline.textContent = headlineText;
+  if (mMeta) mMeta.textContent = metaText;
 }
 
 function bcStartProgressTracking(story) {
