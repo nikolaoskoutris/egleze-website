@@ -3,7 +3,7 @@
 
 (function () {
   const SUPABASE_URL = "https://kerijdhiasrvaxssjqqg.supabase.co";
-  const SUPABASE_ANON_KEY = "PASTE_YOUR_FULL_ANON_KEY_HERE";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg";
 
   if (!window.supabase) {
     console.error("[egleze] supabase-js script missing — load CDN before auth.js");
