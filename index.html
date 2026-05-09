@@ -666,6 +666,7 @@ header{position:relative}
         <div class="live-pill"><span class="live-dot"></span> Live Coverage</div>
         <div class="header-date" style="margin-top:4px;text-align:right" id="header-date-stats">Loading…</div>
       </div>
+      <button id="eg-signin-btn" type="button" style="display:none;padding:8px 16px;background:#0e0a06;color:#fff;border:none;font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer;flex-shrink:0">Sign in</button>
     </div>
   </div>
   <nav id="main-nav" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative">
@@ -3134,8 +3135,59 @@ async function bannerSubscribe() {
   <span>Shorts View</span>
 </a>
 
-<!-- ── EGLEZE AUTH (Phase 1) ──────────────────────────────────── -->
+<!-- ── EGLEZE AUTH (Phase 1, Round 1: Sign-in button only) ──────────── -->
 <script src="/js/auth.js"></script>
+<script>
+(function(){
+  function initAuthButton(){
+    try {
+      if (!window.egleze || !window.egleze.auth) {
+        // auth.js not loaded yet — retry briefly, then give up silently
+        if ((initAuthButton._tries = (initAuthButton._tries || 0) + 1) < 50) {
+          return setTimeout(initAuthButton, 100);
+        }
+        console.warn('[egleze] auth.js never loaded; sign-in button disabled');
+        return;
+      }
+      var btn = document.getElementById('eg-signin-btn');
+      if (!btn) return;
+      var auth = window.egleze.auth;
+
+      // Show button only when logged OUT
+      auth.getUser().then(function(user){
+        if (!user) btn.style.display = '';
+      }).catch(function(e){
+        console.error('[egleze] getUser failed:', e);
+      });
+
+      btn.addEventListener('click', async function(){
+        btn.disabled = true;
+        btn.textContent = 'Opening Google…';
+        try {
+          var res = await auth.signInWithGoogle();
+          if (res && res.error) throw res.error;
+        } catch (e) {
+          console.error('[egleze] sign-in failed:', e);
+          btn.disabled = false;
+          btn.textContent = 'Sign in';
+        }
+      });
+
+      auth.onChange(function(payload){
+        btn.style.display = (payload && payload.user) ? 'none' : '';
+      });
+    } catch (e) {
+      console.error('[egleze] auth-button init failed:', e);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuthButton);
+  } else {
+    initAuthButton();
+  }
+})();
+</script>
 
 </body>
 </html>
