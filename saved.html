@@ -942,11 +942,38 @@ initDB();
 <script>
 (function(){
   var allSaves = []; // [{ saved_at, story }]
+  var artworkCache = {};
+  var artworkReady = false;
 
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
+  }
+
+  function getShowArtwork(showName) {
+    if (!showName) return null;
+    return artworkCache[showName] || null;
+  }
+
+  async function preloadArtwork() {
+    try {
+      if (!window.db) return;
+      var res = await window.db.from('shows').select('name, artwork_url').not('artwork_url', 'is', null);
+      if (res.error) {
+        console.warn('[saved] artwork preload error:', res.error);
+        return;
+      }
+      (res.data || []).forEach(function(row){
+        if (row.name && row.artwork_url) artworkCache[row.name] = row.artwork_url;
+      });
+      artworkReady = true;
+      console.log('[saved] artwork cache: ' + Object.keys(artworkCache).length + ' shows');
+      // If cards already rendered, re-render them with artwork
+      if (allSaves.length > 0) renderList();
+    } catch (e) {
+      console.warn('[saved] artwork preload exception:', e);
+    }
   }
 
   function timeAgo(dateStr) {
@@ -1135,10 +1162,17 @@ initDB();
         if (dur > 0) clipDur = '<div class="sp-card-dur">▶ 0:' + (dur < 10 ? '0' + dur : dur) + '</div>';
       }
       var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
+      var artUrl = getShowArtwork(s.show_name);
+      var thumbInner;
+      if (artUrl) {
+        thumbInner = '<img src="' + escapeHtml(artUrl) + '" alt="' + escapeHtml(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'no-art\');">' + clipDur;
+      } else {
+        thumbInner = initials + clipDur;
+      }
 
       html +=
         '<a href="' + url + '" class="sp-card">' +
-          '<div class="sp-card-thumb">' + initials + clipDur + '</div>' +
+          '<div class="sp-card-thumb">' + thumbInner + '</div>' +
           '<div class="sp-card-body">' +
             '<div class="sp-card-meta">' + escapeHtml(s.topic || 'Reveal') + ' · <strong>' + escapeHtml(s.show_name || '') + '</strong></div>' +
             '<div class="sp-card-headline">' + escapeHtml(s.headline || '') + '</div>' +
@@ -1187,6 +1221,7 @@ initDB();
 
   // Re-load on auth changes
   whenReady(function(){
+    preloadArtwork();
     loadSaves();
     if (window.egleze.auth && window.egleze.auth.onChange) {
       window.egleze.auth.onChange(function(payload){
