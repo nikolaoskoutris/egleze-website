@@ -743,6 +743,7 @@ header{position:relative}
   <div class="broadcast" id="broadcast">
     <div class="bc-player" id="bc-player">
       <button class="eg-bookmark bc-player-bookmark" id="bc-player-bookmark" type="button" aria-label="Save current broadcast" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>
+      <button class="eg-share bc-player-share" id="bc-player-share" type="button" aria-label="Share current broadcast" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
       <div class="bc-yt-host" id="bc-yt-host"></div>
       <div class="bc-poster" id="bc-poster">
         <div class="bc-station">
@@ -1409,6 +1410,7 @@ function paintReveals() {
         '<div class="rc-foot">' +
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
           '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
+          '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
@@ -1547,6 +1549,7 @@ function paintCarousel(state) {
         '<div class="rc-foot">' +
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
           '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
+          '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
@@ -2322,6 +2325,15 @@ function openClipPlayer(story, pushUrl) {
         cpBookmark.style.display = 'none';
       }
     }
+    var cpShare = document.getElementById('cp-share');
+    if (cpShare) {
+      if (story.id) {
+        cpShare.setAttribute('data-story-id', story.id);
+        cpShare.style.display = '';
+      } else {
+        cpShare.style.display = 'none';
+      }
+    }
   } catch (e) { /* don't let this break the modal */ }
 
   // Populate episode summary panel — only show when episode_summary or episode_key_points exists
@@ -2700,6 +2712,7 @@ function renderBroadcastQueue() {
         '<span class="bc-qi-when"><strong style="color:#bcb09a">' + escapeHtml(s.show_name || '') + '</strong> · ' + escapeHtml(when) + '</span>' +
       '</div>' +
       '<button class="eg-bookmark bc-qi-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
+      '<button class="eg-share bc-qi-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
     '</div>';
   });
   list.innerHTML = html;
@@ -2812,6 +2825,10 @@ function bcUpdateLowerThird(story) {
   var playerBookmark = document.getElementById('bc-player-bookmark');
   if (playerBookmark && story && story.id) {
     playerBookmark.setAttribute('data-story-id', story.id);
+  }
+  var playerShare = document.getElementById('bc-player-share');
+  if (playerShare && story && story.id) {
+    playerShare.setAttribute('data-story-id', story.id);
   }
 }
 
@@ -3108,6 +3125,7 @@ async function bannerSubscribe() {
     <div class="cp-handle" aria-hidden="true"></div>
     <button class="cp-close" id="cp-close-btn" aria-label="Close player">✕</button>
     <button class="eg-bookmark cp-bookmark" id="cp-bookmark" type="button" aria-label="Save this story" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>
+    <button class="eg-share cp-share" id="cp-share" type="button" aria-label="Share this story" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
     <div class="cp-video" id="cp-video"></div>
     <div class="cp-body">
       <div class="cp-tag" id="cp-tag">Podcast Reveal</div>
@@ -3241,6 +3259,37 @@ async function bannerSubscribe() {
 @media (max-width: 480px) {
   .bc-player-bookmark { top: 10px; right: 10px; width: 34px; height: 34px; }
   .cp-bookmark { top: 6px; right: 44px; width: 28px; height: 28px; }
+}
+</style>
+
+<style id="eg-share-styles">
+.eg-share { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; padding: 0; cursor: pointer; color: #888780; transition: background 0.15s, color 0.15s; line-height: 1; }
+.eg-share:hover, .eg-share:focus-visible { color: #bb1919; }
+.eg-share:disabled { opacity: 0.5; cursor: wait; }
+
+/* Story card share (sits next to bookmark in card footer) */
+.rc-share { width: 26px; height: 26px; border-radius: 50%; margin-left: 2px; }
+.rc-share:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* Broadcast queue share */
+.bc-qi-share { width: 32px; height: 32px; border-radius: 50%; color: #7a6f5d; flex-shrink: 0; align-self: center; margin-left: 2px; }
+.bc-qi-share:hover { background: rgba(187,25,25,0.18); color: #bb1919; }
+
+/* Broadcast player share — second pill to the LEFT of the bookmark */
+.bc-player-share { position: absolute; top: 14px; right: 60px; z-index: 10; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-share:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
+
+/* Clip modal share — sits LEFT of the bookmark */
+.cp-share { position: absolute; top: 12px; right: 96px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #0e0a06; z-index: 2; transition: background 0.15s, color 0.15s; }
+.cp-share:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* "Link copied" toast — appears bottom-center for ~2s */
+#eg-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: #0e0a06; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 11px 18px; border-radius: 6px; box-shadow: 0 8px 28px rgba(0,0,0,0.28); opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 10000; pointer-events: none; }
+#eg-toast.is-shown { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 480px) {
+  .bc-player-share { top: 10px; right: 50px; width: 34px; height: 34px; }
+  .cp-share { top: 6px; right: 76px; width: 28px; height: 28px; }
 }
 </style>
 
@@ -3683,6 +3732,174 @@ async function bannerSubscribe() {
     sync: syncAllBookmarks,
     refresh: loadSavedIds
   };
+})();
+</script>
+
+<!-- ── EGLEZE SHARE (Phase 1, Round 2B: Web Share API + clipboard fallback + tracking) ── -->
+<div id="eg-toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  // Cache of story metadata so share can build URLs without an extra DB call
+  // window._storyCache is already populated by renderRevealsCarousel
+  function getStoryById(id) {
+    try {
+      var cache = window._storyCache || {};
+      return cache[id] || cache[String(id)] || cache[parseInt(id, 10)] || null;
+    } catch (e) { return null; }
+  }
+
+  function showToast(text) {
+    var el = document.getElementById('eg-toast');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('is-shown');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ el.classList.remove('is-shown'); }, 2200);
+  }
+
+  // Build share URL — uses existing /story/[slug] pattern + storySlug() helper
+  async function buildShareUrl(storyId) {
+    var story = getStoryById(storyId);
+    if (!story) {
+      // Fallback: fetch from DB if not cached
+      try {
+        var db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || window.db;
+        if (db) {
+          var res = await db.from('stories').select('*').eq('id', parseInt(storyId, 10)).single();
+          if (!res.error && res.data) story = res.data;
+        }
+      } catch (e) { console.warn('[egleze share] story lookup failed:', e); }
+    }
+    var slug = '';
+    try {
+      if (typeof storySlug === 'function' && story) slug = storySlug(story) || '';
+    } catch (e) {}
+    var base = (window.location && window.location.origin) || 'https://egleze.com';
+    return slug ? (base + '/story/' + slug) : base;
+  }
+
+  function buildShareTitle(storyId) {
+    var story = getStoryById(storyId);
+    if (story && story.headline) return story.headline + ' — Egleze';
+    return 'Egleze · Podcast Intelligence Network';
+  }
+
+  function buildShareText(storyId) {
+    var story = getStoryById(storyId);
+    if (story && story.headline) {
+      var prefix = story.show_name ? ('From ' + story.show_name + ': ') : '';
+      return prefix + story.headline;
+    }
+    return 'Worth a listen on Egleze';
+  }
+
+  async function logShareEvent(storyId, method) {
+    try {
+      var db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || null;
+      if (!db) return;
+      var user = null;
+      try { user = await window.egleze.auth.getUser(); } catch (e) {}
+      var sessionKey = 'egleze_session_id';
+      var sessionId = '';
+      try {
+        sessionId = sessionStorage.getItem(sessionKey) || '';
+        if (!sessionId) {
+          sessionId = 'eg-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+          sessionStorage.setItem(sessionKey, sessionId);
+        }
+      } catch (e) {}
+      var row = {
+        story_id: parseInt(storyId, 10),
+        user_id: user ? user.id : null,
+        session_id: sessionId,
+        share_method: method
+      };
+      var ins = await db.from('share_events').insert(row);
+      if (ins.error) console.warn('[egleze share] log failed:', ins.error);
+    } catch (e) {
+      console.warn('[egleze share] log exception:', e);
+    }
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (e) { /* fall through */ }
+    // Fallback: hidden textarea
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  async function handleShare(storyId, btn) {
+    if (!storyId) return;
+    if (btn) btn.disabled = true;
+    try {
+      var url = await buildShareUrl(storyId);
+      var title = buildShareTitle(storyId);
+      var text = buildShareText(storyId);
+
+      // Prefer the native share sheet (mobile + some desktop browsers)
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: title, text: text, url: url });
+          logShareEvent(storyId, 'native');
+          return;
+        } catch (e) {
+          // User cancelled the share sheet — that's normal, don't fall back
+          if (e && (e.name === 'AbortError' || /abort|cancel/i.test(e.message || ''))) {
+            return;
+          }
+          // Otherwise fall through to clipboard
+          console.warn('[egleze share] native share failed, falling back to clipboard:', e);
+        }
+      }
+
+      // Fallback: copy to clipboard with a toast
+      var ok = await copyToClipboard(url);
+      if (ok) {
+        showToast('Link copied to clipboard');
+        logShareEvent(storyId, 'clipboard');
+      } else {
+        showToast('Could not copy link');
+      }
+    } catch (e) {
+      console.error('[egleze share] handleShare exception:', e);
+      showToast('Sharing failed — please try again');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  // Click delegation — capture phase, mirror to bookmark pattern
+  document.addEventListener('click', function(e){
+    try {
+      var btn = e.target.closest && e.target.closest('.eg-share');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      if (!id) return;
+      handleShare(id, btn);
+    } catch (err) {
+      console.error('[egleze share] click handler exception:', err);
+    }
+  }, true);
+
+  // Public hook
+  window.egleze = window.egleze || {};
+  window.egleze.share = handleShare;
 })();
 </script>
 
