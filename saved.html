@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved Stories — Egleze</title>
+
+<!-- Saved page is private user data — do not index -->
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Favicons -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#bb1919">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@400;500;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --red:#bb1919;
+  --dark:#111;
+  --muted:#888;
+  --light:#f5f5f0;
+  --white:#ffffff;
+  --border:#e0e0da;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--white);color:var(--dark);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;margin:0;overflow-x:hidden}
+a{color:inherit}
+
+/* Header */
+header{background:var(--white);border-bottom:3px solid var(--red)}
+.sp-header-inner{max-width:1320px;margin:0 auto;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.sp-logo{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;letter-spacing:-0.8px;color:var(--dark);text-decoration:none;line-height:1}
+.sp-logo .e-red{color:var(--red)}
+.sp-header-right{display:flex;align-items:center;gap:14px}
+.sp-back-home{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);text-decoration:none}
+.sp-back-home:hover{color:var(--dark)}
+
+/* Main */
+main{max-width:880px;margin:0 auto;padding:28px 24px 60px}
+.sp-breadcrumb{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.sp-breadcrumb a{color:var(--muted);text-decoration:none}
+.sp-breadcrumb a:hover{color:var(--dark)}
+
+/* Hero */
+.sp-hero{display:flex;align-items:center;gap:22px;padding:30px 28px;background:var(--white);border:1px solid var(--border);margin-bottom:18px}
+.sp-hero-brain{flex-shrink:0;color:var(--red)}
+.sp-hero-titlewrap{flex:1;min-width:0}
+.sp-hero-title{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;line-height:1;letter-spacing:-0.8px;margin:0;color:var(--dark)}
+.sp-hero-title .e-red{color:var(--red)}
+.sp-hero-subtitle{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* Filters */
+.sp-filters{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.sp-filter-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:4px}
+.sp-filter-pill{padding:8px 32px 8px 14px;background:var(--white);border:1px solid var(--border);border-radius:18px;font-size:12px;color:var(--dark);font-family:'DM Sans',sans-serif;cursor:pointer;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;background-size:10px 6px;transition:border-color 0.15s,color 0.15s}
+.sp-filter-pill:focus{outline:none;border-color:var(--red)}
+.sp-filter-pill.is-active{border-color:var(--red);color:var(--red)}
+.sp-count{margin-left:auto;font-family:'Roboto Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.4px}
+
+/* Cards */
+.sp-card{display:flex;gap:16px;padding:16px;background:var(--white);border:1px solid var(--border);margin-bottom:8px;align-items:stretch;cursor:pointer;transition:border-color 0.15s;text-decoration:none;color:inherit}
+.sp-card:hover{border-color:#f0c4c4}
+.sp-card-thumb{width:84px;height:84px;flex-shrink:0;background:linear-gradient(135deg,#3a2a1a,#0e0a06);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--red);position:relative;overflow:hidden;letter-spacing:-1px}
+.sp-card-thumb img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+.sp-card-dur{position:absolute;right:4px;bottom:4px;font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(255,255,255,0.95);background:rgba(0,0,0,0.7);padding:2px 6px;letter-spacing:0.2px;z-index:2}
+.sp-card-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.sp-card-meta{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:0.9px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.sp-card-meta strong{color:var(--dark);font-weight:700}
+.sp-card-headline{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;line-height:1.3;color:var(--dark)}
+.sp-card-summary{font-size:12.5px;color:#555;line-height:1.45;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.sp-card-foot{font-size:11px;color:var(--muted);letter-spacing:0.3px;margin-top:4px}
+.sp-card-actions{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;flex-shrink:0}
+.sp-card-bm,.sp-card-sh{width:30px;height:30px;border-radius:50%}
+
+/* State blocks */
+.sp-state{text-align:center;padding:70px 24px 60px;background:var(--white);border:1px solid var(--border)}
+.sp-state.is-empty{border:1px dashed var(--border)}
+.sp-state-brain{display:inline-block;margin-bottom:22px}
+.sp-state-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin:0 0 10px;line-height:1.2}
+.sp-state-title .e-red{color:var(--red)}
+.sp-state-desc{font-size:13px;color:#555;max-width:460px;margin:0 auto 24px;line-height:1.55}
+.sp-state-cta{display:inline-block;padding:13px 26px;background:var(--dark);color:var(--white);font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;text-decoration:none;border:none;cursor:pointer}
+.sp-state-cta:hover{background:#000}
+.sp-state-cta.cta-red{background:var(--red)}
+.sp-state-cta.cta-red:hover{background:#a31515}
+
+.sp-loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+
+/* Mobile */
+@media (max-width:600px){
+  .sp-header-inner{padding:14px 16px}
+  .sp-logo{font-size:30px}
+  main{padding:18px 14px 40px}
+  .sp-hero{padding:22px 18px;gap:14px}
+  .sp-hero-brain svg{width:50px !important;height:50px !important}
+  .sp-hero-title{font-size:32px}
+  .sp-card{padding:12px;gap:12px}
+  .sp-card-thumb{width:64px;height:64px;font-size:24px}
+  .sp-card-headline{font-size:14px}
+  .sp-card-summary{font-size:11.5px}
+  .sp-card-actions{flex-direction:row}
+  .sp-state{padding:50px 18px 40px}
+  .sp-state-title{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────────── -->
+<header>
+  <div class="sp-header-inner">
+    <a href="/" class="sp-logo"><span class="e-red">E</span>gleze</a>
+    <div class="sp-header-right">
+      <a href="/" class="sp-back-home">← Home</a>
+      <button id="eg-signin-btn" type="button" style="display:none;padding:8px 16px;background:#0e0a06;color:#fff;border:none;font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer;flex-shrink:0">Sign in</button>
+      <div id="eg-userbox-wrap" style="position:relative;flex-shrink:0">
+        <button id="eg-userbox" type="button" hidden aria-haspopup="true" aria-expanded="false" style="align-items:center;gap:8px;padding:5px 10px 5px 5px;background:#fff;border:1px solid #ddd;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--dark);cursor:pointer">
+          <span id="eg-userbox-avatar" style="width:24px;height:24px;border-radius:50%;background:#bb1919;color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-family:'Playfair Display',serif">E</span>
+          <span id="eg-userbox-name" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">You</span>
+          <span style="font-size:9px;color:#888" aria-hidden="true">▾</span>
+        </button>
+        <div id="eg-userdrop" hidden role="menu" aria-labelledby="eg-userbox">
+          <a class="eg-userdrop-item" href="/saved.html" role="menuitem">Saved stories</a>
+          <a class="eg-userdrop-item" href="/account.html" role="menuitem">Account</a>
+          <button class="eg-userdrop-item eg-userdrop-signout" type="button" id="eg-signout-btn" role="menuitem">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ───────────────────────────────────────────────────── -->
+<main>
+  <div class="sp-breadcrumb"><a href="/">Home</a> &nbsp;›&nbsp; Saved</div>
+
+  <!-- LOADING -->
+  <div id="sp-loading" class="sp-loading">Loading your library…</div>
+
+  <!-- LOCKED (logged out) -->
+  <div id="sp-locked" class="sp-state" hidden>
+    <div class="sp-state-brain">
+      <svg width="80" height="80" viewBox="0 0 24 24" style="color:var(--red)"><path d="M5 12 C5 7 8 4 12 4 C16 4 19 7 19 11 C20 12 20 13 19 14 C19 18 16 20 13 20 C11 20 10 19 9 20 C6 20 4 17 5 14 Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </div>
+    <h2 class="sp-state-title"><span class="e-red">S</span>aved stories live here</h2>
+    <p class="sp-state-desc">Sign in to see your library — every story you've bookmarked, in one place. We'll remember.</p>
+    <button class="sp-state-cta" id="sp-locked-signin">Sign in to Egleze</button>
+  </div>
+
+  <!-- CONTENT (logged in) -->
+  <div id="sp-content" hidden>
+    <!-- HERO -->
+    <div class="sp-hero">
+      <div class="sp-hero-brain">
+        <svg width="64" height="64" viewBox="0 0 24 24"><path d="M5 12 C5 7 8 4 12 4 C16 4 19 7 19 11 C20 12 20 13 19 14 C19 18 16 20 13 20 C11 20 10 19 9 20 C6 20 4 17 5 14 Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="sp-hero-titlewrap">
+        <h1 class="sp-hero-title"><span class="e-red">S</span>aved</h1>
+        <div class="sp-hero-subtitle" id="sp-hero-subtitle">Your library</div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="sp-filters" id="sp-filters" hidden>
+      <span class="sp-filter-label">Filter</span>
+      <select id="sp-filter-topic" class="sp-filter-pill" aria-label="Filter by topic">
+        <option value="">All topics</option>
+      </select>
+      <select id="sp-filter-show" class="sp-filter-pill" aria-label="Filter by show">
+        <option value="">All shows</option>
+      </select>
+      <select id="sp-filter-sort" class="sp-filter-pill" aria-label="Sort">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+      </select>
+      <span class="sp-count" id="sp-count"></span>
+    </div>
+
+    <!-- CARD LIST -->
+    <div id="sp-list"></div>
+
+    <!-- EMPTY -->
+    <div id="sp-empty" class="sp-state is-empty" hidden>
+      <div class="sp-state-brain">
+        <svg width="68" height="68" viewBox="0 0 24 24" style="color:var(--red);opacity:0.55"><path d="M5 12 C5 7 8 4 12 4 C16 4 19 7 19 11 C20 12 20 13 19 14 C19 18 16 20 13 20 C11 20 10 19 9 20 C6 20 4 17 5 14 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
+      <h2 class="sp-state-title">Nothing saved yet</h2>
+      <p class="sp-state-desc">Start bookmarking stories you want to come back to. Click the bookmark icon on any story card and it lands here.</p>
+      <a href="/" class="sp-state-cta cta-red">Browse stories</a>
+    </div>
+  </div>
+</main>
+
+<!-- ────── SUPABASE INIT ────── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+function safeFetch(input, init) {
+  init = init || {};
+  if (init.headers && typeof init.headers.forEach === 'function') {
+    var plain = {};
+    init.headers.forEach(function(v, k) { plain[k] = v; });
+    init = Object.assign({}, init, { headers: plain });
+  }
+  return fetch(input, init);
+}
+let db = null;
+function initDB() {
+  if (typeof supabase !== 'undefined') {
+    db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { global: { fetch: safeFetch } });
+    try { window.db = db; } catch(e) {}
+    return true;
+  }
+  return false;
+}
+initDB();
+</script>
+
+<script src="/js/auth.js"></script>
+
+<style id="eg-modal-styles">
+#eg-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.2s; }
+#eg-modal.is-shown { display: flex; }
+#eg-modal.is-open { opacity: 1; }
+#eg-modal-backdrop { position: absolute; inset: 0; background: rgba(14,10,6,0.55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+#eg-modal-card { position: relative; background: #fff; border-radius: 8px; padding: 32px 30px 24px; width: 100%; max-width: 380px; box-shadow: 0 12px 36px rgba(0,0,0,0.28); transform: translateY(8px); transition: transform 0.2s; font-family: 'DM Sans', -apple-system, sans-serif; }
+#eg-modal.is-open #eg-modal-card { transform: translateY(0); }
+#eg-modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #aaa; font-size: 22px; cursor: pointer; line-height: 1; padding: 4px 8px; }
+#eg-modal-close:hover { color: #0e0a06; }
+#eg-modal-logo { font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -1.2px; line-height: 1; text-align: center; color: #0e0a06; }
+#eg-modal-logo .e-red { color: #bb1919; }
+#eg-modal-headline { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; line-height: 1.25; text-align: center; margin: 16px 0 6px; color: #0e0a06; }
+#eg-modal-sub { font-size: 12px; color: #777; text-align: center; line-height: 1.5; margin: 0 0 22px; }
+#eg-btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; width: 100%; background: #fff; color: #0e0a06; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: border-color 0.15s, background 0.15s; }
+#eg-btn-google:hover { border-color: #bb1919; background: #fff8f0; }
+#eg-btn-google:disabled { opacity: 0.6; cursor: wait; }
+#eg-modal-or { text-align: center; margin: 14px 0; color: #aaa; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; font-family: 'Roboto Condensed', sans-serif; }
+#eg-modal-form { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+#eg-modal-email { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; box-sizing: border-box; color: #0e0a06; }
+#eg-modal-email:focus { border-color: #bb1919; }
+#eg-btn-magic { width: 100%; padding: 12px 16px; background: #bb1919; color: #fff; border: none; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+#eg-btn-magic:hover { opacity: 0.9; }
+#eg-btn-magic:disabled { opacity: 0.5; cursor: wait; }
+#eg-modal-status { font-size: 12px; text-align: center; min-height: 18px; margin-top: 12px; font-family: inherit; }
+#eg-modal-status.is-success { color: #2e7d32; }
+#eg-modal-status.is-error { color: #bb1919; }
+#eg-modal-status.is-loading { color: #777; }
+#eg-modal-foot { font-size: 10px; color: #999; text-align: center; margin-top: 16px; line-height: 1.5; font-family: inherit; }
+#eg-modal-foot a { color: inherit; text-decoration: underline; }
+@media (max-width: 480px) { #eg-modal-card { padding: 26px 22px 20px; max-width: 100%; } }
+#eg-userdrop { position: absolute; top: calc(100% + 6px); right: 0; min-width: 200px; background: #fff; border: 1px solid #ddd; box-shadow: 0 8px 28px rgba(0,0,0,0.18); z-index: 1300; }
+.eg-userdrop-item { display: block; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--dark, #0e0a06); text-decoration: none; cursor: pointer; background: none; border: none; width: 100%; text-align: left; transition: background 0.12s; box-sizing: border-box; }
+.eg-userdrop-item:hover { background: #fff8f0; }
+.eg-userdrop-signout { color: #bb1919; border-top: 1px solid #ddd; }
+#eg-userbox[aria-expanded="true"] { border-color: #bb1919; }
+</style>
+
+<style id="eg-bookmark-styles">
+.eg-bookmark { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; padding: 0; cursor: pointer; color: #888780; transition: background 0.15s, color 0.15s; line-height: 1; }
+.eg-bookmark:hover, .eg-bookmark:focus-visible { color: #bb1919; }
+.eg-bookmark.is-saved { color: #bb1919; }
+.eg-bookmark.is-saved svg path { fill: #bb1919; stroke: #bb1919; }
+
+/* Story card bookmark (homepage carousels) */
+.rc-bookmark { width: 26px; height: 26px; border-radius: 50%; }
+.rc-bookmark:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* Broadcast queue item bookmark */
+.bc-qi-bookmark { width: 32px; height: 32px; border-radius: 50%; color: #7a6f5d; flex-shrink: 0; align-self: center; margin-left: 6px; }
+.bc-qi-bookmark:hover { background: rgba(187,25,25,0.18); color: #bb1919; }
+.bc-qi-bookmark.is-saved { color: #bb1919; }
+
+/* Broadcast player bookmark — top-right overlay */
+.bc-player-bookmark { position: absolute; top: 14px; right: 14px; z-index: 10; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-bookmark:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
+.bc-player-bookmark.is-saved { background: #bb1919; color: #fff; border-color: #bb1919; }
+.bc-player-bookmark.is-saved svg path { fill: currentColor; stroke: currentColor; }
+
+/* Clip player modal bookmark — beside the close × */
+.cp-bookmark { position: absolute; top: 12px; right: 56px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #0e0a06; z-index: 2; transition: background 0.15s, color 0.15s; }
+.cp-bookmark:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+.cp-bookmark.is-saved { background: rgba(187,25,25,0.10); color: #bb1919; }
+.cp-bookmark.is-saved svg path { fill: #bb1919; stroke: #bb1919; }
+
+@media (max-width: 480px) {
+  .bc-player-bookmark { top: 10px; right: 10px; width: 34px; height: 34px; }
+  .cp-bookmark { top: 6px; right: 44px; width: 28px; height: 28px; }
+}
+</style>
+
+<style id="eg-share-styles">
+.eg-share { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; padding: 0; cursor: pointer; color: #888780; transition: background 0.15s, color 0.15s; line-height: 1; }
+.eg-share:hover, .eg-share:focus-visible { color: #bb1919; }
+.eg-share:disabled { opacity: 0.5; cursor: wait; }
+
+/* Story card share (sits next to bookmark in card footer) */
+.rc-share { width: 26px; height: 26px; border-radius: 50%; margin-left: 2px; }
+.rc-share:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* Broadcast queue share */
+.bc-qi-share { width: 32px; height: 32px; border-radius: 50%; color: #7a6f5d; flex-shrink: 0; align-self: center; margin-left: 2px; }
+.bc-qi-share:hover { background: rgba(187,25,25,0.18); color: #bb1919; }
+
+/* Broadcast player share — second pill to the LEFT of the bookmark */
+.bc-player-share { position: absolute; top: 14px; right: 60px; z-index: 10; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-share:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
+
+/* Clip modal share — sits LEFT of the bookmark */
+.cp-share { position: absolute; top: 12px; right: 96px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #0e0a06; z-index: 2; transition: background 0.15s, color 0.15s; }
+.cp-share:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* "Link copied" toast — appears bottom-center for ~2s */
+#eg-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: #0e0a06; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 11px 18px; border-radius: 6px; box-shadow: 0 8px 28px rgba(0,0,0,0.28); opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 10000; pointer-events: none; }
+#eg-toast.is-shown { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 480px) {
+  .bc-player-share { top: 10px; right: 50px; width: 34px; height: 34px; }
+  .cp-share { top: 6px; right: 76px; width: 28px; height: 28px; }
+}
+</style>
+
+<div id="eg-modal" role="dialog" aria-modal="true" aria-labelledby="eg-modal-headline">
+  <div id="eg-modal-backdrop" data-eg-close></div>
+  <div id="eg-modal-card">
+    <button id="eg-modal-close" type="button" data-eg-close aria-label="Close">×</button>
+    <div id="eg-modal-logo"><span class="e-red">E</span>gleze</div>
+    <h2 id="eg-modal-headline">Sign in to save stories</h2>
+    <p id="eg-modal-sub">Bookmark stories, build a memory of what's shaping the world.</p>
+    <button id="eg-btn-google" type="button">
+      <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.27h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" fill="#4285f4"/><path d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.27c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.97v2.34A9 9 0 0 0 9 18z" fill="#34a853"/><path d="M3.95 10.69A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.16.29-1.69V4.97H.97A9 9 0 0 0 0 9c0 1.45.35 2.82.97 4.03l2.98-2.34z" fill="#fbbc04"/><path d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .97 4.97l2.98 2.34C4.66 5.18 6.65 3.58 9 3.58z" fill="#ea4335"/></svg>
+      Continue with Google
+    </button>
+    <div id="eg-modal-or">or</div>
+    <form id="eg-modal-form" novalidate>
+      <input type="email" id="eg-modal-email" placeholder="your@email.com" required autocomplete="email" />
+      <button type="submit" id="eg-btn-magic">Send magic link</button>
+    </form>
+    <div id="eg-modal-status" role="status" aria-live="polite"></div>
+    <p id="eg-modal-foot">By continuing you agree to Egleze's<br><a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  function renderAuthSlot(user){
+    try {
+      var btn = document.getElementById('eg-signin-btn');
+      var box = document.getElementById('eg-userbox');
+      if (!btn || !box) return;
+
+      if (user) {
+        var meta = user.user_metadata || {};
+        var name = meta.name || meta.full_name || (user.email ? user.email.split('@')[0] : 'You');
+        var initial = (name.charAt(0) || 'E').toUpperCase();
+        var avatarEl = document.getElementById('eg-userbox-avatar');
+        var nameEl = document.getElementById('eg-userbox-name');
+        if (avatarEl) avatarEl.textContent = initial;
+        if (nameEl) nameEl.textContent = name;
+        btn.style.display = 'none';
+        box.hidden = false;
+        box.style.display = 'flex';
+      } else {
+        btn.style.display = '';
+        box.hidden = true;
+        box.style.display = '';
+      }
+    } catch (e) {
+      console.error('[egleze] renderAuthSlot failed:', e);
+    }
+  }
+
+  function setStatus(text, kind){
+    var s = document.getElementById('eg-modal-status');
+    if (!s) return;
+    s.textContent = text || '';
+    s.className = kind ? ('is-' + kind) : '';
+  }
+
+  function openModal(){
+    var m = document.getElementById('eg-modal');
+    if (!m) return;
+    m.classList.add('is-shown');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function(){ m.classList.add('is-open'); });
+    var emailEl = document.getElementById('eg-modal-email');
+    if (emailEl) setTimeout(function(){ try { emailEl.focus(); } catch(_){} }, 120);
+  }
+
+  function closeModal(){
+    var m = document.getElementById('eg-modal');
+    if (!m) return;
+    m.classList.remove('is-open');
+    document.body.style.overflow = '';
+    setTimeout(function(){
+      m.classList.remove('is-shown');
+      setStatus('', '');
+      var magic = document.getElementById('eg-btn-magic');
+      var google = document.getElementById('eg-btn-google');
+      if (magic) magic.disabled = false;
+      if (google) google.disabled = false;
+    }, 200);
+  }
+
+  function isModalOpen(){
+    var m = document.getElementById('eg-modal');
+    return m && m.classList.contains('is-shown');
+  }
+
+  function toggleDropdown(){
+    var dd = document.getElementById('eg-userdrop');
+    var trig = document.getElementById('eg-userbox');
+    if (!dd || !trig) return;
+    var willOpen = dd.hidden;
+    dd.hidden = !willOpen;
+    trig.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  }
+
+  function closeDropdown(){
+    var dd = document.getElementById('eg-userdrop');
+    var trig = document.getElementById('eg-userbox');
+    if (dd) dd.hidden = true;
+    if (trig) trig.setAttribute('aria-expanded', 'false');
+  }
+
+  function isDropdownOpen(){
+    var dd = document.getElementById('eg-userdrop');
+    return dd && !dd.hidden;
+  }
+
+  function initAuthButton(){
+    try {
+      if (!window.egleze || !window.egleze.auth) {
+        if ((initAuthButton._tries = (initAuthButton._tries || 0) + 1) < 50) {
+          return setTimeout(initAuthButton, 100);
+        }
+        console.warn('[egleze] auth.js never loaded; sign-in disabled');
+        return;
+      }
+      var btn = document.getElementById('eg-signin-btn');
+      if (!btn) return;
+      var auth = window.egleze.auth;
+
+      auth.getUser().then(renderAuthSlot).catch(function(e){
+        console.error('[egleze] getUser failed:', e);
+      });
+
+      // Sign-in button now opens the modal
+      btn.addEventListener('click', openModal);
+
+      // Userbox click → toggle dropdown
+      var userboxEl = document.getElementById('eg-userbox');
+      if (userboxEl) {
+        userboxEl.addEventListener('click', function(e){
+          e.stopPropagation();
+          toggleDropdown();
+        });
+      }
+
+      // Sign-out button
+      var signoutBtn = document.getElementById('eg-signout-btn');
+      if (signoutBtn) {
+        signoutBtn.addEventListener('click', async function(){
+          closeDropdown();
+          try {
+            await auth.signOut();
+          } catch (e) {
+            console.error('[egleze] sign-out failed:', e);
+          }
+        });
+      }
+
+      // Click outside the userbox-wrap → close dropdown
+      document.addEventListener('click', function(e){
+        if (!e.target.closest || !e.target.closest('#eg-userbox-wrap')) {
+          if (isDropdownOpen()) closeDropdown();
+        }
+      });
+
+      // Close handlers (backdrop + × button)
+      var closeEls = document.querySelectorAll('#eg-modal [data-eg-close]');
+      for (var i = 0; i < closeEls.length; i++) {
+        closeEls[i].addEventListener('click', closeModal);
+      }
+
+      // Escape key
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape') {
+          if (isModalOpen()) closeModal();
+          if (isDropdownOpen()) closeDropdown();
+        }
+      });
+
+      // Modal: Google button
+      var googleBtn = document.getElementById('eg-btn-google');
+      if (googleBtn) {
+        googleBtn.addEventListener('click', async function(){
+          googleBtn.disabled = true;
+          setStatus('Opening Google…', 'loading');
+          try {
+            var res = await auth.signInWithGoogle();
+            if (res && res.error) throw res.error;
+          } catch (e) {
+            console.error('[egleze] google sign-in failed:', e);
+            googleBtn.disabled = false;
+            setStatus('Could not open Google sign-in. Please try again.', 'error');
+          }
+        });
+      }
+
+      // Modal: magic-link form
+      var form = document.getElementById('eg-modal-form');
+      if (form) {
+        form.addEventListener('submit', async function(e){
+          e.preventDefault();
+          var emailEl = document.getElementById('eg-modal-email');
+          var magicBtn = document.getElementById('eg-btn-magic');
+          var email = ((emailEl && emailEl.value) || '').trim();
+          if (!email || email.indexOf('@') === -1) {
+            setStatus('Please enter a valid email address.', 'error');
+            return;
+          }
+          if (magicBtn) magicBtn.disabled = true;
+          setStatus('Sending magic link…', 'loading');
+          try {
+            var res = await auth.signInWithMagicLink(email);
+            if (magicBtn) magicBtn.disabled = false;
+            if (res && res.error) {
+              var msg = (res.error.message || '').toLowerCase();
+              if (msg.indexOf('rate') !== -1) setStatus('Too many attempts. Please try again in a few minutes.', 'error');
+              else if (msg.indexOf('invalid') !== -1) setStatus('That email address looks invalid.', 'error');
+              else setStatus(res.error.message || 'Could not send link. Please try again.', 'error');
+            } else {
+              setStatus('Check your inbox — we sent you a sign-in link.', 'success');
+            }
+          } catch (err) {
+            console.error('[egleze] magic-link failed:', err);
+            if (magicBtn) magicBtn.disabled = false;
+            setStatus('Could not send link. Please try again.', 'error');
+          }
+        });
+      }
+
+      // Auth state changes
+      auth.onChange(function(payload){
+        renderAuthSlot(payload && payload.user);
+        if (payload && payload.event === 'SIGNED_IN' && isModalOpen()) closeModal();
+        if (payload && !payload.user) closeDropdown();
+      });
+
+      // Public hook for future bookmark button (Round 7c) to open the modal
+      window.egleze = window.egleze || {};
+      window.egleze.ui = { openSignIn: openModal, closeSignIn: closeModal };
+
+    } catch (e) {
+      console.error('[egleze] auth-button init failed:', e);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuthButton);
+  } else {
+    initAuthButton();
+  }
+})();
+</script>
+
+<!-- ── EGLEZE BOOKMARKS (Phase 1, Round 2A: click logic + sync + intent) ── -->
+<script>
+(function(){
+  // Cache of story IDs the current user has saved
+  window.egleze = window.egleze || {};
+  window.egleze.saved = new Set();
+
+  // Use the auth client for DB ops — it carries the user JWT, unlike window.db
+  function getDB() {
+    return (window.egleze.auth && window.egleze.auth.client) || null;
+  }
+
+  function whenReady(cb) {
+    var tries = 0;
+    function check() {
+      if (window.egleze && window.egleze.auth && window.egleze.auth.client) return cb();
+      if (tries++ < 50) setTimeout(check, 100);
+      else console.warn('[egleze bookmarks] auth client never ready');
+    }
+    check();
+  }
+
+  async function loadSavedIds() {
+    try {
+      var auth = window.egleze.auth;
+      if (!auth) return;
+      var user = await auth.getUser();
+      var db = getDB();
+      if (!user || !db) {
+        window.egleze.saved.clear();
+        syncAllBookmarks();
+        return;
+      }
+      var res = await db.from('user_saved_stories').select('story_id').eq('user_id', user.id);
+      if (res.error) {
+        console.error('[egleze bookmarks] loadSavedIds error:', res.error);
+        return;
+      }
+      window.egleze.saved = new Set((res.data || []).map(function(r){ return String(r.story_id); }));
+      console.log('[egleze bookmarks] loaded ' + window.egleze.saved.size + ' saved IDs');
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] loadSavedIds exception:', e);
+    }
+  }
+
+  function syncAllBookmarks() {
+    try {
+      var set = window.egleze.saved;
+      var els = document.querySelectorAll('.eg-bookmark[data-story-id]');
+      for (var i = 0; i < els.length; i++) {
+        var id = els[i].getAttribute('data-story-id');
+        if (!id) continue;
+        els[i].classList.toggle('is-saved', set.has(String(id)));
+      }
+    } catch (e) {
+      console.error('[egleze bookmarks] syncAllBookmarks exception:', e);
+    }
+  }
+
+  async function toggleBookmark(storyId) {
+    if (!storyId) return;
+    storyId = String(storyId);
+    console.log('[egleze bookmarks] toggle:', storyId);
+
+    if (!window.egleze.auth) { console.error('[egleze bookmarks] no auth'); return; }
+    var user = await window.egleze.auth.getUser();
+
+    if (!user) {
+      console.log('[egleze bookmarks] not signed in — saving intent and opening modal');
+      try { localStorage.setItem('egleze_pending_save', storyId); } catch(_){}
+      if (window.egleze.ui && window.egleze.ui.openSignIn) {
+        window.egleze.ui.openSignIn();
+      }
+      return;
+    }
+
+    var db = getDB();
+    if (!db) { console.error('[egleze bookmarks] auth client not available'); return; }
+
+    var set = window.egleze.saved;
+    var wasSaved = set.has(storyId);
+    console.log('[egleze bookmarks] user:', user.id, 'wasSaved:', wasSaved);
+
+    // Optimistic UI: flip every bookmark for this story
+    var els = document.querySelectorAll('.eg-bookmark[data-story-id="' + storyId + '"]');
+    for (var i = 0; i < els.length; i++) {
+      els[i].classList.toggle('is-saved', !wasSaved);
+    }
+
+    if (wasSaved) {
+      set.delete(storyId);
+      var del = await db.from('user_saved_stories').delete().eq('user_id', user.id).eq('story_id', parseInt(storyId, 10));
+      if (del.error) {
+        console.error('[egleze bookmarks] unsave failed:', del.error);
+        set.add(storyId);
+        for (var j = 0; j < els.length; j++) els[j].classList.add('is-saved');
+      } else {
+        console.log('[egleze bookmarks] unsaved successfully');
+      }
+    } else {
+      set.add(storyId);
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(storyId, 10) });
+      if (ins.error && ins.error.code !== '23505') {
+        console.error('[egleze bookmarks] save failed:', ins.error);
+        set.delete(storyId);
+        for (var k = 0; k < els.length; k++) els[k].classList.remove('is-saved');
+      } else {
+        console.log('[egleze bookmarks] saved successfully');
+      }
+    }
+  }
+
+  async function applyPendingSave() {
+    try {
+      var pending = null;
+      try { pending = localStorage.getItem('egleze_pending_save'); } catch(_){}
+      if (!pending) return;
+      try { localStorage.removeItem('egleze_pending_save'); } catch(_){}
+      console.log('[egleze bookmarks] applying pending save for story:', pending);
+      var db = getDB();
+      if (!window.egleze.auth || !db) return;
+      var user = await window.egleze.auth.getUser();
+      if (!user) return;
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(pending, 10) });
+      if (ins.error && ins.error.code !== '23505') {
+        console.error('[egleze bookmarks] applyPendingSave failed:', ins.error);
+        return;
+      }
+      window.egleze.saved.add(String(pending));
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] applyPendingSave exception:', e);
+    }
+  }
+
+  // Click delegation — capture phase so we beat card-level click handlers
+  document.addEventListener('click', function(e){
+    try {
+      var btn = e.target.closest && e.target.closest('.eg-bookmark');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      console.log('[egleze bookmarks] click captured, story-id:', id);
+      if (!id) return;
+      toggleBookmark(id);
+    } catch (err) {
+      console.error('[egleze bookmarks] click handler exception:', err);
+    }
+  }, true);
+
+  // Init once auth is ready
+  whenReady(function(){
+    console.log('[egleze bookmarks] auth ready, loading saved IDs');
+    loadSavedIds().then(applyPendingSave);
+
+    if (window.egleze.auth && window.egleze.auth.onChange) {
+      window.egleze.auth.onChange(function(payload){
+        try {
+          if (payload && payload.event === 'SIGNED_IN') {
+            console.log('[egleze bookmarks] signed in, reloading saved IDs');
+            loadSavedIds().then(applyPendingSave);
+          } else if (payload && payload.event === 'SIGNED_OUT') {
+            console.log('[egleze bookmarks] signed out, clearing saved IDs');
+            window.egleze.saved.clear();
+            syncAllBookmarks();
+          }
+        } catch (e) { console.error('[egleze bookmarks] onChange exception:', e); }
+      });
+    }
+
+    // Re-sync as cards re-render (debounced)
+    var debounce;
+    try {
+      var observer = new MutationObserver(function(){
+        clearTimeout(debounce);
+        debounce = setTimeout(syncAllBookmarks, 80);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    } catch (e) {
+      console.warn('[egleze bookmarks] mutation observer failed:', e);
+    }
+
+    setTimeout(syncAllBookmarks, 600);
+    setTimeout(syncAllBookmarks, 2000);
+  });
+
+  // Public hook for debugging
+  window.egleze.bookmarks = {
+    toggle: toggleBookmark,
+    sync: syncAllBookmarks,
+    refresh: loadSavedIds
+  };
+})();
+</script>
+
+
+<!-- ── EGLEZE SHARE (Phase 1, Round 2B: Web Share API + clipboard fallback + tracking) ── -->
+<div id="eg-toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  // Cache of story metadata so share can build URLs without an extra DB call
+  // window._storyCache is already populated by renderRevealsCarousel
+  function getStoryById(id) {
+    try {
+      var cache = window._storyCache || {};
+      return cache[id] || cache[String(id)] || cache[parseInt(id, 10)] || null;
+    } catch (e) { return null; }
+  }
+
+  function showToast(text) {
+    var el = document.getElementById('eg-toast');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('is-shown');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ el.classList.remove('is-shown'); }, 2200);
+  }
+
+  // Build share URL — uses existing /story/[slug] pattern + storySlug() helper
+  async function buildShareUrl(storyId) {
+    var story = getStoryById(storyId);
+    if (!story) {
+      // Fallback: fetch from DB if not cached
+      try {
+        var db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || window.db;
+        if (db) {
+          var res = await db.from('stories').select('*').eq('id', parseInt(storyId, 10)).single();
+          if (!res.error && res.data) story = res.data;
+        }
+      } catch (e) { console.warn('[egleze share] story lookup failed:', e); }
+    }
+    var slug = '';
+    try {
+      if (typeof storySlug === 'function' && story) slug = storySlug(story) || '';
+    } catch (e) {}
+    var base = (window.location && window.location.origin) || 'https://egleze.com';
+    return slug ? (base + '/story/' + slug) : base;
+  }
+
+  function buildShareTitle(storyId) {
+    var story = getStoryById(storyId);
+    if (story && story.headline) return story.headline + ' — Egleze';
+    return 'Egleze · Podcast Intelligence Network';
+  }
+
+  function buildShareText(storyId) {
+    var story = getStoryById(storyId);
+    if (story && story.headline) {
+      var prefix = story.show_name ? ('From ' + story.show_name + ': ') : '';
+      return prefix + story.headline;
+    }
+    return 'Worth a listen on Egleze';
+  }
+
+  async function logShareEvent(storyId, method) {
+    try {
+      var db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || null;
+      if (!db) return;
+      var user = null;
+      try { user = await window.egleze.auth.getUser(); } catch (e) {}
+      var sessionKey = 'egleze_session_id';
+      var sessionId = '';
+      try {
+        sessionId = sessionStorage.getItem(sessionKey) || '';
+        if (!sessionId) {
+          sessionId = 'eg-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+          sessionStorage.setItem(sessionKey, sessionId);
+        }
+      } catch (e) {}
+      var row = {
+        story_id: parseInt(storyId, 10),
+        user_id: user ? user.id : null,
+        session_id: sessionId,
+        share_method: method
+      };
+      var ins = await db.from('share_events').insert(row);
+      if (ins.error) console.warn('[egleze share] log failed:', ins.error);
+    } catch (e) {
+      console.warn('[egleze share] log exception:', e);
+    }
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (e) { /* fall through */ }
+    // Fallback: hidden textarea
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  async function handleShare(storyId, btn) {
+    if (!storyId) return;
+    if (btn) btn.disabled = true;
+    try {
+      var url = await buildShareUrl(storyId);
+      var title = buildShareTitle(storyId);
+      var text = buildShareText(storyId);
+
+      // Prefer the native share sheet (mobile + some desktop browsers)
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: title, text: text, url: url });
+          logShareEvent(storyId, 'native');
+          return;
+        } catch (e) {
+          // User cancelled the share sheet — that's normal, don't fall back
+          if (e && (e.name === 'AbortError' || /abort|cancel/i.test(e.message || ''))) {
+            return;
+          }
+          // Otherwise fall through to clipboard
+          console.warn('[egleze share] native share failed, falling back to clipboard:', e);
+        }
+      }
+
+      // Fallback: copy to clipboard with a toast
+      var ok = await copyToClipboard(url);
+      if (ok) {
+        showToast('Link copied to clipboard');
+        logShareEvent(storyId, 'clipboard');
+      } else {
+        showToast('Could not copy link');
+      }
+    } catch (e) {
+      console.error('[egleze share] handleShare exception:', e);
+      showToast('Sharing failed — please try again');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  // Click delegation — capture phase, mirror to bookmark pattern
+  document.addEventListener('click', function(e){
+    try {
+      var btn = e.target.closest && e.target.closest('.eg-share');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      if (!id) return;
+      handleShare(id, btn);
+    } catch (err) {
+      console.error('[egleze share] click handler exception:', err);
+    }
+  }, true);
+
+  // Public hook
+  window.egleze = window.egleze || {};
+  window.egleze.share = handleShare;
+})();
+</script>
+
+
+<!-- ────── SAVED-PAGE LOGIC ────── -->
+<script>
+(function(){
+  var allSaves = []; // [{ saved_at, story }]
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function timeAgo(dateStr) {
+    try {
+      var d = new Date(dateStr).getTime();
+      if (isNaN(d)) return '';
+      var s = Math.floor((Date.now() - d) / 1000);
+      if (s < 45) return 'just now';
+      if (s < 90) return '1 min ago';
+      var m = Math.floor(s / 60);
+      if (m < 60) return m + ' min ago';
+      var h = Math.floor(m / 60);
+      if (h < 24) return h + 'h ago';
+      var dd = Math.floor(h / 24);
+      if (dd < 7) return dd + ' days ago';
+      return new Date(d).toLocaleDateString('en-IE', { day: 'numeric', month: 'short' });
+    } catch (e) { return ''; }
+  }
+
+  function storySlug(story) {
+    if (!story) return null;
+    var base = (story.headline || '').toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 80);
+    return story.id ? story.id + '-' + base : base;
+  }
+
+  function whenReady(cb) {
+    var tries = 0;
+    function check() {
+      if (window.egleze && window.egleze.auth && window.egleze.auth.client) return cb();
+      if (tries++ < 60) setTimeout(check, 100);
+      else console.warn('[saved] auth never ready');
+    }
+    check();
+  }
+
+  async function loadSaves() {
+    var loadingEl = document.getElementById('sp-loading');
+    var lockedEl = document.getElementById('sp-locked');
+    var contentEl = document.getElementById('sp-content');
+    var emptyEl = document.getElementById('sp-empty');
+    var listEl = document.getElementById('sp-list');
+    var filtersEl = document.getElementById('sp-filters');
+    var heroSub = document.getElementById('sp-hero-subtitle');
+
+    try {
+      var auth = window.egleze.auth;
+      var user = await auth.getUser();
+
+      if (!user) {
+        loadingEl.hidden = true;
+        contentEl.hidden = true;
+        lockedEl.hidden = false;
+        return;
+      }
+
+      var dbc = auth.client; // auth client carries the JWT — required for RLS
+      var res = await dbc
+        .from('user_saved_stories')
+        .select('saved_at, story:stories(*)')
+        .eq('user_id', user.id)
+        .order('saved_at', { ascending: false });
+
+      if (res.error) {
+        console.error('[saved] load error:', res.error);
+        loadingEl.textContent = 'Could not load your library. Please refresh.';
+        return;
+      }
+
+      allSaves = (res.data || []).filter(function(r){ return r.story; });
+
+      loadingEl.hidden = true;
+      lockedEl.hidden = true;
+      contentEl.hidden = false;
+
+      if (allSaves.length === 0) {
+        emptyEl.hidden = false;
+        filtersEl.hidden = true;
+        listEl.innerHTML = '';
+        if (heroSub) heroSub.textContent = 'Your library is empty';
+      } else {
+        emptyEl.hidden = true;
+        filtersEl.hidden = false;
+        populateFilters();
+        renderList();
+        updateHeroSubtitle();
+      }
+    } catch (e) {
+      console.error('[saved] exception:', e);
+      loadingEl.textContent = 'Something went wrong. Please refresh.';
+    }
+  }
+
+  function populateFilters() {
+    var topicSet = new Set();
+    var showSet = new Set();
+    allSaves.forEach(function(r) {
+      if (r.story.topic) topicSet.add(r.story.topic);
+      if (r.story.show_name) showSet.add(r.story.show_name);
+    });
+
+    var topicEl = document.getElementById('sp-filter-topic');
+    var showEl = document.getElementById('sp-filter-show');
+
+    var prevTopic = topicEl.value;
+    var prevShow = showEl.value;
+
+    topicEl.innerHTML = '<option value="">All topics</option>';
+    Array.from(topicSet).sort().forEach(function(t) {
+      var o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      topicEl.appendChild(o);
+    });
+    if (prevTopic && topicSet.has(prevTopic)) topicEl.value = prevTopic;
+
+    showEl.innerHTML = '<option value="">All shows</option>';
+    Array.from(showSet).sort().forEach(function(s) {
+      var o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      showEl.appendChild(o);
+    });
+    if (prevShow && showSet.has(prevShow)) showEl.value = prevShow;
+  }
+
+  function updateHeroSubtitle() {
+    var sub = document.getElementById('sp-hero-subtitle');
+    if (!sub) return;
+    var n = allSaves.length;
+    if (n === 0) {
+      sub.textContent = 'Your library is empty';
+    } else {
+      var newest = allSaves[0].saved_at;
+      sub.textContent = n + ' stor' + (n === 1 ? 'y' : 'ies') + ' kept for later · last updated ' + timeAgo(newest);
+    }
+  }
+
+  function renderList() {
+    var listEl = document.getElementById('sp-list');
+    var topicEl = document.getElementById('sp-filter-topic');
+    var showEl = document.getElementById('sp-filter-show');
+    var sortEl = document.getElementById('sp-filter-sort');
+    var countEl = document.getElementById('sp-count');
+
+    var topicFilter = topicEl.value;
+    var showFilter = showEl.value;
+    var sortMode = sortEl.value;
+
+    topicEl.classList.toggle('is-active', !!topicFilter);
+    showEl.classList.toggle('is-active', !!showFilter);
+
+    var filtered = allSaves.filter(function(r) {
+      if (topicFilter && r.story.topic !== topicFilter) return false;
+      if (showFilter && r.story.show_name !== showFilter) return false;
+      return true;
+    });
+
+    if (sortMode === 'oldest') {
+      filtered = filtered.slice().sort(function(a, b) {
+        return new Date(a.saved_at) - new Date(b.saved_at);
+      });
+    }
+
+    countEl.textContent = filtered.length + ' stor' + (filtered.length === 1 ? 'y' : 'ies');
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px">No saved stories match these filters.</div>';
+      return;
+    }
+
+    // Cache stories for share button to find them
+    window._storyCache = window._storyCache || {};
+
+    var html = '';
+    filtered.forEach(function(r) {
+      var s = r.story;
+      window._storyCache[s.id] = s;
+      var slug = storySlug(s);
+      var url = slug ? ('/story/' + slug) : '#';
+      var clipDur = '';
+      if (s.clip_start_seconds != null && s.clip_end_seconds != null) {
+        var dur = parseInt(s.clip_end_seconds, 10) - parseInt(s.clip_start_seconds, 10);
+        if (dur > 0) clipDur = '<div class="sp-card-dur">▶ 0:' + (dur < 10 ? '0' + dur : dur) + '</div>';
+      }
+      var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
+
+      html +=
+        '<a href="' + url + '" class="sp-card">' +
+          '<div class="sp-card-thumb">' + initials + clipDur + '</div>' +
+          '<div class="sp-card-body">' +
+            '<div class="sp-card-meta">' + escapeHtml(s.topic || 'Reveal') + ' · <strong>' + escapeHtml(s.show_name || '') + '</strong></div>' +
+            '<div class="sp-card-headline">' + escapeHtml(s.headline || '') + '</div>' +
+            '<div class="sp-card-summary">' + escapeHtml(s.summary || '') + '</div>' +
+            '<div class="sp-card-foot">Saved ' + timeAgo(r.saved_at) + '</div>' +
+          '</div>' +
+          '<div class="sp-card-actions">' +
+            '<button class="eg-bookmark sp-card-bm is-saved" type="button" aria-label="Saved — click to remove" data-story-id="' + s.id + '" onclick="event.preventDefault();event.stopPropagation();">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+            '<button class="eg-share sp-card-sh" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.preventDefault();event.stopPropagation();">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</a>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  // Wire filter changes
+  ['sp-filter-topic','sp-filter-show','sp-filter-sort'].forEach(function(id){
+    document.addEventListener('DOMContentLoaded', function(){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('change', renderList);
+    });
+  });
+
+  // Wire locked-state sign-in button
+  document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('sp-locked-signin');
+    if (btn) {
+      btn.addEventListener('click', function(){
+        if (window.egleze && window.egleze.ui && window.egleze.ui.openSignIn) {
+          window.egleze.ui.openSignIn();
+        }
+      });
+    }
+  });
+
+  // After unsave, the bookmark logic flips is-saved class — refresh the list
+  document.addEventListener('click', function(e){
+    var bm = e.target.closest && e.target.closest('.sp-card-bm');
+    if (!bm) return;
+    setTimeout(loadSaves, 350);
+  }, false);
+
+  // Re-load on auth changes
+  whenReady(function(){
+    loadSaves();
+    if (window.egleze.auth && window.egleze.auth.onChange) {
+      window.egleze.auth.onChange(function(payload){
+        if (payload && (payload.event === 'SIGNED_IN' || payload.event === 'SIGNED_OUT')) {
+          loadSaves();
+        }
+      });
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>
