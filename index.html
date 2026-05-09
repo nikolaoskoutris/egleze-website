@@ -742,6 +742,7 @@ header{position:relative}
   <!-- ── BROADCAST SECTION ────────────────────────────────────── -->
   <div class="broadcast" id="broadcast">
     <div class="bc-player" id="bc-player">
+      <button class="eg-bookmark bc-player-bookmark" id="bc-player-bookmark" type="button" aria-label="Save current broadcast" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>
       <div class="bc-yt-host" id="bc-yt-host"></div>
       <div class="bc-poster" id="bc-poster">
         <div class="bc-station">
@@ -1407,7 +1408,7 @@ function paintReveals() {
         '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
         '<div class="rc-foot">' +
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
-          '<button class="rc-bookmark" type="button" aria-label="Save for later" onclick="event.stopPropagation();">★</button>' +
+          '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
@@ -1545,7 +1546,7 @@ function paintCarousel(state) {
         '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
         '<div class="rc-foot">' +
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
-          '<button class="rc-bookmark" type="button" aria-label="Save for later" onclick="event.stopPropagation();">★</button>' +
+          '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
@@ -2682,6 +2683,7 @@ function renderBroadcastQueue() {
         '<span class="bc-qi-title">' + escapeHtml(s.headline || '') + '</span>' +
         '<span class="bc-qi-when"><strong style="color:#bcb09a">' + escapeHtml(s.show_name || '') + '</strong> · ' + escapeHtml(when) + '</span>' +
       '</div>' +
+      '<button class="eg-bookmark bc-qi-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
     '</div>';
   });
   list.innerHTML = html;
@@ -2790,6 +2792,11 @@ function bcUpdateLowerThird(story) {
   if (mStripe) mStripe.textContent = stripeText;
   if (mHeadline) mHeadline.textContent = headlineText;
   if (mMeta) mMeta.textContent = metaText;
+  // Sync the player bookmark to whatever story is currently playing
+  var playerBookmark = document.getElementById('bc-player-bookmark');
+  if (playerBookmark && story && story.id) {
+    playerBookmark.setAttribute('data-story-id', story.id);
+  }
 }
 
 function bcStartProgressTracking(story) {
@@ -3185,6 +3192,32 @@ async function bannerSubscribe() {
 .eg-userdrop-item:hover { background: #fff8f0; }
 .eg-userdrop-signout { color: #bb1919; border-top: 1px solid #ddd; }
 #eg-userbox[aria-expanded="true"] { border-color: #bb1919; }
+</style>
+
+<style id="eg-bookmark-styles">
+.eg-bookmark { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; padding: 0; cursor: pointer; color: #888780; transition: background 0.15s, color 0.15s; line-height: 1; }
+.eg-bookmark:hover { color: #bb1919; }
+.eg-bookmark.is-saved { color: #bb1919; }
+.eg-bookmark.is-saved svg path { fill: currentColor; }
+
+/* Story card bookmark (homepage carousels) */
+.rc-bookmark { width: 26px; height: 26px; border-radius: 50%; }
+.rc-bookmark:hover { background: rgba(187,25,25,0.10); }
+
+/* Broadcast queue item bookmark */
+.bc-qi-bookmark { width: 32px; height: 32px; border-radius: 50%; color: #7a6f5d; flex-shrink: 0; align-self: center; margin-left: 6px; }
+.bc-qi-bookmark:hover { background: rgba(187,25,25,0.18); color: #bb1919; }
+.bc-qi-bookmark.is-saved { color: #bb1919; }
+
+/* Broadcast player bookmark — top-right overlay */
+.bc-player-bookmark { position: absolute; top: 14px; right: 14px; z-index: 10; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-bookmark:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
+.bc-player-bookmark.is-saved { background: #bb1919; color: #fff; border-color: #bb1919; }
+.bc-player-bookmark.is-saved svg path { fill: currentColor; }
+
+@media (max-width: 480px) {
+  .bc-player-bookmark { top: 10px; right: 10px; width: 34px; height: 34px; }
+}
 </style>
 
 <div id="eg-modal" role="dialog" aria-modal="true" aria-labelledby="eg-modal-headline">
