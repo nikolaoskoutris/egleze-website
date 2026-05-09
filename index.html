@@ -667,6 +667,11 @@ header{position:relative}
         <div class="header-date" style="margin-top:4px;text-align:right" id="header-date-stats">Loading…</div>
       </div>
       <button id="eg-signin-btn" type="button" style="display:none;padding:8px 16px;background:#0e0a06;color:#fff;border:none;font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer;flex-shrink:0">Sign in</button>
+      <div id="eg-userbox" hidden style="align-items:center;gap:8px;padding:5px 10px 5px 5px;background:#fff;border:1px solid #ddd;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--dark);flex-shrink:0">
+        <span id="eg-userbox-avatar" style="width:24px;height:24px;border-radius:50%;background:#bb1919;color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-family:'Playfair Display',serif">E</span>
+        <span id="eg-userbox-name" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">You</span>
+        <span style="font-size:9px;color:#888" aria-hidden="true">▾</span>
+      </div>
     </div>
   </div>
   <nav id="main-nav" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative">
@@ -3135,28 +3140,51 @@ async function bannerSubscribe() {
   <span>Shorts View</span>
 </a>
 
-<!-- ── EGLEZE AUTH (Phase 1, Round 1: Sign-in button only) ──────────── -->
+<!-- ── EGLEZE AUTH (Phase 1, Round 2: Sign-in button + signed-in chip) ── -->
 <script src="/js/auth.js"></script>
 <script>
 (function(){
+  function renderAuthSlot(user){
+    try {
+      var btn = document.getElementById('eg-signin-btn');
+      var box = document.getElementById('eg-userbox');
+      if (!btn || !box) return;
+
+      if (user) {
+        var meta = user.user_metadata || {};
+        var name = meta.name || meta.full_name || (user.email ? user.email.split('@')[0] : 'You');
+        var initial = (name.charAt(0) || 'E').toUpperCase();
+        var avatarEl = document.getElementById('eg-userbox-avatar');
+        var nameEl = document.getElementById('eg-userbox-name');
+        if (avatarEl) avatarEl.textContent = initial;
+        if (nameEl) nameEl.textContent = name;
+        btn.style.display = 'none';
+        box.hidden = false;
+        box.style.display = 'flex';
+      } else {
+        btn.style.display = '';
+        box.hidden = true;
+        box.style.display = '';
+      }
+    } catch (e) {
+      console.error('[egleze] renderAuthSlot failed:', e);
+    }
+  }
+
   function initAuthButton(){
     try {
       if (!window.egleze || !window.egleze.auth) {
-        // auth.js not loaded yet — retry briefly, then give up silently
         if ((initAuthButton._tries = (initAuthButton._tries || 0) + 1) < 50) {
           return setTimeout(initAuthButton, 100);
         }
-        console.warn('[egleze] auth.js never loaded; sign-in button disabled');
+        console.warn('[egleze] auth.js never loaded; sign-in disabled');
         return;
       }
       var btn = document.getElementById('eg-signin-btn');
       if (!btn) return;
       var auth = window.egleze.auth;
 
-      // Show button only when logged OUT
-      auth.getUser().then(function(user){
-        if (!user) btn.style.display = '';
-      }).catch(function(e){
+      auth.getUser().then(renderAuthSlot).catch(function(e){
         console.error('[egleze] getUser failed:', e);
       });
 
@@ -3174,7 +3202,7 @@ async function bannerSubscribe() {
       });
 
       auth.onChange(function(payload){
-        btn.style.display = (payload && payload.user) ? 'none' : '';
+        renderAuthSlot(payload && payload.user);
       });
     } catch (e) {
       console.error('[egleze] auth-button init failed:', e);
