@@ -10,11 +10,11 @@
     },
     {
       "source": "/story/:slug",
-      "destination": "/story/:slug.html"
+      "destination": "/api/story?slug=:slug"
     },
     {
       "source": "/story/:slug/",
-      "destination": "/story/:slug.html"
+      "destination": "/api/story?slug=:slug"
     }
   ],
   "redirects": [
@@ -66,15 +66,6 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=300, s-maxage=600"
-        }
-      ]
-    },
-    {
-      "source": "/story/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=600, s-maxage=3600"
         }
       ]
     }
