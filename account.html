@@ -60,17 +60,17 @@ main{max-width:760px;margin:0 auto;padding:28px 24px 60px}
 .ac-profile{display:flex;gap:18px;align-items:center}
 .ac-avatar-big{width:72px;height:72px;border-radius:50%;background:var(--red);color:#fff;font-weight:900;display:inline-flex;align-items:center;justify-content:center;font-size:34px;font-family:'Playfair Display',serif;flex-shrink:0}
 .ac-profile-fields{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
-.ac-field-row{display:flex;align-items:center;gap:12px;min-height:30px}
+.ac-field-row{display:flex;align-items:center;gap:12px;min-height:30px;flex-wrap:wrap}
 .ac-field-label{width:90px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700;flex-shrink:0}
 .ac-field-value{flex:1;font-size:14px;color:var(--dark);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ac-field-value.muted{color:var(--muted);font-weight:400}
-.ac-field-input{flex:1;font-size:14px;color:var(--dark);font-family:inherit;padding:6px 10px;border:1px solid var(--border);background:#fff;outline:none;min-width:0;border-radius:0}
-.ac-field-input:focus{border-color:var(--red)}
+.ac-field-input{flex:1 1 220px;font-size:15px;color:var(--dark);font-family:inherit;padding:11px 14px;border:1px solid var(--border);background:#fff;outline:none;min-width:0;border-radius:4px;line-height:1.4}
+.ac-field-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(187,25,25,0.10)}
 .ac-field-edit{font-size:10px;color:var(--red);cursor:pointer;font-family:'Roboto Condensed',sans-serif;letter-spacing:0.6px;text-transform:uppercase;font-weight:700;background:none;border:none;padding:6px 10px;flex-shrink:0}
 .ac-field-edit:hover{background:rgba(187,25,25,0.08)}
 .ac-field-actions{display:flex;gap:6px;flex-shrink:0}
-.ac-field-save{padding:6px 12px;background:var(--dark);color:#fff;border:none;font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer}
-.ac-field-cancel{padding:6px 12px;background:none;color:var(--muted);border:1px solid var(--border);font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer}
+.ac-field-save{padding:9px 14px;background:var(--dark);color:#fff;border:none;font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer;border-radius:4px}
+.ac-field-cancel{padding:9px 14px;background:none;color:var(--muted);border:1px solid var(--border);font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer;border-radius:4px}
 .ac-field-status{flex:1 1 100%;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}
 .ac-field-status.is-error{color:var(--red)}
 .ac-field-status.is-success{color:#1a7d3a}
