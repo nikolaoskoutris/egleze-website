@@ -48,6 +48,15 @@ function formatDate(iso) {
   } catch (e) { return ''; }
 }
 
+// Extract YouTube video ID from any YouTube URL form
+// (youtu.be, watch?v=, embed/, shorts/, live/, v/)
+function extractYouTubeId(url) {
+  if (!url) return null;
+  var s = String(url);
+  var m = s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
 // Fetch the story (and optionally its show artwork) from Supabase.
 async function fetchStory(id) {
   const url = `${SUPABASE_URL}/rest/v1/stories?id=eq.${encodeURIComponent(id)}&status=eq.approved&select=*&limit=1`;
@@ -146,6 +155,36 @@ function renderStoryHtml(story, artworkUrl) {
     ? `<blockquote class="story-quote">"${escapeHtml(quote)}"</blockquote>`
     : '';
 
+  // Video block — YouTube embed with click-to-play poster.
+  // Auto-starts at clip_start_seconds and ends at clip_end_seconds when
+  // both are set; otherwise plays the full source video.
+  const videoId = extractYouTubeId(story.source_url);
+  const startSec = (typeof story.clip_start_seconds === 'number' && story.clip_start_seconds >= 0) ? story.clip_start_seconds : null;
+  const endSec = (typeof story.clip_end_seconds === 'number' && startSec !== null && story.clip_end_seconds > startSec) ? story.clip_end_seconds : null;
+  const videoParams = [
+    'autoplay=1',
+    'rel=0',
+    'modestbranding=1',
+    'playsinline=1',
+    startSec !== null ? `start=${startSec}` : null,
+    endSec !== null ? `end=${endSec}` : null
+  ].filter(Boolean).join('&');
+  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?${videoParams}` : null;
+  const posterUrl = videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : null;
+  const videoHtml = embedUrl
+    ? `<div class="video-block">
+         <div class="video-wrap" id="video-wrap" data-embed="${escapeHtml(embedUrl)}">
+           <img class="video-poster" src="${escapeHtml(posterUrl)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/${videoId}/hqdefault.jpg';">
+           <button class="video-play" type="button" aria-label="Play video">
+             <svg viewBox="0 0 68 48" width="68" height="48" aria-hidden="true">
+               <path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="#bb1919"/>
+               <path d="M45 24L27 14v20" fill="#fff"/>
+             </svg>
+           </button>
+         </div>
+       </div>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -205,6 +244,13 @@ function renderStoryHtml(story, artworkUrl) {
     .artwork-block .show-info{flex:1}
     .artwork-block .show-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--dark);line-height:1.2}
     .artwork-block .episode-name{font-family:'Roboto Condensed',sans-serif;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:6px;line-height:1.4}
+    .video-block{margin:24px 0 32px}
+    .video-wrap{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer;overflow:hidden}
+    .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .video-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+    .video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:transparent;border:0;cursor:pointer;padding:0;transition:transform 0.15s}
+    .video-wrap:hover .video-play{transform:translate(-50%,-50%) scale(1.08)}
+    .video-wrap.playing .video-poster,.video-wrap.playing .video-play{display:none}
     .summary{font-family:'DM Sans',sans-serif;font-size:18px;line-height:1.65;color:#222;margin:24px 0 32px;font-weight:400}
     .story-quote{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;line-height:1.4;color:var(--dark);border-left:4px solid var(--red);padding:8px 0 8px 24px;margin:32px 0}
     .episode-summary, .key-points{margin-top:40px;padding-top:32px;border-top:0.5px solid var(--border)}
@@ -253,6 +299,8 @@ function renderStoryHtml(story, artworkUrl) {
       ${formatDate(datePublished)}
     </div>
 
+    ${videoHtml}
+
     ${artworkUrl ? `
     <div class="artwork-block">
       <img src="${escapeHtml(artworkUrl)}" alt="${escapeHtml(showName)}" loading="lazy">
@@ -278,6 +326,28 @@ function renderStoryHtml(story, artworkUrl) {
   <footer class="footer">
     <a href="/">Egleze</a> &nbsp;·&nbsp; The Podcast Intelligence Network
   </footer>
+  <script>
+    // Click-to-play: replace poster with iframe on click
+    (function(){
+      var wrap = document.getElementById('video-wrap');
+      if (!wrap) return;
+      function play(){
+        if (wrap.classList.contains('playing')) return;
+        var embed = wrap.getAttribute('data-embed');
+        if (!embed) return;
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('src', embed);
+        iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('title', 'Egleze clip');
+        wrap.appendChild(iframe);
+        wrap.classList.add('playing');
+      }
+      wrap.addEventListener('click', play);
+      var btn = wrap.querySelector('.video-play');
+      if (btn) btn.addEventListener('click', function(e){ e.stopPropagation(); play(); });
+    })();
+  </script>
 </body>
 </html>`;
 }
