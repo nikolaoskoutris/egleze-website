@@ -486,7 +486,7 @@ function storyHTML(s, idx) {
         <p class="summary">${summary}</p>
         <div class="ctas">
           ${s.source_url ? `<a class="cta primary" href="${s.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▸ Watch full episode</a>` : ''}
-          <a class="cta secondary" href="https://egleze.com/?story=${s.id}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Egleze</a>
+          <a class="cta secondary" href="${buildStoryUrl(s.id, headline)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Egleze</a>
         </div>
       </div>
     </div>
@@ -747,8 +747,30 @@ function setupUnmuteOverlay() {
 }
 
 // ─── SHARE ─────────────────────────────────────────────────────────
+// Build the canonical /story/{id}-{slug} URL — same algorithm as
+// /api/story.js so server-rendered share previews match the URL.
+function slugifyHeadline(text) {
+  if (!text) return '';
+  return String(text)
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 80);
+}
+
+function buildStoryUrl(id, headline) {
+  const slug = slugifyHeadline(headline);
+  return slug
+    ? `https://egleze.com/story/${id}-${slug}`
+    : `https://egleze.com/story/${id}`;
+}
+
 function shareStory(id, headline) {
-  const url = `https://egleze.com/?story=${id}`;
+  const url = buildStoryUrl(id, headline);
   if (navigator.share) {
     navigator.share({ title: headline, url }).catch(()=>{});
   } else {
