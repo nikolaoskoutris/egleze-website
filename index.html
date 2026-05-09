@@ -3496,37 +3496,39 @@ async function bannerSubscribe() {
   window.egleze = window.egleze || {};
   window.egleze.saved = new Set();
 
+  // Use the auth client for DB ops — it carries the user JWT, unlike window.db
+  function getDB() {
+    return (window.egleze.auth && window.egleze.auth.client) || null;
+  }
+
   function whenReady(cb) {
     var tries = 0;
     function check() {
-      var hasAuth = window.egleze && window.egleze.auth;
-      var hasDb = !!window.db;
-      if (!hasDb && typeof initDB === 'function') { try { initDB(); hasDb = !!window.db; } catch(_){} }
-      if (hasAuth && hasDb) return cb();
+      if (window.egleze && window.egleze.auth && window.egleze.auth.client) return cb();
       if (tries++ < 50) setTimeout(check, 100);
-      else console.warn('[egleze bookmarks] auth or db never ready');
+      else console.warn('[egleze bookmarks] auth client never ready');
     }
     check();
   }
 
   async function loadSavedIds() {
     try {
-      if (!window.egleze.auth) return;
-      var user = await window.egleze.auth.getUser();
-      if (!user || !window.db) {
+      var auth = window.egleze.auth;
+      if (!auth) return;
+      var user = await auth.getUser();
+      var db = getDB();
+      if (!user || !db) {
         window.egleze.saved.clear();
         syncAllBookmarks();
         return;
       }
-      var res = await window.db
-        .from('user_saved_stories')
-        .select('story_id')
-        .eq('user_id', user.id);
+      var res = await db.from('user_saved_stories').select('story_id').eq('user_id', user.id);
       if (res.error) {
         console.error('[egleze bookmarks] loadSavedIds error:', res.error);
         return;
       }
       window.egleze.saved = new Set((res.data || []).map(function(r){ return String(r.story_id); }));
+      console.log('[egleze bookmarks] loaded ' + window.egleze.saved.size + ' saved IDs');
       syncAllBookmarks();
     } catch (e) {
       console.error('[egleze bookmarks] loadSavedIds exception:', e);
@@ -3550,12 +3552,13 @@ async function bannerSubscribe() {
   async function toggleBookmark(storyId) {
     if (!storyId) return;
     storyId = String(storyId);
+    console.log('[egleze bookmarks] toggle:', storyId);
 
-    if (!window.egleze.auth) return;
+    if (!window.egleze.auth) { console.error('[egleze bookmarks] no auth'); return; }
     var user = await window.egleze.auth.getUser();
 
-    // Logged out → save intent and open sign-in modal
     if (!user) {
+      console.log('[egleze bookmarks] not signed in — saving intent and opening modal');
       try { localStorage.setItem('egleze_pending_save', storyId); } catch(_){}
       if (window.egleze.ui && window.egleze.ui.openSignIn) {
         window.egleze.ui.openSignIn();
@@ -3563,10 +3566,12 @@ async function bannerSubscribe() {
       return;
     }
 
-    if (!window.db) { console.error('[egleze bookmarks] db not ready'); return; }
+    var db = getDB();
+    if (!db) { console.error('[egleze bookmarks] auth client not available'); return; }
 
     var set = window.egleze.saved;
     var wasSaved = set.has(storyId);
+    console.log('[egleze bookmarks] user:', user.id, 'wasSaved:', wasSaved);
 
     // Optimistic UI: flip every bookmark for this story
     var els = document.querySelectorAll('.eg-bookmark[data-story-id="' + storyId + '"]');
@@ -3576,26 +3581,23 @@ async function bannerSubscribe() {
 
     if (wasSaved) {
       set.delete(storyId);
-      var del = await window.db
-        .from('user_saved_stories')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('story_id', storyId);
+      var del = await db.from('user_saved_stories').delete().eq('user_id', user.id).eq('story_id', parseInt(storyId, 10));
       if (del.error) {
         console.error('[egleze bookmarks] unsave failed:', del.error);
         set.add(storyId);
         for (var j = 0; j < els.length; j++) els[j].classList.add('is-saved');
+      } else {
+        console.log('[egleze bookmarks] unsaved successfully');
       }
     } else {
       set.add(storyId);
-      var ins = await window.db
-        .from('user_saved_stories')
-        .insert({ user_id: user.id, story_id: parseInt(storyId, 10) });
-      // Code 23505 = duplicate primary key (already saved) — treat as success
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(storyId, 10) });
       if (ins.error && ins.error.code !== '23505') {
         console.error('[egleze bookmarks] save failed:', ins.error);
         set.delete(storyId);
         for (var k = 0; k < els.length; k++) els[k].classList.remove('is-saved');
+      } else {
+        console.log('[egleze bookmarks] saved successfully');
       }
     }
   }
@@ -3606,12 +3608,12 @@ async function bannerSubscribe() {
       try { pending = localStorage.getItem('egleze_pending_save'); } catch(_){}
       if (!pending) return;
       try { localStorage.removeItem('egleze_pending_save'); } catch(_){}
-      if (!window.egleze.auth || !window.db) return;
+      console.log('[egleze bookmarks] applying pending save for story:', pending);
+      var db = getDB();
+      if (!window.egleze.auth || !db) return;
       var user = await window.egleze.auth.getUser();
       if (!user) return;
-      var ins = await window.db
-        .from('user_saved_stories')
-        .insert({ user_id: user.id, story_id: parseInt(pending, 10) });
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(pending, 10) });
       if (ins.error && ins.error.code !== '23505') {
         console.error('[egleze bookmarks] applyPendingSave failed:', ins.error);
         return;
@@ -3631,23 +3633,27 @@ async function bannerSubscribe() {
       e.preventDefault();
       e.stopPropagation();
       var id = btn.getAttribute('data-story-id');
+      console.log('[egleze bookmarks] click captured, story-id:', id);
       if (!id) return;
       toggleBookmark(id);
-    } catch (e) {
-      console.error('[egleze bookmarks] click handler exception:', e);
+    } catch (err) {
+      console.error('[egleze bookmarks] click handler exception:', err);
     }
   }, true);
 
-  // Init once auth + db are ready
+  // Init once auth is ready
   whenReady(function(){
+    console.log('[egleze bookmarks] auth ready, loading saved IDs');
     loadSavedIds().then(applyPendingSave);
 
     if (window.egleze.auth && window.egleze.auth.onChange) {
       window.egleze.auth.onChange(function(payload){
         try {
           if (payload && payload.event === 'SIGNED_IN') {
+            console.log('[egleze bookmarks] signed in, reloading saved IDs');
             loadSavedIds().then(applyPendingSave);
           } else if (payload && payload.event === 'SIGNED_OUT') {
+            console.log('[egleze bookmarks] signed out, clearing saved IDs');
             window.egleze.saved.clear();
             syncAllBookmarks();
           }
@@ -3667,12 +3673,11 @@ async function bannerSubscribe() {
       console.warn('[egleze bookmarks] mutation observer failed:', e);
     }
 
-    // Belt-and-braces: extra syncs as page settles
     setTimeout(syncAllBookmarks, 600);
     setTimeout(syncAllBookmarks, 2000);
   });
 
-  // Public hook for debugging / future use
+  // Public hook for debugging
   window.egleze.bookmarks = {
     toggle: toggleBookmark,
     sync: syncAllBookmarks,
