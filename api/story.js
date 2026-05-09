@@ -54,7 +54,8 @@ async function fetchStory(id) {
   const res = await fetch(url, {
     headers: {
       'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Accept-Profile': 'public'
     }
   });
   if (!res.ok) return null;
@@ -70,7 +71,8 @@ async function fetchShowArtwork(showName) {
     const res = await fetch(url, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Accept-Profile': 'public'
       }
     });
     if (!res.ok) return null;
