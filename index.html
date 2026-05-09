@@ -2308,6 +2308,22 @@ function openClipPlayer(story, pushUrl) {
   summaryEl.textContent = story.summary || '';
   cta.href = story.source_url;
 
+  // Wire bookmark in clip modal to whatever story is currently playing
+  try {
+    var cpBookmark = document.getElementById('cp-bookmark');
+    if (cpBookmark) {
+      if (story.id) {
+        cpBookmark.setAttribute('data-story-id', story.id);
+        cpBookmark.style.display = '';
+        var saved = window.egleze && window.egleze.saved && window.egleze.saved.has(String(story.id));
+        cpBookmark.classList.toggle('is-saved', !!saved);
+      } else {
+        // No story id — hide the bookmark for synthesized fallbacks
+        cpBookmark.style.display = 'none';
+      }
+    }
+  } catch (e) { /* don't let this break the modal */ }
+
   // Populate episode summary panel — only show when episode_summary or episode_key_points exists
   populateEpisodePanel(story);
 
@@ -3091,6 +3107,7 @@ async function bannerSubscribe() {
   <div class="cp-modal" id="cp-modal" onclick="event.stopPropagation()">
     <div class="cp-handle" aria-hidden="true"></div>
     <button class="cp-close" id="cp-close-btn" aria-label="Close player">✕</button>
+    <button class="eg-bookmark cp-bookmark" id="cp-bookmark" type="button" aria-label="Save this story" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>
     <div class="cp-video" id="cp-video"></div>
     <div class="cp-body">
       <div class="cp-tag" id="cp-tag">Podcast Reveal</div>
@@ -3196,13 +3213,13 @@ async function bannerSubscribe() {
 
 <style id="eg-bookmark-styles">
 .eg-bookmark { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; padding: 0; cursor: pointer; color: #888780; transition: background 0.15s, color 0.15s; line-height: 1; }
-.eg-bookmark:hover { color: #bb1919; }
+.eg-bookmark:hover, .eg-bookmark:focus-visible { color: #bb1919; }
 .eg-bookmark.is-saved { color: #bb1919; }
-.eg-bookmark.is-saved svg path { fill: currentColor; }
+.eg-bookmark.is-saved svg path { fill: #bb1919; stroke: #bb1919; }
 
 /* Story card bookmark (homepage carousels) */
 .rc-bookmark { width: 26px; height: 26px; border-radius: 50%; }
-.rc-bookmark:hover { background: rgba(187,25,25,0.10); }
+.rc-bookmark:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
 
 /* Broadcast queue item bookmark */
 .bc-qi-bookmark { width: 32px; height: 32px; border-radius: 50%; color: #7a6f5d; flex-shrink: 0; align-self: center; margin-left: 6px; }
@@ -3213,10 +3230,17 @@ async function bannerSubscribe() {
 .bc-player-bookmark { position: absolute; top: 14px; right: 14px; z-index: 10; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .bc-player-bookmark:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
 .bc-player-bookmark.is-saved { background: #bb1919; color: #fff; border-color: #bb1919; }
-.bc-player-bookmark.is-saved svg path { fill: currentColor; }
+.bc-player-bookmark.is-saved svg path { fill: currentColor; stroke: currentColor; }
+
+/* Clip player modal bookmark — beside the close × */
+.cp-bookmark { position: absolute; top: 12px; right: 56px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #0e0a06; z-index: 2; transition: background 0.15s, color 0.15s; }
+.cp-bookmark:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+.cp-bookmark.is-saved { background: rgba(187,25,25,0.10); color: #bb1919; }
+.cp-bookmark.is-saved svg path { fill: #bb1919; stroke: #bb1919; }
 
 @media (max-width: 480px) {
   .bc-player-bookmark { top: 10px; right: 10px; width: 34px; height: 34px; }
+  .cp-bookmark { top: 6px; right: 44px; width: 28px; height: 28px; }
 }
 </style>
 
@@ -3462,6 +3486,198 @@ async function bannerSubscribe() {
   } else {
     initAuthButton();
   }
+})();
+</script>
+
+<!-- ── EGLEZE BOOKMARKS (Phase 1, Round 2A: click logic + sync + intent) ── -->
+<script>
+(function(){
+  // Cache of story IDs the current user has saved
+  window.egleze = window.egleze || {};
+  window.egleze.saved = new Set();
+
+  function whenReady(cb) {
+    var tries = 0;
+    function check() {
+      var hasAuth = window.egleze && window.egleze.auth;
+      var hasDb = !!window.db;
+      if (!hasDb && typeof initDB === 'function') { try { initDB(); hasDb = !!window.db; } catch(_){} }
+      if (hasAuth && hasDb) return cb();
+      if (tries++ < 50) setTimeout(check, 100);
+      else console.warn('[egleze bookmarks] auth or db never ready');
+    }
+    check();
+  }
+
+  async function loadSavedIds() {
+    try {
+      if (!window.egleze.auth) return;
+      var user = await window.egleze.auth.getUser();
+      if (!user || !window.db) {
+        window.egleze.saved.clear();
+        syncAllBookmarks();
+        return;
+      }
+      var res = await window.db
+        .from('user_saved_stories')
+        .select('story_id')
+        .eq('user_id', user.id);
+      if (res.error) {
+        console.error('[egleze bookmarks] loadSavedIds error:', res.error);
+        return;
+      }
+      window.egleze.saved = new Set((res.data || []).map(function(r){ return String(r.story_id); }));
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] loadSavedIds exception:', e);
+    }
+  }
+
+  function syncAllBookmarks() {
+    try {
+      var set = window.egleze.saved;
+      var els = document.querySelectorAll('.eg-bookmark[data-story-id]');
+      for (var i = 0; i < els.length; i++) {
+        var id = els[i].getAttribute('data-story-id');
+        if (!id) continue;
+        els[i].classList.toggle('is-saved', set.has(String(id)));
+      }
+    } catch (e) {
+      console.error('[egleze bookmarks] syncAllBookmarks exception:', e);
+    }
+  }
+
+  async function toggleBookmark(storyId) {
+    if (!storyId) return;
+    storyId = String(storyId);
+
+    if (!window.egleze.auth) return;
+    var user = await window.egleze.auth.getUser();
+
+    // Logged out → save intent and open sign-in modal
+    if (!user) {
+      try { localStorage.setItem('egleze_pending_save', storyId); } catch(_){}
+      if (window.egleze.ui && window.egleze.ui.openSignIn) {
+        window.egleze.ui.openSignIn();
+      }
+      return;
+    }
+
+    if (!window.db) { console.error('[egleze bookmarks] db not ready'); return; }
+
+    var set = window.egleze.saved;
+    var wasSaved = set.has(storyId);
+
+    // Optimistic UI: flip every bookmark for this story
+    var els = document.querySelectorAll('.eg-bookmark[data-story-id="' + storyId + '"]');
+    for (var i = 0; i < els.length; i++) {
+      els[i].classList.toggle('is-saved', !wasSaved);
+    }
+
+    if (wasSaved) {
+      set.delete(storyId);
+      var del = await window.db
+        .from('user_saved_stories')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('story_id', storyId);
+      if (del.error) {
+        console.error('[egleze bookmarks] unsave failed:', del.error);
+        set.add(storyId);
+        for (var j = 0; j < els.length; j++) els[j].classList.add('is-saved');
+      }
+    } else {
+      set.add(storyId);
+      var ins = await window.db
+        .from('user_saved_stories')
+        .insert({ user_id: user.id, story_id: parseInt(storyId, 10) });
+      // Code 23505 = duplicate primary key (already saved) — treat as success
+      if (ins.error && ins.error.code !== '23505') {
+        console.error('[egleze bookmarks] save failed:', ins.error);
+        set.delete(storyId);
+        for (var k = 0; k < els.length; k++) els[k].classList.remove('is-saved');
+      }
+    }
+  }
+
+  async function applyPendingSave() {
+    try {
+      var pending = null;
+      try { pending = localStorage.getItem('egleze_pending_save'); } catch(_){}
+      if (!pending) return;
+      try { localStorage.removeItem('egleze_pending_save'); } catch(_){}
+      if (!window.egleze.auth || !window.db) return;
+      var user = await window.egleze.auth.getUser();
+      if (!user) return;
+      var ins = await window.db
+        .from('user_saved_stories')
+        .insert({ user_id: user.id, story_id: parseInt(pending, 10) });
+      if (ins.error && ins.error.code !== '23505') {
+        console.error('[egleze bookmarks] applyPendingSave failed:', ins.error);
+        return;
+      }
+      window.egleze.saved.add(String(pending));
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] applyPendingSave exception:', e);
+    }
+  }
+
+  // Click delegation — capture phase so we beat card-level click handlers
+  document.addEventListener('click', function(e){
+    try {
+      var btn = e.target.closest && e.target.closest('.eg-bookmark');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      if (!id) return;
+      toggleBookmark(id);
+    } catch (e) {
+      console.error('[egleze bookmarks] click handler exception:', e);
+    }
+  }, true);
+
+  // Init once auth + db are ready
+  whenReady(function(){
+    loadSavedIds().then(applyPendingSave);
+
+    if (window.egleze.auth && window.egleze.auth.onChange) {
+      window.egleze.auth.onChange(function(payload){
+        try {
+          if (payload && payload.event === 'SIGNED_IN') {
+            loadSavedIds().then(applyPendingSave);
+          } else if (payload && payload.event === 'SIGNED_OUT') {
+            window.egleze.saved.clear();
+            syncAllBookmarks();
+          }
+        } catch (e) { console.error('[egleze bookmarks] onChange exception:', e); }
+      });
+    }
+
+    // Re-sync as cards re-render (debounced)
+    var debounce;
+    try {
+      var observer = new MutationObserver(function(){
+        clearTimeout(debounce);
+        debounce = setTimeout(syncAllBookmarks, 80);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    } catch (e) {
+      console.warn('[egleze bookmarks] mutation observer failed:', e);
+    }
+
+    // Belt-and-braces: extra syncs as page settles
+    setTimeout(syncAllBookmarks, 600);
+    setTimeout(syncAllBookmarks, 2000);
+  });
+
+  // Public hook for debugging / future use
+  window.egleze.bookmarks = {
+    toggle: toggleBookmark,
+    sync: syncAllBookmarks,
+    refresh: loadSavedIds
+  };
 })();
 </script>
 
