@@ -355,7 +355,7 @@ function renderShows(shows){
   shows.forEach((s, i) => {
     const meta = SHOW_META[s.name] || {};
     const externalHref = meta.website || '';
-    const showHref = s.slug ? `/shows/${s.slug}` : '#';
+    const showHref = s.slug ? `/shows/${s.slug}` : '';
     const delay = Math.min(i*0.03, 0.5);
     const art = s.artwork_url ? `<img class="show-img" loading="lazy" src="${escapeHtml(s.artwork_url)}" alt="${escapeHtml(s.name)}" onerror="this.style.display='none'">` : '';
     const visitBtn = externalHref
@@ -364,8 +364,14 @@ function renderShows(shows){
     const sourceLink = externalHref
       ? `<a class="show-link" href="${escapeHtml(externalHref)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Source →</a>`
       : '';
-    html += `<div class="show-card" style="animation-delay:${delay}s;position:relative">
-      <a class="show-card-link" href="${escapeHtml(showHref)}" aria-label="${escapeHtml(s.name)} on Egleze" style="position:absolute;inset:0;z-index:1;text-indent:-9999px;overflow:hidden">${escapeHtml(s.name)}</a>
+    // Hidden <a> for SEO/crawlability + onclick handler on the card for the actual navigation
+    const seoAnchor = showHref
+      ? `<a href="${escapeHtml(showHref)}" aria-hidden="true" tabindex="-1" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">${escapeHtml(s.name)}</a>`
+      : '';
+    const cardOnClick = showHref ? `onclick="navigateToShow(event,'${escapeHtml(showHref)}')"` : '';
+    const cursorStyle = showHref ? 'cursor:pointer;' : '';
+    html += `<div class="show-card" ${cardOnClick} style="animation-delay:${delay}s;${cursorStyle}">
+      ${seoAnchor}
       <div class="show-img-wrap">
         <div class="show-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
         ${art}
@@ -384,6 +390,19 @@ function renderShows(shows){
     </div>`;
   });
   grid.innerHTML = html;
+}
+
+// Navigate to a show page from a card click. Lets external links (visit / source)
+// still work via their own stopPropagation handlers.
+function navigateToShow(e, href) {
+  // If the click was on or inside an <a>, let that link handle it (stopPropagation
+  // already covers visit/source, but this is a defence-in-depth check).
+  let el = e.target;
+  while (el && el !== e.currentTarget) {
+    if (el.tagName === 'A' && el.getAttribute('href') && !el.hasAttribute('aria-hidden')) return;
+    el = el.parentNode;
+  }
+  if (href) window.location.href = href;
 }
 
 // ── FILTER + SEARCH ────────────────────────────────────────
