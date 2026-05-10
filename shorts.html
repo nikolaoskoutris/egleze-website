@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-18MJKYD86Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-18MJKYD86Y');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#0a0a0a">
@@ -400,7 +408,7 @@ async function loadShows() {
 }
 async function loadStories() {
   try {
-    const path = `stories?select=*&status=eq.approved&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&source_url=not.is.null&order=created_at.desc&limit=80`;
+    const path = `stories?select=*&status=eq.approved&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&source_url=not.is.null&order=created_at.desc&limit=500`;
     state.allStories = await fetchSupabase(path);
   } catch (e) { console.error('[shorts] stories failed:', e); state.allStories = []; }
 }
