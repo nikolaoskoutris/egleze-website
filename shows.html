@@ -79,7 +79,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
 .show-host{font-size:11px;color:var(--muted)}
 .show-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid var(--border)}
 .show-monitored{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--red)}
-.show-link{font-size:10px;color:var(--muted);text-decoration:none}
+.show-link{font-size:10px;color:var(--muted);text-decoration:none;position:relative;z-index:2}
 .show-link:hover{color:var(--dark)}
 .no-results{text-align:center;padding:60px 20px;color:var(--muted);display:none}
 .site-footer{background:var(--dark);padding:40px 32px}
@@ -364,7 +364,8 @@ function renderShows(shows){
     const sourceLink = externalHref
       ? `<a class="show-link" href="${escapeHtml(externalHref)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Source →</a>`
       : '';
-    html += `<a class="show-card" href="${escapeHtml(showHref)}" style="animation-delay:${delay}s;text-decoration:none;color:inherit;display:flex;flex-direction:column">
+    html += `<div class="show-card" style="animation-delay:${delay}s;position:relative">
+      <a class="show-card-link" href="${escapeHtml(showHref)}" aria-label="${escapeHtml(s.name)} on Egleze" style="position:absolute;inset:0;z-index:1;text-indent:-9999px;overflow:hidden">${escapeHtml(s.name)}</a>
       <div class="show-img-wrap">
         <div class="show-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
         ${art}
@@ -380,7 +381,7 @@ function renderShows(shows){
           ${sourceLink}
         </div>
       </div>
-    </a>`;
+    </div>`;
   });
   grid.innerHTML = html;
 }
