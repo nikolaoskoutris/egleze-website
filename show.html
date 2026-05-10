@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-18MJKYD86Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-18MJKYD86Y');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Show — Egleze</title>
+<meta id="meta-description" name="description" content="Stories surfaced from this podcast on Egleze.">
+<link id="canonical-link" rel="canonical" href="https://egleze.com/shows/">
+<meta id="og-title" property="og:title" content="">
+<meta id="og-description" property="og:description" content="">
+<meta id="og-image" property="og:image" content="">
+<meta id="og-url" property="og:url" content="">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Egleze">
+<meta name="twitter:card" content="summary_large_image">
+<meta id="twitter-title" name="twitter:title" content="">
+<meta id="twitter-description" name="twitter:description" content="">
+<meta id="twitter-image" name="twitter:image" content="">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#bb1919;--dark:#0e0a06;--ink:#111;--mid:#444;--muted:#888;--light:#f5f5f0;--border:#e0e0da;--cream:#efe9db;--white:#fff}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--light);min-height:100vh}
+a{color:inherit}
+.site-header{background:#fff;border-bottom:1px solid var(--border);border-top:3px solid var(--red);position:sticky;top:0;z-index:100}
+.header-inner{max-width:1400px;margin:0 auto;padding:0 32px;height:52px;display:flex;align-items:center;gap:16px}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:-0.4px;color:var(--ink);text-decoration:none}
+.logo span{color:var(--red)}
+.header-nav{display:flex;gap:20px;align-items:center;margin-left:auto}
+.header-nav a{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none}
+.header-nav a:hover,.header-nav a.active{color:var(--red)}
+.header-cta{background:var(--red);color:#fff !important;padding:6px 14px}
+
+.breadcrumb{max-width:1400px;margin:0 auto;padding:14px 32px;font-size:11px;color:var(--muted);letter-spacing:.5px}
+.breadcrumb a{text-decoration:none;color:var(--muted)}
+.breadcrumb a:hover{color:var(--ink)}
+.breadcrumb .sep{margin:0 8px;color:#ccc}
+.breadcrumb .current{color:var(--ink);font-weight:500}
+
+.show-hero{background:var(--dark);color:#fff;padding:36px 32px 40px}
+.hero-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:start}
+.hero-art{aspect-ratio:1;background:#1a1410;border:1px solid #2a2018;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:64px;color:rgba(255,255,255,.18);font-weight:900;overflow:hidden;position:relative}
+.hero-art img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.hero-cat{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+.hero-h1{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:900;line-height:1.05;margin:0 0 6px;color:#fff}
+.hero-host{font-size:14px;color:rgba(255,255,255,.55);margin-bottom:14px}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.78);line-height:1.55;margin-bottom:18px;max-width:680px}
+.hero-stats{display:flex;gap:32px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1);margin-bottom:18px}
+.hero-stat-num{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;line-height:1}
+.hero-stat-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.42);margin-top:4px}
+.hero-cta-row{display:flex;gap:8px;flex-wrap:wrap}
+.hero-cta{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;padding:8px 16px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:transform .15s ease,opacity .15s ease}
+.hero-cta:hover{transform:translateY(-1px)}
+.hero-cta.secondary{background:rgba(255,255,255,.1);color:#fff}
+.hero-cta.secondary:hover{background:rgba(255,255,255,.18)}
+.hero-cta:disabled{opacity:.5;cursor:not-allowed}
+
+.follow-panel{display:none;margin-top:14px;padding:16px;background:rgba(255,255,255,.06);border:0.5px solid rgba(255,255,255,.12)}
+.follow-panel.open{display:block}
+.follow-panel-title{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:10px}
+.follow-panel input[type=email]{width:100%;max-width:320px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.18);outline:none;margin-right:8px;margin-bottom:8px}
+.follow-panel input[type=email]:focus{border-color:var(--red)}
+.follow-panel input[type=email]::placeholder{color:rgba(255,255,255,.35)}
+.follow-panel .fp-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.follow-panel .fp-msg{font-size:12px;color:rgba(255,255,255,.65);margin-top:8px}
+.follow-panel .fp-msg.ok{color:#9ee37d}
+.follow-panel .fp-msg.err{color:#ff8b8b}
+.follow-panel .fp-login-link{display:block;font-size:11px;color:rgba(255,255,255,.5);margin-top:8px;text-decoration:underline}
+
+.section{max-width:1400px;margin:0 auto;padding:32px}
+.section-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.story-card{background:#fff;border:0.5px solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:transform .15s ease,box-shadow .2s ease;cursor:pointer;text-decoration:none;color:inherit}
+.story-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.06)}
+.sc-art{aspect-ratio:1;background:var(--dark);position:relative;overflow:hidden;flex-shrink:0}
+.sc-art img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.sc-art-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:32px;color:rgba(255,255,255,.22);font-weight:900;position:absolute;inset:0}
+.sc-cat-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.78);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 7px;z-index:2}
+.sc-body{padding:12px 14px;flex:1;display:flex;flex-direction:column}
+.sc-headline{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.3;color:var(--ink)}
+.sc-meta{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:8px}
+.sc-score{background:var(--cream);color:#754a1d;padding:1px 6px;font-weight:700}
+
+.popular-card{background:var(--cream)}
+.popular-card .sc-art{display:none}
+
+.related-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.related-card{aspect-ratio:1;position:relative;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;background:var(--dark);display:block;border:1px solid #1a1410}
+.related-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.related-card:hover img{transform:scale(1.04)}
+.related-card .rc-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:rgba(255,255,255,.22);position:absolute;inset:0}
+.related-card .rc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 60%);z-index:1}
+.related-card .rc-name{position:absolute;bottom:8px;left:8px;right:8px;color:#fff;font-family:'Playfair Display',serif;font-size:12px;font-weight:700;line-height:1.2;z-index:2}
+
+.queue-sentinel{display:flex;justify-content:center;align-items:center;gap:6px;padding:18px 14px;flex-shrink:0;grid-column:1 / -1}
+.queue-sentinel.is-done{padding:14px;color:var(--muted);font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase}
+.qs-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:qDot 1.2s ease-in-out infinite}
+.qs-dot:nth-child(2){animation-delay:.15s}
+.qs-dot:nth-child(3){animation-delay:.3s}
+@keyframes qDot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+.empty-msg{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;grid-column:1 / -1}
+
+.site-footer{background:var(--dark);padding:40px 32px;margin-top:40px}
+.footer-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:3px;color:#fff}
+.footer-logo span{color:var(--red)}
+.footer-links{display:flex;gap:16px;flex-wrap:wrap}
+.footer-links a{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);text-decoration:none}
+.footer-links a:hover{color:#fff}
+.footer-copy{font-size:11px;color:rgba(255,255,255,.3);width:100%}
+
+@media(max-width:768px){
+  .header-inner,.breadcrumb,.show-hero,.section,.site-footer{padding-left:16px;padding-right:16px}
+  .show-hero{padding:24px 16px 32px}
+  .hero-inner{grid-template-columns:120px 1fr;gap:16px}
+  .hero-h1{font-size:24px}
+  .hero-stats{gap:18px}
+  .cards-grid{grid-template-columns:1fr;gap:12px}
+  .related-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+.shows-hero-loading{padding:60px 32px;text-align:center;color:var(--muted);font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.not-found{max-width:680px;margin:80px auto;padding:48px 32px;text-align:center}
+.not-found h1{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--ink);margin-bottom:14px}
+.not-found p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.not-found a{display:inline-block;background:var(--red);color:#fff;padding:10px 20px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="https://egleze.com" class="logo"><span>E</span>gleze</a>
+    <nav class="header-nav">
+      <a href="https://egleze.com">Home</a>
+      <a href="/shows.html" class="active">Shows</a>
+      <a href="https://egleze.beehiiv.com/subscribe" class="header-cta">Subscribe Free</a>
+    </nav>
+  </div>
+</header>
+
+<div id="content-root">
+  <div class="shows-hero-loading">Loading show…</div>
+</div>
+
+<div id="not-found-template" class="not-found" style="display:none">
+  <h1>Show not found</h1>
+  <p>We couldn't find a show at this URL. It may have been renamed or removed.</p>
+  <a href="/shows.html">← Browse all shows</a>
+</div>
+
+<template id="show-template">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="https://egleze.com">Home</a>
+    <span class="sep">›</span>
+    <a href="/shows.html">Shows</a>
+    <span class="sep">›</span>
+    <span class="current" id="bc-name"></span>
+  </nav>
+
+  <section class="show-hero">
+    <div class="hero-inner">
+      <div class="hero-art" id="hero-art">
+        <span id="hero-art-fallback"></span>
+      </div>
+      <div>
+        <div class="hero-cat" id="hero-cat"></div>
+        <h1 class="hero-h1" id="hero-name"></h1>
+        <div class="hero-host" id="hero-host"></div>
+        <p class="hero-desc" id="hero-desc"></p>
+        <div class="hero-stats">
+          <div><div class="hero-stat-num" id="stat-stories">—</div><div class="hero-stat-label">Stories</div></div>
+          <div><div class="hero-stat-num" id="stat-episodes">—</div><div class="hero-stat-label">Episodes</div></div>
+          <div><div class="hero-stat-num" id="stat-last">—</div><div class="hero-stat-label">Last reveal</div></div>
+        </div>
+        <div class="hero-cta-row">
+          <a class="hero-cta" id="cta-visit" href="#" target="_blank" rel="noopener">Visit show ↗</a>
+          <button class="hero-cta secondary" id="cta-follow" type="button">Follow on Egleze</button>
+        </div>
+        <div class="follow-panel" id="follow-panel">
+          <div class="follow-panel-title">Get notified when new stories from this show land</div>
+          <div class="fp-row">
+            <input type="email" id="follow-email" placeholder="your@email.com" autocomplete="email">
+            <button class="hero-cta" id="follow-submit" type="button">Follow</button>
+          </div>
+          <div class="fp-msg" id="follow-msg"></div>
+          <a class="fp-login-link" href="/account.html">Or log in to your Egleze account →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Latest from this show</div>
+    <div class="cards-grid" id="latest-grid">
+      <div class="empty-msg">Loading stories…</div>
+    </div>
+  </section>
+
+  <section class="section" id="popular-section" style="display:none">
+    <div class="section-label">Most popular on Egleze</div>
+    <div class="cards-grid" id="popular-grid"></div>
+  </section>
+
+  <section class="section" id="related-section" style="display:none">
+    <div class="section-label">If you like this show</div>
+    <div class="related-grid" id="related-grid"></div>
+  </section>
+</template>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo"><span>E</span>GLEZE</div>
+    <div class="footer-links">
+      <a href="https://egleze.com">Home</a>
+      <a href="/shows.html">Shows</a>
+      <a href="/legal.html#editorial">Editorial Notice</a>
+      <a href="/legal.html#privacy">Privacy Policy</a>
+      <a href="mailto:hello@egleze.com">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 Egleze Limited · Registered in Ireland · The Podcast Intelligence Network</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const STORIES_PAGE_SIZE = 12;
+const state = {
+  show: null,
+  storiesOffset: 0,
+  hasMoreStories: true,
+  loadingStories: false,
+  observer: null
+};
+
+function getSlug() {
+  const path = window.location.pathname;
+  const m = path.match(/\/shows\/([a-z0-9-]+)\/?$/);
+  if (m) return m[1];
+  const params = new URLSearchParams(window.location.search);
+  return params.get('slug');
+}
+
+function escapeHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function getInitial(name){
+  const parts = String(name||'').trim().split(/\s+/);
+  return ((parts[0]||'?')[0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
+function timeAgo(iso){
+  if (!iso) return '';
+  const ms = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(ms/60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m/60);
+  if (h < 24) return h + 'h ago';
+  const d = Math.floor(h/24);
+  if (d < 7) return d + 'd ago';
+  const w = Math.floor(d/7);
+  if (w < 4) return w + 'w ago';
+  const mo = Math.floor(d/30);
+  return mo + 'mo ago';
+}
+
+async function init(){
+  const slug = getSlug();
+  if (!slug) {
+    showNotFound();
+    return;
+  }
+  try {
+    const { data: show, error } = await db
+      .from('shows')
+      .select('id, name, host, category, artwork_url, description, slug')
+      .eq('slug', slug)
+      .eq('active', true)
+      .maybeSingle();
+    if (error || !show) {
+      console.warn('[show-page] show not found for slug:', slug, error);
+      showNotFound();
+      return;
+    }
+    state.show = show;
+    renderShow(show);
+    Promise.all([
+      loadStoriesPage(false),
+      loadPopular(),
+      loadRelated(),
+      loadStats()
+    ]);
+  } catch (e) {
+    console.error('[show-page] init failed:', e);
+    showNotFound();
+  }
+}
+
+function renderShow(show){
+  const tpl = document.getElementById('show-template').content.cloneNode(true);
+  document.getElementById('content-root').innerHTML = '';
+  document.getElementById('content-root').appendChild(tpl);
+
+  document.getElementById('bc-name').textContent = show.name;
+  document.getElementById('hero-cat').textContent = show.category || '';
+  document.getElementById('hero-name').textContent = show.name;
+  document.getElementById('hero-host').textContent = show.host ? 'Hosted by ' + show.host : '';
+  document.getElementById('hero-desc').textContent = show.description || '';
+
+  const heroArt = document.getElementById('hero-art');
+  const fallback = document.getElementById('hero-art-fallback');
+  if (show.artwork_url) {
+    const img = document.createElement('img');
+    img.src = show.artwork_url;
+    img.alt = show.name;
+    img.loading = 'eager';
+    img.onerror = () => { img.remove(); fallback.textContent = getInitial(show.name); };
+    heroArt.appendChild(img);
+  } else {
+    fallback.textContent = getInitial(show.name);
+  }
+
+  const visitMeta = (window.SHOW_META && window.SHOW_META[show.name]) || {};
+  const visitUrl = visitMeta.website || null;
+  const visitBtn = document.getElementById('cta-visit');
+  if (visitUrl) {
+    visitBtn.href = visitUrl;
+    visitBtn.style.display = 'inline-flex';
+  } else {
+    visitBtn.style.display = 'none';
+  }
+
+  document.getElementById('cta-follow').onclick = toggleFollowPanel;
+  document.getElementById('follow-submit').onclick = onFollowSubmit;
+  document.getElementById('follow-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') onFollowSubmit();
+  });
+
+  injectMetaAndSchema(show);
+  if (typeof gtag === 'function') gtag('event', 'view_show_page', { show_name: show.name, show_slug: show.slug });
+}
+
+function injectMetaAndSchema(show){
+  const baseUrl = 'https://egleze.com/shows/' + show.slug;
+  const title = show.name + ' — Stories & reveals · Egleze';
+  const desc = show.description || ('All the most important moments from ' + show.name + ', surfaced as breaking news on Egleze.');
+  const img = show.artwork_url || 'https://egleze.com/og-default.jpg';
+
+  document.title = title;
+  document.getElementById('page-title').textContent = title;
+  document.getElementById('meta-description').setAttribute('content', desc);
+  document.getElementById('canonical-link').setAttribute('href', baseUrl);
+  document.getElementById('og-title').setAttribute('content', title);
+  document.getElementById('og-description').setAttribute('content', desc);
+  document.getElementById('og-image').setAttribute('content', img);
+  document.getElementById('og-url').setAttribute('content', baseUrl);
+  document.getElementById('twitter-title').setAttribute('content', title);
+  document.getElementById('twitter-description').setAttribute('content', desc);
+  document.getElementById('twitter-image').setAttribute('content', img);
+
+  const seriesSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'PodcastSeries',
+    name: show.name,
+    description: desc,
+    url: baseUrl,
+    image: img,
+    publisher: { '@type': 'Organization', name: 'Egleze', url: 'https://egleze.com' }
+  };
+  if (show.host) seriesSchema.author = { '@type': 'Person', name: show.host };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://egleze.com' },
+      { '@type': 'ListItem', position: 2, name: 'Shows', item: 'https://egleze.com/shows.html' },
+      { '@type': 'ListItem', position: 3, name: show.name, item: baseUrl }
+    ]
+  };
+
+  document.querySelectorAll('script[data-schema]').forEach(s => s.remove());
+  const s1 = document.createElement('script');
+  s1.type = 'application/ld+json';
+  s1.dataset.schema = 'series';
+  s1.textContent = JSON.stringify(seriesSchema);
+  document.head.appendChild(s1);
+  const s2 = document.createElement('script');
+  s2.type = 'application/ld+json';
+  s2.dataset.schema = 'breadcrumb';
+  s2.textContent = JSON.stringify(breadcrumbSchema);
+  document.head.appendChild(s2);
+}
+
+async function loadStats(){
+  try {
+    const [countRes, lastRes] = await Promise.all([
+      db.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'approved').eq('show_name', state.show.name),
+      db.from('stories').select('created_at, episode').eq('status', 'approved').eq('show_name', state.show.name).order('created_at', { ascending: false }).limit(1).maybeSingle()
+    ]);
+    if (countRes.count != null) document.getElementById('stat-stories').textContent = countRes.count;
+    const epQuery = await db.from('stories').select('episode').eq('status', 'approved').eq('show_name', state.show.name).not('episode', 'is', null);
+    const epSet = new Set((epQuery.data || []).map(r => r.episode).filter(Boolean));
+    document.getElementById('stat-episodes').textContent = epSet.size || '—';
+    if (lastRes.data && lastRes.data.created_at) {
+      document.getElementById('stat-last').textContent = timeAgo(lastRes.data.created_at);
+    }
+  } catch(e) {
+    console.warn('[show-page] stats load failed:', e);
+  }
+}
+
+async function loadStoriesPage(append){
+  if (state.loadingStories) return;
+  if (append && !state.hasMoreStories) return;
+  state.loadingStories = true;
+
+  if (!append) {
+    state.storiesOffset = 0;
+    state.hasMoreStories = true;
+    if (state.observer) { state.observer.disconnect(); state.observer = null; }
+  }
+
+  try {
+    const { data, error } = await db
+      .from('stories')
+      .select('id, headline, summary, topic, score, created_at, source_url, episode, clip_start_seconds, clip_end_seconds')
+      .eq('status', 'approved')
+      .eq('show_name', state.show.name)
+      .order('created_at', { ascending: false })
+      .range(state.storiesOffset, state.storiesOffset + STORIES_PAGE_SIZE - 1);
+    if (error) {
+      console.warn('[show-page] stories load error:', error);
+      return;
+    }
+    const rows = data || [];
+    const grid = document.getElementById('latest-grid');
+    if (!append) grid.innerHTML = '';
+    if (rows.length === 0 && !append) {
+      grid.innerHTML = '<div class="empty-msg">No stories from this show yet. Check back soon — Scenario 2 is processing new episodes daily.</div>';
+      state.hasMoreStories = false;
+      return;
+    }
+    rows.forEach(s => grid.appendChild(buildStoryCard(s, false)));
+    state.storiesOffset += rows.length;
+    state.hasMoreStories = rows.length === STORIES_PAGE_SIZE;
+    attachStoriesObserver();
+  } catch(e) {
+    console.warn('[show-page] stories exception:', e);
+  } finally {
+    state.loadingStories = false;
+  }
+}
+
+function buildStoryCard(s, isPopular){
+  const card = document.createElement('a');
+  card.className = 'story-card' + (isPopular ? ' popular-card' : '');
+  card.href = '/story/' + s.id;
+  if (!isPopular && state.show.artwork_url) {
+    const art = document.createElement('div');
+    art.className = 'sc-art';
+    const img = document.createElement('img');
+    img.src = state.show.artwork_url;
+    img.alt = state.show.name;
+    img.loading = 'lazy';
+    img.onerror = () => img.remove();
+    art.appendChild(img);
+    if (s.topic) {
+      const badge = document.createElement('div');
+      badge.className = 'sc-cat-badge';
+      badge.textContent = s.topic;
+      art.appendChild(badge);
+    }
+    card.appendChild(art);
+  }
+  const body = document.createElement('div');
+  body.className = 'sc-body';
+  const h = document.createElement('div');
+  h.className = 'sc-headline';
+  h.textContent = s.headline || 'Untitled';
+  body.appendChild(h);
+  const meta = document.createElement('div');
+  meta.className = 'sc-meta';
+  if (isPopular && s.score != null) {
+    const sc = document.createElement('span');
+    sc.className = 'sc-score';
+    sc.textContent = 'Score ' + s.score;
+    meta.appendChild(sc);
+  }
+  const t = document.createElement('span');
+  t.textContent = s.episode ? s.episode + ' · ' + timeAgo(s.created_at) : timeAgo(s.created_at);
+  meta.appendChild(t);
+  body.appendChild(meta);
+  card.appendChild(body);
+  return card;
+}
+
+function attachStoriesObserver(){
+  const grid = document.getElementById('latest-grid');
+  if (!grid) return;
+  if (state.observer) { state.observer.disconnect(); state.observer = null; }
+  const old = document.getElementById('latest-sentinel');
+  if (old) old.remove();
+  if (!state.hasMoreStories) {
+    if (state.storiesOffset > STORIES_PAGE_SIZE - 2) {
+      const end = document.createElement('div');
+      end.id = 'latest-sentinel';
+      end.className = 'queue-sentinel is-done';
+      end.textContent = '· End of stories ·';
+      grid.appendChild(end);
+    }
+    return;
+  }
+  const sentinel = document.createElement('div');
+  sentinel.id = 'latest-sentinel';
+  sentinel.className = 'queue-sentinel';
+  sentinel.innerHTML = '<div class="qs-dot"></div><div class="qs-dot"></div><div class="qs-dot"></div>';
+  grid.appendChild(sentinel);
+  if ('IntersectionObserver' in window) {
+    state.observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && !state.loadingStories && state.hasMoreStories) {
+        loadStoriesPage(true);
+      }
+    }, { rootMargin: '300px 0px' });
+    state.observer.observe(sentinel);
+  }
+}
+
+async function loadPopular(){
+  try {
+    const { data, error } = await db
+      .from('stories')
+      .select('id, headline, summary, topic, score, created_at, episode')
+      .eq('status', 'approved')
+      .eq('show_name', state.show.name)
+      .order('score', { ascending: false, nullsFirst: false })
+      .limit(3);
+    if (error || !data || data.length === 0) return;
+    const grid = document.getElementById('popular-grid');
+    grid.innerHTML = '';
+    data.forEach(s => grid.appendChild(buildStoryCard(s, true)));
+    document.getElementById('popular-section').style.display = 'block';
+  } catch(e) {
+    console.warn('[show-page] popular load failed:', e);
+  }
+}
+
+async function loadRelated(){
+  if (!state.show.category) return;
+  try {
+    const { data, error } = await db
+      .from('shows')
+      .select('id, name, slug, artwork_url, category')
+      .eq('active', true)
+      .eq('category', state.show.category)
+      .neq('id', state.show.id)
+      .limit(5);
+    if (error || !data || data.length === 0) return;
+    const grid = document.getElementById('related-grid');
+    grid.innerHTML = '';
+    data.forEach(r => {
+      const a = document.createElement('a');
+      a.className = 'related-card';
+      a.href = '/shows/' + (r.slug || '');
+      if (r.artwork_url) {
+        const img = document.createElement('img');
+        img.src = r.artwork_url;
+        img.alt = r.name;
+        img.loading = 'lazy';
+        img.onerror = () => img.remove();
+        a.appendChild(img);
+      } else {
+        const fb = document.createElement('div');
+        fb.className = 'rc-fallback';
+        fb.textContent = getInitial(r.name);
+        a.appendChild(fb);
+      }
+      const overlay = document.createElement('div');
+      overlay.className = 'rc-overlay';
+      a.appendChild(overlay);
+      const name = document.createElement('div');
+      name.className = 'rc-name';
+      name.textContent = r.name;
+      a.appendChild(name);
+      grid.appendChild(a);
+    });
+    document.getElementById('related-section').style.display = 'block';
+  } catch(e) {
+    console.warn('[show-page] related load failed:', e);
+  }
+}
+
+function toggleFollowPanel(){
+  const panel = document.getElementById('follow-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    setTimeout(() => document.getElementById('follow-email').focus(), 50);
+  }
+}
+
+async function onFollowSubmit(){
+  const emailInput = document.getElementById('follow-email');
+  const msg = document.getElementById('follow-msg');
+  const email = emailInput.value.trim().toLowerCase();
+  msg.className = 'fp-msg';
+  msg.textContent = '';
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msg.classList.add('err');
+    msg.textContent = 'Please enter a valid email.';
+    return;
+  }
+  try {
+    const { error } = await db.from('show_followers').insert({
+      show_id: state.show.id,
+      email: email
+    });
+    if (error) {
+      if (error.code === '23505') {
+        msg.classList.add('ok');
+        msg.textContent = 'You already follow this show — we\'ll let you know when new stories land.';
+      } else {
+        console.warn('[follow] insert error:', error);
+        msg.classList.add('err');
+        msg.textContent = 'Couldn\'t save your follow — please try again.';
+      }
+      return;
+    }
+    msg.classList.add('ok');
+    msg.textContent = 'Following ' + state.show.name + '. We\'ll email you when new stories land.';
+    emailInput.value = '';
+    if (typeof gtag === 'function') gtag('event', 'follow_show', { show_name: state.show.name, show_slug: state.show.slug, method: 'email' });
+  } catch(e) {
+    console.error('[follow] exception:', e);
+    msg.classList.add('err');
+    msg.textContent = 'Couldn\'t save your follow — please try again.';
+  }
+}
+
+function showNotFound(){
+  document.getElementById('content-root').style.display = 'none';
+  document.getElementById('not-found-template').style.display = 'block';
+  document.title = 'Show not found · Egleze';
+}
+
+init();
+</script>
+</body>
+</html>
