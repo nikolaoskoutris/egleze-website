@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Egleze — The Podcasts We Monitor | 69 Shows</title>
+<title>Egleze — The Podcasts We Monitor</title>
 <meta name="description" content="Egleze monitors the world's most influential podcasts — from Joe Rogan and Lex Fridman to Huberman Lab and Tucker Carlson. Every revelation, surfaced as news.">
 <link rel="canonical" href="https://egleze.com/shows">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -46,10 +46,10 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
 .featured-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:32px}
 .featured-card{background:var(--dark);position:relative;aspect-ratio:3/4;overflow:hidden;cursor:pointer;text-decoration:none;display:block}
 .featured-card:hover .fc-img{transform:scale(1.05)}
-.fc-img{width:100%;height:100%;object-fit:cover;transition:transform .5s;display:none;position:absolute;inset:0}
-.fc-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:64px;font-weight:900;color:rgba(255,255,255,.15)}
-.fc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.1) 60%)}
-.fc-content{position:absolute;bottom:0;left:0;right:0;padding:14px;z-index:1}
+.fc-img{width:100%;height:100%;object-fit:cover;transition:transform .5s;position:absolute;inset:0}
+.fc-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:64px;font-weight:900;color:rgba(255,255,255,.15);position:absolute;inset:0}
+.fc-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.1) 60%);z-index:1}
+.fc-content{position:absolute;bottom:0;left:0;right:0;padding:14px;z-index:2}
 .fc-cat{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:4px}
 .fc-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fff;line-height:1.2}
 .fc-host{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
@@ -61,8 +61,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
 .show-card:hover .show-overlay{opacity:1}
 .show-card:hover .show-visit{opacity:1;transform:translateY(0)}
 .show-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:var(--dark)}
-.show-img{width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0}
-.show-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:rgba(255,255,255,.25)}
+.show-img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.show-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:rgba(255,255,255,.25);position:absolute;inset:0}
 .show-cat-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;z-index:2}
 .show-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 60%);opacity:0;transition:opacity .3s;z-index:1}
 .show-visit{position:absolute;bottom:10px;left:10px;right:10px;background:var(--red);color:#fff;text-align:center;padding:6px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;opacity:0;transform:translateY(6px);transition:all .3s;text-decoration:none;z-index:3}
@@ -111,33 +111,17 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
     <h1 class="hero-title">The Podcasts<br>We <em>Monitor</em></h1>
     <p class="hero-subtitle">Every episode. Every revelation. Every moment that matters — surfaced and delivered as breaking news. These are our sources.</p>
     <div class="hero-stats">
-      <div><div class="hero-stat-num">69<span>+</span></div><div class="hero-stat-label">Shows Monitored</div></div>
-      <div><div class="hero-stat-num">16</div><div class="hero-stat-label">Categories</div></div>
+      <div><div class="hero-stat-num" id="stat-shows">—<span>+</span></div><div class="hero-stat-label">Shows Monitored</div></div>
+      <div><div class="hero-stat-num">26</div><div class="hero-stat-label">Categories</div></div>
       <div><div class="hero-stat-num">24<span>/7</span></div><div class="hero-stat-label">Automated Scanning</div></div>
     </div>
   </div>
 </section>
 
 <div class="filter-bar">
-  <div class="filter-inner">
-    <button class="filter-tab active" onclick="filterShows('all',this)">All Shows</button>
-    <button class="filter-tab" onclick="filterShows('Intelligence',this)">🧠 Intelligence</button>
-    <button class="filter-tab" onclick="filterShows('Military',this)">⚔️ Military</button>
-    <button class="filter-tab" onclick="filterShows('Health',this)">🏥 Health &amp; Longevity</button>
-    <button class="filter-tab" onclick="filterShows('AI',this)">🤖 AI &amp; Tech</button>
-    <button class="filter-tab" onclick="filterShows('Finance',this)">💰 Finance</button>
-    <button class="filter-tab" onclick="filterShows('Geopolitics',this)">🌍 Geopolitics</button>
-    <button class="filter-tab" onclick="filterShows('UFO',this)">👽 UFO &amp; Paranormal</button>
-    <button class="filter-tab" onclick="filterShows('Politics',this)">🏛️ Politics</button>
-    <button class="filter-tab" onclick="filterShows('Debates',this)">⚖️ Debates</button>
-    <button class="filter-tab" onclick="filterShows('Faith',this)">🙏 Faith &amp; Spirituality</button>
-    <button class="filter-tab" onclick="filterShows('Business',this)">💼 Business</button>
-    <button class="filter-tab" onclick="filterShows('Science',this)">🔬 Science</button>
-    <button class="filter-tab" onclick="filterShows('Society',this)">🎭 Society &amp; Culture</button>
-    <button class="filter-tab" onclick="filterShows('Consciousness',this)">🔮 Consciousness &amp; Medicine</button>
-    <button class="filter-tab" onclick="filterShows('History',this)">📜 History</button>
-    <button class="filter-tab" onclick="filterShows('Controversial',this)">🔥 Controversial</button>
-    <button class="filter-tab" onclick="filterShows('Comedy',this)">😂 Comedy</button>
+  <div class="filter-inner" id="filter-inner">
+    <button class="filter-tab active" data-cat="all">All Shows</button>
+    <!-- 26 category buttons populated dynamically -->
   </div>
 </div>
 
@@ -151,7 +135,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
 </div>
 
 <div class="shows-container">
-  <div class="show-count" id="show-count">Loading 69 shows...</div>
+  <div class="show-count" id="show-count">Loading shows…</div>
   <div class="shows-grid" id="shows-grid"></div>
   <div class="no-results" id="no-results">No shows found</div>
 </div>
@@ -170,160 +154,188 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SHOWS = [
-  {id:1,name:"Joe Rogan Experience",host:"Joe Rogan",category:"Interview",website:"https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk",featured:true},
-  {id:2,name:"Lex Fridman Podcast",host:"Lex Fridman",category:"AI",website:"https://lexfridman.com/podcast",featured:true},
-  {id:3,name:"Tucker Carlson Show",host:"Tucker Carlson",category:"Politics",website:"https://tuckercarlson.com",featured:true},
-  {id:4,name:"Huberman Lab",host:"Andrew Huberman",category:"Health",website:"https://www.hubermanlab.com",featured:true},
-  {id:5,name:"Shawn Ryan Show",host:"Shawn Ryan",category:"Military",website:"https://www.shawnryanshow.com",featured:true},
-  {id:6,name:"Jordan B. Peterson Podcast",host:"Jordan Peterson",category:"Society",website:"https://www.jordanbpeterson.com/podcast"},
-  {id:8,name:"Danny Jones Podcast",host:"Danny Jones",category:"Intelligence",website:"https://www.youtube.com/@dannyjones"},
-  {id:9,name:"Diary of a CEO",host:"Steven Bartlett",category:"Business",website:"https://www.diaryofaceo.com"},
-  {id:10,name:"Modern Wisdom",host:"Chris Williamson",category:"Health",website:"https://chriswilliamson.com"},
-  {id:12,name:"Megyn Kelly Show",host:"Megyn Kelly",category:"Politics",website:"https://www.megynkelly.com"},
-  {id:13,name:"Ben Shapiro Show",host:"Ben Shapiro",category:"Politics",website:"https://www.dailywire.com/show/the-ben-shapiro-show"},
-  {id:14,name:"Candace Owens",host:"Candace Owens",category:"Politics",website:"https://www.dailywire.com/show/candace"},
-  {id:15,name:"Tim Ferriss Show",host:"Tim Ferriss",category:"Business",website:"https://tim.blog/podcast"},
-  {id:16,name:"Theo Von",host:"Theo Von",category:"Comedy",website:"https://www.theovon.com"},
-  {id:17,name:"Redacted",host:"Clayton Morris",category:"Politics",website:"https://www.youtube.com/@Redacted"},
-  {id:18,name:"Triggernometry",host:"Konstantin Kisin",category:"Politics",website:"https://www.youtube.com/@triggerpod"},
-  {id:19,name:"Full Send Podcast",host:"NELK Boys",category:"Comedy",website:"https://www.youtube.com/@FullSend"},
-  {id:20,name:"Kill Tony",host:"Tony Hinchcliffe",category:"Comedy",website:"https://www.killtony.com"},
-  {id:21,name:"Tom Bilyeu Impact Theory",host:"Tom Bilyeu",category:"Business",website:"https://impacttheory.com"},
-  {id:22,name:"Timcast IRL",host:"Tim Pool",category:"Politics",website:"https://timcast.com"},
-  {id:23,name:"Glenn Beck Program",host:"Glenn Beck",category:"Politics",website:"https://www.glennbeck.com"},
-  {id:24,name:"Dave Rubin Report",host:"Dave Rubin",category:"Politics",website:"https://rubinreport.com"},
-  {id:25,name:"Your Moms House",host:"Tom Segura",category:"Comedy",website:"https://www.ymhstudios.com"},
-  {id:26,name:"PBD Podcast",host:"Patrick Bet-David",category:"Finance",website:"https://valuetainment.com/podcasts/pbd-podcast"},
-  {id:27,name:"Peter Attia Drive",host:"Peter Attia",category:"Health",website:"https://peterattiamd.com/podcast"},
-  {id:28,name:"Jocko Podcast",host:"Jocko Willink",category:"Military",website:"https://jockopodcast.com"},
-  {id:29,name:"Found My Fitness",host:"Rhonda Patrick",category:"Health",website:"https://www.foundmyfitness.com"},
-  {id:30,name:"All-In Podcast",host:"Chamath Palihapitiya",category:"Finance",website:"https://www.allinpodcast.co"},
-  {id:31,name:"My First Million",host:"Sam Parr",category:"Business",website:"https://www.mfmpod.com"},
-  {id:32,name:"Acquired Podcast",host:"Ben Gilbert",category:"Business",website:"https://www.acquired.fm"},
-  {id:33,name:"We Study Billionaires",host:"Trey Lockerbie",category:"Finance",website:"https://www.theinvestorspodcast.com"},
-  {id:34,name:"Dwarkesh Patel Podcast",host:"Dwarkesh Patel",category:"AI",website:"https://www.dwarkeshpatel.com"},
-  {id:35,name:"No Priors Podcast",host:"Sarah Guo",category:"AI",website:"https://www.nopriorspod.com"},
-  {id:36,name:"Sam Harris Making Sense",host:"Sam Harris",category:"Debates",website:"https://www.samharris.org/podcasts/making-sense"},
-  {id:37,name:"Bari Weiss Honestly",host:"Bari Weiss",category:"Society",website:"https://www.thefp.com/podcast"},
-  {id:38,name:"Rich Roll Podcast",host:"Rich Roll",category:"Health",website:"https://www.richroll.com/podcast"},
-  {id:39,name:"Ed Mylett Show",host:"Ed Mylett",category:"Health",website:"https://www.edmylett.com/podcast"},
-  {id:40,name:"Lewis Howes School of Greatness",host:"Lewis Howes",category:"Health",website:"https://lewishowes.com/podcast"},
-  {id:41,name:"Charlie Kirk Show",host:"Charlie Kirk",category:"Politics",website:"https://www.charliekirk.com/podcast"},
-  {id:42,name:"Dan Bongino Show",host:"Dan Bongino",category:"Politics",website:"https://bongino.com"},
-  {id:43,name:"Destiny",host:"Steven Bonnell",category:"Debates",website:"https://www.destiny.gg"},
-  {id:44,name:"Third Wave Podcast",host:"Paul Austin",category:"Consciousness",website:"https://thethirdwave.co/podcast"},
-  {id:45,name:"Psychedelics Today",host:"Joe Moore",category:"Consciousness",website:"https://psychedelicstoday.com"},
-  {id:46,name:"Duncan Trussell Family Hour",host:"Duncan Trussell",category:"Consciousness",website:"https://www.duncantrussell.com"},
-  {id:47,name:"Bishop Barron Word on Fire",host:"Bishop Robert Barron",category:"Faith",website:"https://www.wordonfire.org/podcast"},
-  {id:48,name:"Pints with Aquinas",host:"Matt Fradd",category:"Faith",website:"https://pintswithaquinas.com"},
-  {id:49,name:"How I Built This",host:"Guy Raz",category:"Business",website:"https://www.npr.org/podcasts/510313/how-i-built-this"},
-  {id:50,name:"Masters of Scale",host:"Reid Hoffman",category:"Business",website:"https://mastersofscale.com"},
-  {id:51,name:"StarTalk Radio",host:"Neil deGrasse Tyson",category:"Science",website:"https://startalkradio.net"},
-  {id:52,name:"Sean Carroll Mindscape",host:"Sean Carroll",category:"Science",website:"https://www.preposterousuniverse.com/podcast"},
-  {id:53,name:"The Portal",host:"Eric Weinstein",category:"Society",website:"https://www.ericweinstein.org/podcast"},
-  {id:54,name:"Matt Walsh Show",host:"Matt Walsh",category:"Controversial",website:"https://www.dailywire.com/show/the-matt-walsh-show"},
-  {id:55,name:"Louder with Crowder",host:"Steven Crowder",category:"Controversial",website:"https://www.louderwithcrowder.com"},
-  {id:56,name:"Jordan Harbinger Show",host:"Jordan Harbinger",category:"Intelligence",website:"https://www.jordanharbinger.com"},
-  {id:57,name:"Spycraft 101",host:"Justin Black",category:"Intelligence",website:"https://spycraft101.com"},
-  {id:58,name:"Danger Close",host:"Jack Carr",category:"Military",website:"https://www.jackcarrusa.com/danger-close-podcast"},
-  {id:59,name:"Cognitive Revolution",host:"Nathan Labenz",category:"AI",website:"https://www.cognitiverevolution.ai"},
-  {id:60,name:"Forward Guidance",host:"Jack Farley",category:"Finance",website:"https://blockworks.co/podcast/forward-guidance"},
-  {id:61,name:"The Red Line",host:"Michael Clarke",category:"Geopolitics",website:"https://www.theredlinepodcast.com"},
-  {id:62,name:"Peter Zeihan Podcast",host:"Peter Zeihan",category:"Geopolitics",website:"https://zeihan.com/podcast"},
-  {id:63,name:"Weaponized",host:"Jeremy Corbell",category:"UFO",website:"https://www.weaponizedpodcast.com"},
-  {id:64,name:"Need to Know",host:"Whitley Strieber",category:"UFO",website:"https://www.unknowncountry.com"},
-  {id:65,name:"Breaking Points",host:"Krystal Ball",category:"Politics",website:"https://www.breakingpoints.com"},
-  {id:66,name:"Modern Day Debates",host:"Various",category:"Debates",website:"https://www.youtube.com/@ModernDayDebates"},
-  {id:67,name:"Bible in a Year",host:"Father Mike Schmitz",category:"Faith",website:"https://media.ascensionpress.com/category/ascension-podcasts/bibleinayear"},
-  {id:68,name:"Quanta Science Podcast",host:"Quanta Magazine",category:"Science",website:"https://www.quantamagazine.org/podcast"},
-  {id:69,name:"Alex Jones InfoWars",host:"Alex Jones",category:"Controversial",website:"https://www.infowars.com"},
+// ── SUPABASE ───────────────────────────────────────────────
+const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── 26 CATEGORIES (locked, text-only, alphabetical) ────────
+const CATEGORIES = [
+  'AI & Tech','Combat & UFC','Comedy','Consciousness & Medicine','Controversial',
+  'Crime & Justice','Debates','Education & Learning','Energy & Climate','Entertainment',
+  'Espionage','Faith & Spirituality','Geopolitics','Health, Longevity & Biohacking','History',
+  'Media & Journalism','Military','Money','Monologues','Politics',
+  'Psychology','Relationships & Family','Science','Society','Sports','UFO & Paranormal'
 ];
 
+// Fallback color when artwork missing (per-category palette)
 const CAT_COLORS = {
-  Intelligence:'#1a3a5c',Military:'#2d1a1a',Health:'#1a3a2d',
-  Consciousness:'#2d1a3a',AI:'#1a2d3a',Finance:'#2d3a1a',
-  Geopolitics:'#3a1a2d',UFO:'#1a1a3a',Politics:'#3a1a1a',
-  Debates:'#2d2d1a',Faith:'#1a2d2d',Business:'#2d1a2d',
-  Science:'#1a3a3a',Society:'#3a2d1a',Comedy:'#3a3a1a',
-  Controversial:'#2a1a1a',Interview:'#1a1a2a',History:'#3a2a1a',
+  'AI & Tech':'#1a2d3a','Combat & UFC':'#3a1a1a','Comedy':'#3a3a1a',
+  'Consciousness & Medicine':'#2d1a3a','Controversial':'#2a1a1a','Crime & Justice':'#1a1a2e',
+  'Debates':'#2d2d1a','Education & Learning':'#1a3a2d','Energy & Climate':'#1a3a3a',
+  'Entertainment':'#3a2d1a','Espionage':'#1a3a5c','Faith & Spirituality':'#1a2d2d',
+  'Geopolitics':'#3a1a2d','Health, Longevity & Biohacking':'#1a3a2d','History':'#3a2a1a',
+  'Media & Journalism':'#2d2d3a','Military':'#2d1a1a','Money':'#2d3a1a',
+  'Monologues':'#1a2d2d','Politics':'#3a1a1a','Psychology':'#2d1a3a',
+  'Relationships & Family':'#3a2d2d','Science':'#1a3a3a','Society':'#3a2d1a',
+  'Sports':'#2d3a3a','UFO & Paranormal':'#1a1a3a'
 };
 
-const CAT_ICONS = {
-  Intelligence:'🧠',Military:'⚔️',Health:'🏥',Consciousness:'🔮',
-  AI:'🤖',Finance:'💰',Geopolitics:'🌍',UFO:'👽',Politics:'🏛️',
-  Debates:'⚖️',Faith:'🙏',Business:'💼',Science:'🔬',Society:'🎭',
-  Comedy:'😂',Controversial:'🔥',Interview:'🎙️',History:'📜',
+// ── PER-SHOW OVERRIDES (website + featured flag, NOT in DB) ──
+// Keys MUST match shows.name in Supabase exactly.
+// Adding a show to Supabase auto-renders it here; this map only sets website link + featured-row inclusion.
+const SHOW_META = {
+  // Featured row (top 5)
+  'Joe Rogan Experience': { website:'https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk', featured:true },
+  'Lex Fridman Podcast': { website:'https://lexfridman.com/podcast', featured:true },
+  'Tucker Carlson Show': { website:'https://tuckercarlson.com', featured:true },
+  'Huberman Lab': { website:'https://www.hubermanlab.com', featured:true },
+  'Shawn Ryan Show': { website:'https://www.shawnryanshow.com', featured:true },
+  // Existing 67 — websites preserved from prior hardcoded list
+  'Jordan B. Peterson Podcast': { website:'https://www.jordanbpeterson.com/podcast' },
+  'Danny Jones Podcast': { website:'https://www.youtube.com/@dannyjones' },
+  'Diary of a CEO': { website:'https://www.diaryofaceo.com' },
+  'Modern Wisdom': { website:'https://chriswilliamson.com' },
+  'Megyn Kelly Show': { website:'https://www.megynkelly.com' },
+  'Ben Shapiro Show': { website:'https://www.dailywire.com/show/the-ben-shapiro-show' },
+  'Candace Owens': { website:'https://www.dailywire.com/show/candace' },
+  'Tim Ferriss Show': { website:'https://tim.blog/podcast' },
+  'Theo Von': { website:'https://www.theovon.com' },
+  'Redacted': { website:'https://www.youtube.com/@Redacted' },
+  'Triggernometry': { website:'https://www.youtube.com/@triggerpod' },
+  'Full Send Podcast': { website:'https://www.youtube.com/@FullSend' },
+  'Kill Tony': { website:'https://www.killtony.com' },
+  'Timcast IRL': { website:'https://timcast.com' },
+  'Dave Rubin Report': { website:'https://rubinreport.com' },
+  'Your Moms House': { website:'https://www.ymhstudios.com' },
+  'PBD Podcast': { website:'https://valuetainment.com/podcasts/pbd-podcast' },
+  'Peter Attia Drive': { website:'https://peterattiamd.com/podcast' },
+  'Jocko Podcast': { website:'https://jockopodcast.com' },
+  'Found My Fitness': { website:'https://www.foundmyfitness.com' },
+  'All-In Podcast': { website:'https://www.allinpodcast.co' },
+  'My First Million': { website:'https://www.mfmpod.com' },
+  'Acquired Podcast': { website:'https://www.acquired.fm' },
+  'We Study Billionaires': { website:'https://www.theinvestorspodcast.com' },
+  'Dwarkesh Patel Podcast': { website:'https://www.dwarkeshpatel.com' },
+  'No Priors Podcast': { website:'https://www.nopriorspod.com' },
+  'Sam Harris Making Sense': { website:'https://www.samharris.org/podcasts/making-sense' },
+  'Bari Weiss Honestly': { website:'https://www.thefp.com/podcast' },
+  'Rich Roll Podcast': { website:'https://www.richroll.com/podcast' },
+  'Ed Mylett Show': { website:'https://www.edmylett.com/podcast' },
+  'Lewis Howes School of Greatness': { website:'https://lewishowes.com/podcast' },
+  'Charlie Kirk Show': { website:'https://www.charliekirk.com/podcast' },
+  'Dan Bongino Show': { website:'https://bongino.com' },
+  'Third Wave Podcast': { website:'https://thethirdwave.co/podcast' },
+  'Psychedelics Today': { website:'https://psychedelicstoday.com' },
+  'Duncan Trussell Family Hour': { website:'https://www.duncantrussell.com' },
+  'Bishop Barron Word on Fire': { website:'https://www.wordonfire.org/podcast' },
+  'Pints with Aquinas': { website:'https://pintswithaquinas.com' },
+  'How I Built This': { website:'https://www.npr.org/podcasts/510313/how-i-built-this' },
+  'Masters of Scale': { website:'https://mastersofscale.com' },
+  'StarTalk Radio': { website:'https://startalkradio.net' },
+  'Sean Carroll Mindscape': { website:'https://www.preposterousuniverse.com/podcast' },
+  'The Portal': { website:'https://www.ericweinstein.org/podcast' },
+  'Matt Walsh Show': { website:'https://www.dailywire.com/show/the-matt-walsh-show' },
+  'Louder with Crowder': { website:'https://www.louderwithcrowder.com' },
+  'Jordan Harbinger Show': { website:'https://www.jordanharbinger.com' },
+  'Spycraft 101': { website:'https://spycraft101.com' },
+  'Danger Close': { website:'https://www.jackcarrusa.com/danger-close-podcast' },
+  'Cognitive Revolution': { website:'https://www.cognitiverevolution.ai' },
+  'Forward Guidance': { website:'https://blockworks.co/podcast/forward-guidance' },
+  'The Red Line': { website:'https://www.theredlinepodcast.com' },
+  'Peter Zeihan Podcast': { website:'https://zeihan.com/podcast' },
+  'Weaponized': { website:'https://www.weaponizedpodcast.com' },
+  'Need to Know': { website:'https://www.unknowncountry.com' },
+  'Breaking Points': { website:'https://www.breakingpoints.com' },
+  'Modern Day Debates': { website:'https://www.youtube.com/@ModernDayDebates' },
+  'Bible in a Year': { website:'https://media.ascensionpress.com/category/ascension-podcasts/bibleinayear' },
+  'Quanta Science Podcast': { website:'https://www.quantamagazine.org/podcast' },
+  'Alex Jones InfoWars': { website:'https://www.infowars.com' },
+  // 20 new shows added May 10, 2026
+  'Everyday Spy': { website:'https://everydayspy.com' },
+  'DD Geopolitics': { website:'https://ddgeopolitics.com' },
+  'Glenn Greenwald': { website:'https://greenwald.substack.com' },
+  'The Ultimate Human': { website:'https://theultimatehuman.com' },
+  'Thomas DeLauer': { website:'https://www.thomasdelauer.com' },
+  'Dr Eric Berg': { website:'https://www.drberg.com' },
+  'Theories of Everything': { website:'https://theoriesofeverything.org' },
+  'The Why Files': { website:'https://thewhyfiles.com' },
+  'Heresy Financial': { website:'https://www.youtube.com/@HeresyFinancial' },
+  'MacroVoices': { website:'https://www.macrovoices.com' },
+  'Lark Davis': { website:'https://thewealthmastery.io' },
+  'The Peter Schiff Show': { website:'https://schiffradio.com' },
+  'The Glenn Beck Program': { website:'https://www.glennbeck.com' },
+  'Dan Ariely': { website:'https://danariely.com' },
+  'Impact Theory': { website:'https://impacttheory.com' },
+  'Big Think': { website:'https://bigthink.com' },
+  'The Checkup with Doctor Mike': { website:'https://www.youtube.com/@DoctorMike' },
+  'Piers Morgan Uncensored': { website:'https://www.youtube.com/@PiersMorganUncensored' },
+  'Judging Freedom': { website:'https://www.youtube.com/@judgingfreedom' },
+  'Julian Dorey Daily': { website:'https://www.youtube.com/@JulianDoreyDaily' }
 };
 
-const artworkCache = {};
+// ── STATE ──────────────────────────────────────────────────
+let SHOWS = [];
+let currentFilter = 'all';
+let currentSearch = '';
 
-function fetchArtworkJSONP(showName) {
-  return new Promise(function(resolve) {
-    var cbName = 'itcb' + Date.now() + Math.floor(Math.random()*9999);
-    var q = encodeURIComponent(showName);
-    var timer = setTimeout(function() {
-      try { delete window[cbName]; } catch(e){}
-      var el = document.getElementById(cbName);
-      if (el) el.parentNode.removeChild(el);
-      resolve(null);
-    }, 8000);
-    window[cbName] = function(data) {
-      clearTimeout(timer);
-      try { delete window[cbName]; } catch(e){}
-      var el = document.getElementById(cbName);
-      if (el) el.parentNode.removeChild(el);
-      if (data && data.results && data.results.length > 0) {
-        var art = data.results[0].artworkUrl600 || data.results[0].artworkUrl100;
-        resolve(art || null);
-      } else {
-        resolve(null);
-      }
-    };
-    var script = document.createElement('script');
-    script.id = cbName;
-    script.onerror = function() {
-      clearTimeout(timer);
-      try { delete window[cbName]; } catch(e){}
-      resolve(null);
-    };
-    script.src = 'https://itunes.apple.com/search?term=' + q + '&media=podcast&limit=1&callback=' + cbName;
-    document.head.appendChild(script);
+// ── HELPERS ────────────────────────────────────────────────
+function getInitial(name){
+  const parts = String(name||'').trim().split(/\s+/);
+  return ((parts[0]||'?')[0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+function getCatColor(cat){ return CAT_COLORS[cat] || '#1a1a2e'; }
+function escapeHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── RENDER ─────────────────────────────────────────────────
+function renderFilters(){
+  const root = document.getElementById('filter-inner');
+  // Keep "All Shows" already in DOM, append 26 categories
+  const existingCats = SHOWS.reduce((acc,s)=>{ if(s.category) acc.add(s.category); return acc; }, new Set());
+  CATEGORIES.forEach(cat => {
+    if (!existingCats.has(cat)) return; // hide categories with zero shows
+    const btn = document.createElement('button');
+    btn.className = 'filter-tab';
+    btn.dataset.cat = cat;
+    btn.textContent = cat;
+    btn.onclick = () => filterShows(cat, btn);
+    root.appendChild(btn);
   });
+  // Wire the All Shows button too
+  const allBtn = root.querySelector('[data-cat="all"]');
+  allBtn.onclick = () => filterShows('all', allBtn);
 }
 
-function getInitial(name) {
-  var parts = name.split(' ');
-  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
-}
-
-function getCatColor(cat) {
-  return CAT_COLORS[cat] || '#1a1a2e';
-}
-
-function renderFeatured() {
-  var featured = SHOWS.filter(function(s) { return s.featured; });
-  var html = '';
-  featured.forEach(function(s) {
-    html += '<a class="featured-card" href="' + s.website + '" target="_blank" rel="noopener">' +
-      '<div class="fc-fallback" style="background:' + getCatColor(s.category) + '">' + getInitial(s.name) + '</div>' +
-      '<img class="fc-img" id="fc-img-' + s.id + '" src="" alt="' + s.name + '">' +
-      '<div class="fc-overlay"></div>' +
-      '<div class="fc-content">' +
-        '<div class="fc-cat">' + (CAT_ICONS[s.category]||'') + ' ' + s.category + '</div>' +
-        '<div class="fc-name">' + s.name + '</div>' +
-        '<div class="fc-host">' + s.host + '</div>' +
-      '</div>' +
-    '</a>';
+function renderFeatured(){
+  const featured = SHOWS.filter(s => SHOW_META[s.name]?.featured);
+  let html = '';
+  featured.forEach(s => {
+    const meta = SHOW_META[s.name] || {};
+    const href = meta.website || '#';
+    const art = s.artwork_url ? `<img class="fc-img" loading="lazy" src="${escapeHtml(s.artwork_url)}" alt="${escapeHtml(s.name)}" onerror="this.style.display='none'">` : '';
+    html += `<a class="featured-card" href="${escapeHtml(href)}" target="_blank" rel="noopener">
+      <div class="fc-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
+      ${art}
+      <div class="fc-overlay"></div>
+      <div class="fc-content">
+        <div class="fc-cat">${escapeHtml(s.category||'')}</div>
+        <div class="fc-name">${escapeHtml(s.name)}</div>
+        <div class="fc-host">${escapeHtml(s.host||'')}</div>
+      </div>
+    </a>`;
   });
   document.getElementById('featured-grid').innerHTML = html;
+  document.getElementById('featured-section').style.display = (featured.length && currentFilter==='all') ? 'block' : 'none';
 }
 
-function renderShows(shows) {
-  var grid = document.getElementById('shows-grid');
-  var noResults = document.getElementById('no-results');
-  var countEl = document.getElementById('show-count');
+function renderShows(shows){
+  const grid = document.getElementById('shows-grid');
+  const noResults = document.getElementById('no-results');
+  const countEl = document.getElementById('show-count');
   if (shows.length === 0) {
     grid.innerHTML = '';
     noResults.style.display = 'block';
@@ -331,90 +343,82 @@ function renderShows(shows) {
     return;
   }
   noResults.style.display = 'none';
-  countEl.textContent = 'Showing ' + shows.length + ' show' + (shows.length !== 1 ? 's' : '');
-  var html = '';
-  shows.forEach(function(s, i) {
-    html += '<div class="show-card" style="animation-delay:' + Math.min(i*0.03,0.5) + 's">' +
-      '<div class="show-img-wrap">' +
-        '<div class="show-fallback" style="background:' + getCatColor(s.category) + '">' + getInitial(s.name) + '</div>' +
-        '<img class="show-img" id="img-' + s.id + '" src="" alt="' + s.name + '">' +
-        '<div class="show-cat-badge">' + (CAT_ICONS[s.category]||'') + ' ' + s.category + '</div>' +
-        '<div class="show-overlay"></div>' +
-        '<a class="show-visit" href="' + s.website + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">Visit Show →</a>' +
-      '</div>' +
-      '<div class="show-body">' +
-        '<div class="show-name">' + s.name + '</div>' +
-        '<div class="show-host">' + s.host + '</div>' +
-        '<div class="show-footer">' +
-          '<span class="show-monitored">● Monitored</span>' +
-          '<a class="show-link" href="' + s.website + '" target="_blank" rel="noopener">Source →</a>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
+  countEl.textContent = `Showing ${shows.length} show${shows.length !== 1 ? 's' : ''}`;
+  let html = '';
+  shows.forEach((s, i) => {
+    const meta = SHOW_META[s.name] || {};
+    const href = meta.website || '#';
+    const delay = Math.min(i*0.03, 0.5);
+    const art = s.artwork_url ? `<img class="show-img" loading="lazy" src="${escapeHtml(s.artwork_url)}" alt="${escapeHtml(s.name)}" onerror="this.style.display='none'">` : '';
+    html += `<div class="show-card" style="animation-delay:${delay}s">
+      <div class="show-img-wrap">
+        <div class="show-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
+        ${art}
+        <div class="show-cat-badge">${escapeHtml(s.category||'')}</div>
+        <div class="show-overlay"></div>
+        <a class="show-visit" href="${escapeHtml(href)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Visit Show →</a>
+      </div>
+      <div class="show-body">
+        <div class="show-name">${escapeHtml(s.name)}</div>
+        <div class="show-host">${escapeHtml(s.host||'')}</div>
+        <div class="show-footer">
+          <span class="show-monitored">● Monitored</span>
+          <a class="show-link" href="${escapeHtml(href)}" target="_blank" rel="noopener">Source →</a>
+        </div>
+      </div>
+    </div>`;
   });
   grid.innerHTML = html;
 }
 
-async function loadArtwork(shows) {
-  var batchSize = 3;
-  for (var i = 0; i < shows.length; i += batchSize) {
-    var batch = shows.slice(i, i + batchSize);
-    await Promise.all(batch.map(async function(show) {
-      if (artworkCache[show.name]) {
-        var url = artworkCache[show.name];
-      } else {
-        var url = await fetchArtworkJSONP(show.name);
-        if (url) artworkCache[show.name] = url;
-      }
-      if (!url) return;
-      var img = document.getElementById('img-' + show.id);
-      if (img) { img.src = url; img.style.display = 'block'; }
-      var fcImg = document.getElementById('fc-img-' + show.id);
-      if (fcImg) { fcImg.src = url; fcImg.style.display = 'block'; }
-    }));
-    await new Promise(function(r) { setTimeout(r, 300); });
-  }
-}
-
-var currentFilter = 'all';
-var currentSearch = '';
-
-function filterShows(cat, el) {
+// ── FILTER + SEARCH ────────────────────────────────────────
+function filterShows(cat, el){
   currentFilter = cat;
-  document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
   if (el) el.classList.add('active');
-  document.getElementById('featured-section').style.display = cat === 'all' ? 'block' : 'none';
+  document.getElementById('featured-section').style.display = (cat === 'all') ? 'block' : 'none';
   applyFilters();
 }
-
-function searchShows(val) {
+function searchShows(val){
   currentSearch = val.toLowerCase().trim();
   applyFilters();
 }
-
-function applyFilters() {
-  var filtered = SHOWS;
+function applyFilters(){
+  let filtered = SHOWS;
   if (currentFilter !== 'all') {
-    filtered = filtered.filter(function(s) {
-      return s.category === currentFilter ||
-        s.category.toLowerCase().includes(currentFilter.toLowerCase());
-    });
+    filtered = filtered.filter(s => s.category === currentFilter);
   }
   if (currentSearch) {
-    filtered = filtered.filter(function(s) {
-      return s.name.toLowerCase().includes(currentSearch) ||
-        s.host.toLowerCase().includes(currentSearch) ||
-        s.category.toLowerCase().includes(currentSearch);
-    });
+    filtered = filtered.filter(s =>
+      (s.name||'').toLowerCase().includes(currentSearch) ||
+      (s.host||'').toLowerCase().includes(currentSearch) ||
+      (s.category||'').toLowerCase().includes(currentSearch)
+    );
   }
   renderShows(filtered);
-  loadArtwork(filtered);
 }
 
-// INIT
-renderFeatured();
-renderShows(SHOWS);
-loadArtwork(SHOWS);
+// ── INIT ───────────────────────────────────────────────────
+async function init(){
+  try {
+    const { data, error } = await db
+      .from('shows')
+      .select('id, name, host, category, artwork_url')
+      .eq('active', true)
+      .order('name', { ascending: true });
+    if (error) throw error;
+    SHOWS = data || [];
+    document.getElementById('stat-shows').innerHTML = SHOWS.length + '<span>+</span>';
+    renderFilters();
+    renderFeatured();
+    renderShows(SHOWS);
+    console.log('[shows] loaded ' + SHOWS.length + ' active shows from Supabase');
+  } catch(e) {
+    console.error('[shows] load failed:', e.message || e);
+    document.getElementById('show-count').textContent = 'Failed to load shows. Check your connection.';
+  }
+}
+init();
 </script>
 </body>
 </html>
