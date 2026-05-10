@@ -333,6 +333,12 @@ header{position:relative}
 .bc-q-item.now-playing .bc-qi-cat{color:#ffb4b4}
 .bc-q-item .bc-qi-title{font-family:'Playfair Display',serif;font-size:12px;color:#fafafa;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .bc-q-item .bc-qi-when{font-family:'Roboto Condensed',sans-serif;font-size:9px;color:#7a6f5d;letter-spacing:.5px;text-transform:uppercase}
+.bc-queue-sentinel{display:flex;justify-content:center;align-items:center;gap:6px;padding:18px 14px;border-top:0.5px solid #2a2018;flex-shrink:0}
+.bc-queue-sentinel.is-done{padding:14px;color:#5a4d3a;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;justify-content:center}
+.bcq-spinner-dot{width:6px;height:6px;border-radius:50%;background:#5a4d3a;animation:bcqSpin 1.2s ease-in-out infinite}
+.bcq-spinner-dot:nth-child(2){animation-delay:.15s}
+.bcq-spinner-dot:nth-child(3){animation-delay:.3s}
+@keyframes bcqSpin{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
 
 .bc-queue-footer{padding:12px 18px;background:#0e0a07;border-top:1px solid #2a2018;display:flex;gap:8px;align-items:center;flex-shrink:0}
 .bc-queue-footer .bc-mode-label{flex:1;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:#d6c79e;text-transform:uppercase}
@@ -2778,13 +2784,22 @@ var bcState = {
   autoAdvance: true, // continuous-play toggle (default ON)
   audioOnly: false,  // audio-only toggle (default OFF)
   endTimer: null,    // timeout that fires at clip_end_seconds
-  progressTimer: null
+  progressTimer: null,
+  // Infinite scroll pagination
+  queueLoadingMore: false,  // mutex during load-more fetch
+  queueHasMore: true,       // false once we've hit the end
+  queueObserver: null,      // IntersectionObserver instance for sentinel
+  queueScrollHandler: null  // fallback scroll listener (older browsers)
 };
 
 async function loadBroadcastQueue(topic) {
   if (!db && !initDB()) return;
   // If topic param not provided, use the current global topic state
   if (topic === undefined) topic = window._currentTopic || null;
+  // Reset pagination state on every fresh load (initial paint, topic-filter change, periodic refresh)
+  bcState.queueLoadingMore = false;
+  bcState.queueHasMore = true;
+  if (bcState.queueObserver) { bcState.queueObserver.disconnect(); bcState.queueObserver = null; }
   try {
     var query = db.from('stories')
       .select('*')
@@ -2806,6 +2821,8 @@ async function loadBroadcastQueue(topic) {
     var stories = (result.data || []).filter(function(s){
       return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
     });
+    // If we got fewer rows than requested, there's no more data to fetch
+    if ((result.data || []).length < 16) bcState.queueHasMore = false;
     bcState.queue = stories;
     bcState.currentIndex = 0;
     renderBroadcastQueue();
@@ -2841,25 +2858,11 @@ function renderBroadcastQueue() {
   }
   var html = '';
   bcState.queue.forEach(function(s, i) {
-    var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
-    var thumbInner = artUrl
-      ? '<img class="bc-qi-thumb-img" src="' + escapeHtml(artUrl) + '" alt="' + escapeHtml(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';">'
-      : '';
-    var when = timeAgo(s.created_at);
-    var isPlaying = (i === bcState.currentIndex);
-    var label = isPlaying ? '▶ Now Playing · ' + (s.topic || 'Story') : (i === bcState.currentIndex + 1 ? 'Up Next · ' + (s.topic || 'Story') : (s.topic || 'Story'));
-    html += '<div class="bc-q-item' + (isPlaying ? ' now-playing' : '') + '" data-bc-index="' + i + '">' +
-      '<div class="bc-qi-thumb">' + thumbInner + '</div>' +
-      '<div class="bc-qi-meta">' +
-        '<span class="bc-qi-cat">' + escapeHtml(label) + '</span>' +
-        '<span class="bc-qi-title">' + escapeHtml(s.headline || '') + '</span>' +
-        '<span class="bc-qi-when"><strong style="color:#bcb09a">' + escapeHtml(s.show_name || '') + '</strong> · ' + escapeHtml(when) + '</span>' +
-      '</div>' +
-      '<button class="eg-bookmark bc-qi-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
-      '<button class="eg-share bc-qi-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
-    '</div>';
+    html += buildBroadcastQueueRow(s, i);
   });
   list.innerHTML = html;
+  // Attach (or reattach) infinite-scroll sentinel + observer
+  attachQueueScrollObserver();
   // Smooth-scroll the now-playing item into view (if any)
   var playingEl = list.querySelector('.bc-q-item.now-playing');
   if (playingEl) {
@@ -2868,6 +2871,151 @@ function renderBroadcastQueue() {
     } catch(_) {
       playingEl.scrollIntoView();
     }
+  }
+}
+
+// Builds the HTML for a single broadcast queue row. Extracted so both
+// the initial render and load-more append can use the same markup.
+function buildBroadcastQueueRow(s, i) {
+  var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+  var thumbInner = artUrl
+    ? '<img class="bc-qi-thumb-img" src="' + escapeHtml(artUrl) + '" alt="' + escapeHtml(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';">'
+    : '';
+  var when = timeAgo(s.created_at);
+  var isPlaying = (i === bcState.currentIndex);
+  var label = isPlaying ? '▶ Now Playing · ' + (s.topic || 'Story') : (i === bcState.currentIndex + 1 ? 'Up Next · ' + (s.topic || 'Story') : (s.topic || 'Story'));
+  return '<div class="bc-q-item' + (isPlaying ? ' now-playing' : '') + '" data-bc-index="' + i + '">' +
+    '<div class="bc-qi-thumb">' + thumbInner + '</div>' +
+    '<div class="bc-qi-meta">' +
+      '<span class="bc-qi-cat">' + escapeHtml(label) + '</span>' +
+      '<span class="bc-qi-title">' + escapeHtml(s.headline || '') + '</span>' +
+      '<span class="bc-qi-when"><strong style="color:#bcb09a">' + escapeHtml(s.show_name || '') + '</strong> · ' + escapeHtml(when) + '</span>' +
+    '</div>' +
+    '<button class="eg-bookmark bc-qi-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
+    '<button class="eg-share bc-qi-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
+  '</div>';
+}
+
+// Appends new rows (from load-more) without rebuilding the whole list.
+// Preserves the user's scroll position and avoids re-flicker on existing rows.
+function appendBroadcastQueueRows(stories, startIdx) {
+  var list = document.getElementById('bc-queue-list');
+  if (!list) return;
+  // Remove existing sentinel (it gets re-added at end after rows)
+  var oldSentinel = document.getElementById('bc-queue-sentinel');
+  if (oldSentinel) oldSentinel.remove();
+  // Build markup for the new rows only
+  var html = '';
+  stories.forEach(function(s, i) { html += buildBroadcastQueueRow(s, startIdx + i); });
+  // Insert via temp container so we don't replace existing rows
+  var temp = document.createElement('div');
+  temp.innerHTML = html;
+  while (temp.firstChild) list.appendChild(temp.firstChild);
+  // Re-attach sentinel at new bottom
+  attachQueueScrollObserver();
+}
+
+// Attaches (or re-attaches) the IntersectionObserver sentinel at the bottom
+// of the queue list. Called after renderBroadcastQueue + appendBroadcastQueueRows.
+function attachQueueScrollObserver() {
+  var list = document.getElementById('bc-queue-list');
+  if (!list) return;
+  // Disconnect old observer (if any)
+  if (bcState.queueObserver) { bcState.queueObserver.disconnect(); bcState.queueObserver = null; }
+  if (bcState.queueScrollHandler) { list.removeEventListener('scroll', bcState.queueScrollHandler); bcState.queueScrollHandler = null; }
+  // Remove old sentinel
+  var existing = document.getElementById('bc-queue-sentinel');
+  if (existing) existing.remove();
+  // Show "end of queue" indicator when fully loaded — gives clear closure
+  if (!bcState.queueHasMore) {
+    if (bcState.queue.length > 16) {
+      var endMarker = document.createElement('div');
+      endMarker.id = 'bc-queue-sentinel';
+      endMarker.className = 'bc-queue-sentinel is-done';
+      endMarker.textContent = '· End of queue ·';
+      list.appendChild(endMarker);
+    }
+    return;
+  }
+  // Attach new sentinel + observer
+  var sentinel = document.createElement('div');
+  sentinel.id = 'bc-queue-sentinel';
+  sentinel.className = 'bc-queue-sentinel';
+  sentinel.innerHTML = '<div class="bcq-spinner-dot"></div><div class="bcq-spinner-dot"></div><div class="bcq-spinner-dot"></div>';
+  list.appendChild(sentinel);
+  if ('IntersectionObserver' in window) {
+    bcState.queueObserver = new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting && !bcState.queueLoadingMore && bcState.queueHasMore) {
+        loadMoreBroadcastQueue();
+      }
+    }, { root: list, rootMargin: '300px 0px' });
+    bcState.queueObserver.observe(sentinel);
+  } else {
+    // Fallback for browsers without IntersectionObserver
+    var onScroll = function() {
+      if (list.scrollTop + list.clientHeight >= list.scrollHeight - 200 &&
+          !bcState.queueLoadingMore && bcState.queueHasMore) {
+        loadMoreBroadcastQueue();
+      }
+    };
+    list.addEventListener('scroll', onScroll);
+    bcState.queueScrollHandler = onScroll;
+  }
+}
+
+// Fetches the next page of approved + clip-eligible stories and appends them.
+// Triggered by the IntersectionObserver when the sentinel scrolls into view.
+async function loadMoreBroadcastQueue() {
+  if (bcState.queueLoadingMore || !bcState.queueHasMore) return;
+  if (!db && !initDB()) return;
+  bcState.queueLoadingMore = true;
+  var PAGE_SIZE = 16;
+  var offset = bcState.queue.length;
+  try {
+    var query = db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .not('source_url', 'is', null)
+      .not('clip_start_seconds', 'is', null)
+      .not('clip_end_seconds', 'is', null)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+    var topic = window._currentTopic || null;
+    if (topic) query = query.ilike('topic', '%' + topic + '%');
+    var result = await query;
+    if (result.error) {
+      console.log('[broadcast] load-more error:', result.error.message || result.error);
+      return;
+    }
+    var raw = result.data || [];
+    var filtered = raw.filter(function(s){
+      return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
+    });
+    // If we got fewer rows than requested, we've reached the end
+    if (raw.length < PAGE_SIZE) bcState.queueHasMore = false;
+    if (filtered.length > 0) {
+      var startIdx = bcState.queue.length;
+      bcState.queue = bcState.queue.concat(filtered);
+      // Cache for other UI (story modal lookups, etc.)
+      if (window._storyCache) {
+        filtered.forEach(function(s){ if (s && s.id) window._storyCache[s.id] = s; });
+      }
+      appendBroadcastQueueRows(filtered, startIdx);
+    } else {
+      // Edge case: server returned rows but all were filtered out (no clip timing).
+      // Re-attach observer so user can keep scrolling for the next page.
+      attachQueueScrollObserver();
+    }
+    // Update header counter
+    var qhTime = document.getElementById('bc-qh-time');
+    if (qhTime) {
+      qhTime.textContent = bcState.queue.length + (bcState.queueHasMore ? '+' : '') + ' bulletins · Updated ' + new Date().toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'});
+    }
+    console.log('[broadcast] loaded ' + filtered.length + ' more · total ' + bcState.queue.length + ' · hasMore=' + bcState.queueHasMore);
+  } catch(e) {
+    console.log('[broadcast] load-more exception:', e);
+  } finally {
+    bcState.queueLoadingMore = false;
   }
 }
 
