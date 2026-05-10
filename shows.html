@@ -322,10 +322,9 @@ function renderFeatured(){
   const featured = SHOWS.filter(s => SHOW_META[s.name]?.featured);
   let html = '';
   featured.forEach(s => {
-    const meta = SHOW_META[s.name] || {};
-    const href = meta.website || '#';
+    const showHref = s.slug ? `/shows/${s.slug}` : '#';
     const art = s.artwork_url ? `<img class="fc-img" loading="lazy" src="${escapeHtml(s.artwork_url)}" alt="${escapeHtml(s.name)}" onerror="this.style.display='none'">` : '';
-    html += `<a class="featured-card" href="${escapeHtml(href)}" target="_blank" rel="noopener">
+    html += `<a class="featured-card" href="${escapeHtml(showHref)}">
       <div class="fc-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
       ${art}
       <div class="fc-overlay"></div>
@@ -355,26 +354,33 @@ function renderShows(shows){
   let html = '';
   shows.forEach((s, i) => {
     const meta = SHOW_META[s.name] || {};
-    const href = meta.website || '#';
+    const externalHref = meta.website || '';
+    const showHref = s.slug ? `/shows/${s.slug}` : '#';
     const delay = Math.min(i*0.03, 0.5);
     const art = s.artwork_url ? `<img class="show-img" loading="lazy" src="${escapeHtml(s.artwork_url)}" alt="${escapeHtml(s.name)}" onerror="this.style.display='none'">` : '';
-    html += `<div class="show-card" style="animation-delay:${delay}s">
+    const visitBtn = externalHref
+      ? `<a class="show-visit" href="${escapeHtml(externalHref)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Visit official site →</a>`
+      : '';
+    const sourceLink = externalHref
+      ? `<a class="show-link" href="${escapeHtml(externalHref)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Source →</a>`
+      : '';
+    html += `<a class="show-card" href="${escapeHtml(showHref)}" style="animation-delay:${delay}s;text-decoration:none;color:inherit;display:flex;flex-direction:column">
       <div class="show-img-wrap">
         <div class="show-fallback" style="background:${getCatColor(s.category)}">${getInitial(s.name)}</div>
         ${art}
         <div class="show-cat-badge">${escapeHtml(s.category||'')}</div>
         <div class="show-overlay"></div>
-        <a class="show-visit" href="${escapeHtml(href)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Visit Show →</a>
+        ${visitBtn}
       </div>
       <div class="show-body">
         <div class="show-name">${escapeHtml(s.name)}</div>
         <div class="show-host">${escapeHtml(s.host||'')}</div>
         <div class="show-footer">
           <span class="show-monitored">● Monitored</span>
-          <a class="show-link" href="${escapeHtml(href)}" target="_blank" rel="noopener">Source →</a>
+          ${sourceLink}
         </div>
       </div>
-    </div>`;
+    </a>`;
   });
   grid.innerHTML = html;
 }
@@ -411,7 +417,7 @@ async function init(){
   try {
     const { data, error } = await db
       .from('shows')
-      .select('id, name, host, category, artwork_url')
+      .select('id, name, host, category, artwork_url, slug')
       .eq('active', true)
       .order('name', { ascending: true });
     if (error) throw error;
