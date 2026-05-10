@@ -342,24 +342,32 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const CATEGORIES = [
   { id: 'all', label: 'For You', emoji: '' },
-  { id: 'Intelligence', label: 'Intelligence', emoji: '🧠' },
-  { id: 'Military', label: 'Military', emoji: '⚔️' },
-  { id: 'Health', label: 'Health', emoji: '🏥' },
-  { id: 'AI', label: 'AI', emoji: '🤖' },
-  { id: 'Finance', label: 'Finance', emoji: '💰' },
-  { id: 'Geopolitics', label: 'Geopolitics', emoji: '🌍' },
-  { id: 'UFO', label: 'UFO', emoji: '👽' },
-  { id: 'Politics', label: 'Politics', emoji: '🏛️' },
-  { id: 'Debates', label: 'Debates', emoji: '⚖️' },
-  { id: 'Faith', label: 'Faith', emoji: '🙏' },
-  { id: 'Business', label: 'Business', emoji: '💼' },
-  { id: 'Science', label: 'Science', emoji: '🔬' },
-  { id: 'Society', label: 'Society', emoji: '🎭' },
-  { id: 'Consciousness', label: 'Consciousness', emoji: '🔮' },
-  { id: 'History', label: 'History', emoji: '📜' },
-  { id: 'Controversial', label: 'Controversial', emoji: '🔥' },
-  { id: 'Psychology', label: 'Psychology', emoji: '🧩' },
-  { id: 'Sports', label: 'Sports', emoji: '🏆' }
+  { id: 'AI & Tech', label: 'AI & Tech', emoji: '' },
+  { id: 'Combat & UFC', label: 'Combat & UFC', emoji: '' },
+  { id: 'Comedy', label: 'Comedy', emoji: '' },
+  { id: 'Consciousness & Medicine', label: 'Consciousness & Medicine', emoji: '' },
+  { id: 'Controversial', label: 'Controversial', emoji: '' },
+  { id: 'Crime & Justice', label: 'Crime & Justice', emoji: '' },
+  { id: 'Debates', label: 'Debates', emoji: '' },
+  { id: 'Education & Learning', label: 'Education & Learning', emoji: '' },
+  { id: 'Energy & Climate', label: 'Energy & Climate', emoji: '' },
+  { id: 'Entertainment', label: 'Entertainment', emoji: '' },
+  { id: 'Espionage', label: 'Espionage', emoji: '' },
+  { id: 'Faith & Spirituality', label: 'Faith & Spirituality', emoji: '' },
+  { id: 'Geopolitics', label: 'Geopolitics', emoji: '' },
+  { id: 'Health, Longevity & Biohacking', label: 'Health & Longevity', emoji: '' },
+  { id: 'History', label: 'History', emoji: '' },
+  { id: 'Media & Journalism', label: 'Media & Journalism', emoji: '' },
+  { id: 'Military', label: 'Military', emoji: '' },
+  { id: 'Money', label: 'Money', emoji: '' },
+  { id: 'Monologues', label: 'Monologues', emoji: '' },
+  { id: 'Politics', label: 'Politics', emoji: '' },
+  { id: 'Psychology', label: 'Psychology', emoji: '' },
+  { id: 'Relationships & Family', label: 'Relationships & Family', emoji: '' },
+  { id: 'Science', label: 'Science', emoji: '' },
+  { id: 'Society', label: 'Society', emoji: '' },
+  { id: 'Sports', label: 'Sports', emoji: '' },
+  { id: 'UFO & Paranormal', label: 'UFO & Paranormal', emoji: '' }
 ];
 
 const SOUND_MODES = [
@@ -418,7 +426,12 @@ function renderCategories() {
   const strip = document.getElementById('cat-strip');
   const counts = {};
   state.allStories.forEach(s => { if (s.topic) counts[s.topic] = (counts[s.topic] || 0) + 1; });
-  const visible = CATEGORIES.filter(c => c.id === 'all' || counts[c.id] > 0);
+  // Filter to populated categories, then sort by count desc.
+  // 'For You' (id: 'all') is pinned first so it's always the first pill.
+  const populated = CATEGORIES.filter(c => c.id !== 'all' && counts[c.id] > 0);
+  populated.sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0));
+  const allEntry = CATEGORIES.find(c => c.id === 'all');
+  const visible = allEntry ? [allEntry, ...populated] : populated;
   strip.innerHTML = visible.map(c => {
     const n = c.id === 'all' ? state.allStories.length : (counts[c.id] || 0);
     const lbl = c.emoji ? `${c.emoji} ${c.label}` : c.label;
