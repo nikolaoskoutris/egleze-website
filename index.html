@@ -591,10 +591,27 @@ header{position:relative}
 .reveals-section.reveals-editorial .ed-mark{color:var(--red);font-style:normal;margin-right:6px;font-size:18px}
 .reveals-section.reveals-editorial .reveal-card{border-color:#f0d4d4}
 
+/* ── NEW STORIES TOAST (above Today's Reveals) ──────────── */
+.new-stories-toast-wrap{display:flex;justify-content:center;padding:14px 28px 0}
+.new-stories-toast{background:var(--red);color:#fff;border:none;border-radius:999px;padding:9px 18px;display:inline-flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 2px 12px rgba(187,25,25,0.28);transition:transform .15s ease,box-shadow .2s ease;animation:nstSlideIn .35s ease}
+.new-stories-toast:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(187,25,25,0.35)}
+.new-stories-toast:active{transform:translateY(0)}
+.new-stories-toast[hidden]{display:none}
+.nst-pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;animation:nstPulse 1.5s ease-in-out infinite;flex-shrink:0}
+.nst-arrow{font-size:13px;line-height:1;font-weight:700}
+@keyframes nstPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.25)}}
+@keyframes nstSlideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* NEW badge on freshly-arrived reveals cards */
+.reveal-card.is-new{border-color:var(--red) !important}
+.reveal-card.is-new .rc-art::after{content:'New';position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px;z-index:4;font-weight:700;line-height:1.5}
+
 /* MOBILE RESPONSIVE — Option D layout */
 @media (max-width:760px){
   .reveals-grid{grid-template-columns:1fr;gap:14px}
   .reveals-section{padding:20px 16px}
+  .new-stories-toast-wrap{padding:14px 16px 0}
+  .new-stories-toast{font-size:12px;padding:9px 16px}
   .reveals-h2{font-size:18px}
   .ncd-headline{font-size:22px}
   .filter-bar{margin:0 -16px 14px;padding:9px 16px;font-size:10px}
@@ -787,6 +804,15 @@ header{position:relative}
         <span class="bc-toggle" id="bc-toggle-audio" role="button" aria-pressed="false">Audio Only</span>
       </div>
     </div>
+  </div>
+
+  <!-- ── NEW STORIES TOAST ───────────────────────────────────── -->
+  <div class="new-stories-toast-wrap">
+    <button id="new-stories-toast" type="button" class="new-stories-toast" hidden aria-live="polite">
+      <span class="nst-pulse" aria-hidden="true"></span>
+      <span id="nst-text">New stories available</span>
+      <span class="nst-arrow" aria-hidden="true">↑</span>
+    </button>
   </div>
 
   <!-- ── TODAY'S FILED REVEALS — 3-CARD CAROUSEL ─────────────── -->
@@ -1330,6 +1356,7 @@ async function loadStories(topic = null) {
       return;
     }
     renderRevealsCarousel(combined, topic);
+    if (typeof _setRevealsBaseline === 'function') _setRevealsBaseline(combined);
     injectStorySchema(combined);
     updateTicker(combined);
     updateFilterUI(topic, combined.length);
@@ -1357,6 +1384,7 @@ function renderRevealsCarousel(stories, topic) {
 
   window._revealsState.allStories = stories;
   window._revealsState.page = 0;
+  if (typeof _setRevealsBaseline === 'function') _setRevealsBaseline(stories);
   paintReveals();
 }
 
@@ -1378,7 +1406,7 @@ function paintReveals() {
   var _artHits = 0, _artMisses = 0;
   pageStories.forEach(function(s) {
     var card = document.createElement('div');
-    card.className = 'reveal-card';
+    card.className = 'reveal-card' + (s._isNew ? ' is-new' : '');
     card.setAttribute('data-clip-trigger', '1');
     card.setAttribute('data-story-id', s.id);
 
@@ -1456,6 +1484,122 @@ function escapeHtmlMini(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// ── NEW STORIES POLLING — 60s interval + tab refocus ─────────
+// Polls Supabase for stories newer than the most-recent currently
+// rendered. Shows a toast above Today's Reveals; tap prepends new
+// cards (marked .is-new with a NEW badge until next page load).
+window._newStoriesState = window._newStoriesState || {
+  lastLoadedAt: null,
+  pollInterval: null,
+  seenIds: new Set()
+};
+
+function _setRevealsBaseline(stories) {
+  var state = window._newStoriesState;
+  state.seenIds.clear();
+  if (stories && stories.length) {
+    state.lastLoadedAt = stories[0].created_at;
+    stories.forEach(function(s) { if (s && s.id) state.seenIds.add(s.id); });
+  }
+  // Hide toast on baseline reset (e.g., topic filter change)
+  var toast = document.getElementById('new-stories-toast');
+  if (toast) toast.hidden = true;
+}
+
+async function checkForNewStories() {
+  if (!db && (typeof initDB !== 'function' || !initDB())) return;
+  var state = window._newStoriesState;
+  if (!state.lastLoadedAt) return;
+  try {
+    var res = await db
+      .from('stories')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'approved')
+      .gt('created_at', state.lastLoadedAt);
+    if (res.error) { console.warn('[new-stories] poll failed:', res.error.message); return; }
+    var count = res.count || 0;
+    var toast = document.getElementById('new-stories-toast');
+    var textEl = document.getElementById('nst-text');
+    if (!toast || !textEl) return;
+    if (count > 0) {
+      textEl.textContent = count + ' new ' + (count === 1 ? 'story' : 'stories');
+      toast.hidden = false;
+    }
+  } catch (e) {
+    console.warn('[new-stories] poll threw:', e);
+  }
+}
+
+async function onNewStoriesToastClick() {
+  var state = window._newStoriesState;
+  var toast = document.getElementById('new-stories-toast');
+  if (!state.lastLoadedAt) { if (toast) toast.hidden = true; return; }
+  try {
+    var res = await db
+      .from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .gt('created_at', state.lastLoadedAt)
+      .order('created_at', { ascending: false });
+    if (res.error || !res.data || !res.data.length) {
+      if (toast) toast.hidden = true;
+      return;
+    }
+    var newOnes = res.data.filter(function(s) { return s && s.id && !state.seenIds.has(s.id); });
+    if (newOnes.length === 0) {
+      if (toast) toast.hidden = true;
+      return;
+    }
+    newOnes.forEach(function(s) {
+      state.seenIds.add(s.id);
+      s._isNew = true;
+      // Cache new stories so other UI (broadcast, weekly, search) can find them
+      if (window._storyCache) window._storyCache[s.id] = s;
+    });
+    state.lastLoadedAt = newOnes[0].created_at;
+    var revealsState = window._revealsState;
+    if (revealsState) {
+      revealsState.allStories = newOnes.concat(revealsState.allStories || []);
+      revealsState.page = 0;
+      paintReveals();
+      // Smooth scroll to reveals so user sees the new arrivals
+      var section = document.getElementById('reveals-section');
+      if (section && typeof section.scrollIntoView === 'function') {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    if (toast) toast.hidden = true;
+  } catch (e) {
+    console.warn('[new-stories] tap handler threw:', e);
+    if (toast) toast.hidden = true;
+  }
+}
+
+function _initNewStoriesPolling() {
+  var toast = document.getElementById('new-stories-toast');
+  if (toast && !toast._wired) {
+    toast.addEventListener('click', onNewStoriesToastClick);
+    toast._wired = true;
+  }
+  var state = window._newStoriesState;
+  if (state.pollInterval) clearInterval(state.pollInterval);
+  state.pollInterval = setInterval(checkForNewStories, 60000);
+  if (!document._newStoriesVisHook) {
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') checkForNewStories();
+    });
+    document._newStoriesVisHook = true;
+  }
+  console.log('[new-stories] polling started · 60s interval + tab refocus');
+}
+
+// Auto-start when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initNewStoriesPolling);
+} else {
+  _initNewStoriesPolling();
 }
 
 // Legacy iTunes JSONP artwork loader removed. All artwork is now self-hosted —
