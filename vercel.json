@@ -1,6 +1,81 @@
 {
   "rewrites": [
-    { "source": "/shows/:slug", "destination": "/show.html?slug=:slug" },
-    { "source": "/story/:slug", "destination": "/story.html?slug=:slug" }
+    {
+      "source": "/topic/:slug",
+      "destination": "/topic/:slug.html"
+    },
+    {
+      "source": "/topic/:slug/",
+      "destination": "/topic/:slug.html"
+    },
+    {
+      "source": "/story/:slug",
+      "destination": "/api/story?slug=:slug"
+    },
+    {
+      "source": "/story/:slug/",
+      "destination": "/api/story?slug=:slug"
+    },
+    {
+      "source": "/shows/:slug",
+      "destination": "/show.html?slug=:slug"
+    },
+    {
+      "source": "/shows/:slug/",
+      "destination": "/show.html?slug=:slug"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/topic/intelligence",
+      "destination": "/topic/espionage",
+      "permanent": true
+    },
+    {
+      "source": "/topic/finance",
+      "destination": "/topic/money",
+      "permanent": true
+    },
+    {
+      "source": "/topic/business",
+      "destination": "/topic/money",
+      "permanent": true
+    },
+    {
+      "source": "/topic/ai",
+      "destination": "/topic/ai-tech",
+      "permanent": true
+    },
+    {
+      "source": "/topic/health",
+      "destination": "/topic/health-longevity-biohacking",
+      "permanent": true
+    },
+    {
+      "source": "/topic/ufo",
+      "destination": "/topic/ufo-paranormal",
+      "permanent": true
+    },
+    {
+      "source": "/topic/faith",
+      "destination": "/topic/faith-spirituality",
+      "permanent": true
+    },
+    {
+      "source": "/topic/consciousness",
+      "destination": "/topic/consciousness-medicine",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/topic/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=600"
+        }
+      ]
+    }
   ]
 }
