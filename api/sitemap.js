@@ -92,13 +92,13 @@ export default async function handler(req, res) {
   }
 
   const showsResult = await supabaseFetch(
-    'shows?select=slug,updated_at&active=eq.true&slug=not.is.null&order=name.asc',
+    'shows?select=slug,created_at&active=eq.true&slug=not.is.null&order=name.asc',
     'shows'
   );
   if (showsResult.error) errors.push({ source: 'shows', error: showsResult.error });
   for (const show of showsResult.data) {
     if (!show.slug) continue;
-    const lastmod = formatDate(show.updated_at);
+    const lastmod = formatDate(show.created_at);
     urls.push(urlBlock(
       `https://egleze.com/shows/${show.slug}`,
       lastmod,
