@@ -2792,6 +2792,9 @@ var bcState = {
   autoAdvance: true, // continuous-play toggle (default ON)
   audioOnly: false,  // audio-only toggle (default OFF)
   endTimer: null,    // timeout that fires at clip_end_seconds
+  endTimerStartedAt: 0,    // wall-clock ms when the end timer began (or resumed)
+  endTimerRemainingMs: 0,  // ms remaining to fire when paused; 0 when running
+  isPaused: false,         // true while YouTube player is paused
   progressTimer: null,
   // Infinite scroll pagination
   queueLoadingMore: false,  // mutex during load-more fetch
@@ -3081,17 +3084,63 @@ function bcStartStory(story) {
           var clipLenSec = (typeof endSec === 'number' && endSec > startSec)
             ? (endSec - startSec)
             : 60; // safety fallback
+          var totalMs = clipLenSec * 1000 + 600;
+          bcState.endTimerStartedAt = Date.now();
+          bcState.endTimerRemainingMs = 0;
+          bcState.isPaused = false;
           bcState.endTimer = setTimeout(function() {
             // Hard-stop: pause + trigger advance, in case YouTube's `end` param drifted.
             if (bcState.player) {
               try { bcState.player.pauseVideo(); } catch(_) {}
             }
             bcAdvance();
-          }, clipLenSec * 1000 + 600);
+          }, totalMs);
         },
         onStateChange: function(e) {
           // 0 = ended; if we hit ended naturally, advance
-          if (e.data === YT.PlayerState.ENDED) bcAdvance();
+          if (e.data === YT.PlayerState.ENDED) {
+            bcAdvance();
+            return;
+          }
+          // 2 = paused: freeze the auto-advance countdown and progress bar
+          if (e.data === YT.PlayerState.PAUSED) {
+            if (bcState.isPaused) return;
+            bcState.isPaused = true;
+            // Calculate how much time was left when the user paused
+            if (bcState.endTimer) {
+              var elapsed = Date.now() - bcState.endTimerStartedAt;
+              var totalMs = clipLenSec * 1000 + 600;
+              bcState.endTimerRemainingMs = Math.max(0, totalMs - elapsed);
+              clearTimeout(bcState.endTimer);
+              bcState.endTimer = null;
+            }
+            // Stop the progress-bar interval too
+            if (bcState.progressTimer) {
+              clearInterval(bcState.progressTimer);
+              bcState.progressTimer = null;
+            }
+            return;
+          }
+          // 1 = playing: if we were paused, resume the countdown with remaining time
+          if (e.data === YT.PlayerState.PLAYING) {
+            if (!bcState.isPaused) return;
+            bcState.isPaused = false;
+            // Restart the end timer with the remaining time
+            if (bcState.endTimerRemainingMs > 0) {
+              bcState.endTimerStartedAt = Date.now();
+              var remaining = bcState.endTimerRemainingMs;
+              bcState.endTimerRemainingMs = 0;
+              bcState.endTimer = setTimeout(function() {
+                if (bcState.player) {
+                  try { bcState.player.pauseVideo(); } catch(_) {}
+                }
+                bcAdvance();
+              }, remaining);
+            }
+            // Restart progress tracking
+            bcStartProgressTracking(story);
+            return;
+          }
         },
         onError: function(e) {
           console.log('[broadcast] player error:', e.data);
@@ -3162,6 +3211,8 @@ function bcFmtTime(sec) {
 function bcAdvance() {
   if (bcState.endTimer) { clearTimeout(bcState.endTimer); bcState.endTimer = null; }
   if (bcState.progressTimer) { clearInterval(bcState.progressTimer); bcState.progressTimer = null; }
+  bcState.endTimerRemainingMs = 0;
+  bcState.isPaused = false;
   if (!bcState.autoAdvance) {
     bcStop();
     return;
