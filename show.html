@@ -422,14 +422,14 @@ async function loadStats(){
   try {
     const [countRes, lastRes] = await Promise.all([
       db.from('stories').select('id', { count: 'exact', head: true }).eq('status', 'approved').eq('show_name', state.show.name),
-      db.from('stories').select('created_at, episode').eq('status', 'approved').eq('show_name', state.show.name).order('created_at', { ascending: false }).limit(1).maybeSingle()
+      db.from('stories').select('created_at, updated_at, episode').eq('status', 'approved').eq('show_name', state.show.name).order('updated_at', { ascending: false, nullsFirst: false }).limit(1).maybeSingle()
     ]);
     if (countRes.count != null) document.getElementById('stat-stories').textContent = countRes.count;
     const epQuery = await db.from('stories').select('episode').eq('status', 'approved').eq('show_name', state.show.name).not('episode', 'is', null);
     const epSet = new Set((epQuery.data || []).map(r => r.episode).filter(Boolean));
     document.getElementById('stat-episodes').textContent = epSet.size || '—';
-    if (lastRes.data && lastRes.data.created_at) {
-      document.getElementById('stat-last').textContent = timeAgo(lastRes.data.created_at);
+    if (lastRes.data && (lastRes.data.updated_at || lastRes.data.created_at)) {
+      document.getElementById('stat-last').textContent = timeAgo(lastRes.data.updated_at || lastRes.data.created_at);
     }
   } catch(e) {
     console.warn('[show-page] stats load failed:', e);
@@ -453,7 +453,7 @@ async function loadStoriesPage(append){
       .select('id, headline, summary, topic, score, created_at, source_url, episode, clip_start_seconds, clip_end_seconds')
       .eq('status', 'approved')
       .eq('show_name', state.show.name)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .range(state.storiesOffset, state.storiesOffset + STORIES_PAGE_SIZE - 1);
     if (error) {
       console.warn('[show-page] stories load error:', error);

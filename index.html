@@ -1287,7 +1287,7 @@ async function loadStories(topic = null) {
     let query = db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(50);
 
     // Filter by topic field — map full category names to keyword fragments
@@ -1338,7 +1338,7 @@ async function loadStories(topic = null) {
           .select('*')
           .eq('status', 'approved')
           .contains('categories', [topic])
-          .order('created_at', { ascending: false })
+          .order('updated_at', { ascending: false, nullsFirst: false })
           .limit(50);
         if (catData && catData.length > 0) {
           // Merge and deduplicate by id
@@ -1355,7 +1355,7 @@ async function loadStories(topic = null) {
           .select('*')
           .eq('status', 'approved')
           .or(`headline.ilike.%${topic}%,summary.ilike.%${topic}%`)
-          .order('created_at', { ascending: false })
+          .order('updated_at', { ascending: false, nullsFirst: false })
           .limit(20);
         if (textData && textData.length > 0) {
           const ids = new Set(combined.map(s => s.id));
@@ -1778,7 +1778,7 @@ async function loadEditorialChoice() {
       .select('*')
       .eq('status', 'approved')
       .eq('is_editorial_pick', true)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(15);
     if (error) {
       // If column doesn't exist yet (Supabase returns PGRST116/PGRST204), fall back to empty
@@ -2017,7 +2017,7 @@ async function loadSidebar() {
     const { data } = await db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(6);
     if (!data || data.length === 0) return;
     const items = document.querySelectorAll('.side-item');
@@ -2327,7 +2327,7 @@ async function loadClips() {
     const { data } = await db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(8);
     const grid = document.getElementById('clips-grid');
     if (!grid) return;
@@ -2815,7 +2815,7 @@ async function loadBroadcastQueue(topic) {
       .not('source_url', 'is', null)
       .not('clip_start_seconds', 'is', null)
       .not('clip_end_seconds', 'is', null)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(16);
     // Apply topic filter if set
     if (topic) {
@@ -2986,7 +2986,7 @@ async function loadMoreBroadcastQueue() {
       .not('source_url', 'is', null)
       .not('clip_start_seconds', 'is', null)
       .not('clip_end_seconds', 'is', null)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .range(offset, offset + PAGE_SIZE - 1);
     var topic = window._currentTopic || null;
     if (topic) query = query.ilike('topic', '%' + topic + '%');

@@ -416,7 +416,7 @@ async function loadShows() {
 }
 async function loadStories() {
   try {
-    const path = `stories?select=*&status=eq.approved&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&source_url=not.is.null&order=created_at.desc&limit=500`;
+    const path = `stories?select=*&status=eq.approved&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&source_url=not.is.null&order=updated_at.desc.nullslast&limit=500`;
     state.allStories = await fetchSupabase(path);
   } catch (e) { console.error('[shorts] stories failed:', e); state.allStories = []; }
 }
