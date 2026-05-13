@@ -1158,6 +1158,93 @@ function safeFetch(input, init) {
 }
 
 let db = null;
+
+// ─── EGLEZE DIVERSIFY UTILITIES ────────────────────────────────────────────
+// Strict round-robin interleave so consecutive items never share a show_name.
+// Algorithm: group by show_name, then at each step pick the show with the
+// largest remaining bucket (excluding the show used last). When only one
+// show's stories remain, they get appended in order — this is the unavoidable
+// fallback when there's no other show available. Stable: preserves the order
+// within each show (newest first when input is sorted newest first).
+function interleaveByShow(stories) {
+  if (!Array.isArray(stories) || stories.length < 3) return stories || [];
+  // Group by show_name. Stories with no show_name go into a single bucket.
+  var groups = new Map();
+  var order = [];
+  for (var i = 0; i < stories.length; i++) {
+    var key = (stories[i] && stories[i].show_name) || '__unknown__';
+    if (!groups.has(key)) { groups.set(key, []); order.push(key); }
+    groups.get(key).push(stories[i]);
+  }
+  if (groups.size === 1) return stories.slice();
+  var result = [];
+  var lastShow = null;
+  while (result.length < stories.length) {
+    // Find the show (other than last) with the most items remaining
+    var bestKey = null;
+    var bestCount = -1;
+    groups.forEach(function(arr, key) {
+      if (arr.length === 0) return;
+      if (key === lastShow && groups.size > 1) {
+        // Skip last show if any other show still has items
+        var othersHaveItems = false;
+        groups.forEach(function(a, k) { if (k !== lastShow && a.length > 0) othersHaveItems = true; });
+        if (othersHaveItems) return;
+      }
+      if (arr.length > bestCount) { bestCount = arr.length; bestKey = key; }
+    });
+    if (bestKey === null) break;
+    result.push(groups.get(bestKey).shift());
+    lastShow = bestKey;
+  }
+  return result;
+}
+
+// ─── WATCHED-STORY TRACKING (localStorage) ─────────────────────────────────
+// Keeps last 500 watched story IDs with 14-day rolling expiry.
+// Applies only to broadcast queue — topic pages and direct links always
+// show every story (Egleze's archive/connector ethos).
+var WATCHED_KEY = 'egleze.watched';
+var WATCHED_MAX = 500;
+var WATCHED_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+function getWatchedSet() {
+  try {
+    var raw = localStorage.getItem(WATCHED_KEY);
+    if (!raw) return new Map();
+    var parsed = JSON.parse(raw);
+    var now = Date.now();
+    var m = new Map();
+    Object.keys(parsed).forEach(function(id) {
+      if (parsed[id] && (now - parsed[id]) < WATCHED_TTL_MS) {
+        m.set(String(id), parsed[id]);
+      }
+    });
+    return m;
+  } catch(e) { return new Map(); }
+}
+function markWatched(storyId) {
+  if (storyId == null) return;
+  try {
+    var m = getWatchedSet();
+    m.set(String(storyId), Date.now());
+    // Trim to most-recent WATCHED_MAX entries
+    if (m.size > WATCHED_MAX) {
+      var entries = Array.from(m.entries()).sort(function(a, b) { return b[1] - a[1]; }).slice(0, WATCHED_MAX);
+      m = new Map(entries);
+    }
+    var obj = {};
+    m.forEach(function(t, id) { obj[id] = t; });
+    localStorage.setItem(WATCHED_KEY, JSON.stringify(obj));
+  } catch(e) {}
+}
+function filterUnwatched(stories) {
+  if (!Array.isArray(stories) || stories.length === 0) return stories || [];
+  var watched = getWatchedSet();
+  if (watched.size === 0) return stories;
+  return stories.filter(function(s) { return !watched.has(String(s.id)); });
+}
+// ─── END DIVERSIFY UTILITIES ───────────────────────────────────────────────
+
 function initDB() {
   if (typeof supabase !== 'undefined') {
     db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -1369,6 +1456,9 @@ async function loadStories(topic = null) {
       showEmptyState(topic);
       return;
     }
+    // Interleave by show — strict round-robin so consecutive cards (and trios)
+    // never share a podcast. Surfaces variety from across our 86 shows.
+    combined = interleaveByShow(combined);
     renderRevealsCarousel(combined, topic);
     if (typeof _setRevealsBaseline === 'function') _setRevealsBaseline(combined);
     injectStorySchema(combined);
@@ -2835,6 +2925,11 @@ async function loadBroadcastQueue(topic) {
     });
     // If we got fewer rows than requested, there's no more data to fetch
     if ((result.data || []).length < 16) bcState.queueHasMore = false;
+    // Broadcast = live feed of unseen content. Hide what the user has watched
+    // already in this device's localStorage. Then interleave by show so the
+    // queue never plays two consecutive stories from the same podcast.
+    stories = filterUnwatched(stories);
+    stories = interleaveByShow(stories);
     bcState.queue = stories;
     bcState.currentIndex = 0;
     renderBroadcastQueue();
@@ -3003,6 +3098,8 @@ async function loadMoreBroadcastQueue() {
     var filtered = raw.filter(function(s){
       return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
     });
+    // Hide already-watched (per device) from broadcast tail
+    filtered = filterUnwatched(filtered);
     // If we got fewer rows than requested, we've reached the end
     if (raw.length < PAGE_SIZE) bcState.queueHasMore = false;
     if (filtered.length > 0) {
@@ -3233,6 +3330,10 @@ function bcFmtTime(sec) {
 }
 
 function bcAdvance() {
+  // Mark the just-finished story as watched (localStorage)
+  var finishedStory = bcState.queue[bcState.currentIndex];
+  if (finishedStory && finishedStory.id) markWatched(finishedStory.id);
+
   if (bcState.endTimer) { clearTimeout(bcState.endTimer); bcState.endTimer = null; }
   if (bcState.progressTimer) { clearInterval(bcState.progressTimer); bcState.progressTimer = null; }
   bcState.endTimerRemainingMs = 0;

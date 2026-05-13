@@ -376,6 +376,39 @@ const SOUND_MODES = [
   { id: 'silent', icon: '🔇', label: 'Silent' }
 ];
 
+// ─── Strict round-robin interleave by show_name ──────────────────────────
+// Ensures the Shorts feed never plays two consecutive clips from the same
+// podcast. Same algorithm as homepage broadcast queue (kept in sync).
+function interleaveByShow(stories) {
+  if (!Array.isArray(stories) || stories.length < 3) return stories || [];
+  var groups = new Map();
+  for (var i = 0; i < stories.length; i++) {
+    var key = (stories[i] && stories[i].show_name) || '__unknown__';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(stories[i]);
+  }
+  if (groups.size === 1) return stories.slice();
+  var result = [];
+  var lastShow = null;
+  while (result.length < stories.length) {
+    var bestKey = null;
+    var bestCount = -1;
+    groups.forEach(function(arr, key) {
+      if (arr.length === 0) return;
+      if (key === lastShow && groups.size > 1) {
+        var othersHaveItems = false;
+        groups.forEach(function(a, k) { if (k !== lastShow && a.length > 0) othersHaveItems = true; });
+        if (othersHaveItems) return;
+      }
+      if (arr.length > bestCount) { bestCount = arr.length; bestKey = key; }
+    });
+    if (bestKey === null) break;
+    result.push(groups.get(bestKey).shift());
+    lastShow = bestKey;
+  }
+  return result;
+}
+
 const state = {
   allStories: [],
   shows: {},
@@ -448,9 +481,11 @@ function renderCategories() {
   });
 }
 function applyFilter() {
-  state.filteredStories = state.currentCategory === 'all'
+  const base = state.currentCategory === 'all'
     ? [...state.allStories]
     : state.allStories.filter(s => s.topic === state.currentCategory);
+  // Strict round-robin so consecutive shorts never share a podcast
+  state.filteredStories = interleaveByShow(base);
   state.currentIndex = 0;
   // Tear down all existing players when filter changes
   state.players.forEach(p => { try { p.destroy(); } catch(_) {} });
