@@ -3098,8 +3098,9 @@ async function loadMoreBroadcastQueue() {
     var filtered = raw.filter(function(s){
       return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
     });
-    // Hide already-watched (per device) from broadcast tail
-    filtered = filterUnwatched(filtered);
+    // Note: do NOT call filterUnwatched here. Session-aware: only the initial
+    // page load filters watched. Once in session, everything stays in queue
+    // so user can scroll back to a clip they just played (e.g. to share it).
     // If we got fewer rows than requested, we've reached the end
     if (raw.length < PAGE_SIZE) bcState.queueHasMore = false;
     if (filtered.length > 0) {
@@ -3732,9 +3733,9 @@ async function bannerSubscribe() {
 .cp-bookmark.is-saved { background: rgba(187,25,25,0.10); color: #bb1919; }
 .cp-bookmark.is-saved svg path { fill: #bb1919; stroke: #bb1919; }
 
-@media (max-width: 480px) {
-  .bc-player-bookmark { bottom: 42px; right: 10px; width: 34px; height: 34px; }
-  .bc-player-share { bottom: 42px; right: 52px; width: 34px; height: 34px; }
+@media (max-width: 768px) {
+  .bc-player-bookmark { bottom: 42px; top: auto; right: 10px; width: 34px; height: 34px; }
+  .bc-player-share { bottom: 42px; top: auto; right: 52px; width: 34px; height: 34px; }
   .cp-bookmark { top: 6px; right: 44px; width: 28px; height: 28px; }
 }
 </style>
@@ -3764,8 +3765,8 @@ async function bannerSubscribe() {
 #eg-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: #0e0a06; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 11px 18px; border-radius: 6px; box-shadow: 0 8px 28px rgba(0,0,0,0.28); opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 10000; pointer-events: none; }
 #eg-toast.is-shown { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-@media (max-width: 480px) {
-  .bc-player-share { top: 10px; right: 50px; width: 34px; height: 34px; }
+@media (max-width: 768px) {
+  .bc-player-share { bottom: 42px; top: auto; right: 52px; width: 34px; height: 34px; }
   .cp-share { top: 6px; right: 76px; width: 28px; height: 28px; }
 }
 </style>
