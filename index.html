@@ -282,7 +282,7 @@ header{position:relative}
 /* ── BROADCAST SECTION ─────────────────────────────────────── */
 .broadcast{display:grid;grid-template-columns:1fr 360px;gap:0;background:var(--ink, #1a1a1a);color:#fafafa;margin:0 -28px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;z-index:1}
 @media (min-width:1340px){
-  .broadcast{margin:0 calc((100vw - 1284px) / -2 - 28px) 28px}
+  .broadcast{margin:0 max(-28px, calc((100vw - 1284px) / -2 - 28px)) 28px}
 }
 .bc-player{position:relative;background:#000;aspect-ratio:16/9;overflow:hidden}
 .bc-player .bc-yt-host{position:absolute;inset:0;background:#000}
@@ -2793,6 +2793,7 @@ var bcState = {
   audioOnly: false,  // audio-only toggle (default OFF)
   endTimer: null,    // timeout that fires at clip_end_seconds
   endTimerStartedAt: 0,    // wall-clock ms when the end timer began (or resumed)
+  endTimerTotalMs: 0,      // total ms the current timer was set for
   endTimerRemainingMs: 0,  // ms remaining to fire when paused; 0 when running
   isPaused: false,         // true while YouTube player is paused
   progressTimer: null,
@@ -3086,9 +3087,15 @@ function bcStartStory(story) {
             : 60; // safety fallback
           var totalMs = clipLenSec * 1000 + 600;
           bcState.endTimerStartedAt = Date.now();
+          bcState.endTimerTotalMs = totalMs;
           bcState.endTimerRemainingMs = 0;
           bcState.isPaused = false;
           bcState.endTimer = setTimeout(function() {
+            // Belt-and-braces: don't advance if the user is currently paused
+            if (bcState.isPaused) {
+              console.log('[bc-state] end timer fired but user is paused — skipping advance');
+              return;
+            }
             // Hard-stop: pause + trigger advance, in case YouTube's `end` param drifted.
             if (bcState.player) {
               try { bcState.player.pauseVideo(); } catch(_) {}
@@ -3097,8 +3104,18 @@ function bcStartStory(story) {
           }, totalMs);
         },
         onStateChange: function(e) {
+          // DIAGNOSTIC: log every state change for debugging the pause bug
+          var stateName = ({0:'ENDED',1:'PLAYING',2:'PAUSED',3:'BUFFERING',5:'CUED','-1':'UNSTARTED'})[e.data] || ('UNKNOWN_'+e.data);
+          console.log('[bc-state]', stateName, '· isPaused=', bcState.isPaused, '· endTimer=', !!bcState.endTimer);
+
           // 0 = ended; if we hit ended naturally, advance
           if (e.data === YT.PlayerState.ENDED) {
+            // If we're already paused, don't advance — the user paused, then the
+            // video later hit its "end" param. They didn't want to advance.
+            if (bcState.isPaused) {
+              console.log('[bc-state] suppressing ENDED — user is paused');
+              return;
+            }
             bcAdvance();
             return;
           }
@@ -3106,13 +3123,14 @@ function bcStartStory(story) {
           if (e.data === YT.PlayerState.PAUSED) {
             if (bcState.isPaused) return;
             bcState.isPaused = true;
+            console.log('[bc-state] PAUSE — freezing timer');
             // Calculate how much time was left when the user paused
             if (bcState.endTimer) {
               var elapsed = Date.now() - bcState.endTimerStartedAt;
-              var totalMs = clipLenSec * 1000 + 600;
-              bcState.endTimerRemainingMs = Math.max(0, totalMs - elapsed);
+              bcState.endTimerRemainingMs = Math.max(0, bcState.endTimerTotalMs - elapsed);
               clearTimeout(bcState.endTimer);
               bcState.endTimer = null;
+              console.log('[bc-state] · timer cleared · remainingMs=', bcState.endTimerRemainingMs);
             }
             // Stop the progress-bar interval too
             if (bcState.progressTimer) {
@@ -3125,12 +3143,18 @@ function bcStartStory(story) {
           if (e.data === YT.PlayerState.PLAYING) {
             if (!bcState.isPaused) return;
             bcState.isPaused = false;
+            console.log('[bc-state] RESUME — remainingMs=', bcState.endTimerRemainingMs);
             // Restart the end timer with the remaining time
             if (bcState.endTimerRemainingMs > 0) {
               bcState.endTimerStartedAt = Date.now();
+              bcState.endTimerTotalMs = bcState.endTimerRemainingMs;
               var remaining = bcState.endTimerRemainingMs;
               bcState.endTimerRemainingMs = 0;
               bcState.endTimer = setTimeout(function() {
+                if (bcState.isPaused) {
+                  console.log('[bc-state] resumed end timer fired but user is paused — skipping');
+                  return;
+                }
                 if (bcState.player) {
                   try { bcState.player.pauseVideo(); } catch(_) {}
                 }
@@ -4193,44 +4217,108 @@ async function bannerSubscribe() {
     } catch (e) { return false; }
   }
 
+  // Close any open share popover (called on outside click + Escape + after action)
+  function closeSharePopover() {
+    var existing = document.getElementById('eg-share-popover');
+    if (existing) existing.remove();
+    document.removeEventListener('click', onPopoverOutsideClick, true);
+    document.removeEventListener('keydown', onPopoverKeyDown, true);
+  }
+  function onPopoverOutsideClick(e) {
+    var pop = document.getElementById('eg-share-popover');
+    if (!pop) return;
+    if (pop.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('.eg-share')) return;
+    closeSharePopover();
+  }
+  function onPopoverKeyDown(e) {
+    if (e.key === 'Escape') closeSharePopover();
+  }
+
+  function openSharePopover(btn, storyId) {
+    closeSharePopover();
+    var rect = btn.getBoundingClientRect();
+    var pop = document.createElement('div');
+    pop.id = 'eg-share-popover';
+    pop.setAttribute('role', 'menu');
+    pop.style.cssText = 'position:fixed;z-index:9999;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 8px 28px rgba(0,0,0,.18);border-radius:6px;min-width:200px;padding:6px;font-family:"DM Sans",sans-serif;';
+    // Position below the button, right-aligned to it
+    var top = rect.bottom + 6;
+    var right = Math.max(8, window.innerWidth - rect.right);
+    pop.style.top = top + 'px';
+    pop.style.right = right + 'px';
+
+    var hasNative = !!navigator.share;
+
+    var copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.setAttribute('role', 'menuitem');
+    copyBtn.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;background:none;border:none;font-size:13px;color:#1a1a1a;text-align:left;cursor:pointer;border-radius:4px;font-family:inherit;';
+    copyBtn.onmouseover = function(){ copyBtn.style.background = '#f5f3ed'; };
+    copyBtn.onmouseout = function(){ copyBtn.style.background = 'none'; };
+    copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy link</span>';
+    copyBtn.onclick = async function(){
+      try {
+        var url = await buildShareUrl(storyId);
+        var ok = await copyToClipboard(url);
+        if (ok) {
+          showToast('Link copied to clipboard');
+          logShareEvent(storyId, 'clipboard');
+        } else {
+          showToast('Could not copy link');
+        }
+      } catch(err) {
+        console.error('[egleze share] copy failed:', err);
+        showToast('Could not copy link');
+      } finally {
+        closeSharePopover();
+      }
+    };
+    pop.appendChild(copyBtn);
+
+    if (hasNative) {
+      var shareBtn = document.createElement('button');
+      shareBtn.type = 'button';
+      shareBtn.setAttribute('role', 'menuitem');
+      shareBtn.style.cssText = copyBtn.style.cssText;
+      shareBtn.onmouseover = function(){ shareBtn.style.background = '#f5f3ed'; };
+      shareBtn.onmouseout = function(){ shareBtn.style.background = 'none'; };
+      shareBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span>Share via apps…</span>';
+      shareBtn.onclick = async function(){
+        try {
+          var url = await buildShareUrl(storyId);
+          var title = buildShareTitle(storyId);
+          var text = buildShareText(storyId);
+          closeSharePopover();
+          try {
+            await navigator.share({ title: title, text: text, url: url });
+            logShareEvent(storyId, 'native');
+          } catch(e) {
+            if (e && (e.name === 'AbortError' || /abort|cancel/i.test(e.message || ''))) return;
+            console.warn('[egleze share] native share failed:', e);
+            var ok = await copyToClipboard(url);
+            if (ok) {
+              showToast('Link copied to clipboard');
+              logShareEvent(storyId, 'clipboard');
+            }
+          }
+        } catch(err) {
+          console.error('[egleze share] share via apps exception:', err);
+        }
+      };
+      pop.appendChild(shareBtn);
+    }
+
+    document.body.appendChild(pop);
+    setTimeout(function(){
+      document.addEventListener('click', onPopoverOutsideClick, true);
+      document.addEventListener('keydown', onPopoverKeyDown, true);
+    }, 0);
+  }
+
   async function handleShare(storyId, btn) {
     if (!storyId) return;
-    if (btn) btn.disabled = true;
-    try {
-      var url = await buildShareUrl(storyId);
-      var title = buildShareTitle(storyId);
-      var text = buildShareText(storyId);
-
-      // Prefer the native share sheet (mobile + some desktop browsers)
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: title, text: text, url: url });
-          logShareEvent(storyId, 'native');
-          return;
-        } catch (e) {
-          // User cancelled the share sheet — that's normal, don't fall back
-          if (e && (e.name === 'AbortError' || /abort|cancel/i.test(e.message || ''))) {
-            return;
-          }
-          // Otherwise fall through to clipboard
-          console.warn('[egleze share] native share failed, falling back to clipboard:', e);
-        }
-      }
-
-      // Fallback: copy to clipboard with a toast
-      var ok = await copyToClipboard(url);
-      if (ok) {
-        showToast('Link copied to clipboard');
-        logShareEvent(storyId, 'clipboard');
-      } else {
-        showToast('Could not copy link');
-      }
-    } catch (e) {
-      console.error('[egleze share] handleShare exception:', e);
-      showToast('Sharing failed — please try again');
-    } finally {
-      if (btn) btn.disabled = false;
-    }
+    openSharePopover(btn, storyId);
   }
 
   // Click delegation — capture phase, mirror to bookmark pattern
