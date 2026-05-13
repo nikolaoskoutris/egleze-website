@@ -303,11 +303,11 @@ header{position:relative}
 .bc-play-btn::after{content:"";border-style:solid;border-width:14px 0 14px 22px;border-color:transparent transparent transparent #fff;margin-left:5px}
 
 /* Lower third overlay during playback */
-.bc-lower-third{position:absolute;left:24px;bottom:54px;max-width:62%;display:flex;flex-direction:column;z-index:4;pointer-events:none;opacity:0;transition:opacity .25s}
+.bc-lower-third{position:absolute;left:24px;bottom:54px;max-width:62%;display:flex;flex-direction:column;align-items:flex-start;gap:4px;z-index:4;pointer-events:none;opacity:0;transition:opacity .25s}
 .bc-lower-third.show{opacity:1}
-.bc-lower-third .lt-stripe{display:inline-block;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;width:fit-content;font-weight:700}
-.bc-lower-third .lt-headline{background:rgba(20,12,8,.92);color:#fff;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.2;padding:9px 14px;max-width:100%;border-left:3px solid var(--red);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.bc-lower-third .lt-meta{background:rgba(20,12,8,.78);color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;padding:4px 14px;text-transform:uppercase}
+.bc-lower-third .lt-stripe{align-self:flex-start;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;font-weight:700;margin:0}
+.bc-lower-third .lt-headline{background:rgba(20,12,8,.92);color:#fff;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.2;padding:9px 14px;max-width:100%;border-left:3px solid var(--red);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0}
+.bc-lower-third .lt-meta{background:rgba(20,12,8,.78);color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;padding:4px 14px;text-transform:uppercase;margin:0}
 
 /* Bottom progress overlay */
 .bc-progress-row{position:absolute;left:0;right:0;bottom:0;height:34px;display:flex;align-items:center;gap:12px;padding:0 18px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.85) 100%);z-index:5;pointer-events:none}
