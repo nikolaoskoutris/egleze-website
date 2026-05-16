@@ -3,6 +3,8 @@
 // Vercel rewrite: /sitemap.xml -> /api/sitemap
 // Add ?debug=1 to URL for diagnostic JSON output instead of XML
 
+import { createRequire } from 'module';
+
 export const config = {
   runtime: 'nodejs'
 };
@@ -18,6 +20,26 @@ const TOPICS = [
   'military', 'money', 'monologues', 'politics', 'psychology',
   'relationships-family', 'science', 'society', 'sports', 'ufo-paranormal'
 ];
+
+// Only topics flagged hasStories=true in scripts/topic-data.json are
+// indexable; their pages carry index,follow. The other ~14 carry noindex,
+// so they must NOT appear in the sitemap (avoids 'Submitted URL marked
+// noindex' in Search Console). Sourced from the SAME file the build uses
+// so this can never drift from the deployed pages. Falls back to the full
+// list if the file can't be loaded — the sitemap never breaks.
+const require = createRequire(import.meta.url);
+let INDEXABLE_TOPICS = TOPICS;
+try {
+  const topicData = require('../scripts/topic-data.json');
+  if (topicData && Array.isArray(topicData.topics)) {
+    const idx = topicData.topics
+      .filter(t => t && t.hasStories && t.slug)
+      .map(t => t.slug);
+    if (idx.length > 0) INDEXABLE_TOPICS = idx;
+  }
+} catch (e) {
+  // keep INDEXABLE_TOPICS = TOPICS (current behavior) — never break sitemap
+}
 
 function slugify(s) {
   return String(s || '')
@@ -87,7 +109,7 @@ export default async function handler(req, res) {
   urls.push(urlBlock('https://egleze.com/shorts.html', today, 'hourly', '0.7'));
   urls.push(urlBlock('https://egleze.com/legal.html', today, 'monthly', '0.3'));
 
-  for (const topic of TOPICS) {
+  for (const topic of INDEXABLE_TOPICS) {
     urls.push(urlBlock(`https://egleze.com/topic/${topic}`, today, 'daily', '0.6'));
   }
 
@@ -128,7 +150,9 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json({
       total_urls: urls.length,
-      static_count: 4 + TOPICS.length,
+      static_count: 4 + INDEXABLE_TOPICS.length,
+      indexable_topics: INDEXABLE_TOPICS.length,
+      all_topics: TOPICS.length,
       shows_count: showsResult.data.length,
       stories_count: storiesResult.data.length,
       errors: errors,
