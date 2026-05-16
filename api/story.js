@@ -171,6 +171,16 @@ function renderStoryHtml(story, artworkUrl) {
   ].filter(Boolean).join('&');
   const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?${videoParams}` : null;
   const posterUrl = videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : null;
+  const videoObjectLd = videoId ? `\n  <script type="application/ld+json">${JSON.stringify({
+    "@context":"https://schema.org","@type":"VideoObject",
+    "name": title,
+    "description": description,
+    "thumbnailUrl": ["https://i.ytimg.com/vi/" + videoId + "/maxresdefault.jpg"],
+    "uploadDate": datePublished,
+    "contentUrl": "https://www.youtube.com/watch?v=" + videoId,
+    "embedUrl": "https://www.youtube.com/embed/" + videoId,
+    "publisher": {"@type":"NewsMediaOrganization","name":"Egleze","url":"https://egleze.com"}
+  })}</script>` : '';
   const videoHtml = embedUrl
     ? `<div class="video-block">
          <div class="video-wrap" id="video-wrap" data-embed="${escapeHtml(embedUrl)}">
@@ -191,8 +201,26 @@ function renderStoryHtml(story, artworkUrl) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} — Egleze</title>
+  <!-- Consent-gated analytics: no GA network call until consent (shared egleze_cookie) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
+    gtag('js', new Date());
+    window.EGLEZE_GA_ID='G-18MJKYD86Y';
+    window.eglezeLoadAnalytics=function(){
+      if(window.__eglezeGALoaded)return; window.__eglezeGALoaded=true;
+      gtag('consent','update',{'analytics_storage':'granted'});
+      var s=document.createElement('script');s.async=true;
+      s.src='https://www.googletagmanager.com/gtag/js?id='+window.EGLEZE_GA_ID;
+      document.head.appendChild(s);
+      gtag('config',window.EGLEZE_GA_ID,{'anonymize_ip':true});
+    };
+    try{ if(localStorage.getItem('egleze_cookie')==='accepted') window.eglezeLoadAnalytics(); }catch(e){}
+  </script>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonicalUrl}">
+  <meta name="google-site-verification" content="rNxDHlJLJlcENKY5EyvvYSllFud6qDhckUJMbPfKDHo">
 
   <!-- Open Graph -->
   <meta property="og:type" content="article">
@@ -206,13 +234,13 @@ function renderStoryHtml(story, artworkUrl) {
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@egleze">
+  <meta name="twitter:site" content="@egleze_news">
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
   <meta name="twitter:image" content="${escapeHtml(ogImage)}">
 
   <!-- JSON-LD -->
-  <script type="application/ld+json">${JSON.stringify(schema)}</script>
+  <script type="application/ld+json">${JSON.stringify(schema)}</script>${videoObjectLd}
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -324,7 +352,7 @@ function renderStoryHtml(story, artworkUrl) {
     </div>
   </main>
   <footer class="footer">
-    <a href="/">Egleze</a> &nbsp;·&nbsp; The Podcast Intelligence Network
+    <a href="/">Egleze</a> &nbsp;·&nbsp; The most important moments from independent podcasts, surfaced daily
   </footer>
   <script>
     // Click-to-play: replace poster with iframe on click
