@@ -43,7 +43,7 @@
 <meta name="description" content="The biggest sports stories, athlete interviews, and locker-room insights from leading sports podcasts.">
 <meta name="keywords" content="Sports podcasts, Sports podcast news, podcast intelligence, podcast highlights, podcast clips">
 <meta name="author" content="Egleze Limited">
-<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="robots" content="noindex, follow">
 <link rel="canonical" href="https://egleze.com/topic/sports">
 <meta name="google-site-verification" content="rNxDHlJLJlcENKY5EyvvYSllFud6qDhckUJMbPfKDHo">
 
@@ -339,8 +339,8 @@ header{position:relative}
   .broadcast{margin:0 max(-28px, calc((100vw - 1284px) / -2 - 28px)) 28px}
 }
 .bc-player{position:relative;background:#000;aspect-ratio:16/9;overflow:hidden}
-.bc-player .bc-yt-host{position:absolute;inset:0;background:#000}
-.bc-player .bc-yt-host iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.bc-player .bc-yt-host{position:absolute;inset:0;background:#000;z-index:1}
+.bc-player .bc-yt-host iframe{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1}
 .bc-player .bc-poster{position:absolute;inset:0;background:linear-gradient(135deg,#0d0d0d 0%,#1f1612 50%,#1a0e0e 100%);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
 .bc-player .bc-poster.gone{display:none}
 .bc-player .bc-poster::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center bottom,rgba(187,25,25,.18) 0%,transparent 60%);pointer-events:none}
@@ -3871,7 +3871,7 @@ async function bannerSubscribe() {
 .bc-qi-bookmark.is-saved { color: #bb1919; }
 
 /* Broadcast player bookmark — bottom-right overlay (above progress row) */
-.bc-player-bookmark { position: absolute; bottom: 46px; right: 14px; z-index: 10; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-bookmark { position: absolute; bottom: 46px; right: 14px; z-index: 20; pointer-events: auto; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .bc-player-bookmark:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
 .bc-player-bookmark.is-saved { background: #bb1919; color: #fff; border-color: #bb1919; }
 .bc-player-bookmark.is-saved svg path { fill: currentColor; stroke: currentColor; }
@@ -3903,7 +3903,7 @@ async function bannerSubscribe() {
 .bc-qi-share:hover { background: rgba(187,25,25,0.18); color: #bb1919; }
 
 /* Broadcast player share — bottom-right, to the LEFT of the bookmark */
-.bc-player-share { position: absolute; bottom: 46px; right: 60px; z-index: 10; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-share { position: absolute; bottom: 46px; right: 60px; z-index: 20; pointer-events: auto; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .bc-player-share:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
 
 /* Clip modal share — sits LEFT of the bookmark */
@@ -4756,6 +4756,5 @@ async function bannerSubscribe() {
   }
 })();
 </script>
-
 </body>
 </html>
