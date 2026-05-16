@@ -4,6 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Egleze — Legal & Editorial Framework</title>
+<!-- Consent-gated analytics: no GA network call until consent (shared egleze_cookie) -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
+  gtag('js', new Date());
+  window.EGLEZE_GA_ID='G-18MJKYD86Y';
+  window.eglezeLoadAnalytics=function(){
+    if(window.__eglezeGALoaded)return; window.__eglezeGALoaded=true;
+    gtag('consent','update',{'analytics_storage':'granted'});
+    var s=document.createElement('script');s.async=true;
+    s.src='https://www.googletagmanager.com/gtag/js?id='+window.EGLEZE_GA_ID;
+    document.head.appendChild(s);
+    gtag('config',window.EGLEZE_GA_ID,{'anonymize_ip':true});
+  };
+  try{ if(localStorage.getItem('egleze_cookie')==='accepted') window.eglezeLoadAnalytics(); }catch(e){}
+</script>
+<meta name="description" content="Egleze's editorial and fair-use framework, DMCA takedown policy, and GDPR/CCPA privacy and cookie policies. Egleze Limited — a registered Irish digital news agency.">
+<meta name="google-site-verification" content="rNxDHlJLJlcENKY5EyvvYSllFud6qDhckUJMbPfKDHo">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -60,7 +81,7 @@ a:hover{text-decoration:underline}
 
 /* ── FOOTER ── */
 .legal-footer{background:var(--light);border-top:1px solid var(--border);padding:40px;text-align:center;margin-top:80px}
-.footer-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--dark);margin-bottom:8px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;letter-spacing:-0.5px;color:var(--dark);margin-bottom:8px}
 .footer-logo span{color:var(--red)}
 .footer-links{display:flex;gap:20px;justify-content:center;margin:16px 0}
 .footer-links a{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none}
@@ -123,7 +144,7 @@ a:hover{text-decoration:underline}
   </div>
 
   <h2>1. Who We Are</h2>
-  <p>Egleze Limited is a digital news agency and information service provider, incorporated in Dublin, Ireland (registered under NACE code 6391 — News Agency Activities). We operate egleze.com — the Podcast Intelligence Network — a platform dedicated to news reporting, commentary and synthesis of long-form public discourse.</p>
+  <p>Egleze Limited is a digital news agency and information service provider, incorporated in Dublin, Ireland (registered under NACE code 6391 — News Agency Activities). We operate egleze.com, which surfaces the most important moments from independent podcasts — a platform dedicated to news reporting, commentary and synthesis of long-form public discourse.</p>
   <p>We provide a newsroom service for the creator economy: identifying, contextualising and reporting on the most important revelations, announcements and moments from the world's leading podcasts.</p>
 
   <h2>2. Journalistic Purpose</h2>
@@ -165,8 +186,7 @@ a:hover{text-decoration:underline}
   <div class="contact-box">
     <h3>DMCA Registered Agent &amp; Contact</h3>
     <p>Egleze Limited<br>
-    c/o Company Formations International<br>
-    22 Northumberland Road, Ballsbridge, Dublin 4, Ireland<br>
+    Venture Hub, 136 Capel Street, Dublin 1, Ireland<br>
     Email: <a href="mailto:hello@egleze.com">hello@egleze.com</a></p>
   </div>
 
@@ -205,7 +225,7 @@ a:hover{text-decoration:underline}
   <p>The controller of your personal data is:</p>
   <p><strong>Egleze Limited</strong><br>
   Registered in Ireland under the Companies Act 2014<br>
-  Registered Office: c/o Company Formations International, 22 Northumberland Road, Ballsbridge, Dublin 4, Ireland<br>
+  Registered Office: Venture Hub, 136 Capel Street, Dublin 1, Ireland<br>
   Contact: <a href="mailto:hello@egleze.com">hello@egleze.com</a></p>
 
   <h2>2. What Data We Collect</h2>
@@ -298,7 +318,7 @@ a:hover{text-decoration:underline}
     <p>For all privacy-related enquiries:<br>
     <a href="mailto:hello@egleze.com">hello@egleze.com</a><br><br>
     Egleze Limited<br>
-    22 Northumberland Road, Ballsbridge, Dublin 4, Ireland</p>
+    Venture Hub, 136 Capel Street, Dublin 1, Ireland</p>
   </div>
 </div>
 
@@ -330,7 +350,7 @@ a:hover{text-decoration:underline}
       <th style="padding:10px;text-align:left;border:1px solid var(--border)">Duration</th>
     </tr>
     <tr>
-      <td style="padding:10px;border:1px solid var(--border)">egleze_cookie_consent</td>
+      <td style="padding:10px;border:1px solid var(--border)">egleze_cookie</td>
       <td style="padding:10px;border:1px solid var(--border)">Stores your cookie preference</td>
       <td style="padding:10px;border:1px solid var(--border)">1 year</td>
     </tr>
@@ -380,14 +400,14 @@ a:hover{text-decoration:underline}
 <!-- FOOTER -->
 <!-- ══════════════════════════════════════════════════════════ -->
 <footer class="legal-footer">
-  <div class="footer-logo"><span>E</span>GLEZE</div>
+  <div class="footer-logo"><span>E</span>gleze</div>
   <div class="footer-links">
     <a href="#" onclick="showPage('editorial')">Editorial Notice</a>
     <a href="#" onclick="showPage('privacy')">Privacy Policy</a>
     <a href="#" onclick="showPage('cookie')">Cookie Policy</a>
     <a href="mailto:hello@egleze.com">hello@egleze.com</a>
   </div>
-  <p class="footer-copy">© 2026 Egleze Limited · Registered in Ireland · 22 Northumberland Road, Ballsbridge, Dublin 4</p>
+  <p class="footer-copy">© 2026 Egleze Limited · Registered in Ireland · Venture Hub, 136 Capel Street, Dublin 1</p>
 </footer>
 
 <script>
@@ -404,19 +424,21 @@ function showPage(page) {
 
 // ── COOKIE CONSENT ────────────────────────────────────────────
 function acceptCookies() {
-  localStorage.setItem('egleze_cookie_consent', 'accepted');
+  localStorage.setItem('egleze_cookie', 'accepted');
   document.getElementById('cookie-banner').style.display = 'none';
+  if (window.eglezeLoadAnalytics) window.eglezeLoadAnalytics();
 }
 
 function rejectCookies() {
-  localStorage.setItem('egleze_cookie_consent', 'rejected');
+  localStorage.setItem('egleze_cookie', 'rejected');
   document.getElementById('cookie-banner').style.display = 'none';
 }
 
 // Hide banner if already decided
 window.addEventListener('load', function() {
-  const consent = localStorage.getItem('egleze_cookie_consent');
+  const consent = localStorage.getItem('egleze_cookie');
   if (consent) document.getElementById('cookie-banner').style.display = 'none';
+  if (consent === 'accepted' && window.eglezeLoadAnalytics) window.eglezeLoadAnalytics();
 
   // Check URL hash for direct page links
   const hash = window.location.hash.replace('#','');
