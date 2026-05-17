@@ -27,6 +27,14 @@
     {
       "source": "/shows/:slug/",
       "destination": "/show.html?slug=:slug"
+    },
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/about/",
+      "destination": "/about.html"
     }
   ],
   "redirects": [
