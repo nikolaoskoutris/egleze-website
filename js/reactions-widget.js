@@ -21,8 +21,9 @@
     { k: 'validates', l: 'Validates what I knew', c: '#378add' }
   ];
   var LV = ['', 'Slightly', 'Somewhat', 'Moderately', 'Strongly', 'Intensely'];
-  var HOLD_MS = 1500;          // full sweep; 300ms/level
-  var TAP_MAX_MS = 180;        // shorter than this with no movement = tap => level 3
+  var TAP_MAX_MS = 200;        // <= this, instant tap => level 3 (accessibility fallback)
+  var STEP_MS = 420;           // each held level lasts this long (1..5)
+  var HOLD_MS = STEP_MS * 5;   // full sweep to level 5
   var TAP_LEVEL = 3;
   var CIRC = 2 * Math.PI * 15;
 
@@ -104,9 +105,10 @@
       }
       function tick() {
         var held = Date.now() - holdStart;
-        var lvl = Math.min(5, Math.max(1, Math.ceil(held / (HOLD_MS / 5))));
+        var afterTap = held - TAP_MAX_MS;
+        var lvl = afterTap <= 0 ? 1 : Math.min(5, Math.floor(afterTap / STEP_MS) + 1);
         if (lvl !== lastSnap) { lastSnap = lvl; paint(lvl); }
-        if (held < HOLD_MS) raf = requestAnimationFrame(tick);
+        if (held < TAP_MAX_MS + HOLD_MS) raf = requestAnimationFrame(tick);
       }
       function down(e) {
         e.preventDefault(); e.stopPropagation();
@@ -118,8 +120,12 @@
         cancelAnimationFrame(raf);
         var held = Date.now() - holdStart; holdStart = 0;
         var lvl;
-        if (held <= TAP_MAX_MS) lvl = TAP_LEVEL;            // tap fallback => 3
-        else lvl = Math.min(5, Math.max(1, Math.ceil(held / (HOLD_MS / 5))));
+        if (held <= TAP_MAX_MS) {
+          lvl = TAP_LEVEL;                       // instant tap => 3 (fallback)
+        } else {
+          var afterTap = held - TAP_MAX_MS;
+          lvl = afterTap <= 0 ? 1 : Math.min(5, Math.floor(afterTap / STEP_MS) + 1);
+        }
         paint(lvl);
         window.egleze.reactions.setForStory(storyId, r.k, lvl);
       }
@@ -143,10 +149,10 @@
       });
       if (willOpen) {
         var rect = trig.getBoundingClientRect();
-        var spaceAbove = rect.top;
         var spaceBelow = window.innerHeight - rect.bottom;
-        // open upward only if there's clearly more room above; else downward
-        if (spaceAbove > spaceBelow) pop.classList.add('up');
+        // DOWNWARD by default (room almost always exists below); only
+        // flip upward if there is genuinely not enough room below.
+        if (spaceBelow < 300 && rect.top > spaceBelow) pop.classList.add('up');
         else pop.classList.add('down');
         pop.classList.add('open');
         window.egleze.reactions.refreshTotals(storyId);
