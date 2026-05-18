@@ -31,9 +31,11 @@
    + '.egr-trigger{display:inline-flex;align-items:center;background:none;border:none;cursor:pointer;padding:0;color:#888780;line-height:1;font:inherit}'
    + '.egr-trigger:hover{color:#bb1919}.egr-trigger.has{color:#bb1919}'
    + '.egr-ct{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;margin-left:4px;letter-spacing:.5px}'
-   + '.egr-pop{position:absolute;bottom:140%;right:0;width:262px;background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;z-index:9000;display:none}'
+   + '.egr-pop{position:absolute;right:0;width:262px;background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;z-index:9000;display:none;max-height:min(74vh,420px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
    + '.egr-pop.open{display:block}'
-   + '.egr-pop::after{content:"";position:absolute;bottom:-6px;right:16px;width:11px;height:11px;background:#fff;border-right:.5px solid #e0e0da;border-bottom:.5px solid #e0e0da;transform:rotate(45deg)}'
+   + '.egr-pop.up{bottom:140%}.egr-pop.down{top:140%}'
+   + '.egr-pop.up::after{content:"";position:absolute;bottom:-6px;right:16px;width:11px;height:11px;background:#fff;border-right:.5px solid #e0e0da;border-bottom:.5px solid #e0e0da;transform:rotate(45deg)}'
+   + '.egr-pop.down::after{content:"";position:absolute;top:-6px;right:16px;width:11px;height:11px;background:#fff;border-left:.5px solid #e0e0da;border-top:.5px solid #e0e0da;transform:rotate(45deg)}'
    + '.egr-h{font-family:"Roboto Condensed",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;padding:4px 8px 6px}'
    + '.egr-hs{font-size:10px;color:#888;padding:0 8px 8px;border-bottom:.5px solid #f1efe8;margin-bottom:6px}'
    + '.egr-row{display:flex;align-items:center;gap:12px;padding:7px 8px;border-radius:3px;cursor:pointer;transition:background .12s;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}'
@@ -136,15 +138,23 @@
     trig.addEventListener('click', function (e) {
       e.stopPropagation();
       var willOpen = !pop.classList.contains('open');
-      document.querySelectorAll('.egr-pop.open').forEach(function (p) { p.classList.remove('open'); });
+      document.querySelectorAll('.egr-pop.open').forEach(function (p) {
+        p.classList.remove('open'); p.classList.remove('up'); p.classList.remove('down');
+      });
       if (willOpen) {
+        var rect = trig.getBoundingClientRect();
+        var spaceAbove = rect.top;
+        var spaceBelow = window.innerHeight - rect.bottom;
+        // open upward only if there's clearly more room above; else downward
+        if (spaceAbove > spaceBelow) pop.classList.add('up');
+        else pop.classList.add('down');
         pop.classList.add('open');
         window.egleze.reactions.refreshTotals(storyId);
         if (window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(storyId);
       }
     });
     pop.addEventListener('click', function (e) { e.stopPropagation(); });
-    document.addEventListener('click', function () { pop.classList.remove('open'); });
+    document.addEventListener('click', function () { pop.classList.remove('open'); pop.classList.remove('up'); pop.classList.remove('down'); });
 
     function render() {
       var totals = window.egleze.reactions.getTotals(storyId) || [];
