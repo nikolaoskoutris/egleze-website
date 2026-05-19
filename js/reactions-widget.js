@@ -32,11 +32,11 @@
    + '.egr-trigger{display:inline-flex;align-items:center;background:none;border:none;cursor:pointer;padding:0;color:#888780;line-height:1;font:inherit}'
    + '.egr-trigger:hover{color:#bb1919}.egr-trigger.has{color:#bb1919}'
    + '.egr-ct{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;margin-left:4px;letter-spacing:.5px}'
-   + '.egr-pop{position:absolute;right:0;width:284px;background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;z-index:9000;display:none;max-height:min(74vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
+   + '.egr-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:99998;display:none;opacity:0;transition:opacity .2s ease}'
+   + '.egr-backdrop.open{display:block;opacity:1}'
+   + '.egr-pop{position:fixed;width:284px;max-width:calc(100vw - 24px);background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 34px rgba(0,0,0,.20);padding:8px;z-index:99999;display:none;max-height:min(74vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
    + '.egr-pop.open{display:block}'
-   + '.egr-pop.up{bottom:140%}.egr-pop.down{top:140%}'
-   + '.egr-pop.up::after{content:"";position:absolute;bottom:-6px;right:16px;width:11px;height:11px;background:#fff;border-right:.5px solid #e0e0da;border-bottom:.5px solid #e0e0da;transform:rotate(45deg)}'
-   + '.egr-pop.down::after{content:"";position:absolute;top:-6px;right:16px;width:11px;height:11px;background:#fff;border-left:.5px solid #e0e0da;border-top:.5px solid #e0e0da;transform:rotate(45deg)}'
+   + '@media (max-width:760px){.egr-pop{left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;max-width:100%!important;border-radius:14px 14px 0 0;max-height:80vh;padding:8px 8px calc(8px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .26s cubic-bezier(.22,1,.36,1);box-shadow:0 -8px 30px rgba(0,0,0,.22)}.egr-pop.open{transform:translateY(0)}.egr-pop::before{content:"";display:block;width:38px;height:4px;border-radius:3px;background:#d8d4ca;margin:2px auto 8px}}'
    + '.egr-h{font-family:"Roboto Condensed",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;padding:4px 8px 6px}'
    + '.egr-hs{font-size:10px;color:#888;padding:0 8px 8px;border-bottom:.5px solid #f1efe8;margin-bottom:6px}'
    + '.egr-row{padding:8px;border-radius:3px;transition:background .12s}'
@@ -73,12 +73,15 @@
     trig.className = 'egr-trigger'; trig.type = 'button';
     trig.setAttribute('aria-label', 'React to this story');
     trig.innerHTML = HAND + '<span class="egr-ct" data-egr-ct></span>';
+    var backdrop = document.createElement('div'); backdrop.className = 'egr-backdrop';
     var pop = document.createElement('div'); pop.className = 'egr-pop';
     pop.innerHTML = '<div class="egr-h">How did this land?</div>'
       + '<div class="egr-hs">Tap the circle for a quick moderate, or pick an exact strength 1\u20135. React to as many or as few as you like.</div>'
       + '<div data-egr-list></div>'
       + '<div class="egr-foot">Private. Everyone sees totals \u2014 no one, including us, sees it was you.</div>';
     wrap.appendChild(trig); wrap.appendChild(pop); host.appendChild(wrap);
+    document.body.appendChild(backdrop);
+    function isMobile() { return window.matchMedia('(max-width:760px)').matches; }
 
     var listEl = pop.querySelector('[data-egr-list]');
     var ctEl = trig.querySelector('[data-egr-ct]');
@@ -153,6 +156,43 @@
       });
     });
 
+    function positionPop() {
+      if (isMobile()) { pop.style.left=''; pop.style.top=''; return; }
+      var r = trig.getBoundingClientRect();
+      var vw = window.innerWidth, vh = window.innerHeight, M = 8;
+      // measure panel
+      pop.style.left = '0px'; pop.style.top = '0px';
+      var pw = pop.offsetWidth || 284, ph = pop.offsetHeight || 320;
+      // horizontal: align panel's right edge to the trigger's right edge,
+      // clamp into viewport
+      var left = r.right - pw;
+      if (left < M) left = M;
+      if (left + pw > vw - M) left = vw - M - pw;
+      // vertical: prefer below the trigger; flip above if not enough room
+      var spaceBelow = vh - r.bottom, spaceAbove = r.top;
+      var top;
+      if (spaceBelow >= ph + M || spaceBelow >= spaceAbove) {
+        top = r.bottom + 6;
+        if (top + ph > vh - M) top = Math.max(M, vh - M - ph);
+      } else {
+        top = r.top - 6 - ph;
+        if (top < M) top = M;
+      }
+      pop.style.left = Math.round(left) + 'px';
+      pop.style.top = Math.round(top) + 'px';
+    }
+    // a fixed panel won't follow the button on scroll; close instead (clean).
+    function closePop() {
+      pop.classList.remove('open'); backdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function closeOnMove() {
+      if (!isMobile() && pop.classList.contains('open')) closePop();
+    }
+    window.addEventListener('scroll', closeOnMove, true);
+    window.addEventListener('resize', closeOnMove);
+    backdrop.addEventListener('click', closePop);
+
     trig.addEventListener('click', function (e) {
       e.stopPropagation();
       var willOpen = !pop.classList.contains('open');
@@ -160,18 +200,19 @@
         p.classList.remove('open'); p.classList.remove('up'); p.classList.remove('down');
       });
       if (willOpen) {
-        var rect = trig.getBoundingClientRect();
-        var spaceBelow = window.innerHeight - rect.bottom;
-        if (spaceBelow < 320 && rect.top > spaceBelow) pop.classList.add('up');
-        else pop.classList.add('down');
+        if (isMobile()) {
+          backdrop.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        }
         pop.classList.add('open');
+        positionPop();
         window.egleze.reactions.refreshTotals(storyId);
         if (window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(storyId);
       }
     });
     pop.addEventListener('click', function (e) { e.stopPropagation(); });
     document.addEventListener('click', function () {
-      pop.classList.remove('open'); pop.classList.remove('up'); pop.classList.remove('down');
+      if (pop.classList.contains('open')) closePop();
     });
 
     function render() {
