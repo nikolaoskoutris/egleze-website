@@ -1,15 +1,14 @@
-// /js/reactions-widget.js — Egleze reaction UI (tap-to-select)
+// /js/reactions-widget.js — Egleze reaction UI (FINAL interaction model)
 // Renders into any element with data-reactions-for="<storyId>".
-// Wires to window.egleze.reactions (data layer). Load AFTER auth.js + reactions.js.
+// Wires to window.egleze.reactions. Load AFTER auth.js + reactions.js.
 //
-// Interaction (LOCKED — Option 2, tap-to-select for data accuracy):
-//  - Open the hand -> panel with 5 reactions.
-//  - Each reaction has 5 tappable level segments (1..5).
-//  - Tap a segment        -> sets that exact intensity (saved immediately).
-//  - Tap the reaction LABEL (not a segment) -> sets level 3 (locked tap=3 default).
-//  - Tap the currently-selected segment again -> clears that reaction.
-//  - Ring fills to chosen level for visual feedback. Single red. Stores 1..5 only.
-//  - Logged-out -> reactions.js opens the existing sign-in modal.
+// LOCKED model:
+//  - Everything starts EMPTY. 5 independent reactions; any subset allowed.
+//  - Untouched reaction => NO db row (silence is not a weak reaction).
+//  - Circle/ring = FAST toggle: empty -> 3 -> empty.
+//  - Numbers 1..5 = PRECISE set; tap the active number again => clear to empty.
+//  - Last tap wins. Ring fills to chosen level (visual). Single red. Stores 1..5.
+//  - Logged-out => reactions.js opens the existing sign-in modal.
 
 (function () {
   if (!window.egleze || !window.egleze.reactions) {
@@ -25,7 +24,7 @@
     { k: 'validates', l: 'Validates what I knew', c: '#378add' }
   ];
   var LV = ['', 'Slightly', 'Somewhat', 'Moderately', 'Strongly', 'Intensely'];
-  var TAP_LEVEL = 3;            // tapping the row label (not a segment) => 3 (locked)
+  var FAST_LEVEL = 3;          // circle tap on empty => 3 (deliberate "moderate")
   var CIRC = 2 * Math.PI * 15;
 
   var css = ''
@@ -33,7 +32,7 @@
    + '.egr-trigger{display:inline-flex;align-items:center;background:none;border:none;cursor:pointer;padding:0;color:#888780;line-height:1;font:inherit}'
    + '.egr-trigger:hover{color:#bb1919}.egr-trigger.has{color:#bb1919}'
    + '.egr-ct{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;margin-left:4px;letter-spacing:.5px}'
-   + '.egr-pop{position:absolute;right:0;width:280px;background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;z-index:9000;display:none;max-height:min(74vh,440px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
+   + '.egr-pop{position:absolute;right:0;width:284px;background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;z-index:9000;display:none;max-height:min(74vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
    + '.egr-pop.open{display:block}'
    + '.egr-pop.up{bottom:140%}.egr-pop.down{top:140%}'
    + '.egr-pop.up::after{content:"";position:absolute;bottom:-6px;right:16px;width:11px;height:11px;background:#fff;border-right:.5px solid #e0e0da;border-bottom:.5px solid #e0e0da;transform:rotate(45deg)}'
@@ -43,13 +42,13 @@
    + '.egr-row{padding:8px;border-radius:3px;transition:background .12s}'
    + '.egr-row:hover{background:#faf8f3}.egr-row.set{background:#fbeeee}'
    + '.egr-top{display:flex;align-items:center;gap:11px}'
-   + '.egr-ring{position:relative;width:34px;height:34px;flex-shrink:0}'
+   + '.egr-ring{position:relative;width:34px;height:34px;flex-shrink:0;cursor:pointer}'
    + '.egr-ring svg{transform:rotate(-90deg);display:block}'
    + '.egr-ring .bg{stroke:#eceae2}'
    + '.egr-ring .fg{stroke:#bb1919;stroke-linecap:round;transition:stroke-dashoffset .18s ease}'
-   + '.egr-ring .ctr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;color:#888}'
+   + '.egr-ring .ctr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;color:#bbb}'
    + '.egr-row.set .egr-ring .ctr{color:#bb1919}'
-   + '.egr-info{flex:1;min-width:0;cursor:pointer}'
+   + '.egr-info{flex:1;min-width:0}'
    + '.egr-lab{font-size:13px;color:#111;font-weight:500;display:flex;align-items:center;gap:8px}'
    + '.egr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}'
    + '.egr-meta{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;letter-spacing:.5px;margin-top:2px}'
@@ -76,7 +75,7 @@
     trig.innerHTML = HAND + '<span class="egr-ct" data-egr-ct></span>';
     var pop = document.createElement('div'); pop.className = 'egr-pop';
     pop.innerHTML = '<div class="egr-h">How did this land?</div>'
-      + '<div class="egr-hs">Tap a reaction for moderate, or pick an exact strength 1\u20135.</div>'
+      + '<div class="egr-hs">Tap the circle for a quick moderate, or pick an exact strength 1\u20135. React to as many or as few as you like.</div>'
       + '<div data-egr-list></div>'
       + '<div class="egr-foot">Private. Everyone sees totals \u2014 no one, including us, sees it was you.</div>';
     wrap.appendChild(trig); wrap.appendChild(pop); host.appendChild(wrap);
@@ -93,13 +92,14 @@
       }
       row.innerHTML =
         '<div class="egr-top">'
-        + '<div class="egr-ring"><svg width="34" height="34" viewBox="0 0 34 34">'
+        + '<div class="egr-ring" data-egr-circle role="button" tabindex="0" aria-label="Quick moderate reaction">'
+        + '<svg width="34" height="34" viewBox="0 0 34 34">'
         + '<circle class="bg" cx="17" cy="17" r="15" fill="none" stroke-width="3"/>'
         + '<circle class="fg" cx="17" cy="17" r="15" fill="none" stroke-width="3" '
         + 'stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '"/></svg>'
         + '<div class="ctr">' + HAND_S + '</div></div>'
-        + '<div class="egr-info" data-egr-label><div class="egr-lab"><span class="egr-dot" style="background:' + r.c + '"></span>' + r.l + '</div>'
-        + '<div class="egr-meta" data-egr-meta>Tap = moderate \u00b7 or pick 1\u20135</div></div>'
+        + '<div class="egr-info"><div class="egr-lab"><span class="egr-dot" style="background:' + r.c + '"></span>' + r.l + '</div>'
+        + '<div class="egr-meta" data-egr-meta>Circle = quick \u00b7 numbers = exact</div></div>'
         + '<div class="egr-cnt" data-egr-cnt>\u00b7</div>'
         + '</div>'
         + '<div class="egr-seg">' + segs + '</div>';
@@ -108,13 +108,16 @@
       var fg = row.querySelector('.fg'),
           ctr = row.querySelector('.ctr'),
           meta = row.querySelector('[data-egr-meta]'),
+          circle = row.querySelector('[data-egr-circle]'),
           segBtns = row.querySelectorAll('[data-egr-lvl]');
 
       function paint(level) {
         fg.setAttribute('stroke-dashoffset', CIRC * (1 - level / 5));
         if (level > 0) { ctr.textContent = level; }
         else { ctr.innerHTML = HAND_S; }
-        meta.textContent = level > 0 ? (level + ' \u00b7 ' + LV[level]) : 'Tap = moderate \u00b7 or pick 1\u20135';
+        meta.textContent = level > 0
+          ? (level + ' \u00b7 ' + LV[level])
+          : 'Circle = quick \u00b7 numbers = exact';
         row.classList.toggle('set', level > 0);
         segBtns.forEach(function (b) {
           b.classList.toggle('on', parseInt(b.getAttribute('data-egr-lvl'), 10) === level);
@@ -125,30 +128,28 @@
         var mine = window.egleze.reactions.getMine(storyId) || {};
         return mine[r.k] || 0;
       }
+      function setLevel(lvl) {
+        paint(lvl);
+        window.egleze.reactions.setForStory(storyId, r.k, lvl); // 0 => delete row
+      }
 
+      // CIRCLE: empty -> 3 ; anything set -> empty
+      function circleTap(e) {
+        e.preventDefault(); e.stopPropagation();
+        setLevel(current() > 0 ? 0 : FAST_LEVEL);
+      }
+      circle.addEventListener('click', circleTap);
+      circle.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') circleTap(e);
+      });
+
+      // NUMBERS: set exact level; tapping the active level again clears
       segBtns.forEach(function (b) {
         b.addEventListener('click', function (e) {
           e.stopPropagation();
           var lvl = parseInt(b.getAttribute('data-egr-lvl'), 10);
-          if (current() === lvl) {
-            paint(0);
-            window.egleze.reactions.setForStory(storyId, r.k, 0);
-          } else {
-            paint(lvl);
-            window.egleze.reactions.setForStory(storyId, r.k, lvl);
-          }
+          setLevel(current() === lvl ? 0 : lvl);
         });
-      });
-
-      row.querySelector('[data-egr-label]').addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (current() === TAP_LEVEL) {
-          paint(0);
-          window.egleze.reactions.setForStory(storyId, r.k, 0);
-        } else {
-          paint(TAP_LEVEL);
-          window.egleze.reactions.setForStory(storyId, r.k, TAP_LEVEL);
-        }
       });
     });
 
@@ -197,7 +198,7 @@
           row.classList.add('set');
         } else {
           ctr.innerHTML = HAND_S;
-          meta.textContent = 'Tap = moderate \u00b7 or pick 1\u20135';
+          meta.textContent = 'Circle = quick \u00b7 numbers = exact';
           row.classList.remove('set');
         }
         segBtns.forEach(function (b) {
