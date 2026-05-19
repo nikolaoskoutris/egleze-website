@@ -1591,9 +1591,11 @@ function paintReveals() {
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
           '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
           '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
+          '<span class="rc-react" data-reactions-for="' + s.id + '"></span>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
+    if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
   });
   console.log('[reveals] painted ' + pageStories.length + ' cards · artwork hits=' + _artHits + ' misses=' + _artMisses);
 
@@ -1846,9 +1848,11 @@ function paintCarousel(state) {
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
           '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
           '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
+          '<span class="rc-react" data-reactions-for="' + s.id + '"></span>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
+    if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
   });
 
   // Dots
@@ -3716,6 +3720,8 @@ async function bannerSubscribe() {
 
 <!-- ── EGLEZE AUTH (Phase 1, Round 3: Sign-in button + chip + modal) ─── -->
 <script src="/js/auth.js"></script>
+<script src="/js/reactions.js"></script>
+<script src="/js/reactions-widget.js"></script>
 
 <style id="eg-modal-styles">
 #eg-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.2s; }
