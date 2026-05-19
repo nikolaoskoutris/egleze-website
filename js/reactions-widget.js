@@ -1,14 +1,12 @@
-// /js/reactions-widget.js — Egleze reaction UI (FINAL interaction model)
-// Renders into any element with data-reactions-for="<storyId>".
-// Wires to window.egleze.reactions. Load AFTER auth.js + reactions.js.
+// /js/reactions-widget.js — Egleze reaction UI
+// KNOWN-GOOD base (desktop event logic that worked) + a CSS-ONLY mobile fix.
+// Deliberately NO capture-phase listeners, NO containment checks, NO backdrop
+// element, NO body-scroll-lock. Those additions caused regressions. The event
+// model here is the simple one that worked; mobile clipping is solved purely
+// in CSS via position:fixed + a media-query bottom sheet.
 //
-// LOCKED model:
-//  - Everything starts EMPTY. 5 independent reactions; any subset allowed.
-//  - Untouched reaction => NO db row (silence is not a weak reaction).
-//  - Circle/ring = FAST toggle: empty -> 3 -> empty.
-//  - Numbers 1..5 = PRECISE set; tap the active number again => clear to empty.
-//  - Last tap wins. Ring fills to chosen level (visual). Single red. Stores 1..5.
-//  - Logged-out => reactions.js opens the existing sign-in modal.
+// Interaction (LOCKED): everything empty by default; circle = quick toggle
+// (empty->3->empty); numbers 1..5 = exact (tap active again clears). Stores 1..5.
 
 (function () {
   if (!window.egleze || !window.egleze.reactions) {
@@ -24,7 +22,7 @@
     { k: 'validates', l: 'Validates what I knew', c: '#378add' }
   ];
   var LV = ['', 'Slightly', 'Somewhat', 'Moderately', 'Strongly', 'Intensely'];
-  var FAST_LEVEL = 3;          // circle tap on empty => 3 (deliberate "moderate")
+  var FAST_LEVEL = 3;
   var CIRC = 2 * Math.PI * 15;
 
   var css = ''
@@ -32,11 +30,20 @@
    + '.egr-trigger{display:inline-flex;align-items:center;background:none;border:none;cursor:pointer;padding:0;color:#888780;line-height:1;font:inherit}'
    + '.egr-trigger:hover{color:#bb1919}.egr-trigger.has{color:#bb1919}'
    + '.egr-ct{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;margin-left:4px;letter-spacing:.5px}'
-   + '.egr-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:99998;display:none;opacity:0;transition:opacity .2s ease}'
-   + '.egr-backdrop.open{display:block;opacity:1}'
-   + '.egr-pop{position:fixed;width:284px;max-width:calc(100vw - 24px);background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 34px rgba(0,0,0,.20);padding:8px;z-index:99999;display:none;max-height:min(74vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
+   // DESKTOP: anchored dropdown (this is the version that worked).
+   + '.egr-pop{position:absolute;right:0;bottom:140%;width:284px;background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;z-index:9000;display:none;max-height:min(74vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
    + '.egr-pop.open{display:block}'
-   + '@media (max-width:760px){.egr-pop{left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;max-width:100%!important;border-radius:14px 14px 0 0;max-height:80vh;padding:8px 8px calc(8px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .26s cubic-bezier(.22,1,.36,1);box-shadow:0 -8px 30px rgba(0,0,0,.22)}.egr-pop.open{transform:translateY(0)}.egr-pop::before{content:"";display:block;width:38px;height:4px;border-radius:3px;background:#d8d4ca;margin:2px auto 8px}}'
+   + '.egr-pop::after{content:"";position:absolute;bottom:-6px;right:16px;width:11px;height:11px;background:#fff;border-right:.5px solid #e0e0da;border-bottom:.5px solid #e0e0da;transform:rotate(45deg)}'
+   // MOBILE: pure-CSS bottom sheet. position:fixed escapes the card's
+   // overflow:hidden. NO JS involved in this — only this media query.
+   + '@media (max-width:760px){'
+   +   '.egr-pop{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;max-width:100%;'
+   +     'border-radius:14px 14px 0 0;max-height:80vh;'
+   +     'padding:14px 12px calc(14px + env(safe-area-inset-bottom));'
+   +     'box-shadow:0 -8px 30px rgba(0,0,0,.22);z-index:99999}'
+   +   '.egr-pop::after{display:none}'
+   +   '.egr-pop::before{content:"";display:block;width:38px;height:4px;border-radius:3px;background:#d8d4ca;margin:0 auto 10px}'
+   + '}'
    + '.egr-h{font-family:"Roboto Condensed",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;padding:4px 8px 6px}'
    + '.egr-hs{font-size:10px;color:#888;padding:0 8px 8px;border-bottom:.5px solid #f1efe8;margin-bottom:6px}'
    + '.egr-row{padding:8px;border-radius:3px;transition:background .12s}'
@@ -57,6 +64,7 @@
    + '.egr-seg button{flex:1;height:18px;border:.5px solid #e0e0da;background:#f4f2ec;border-radius:3px;cursor:pointer;font-family:"Roboto Condensed",sans-serif;font-size:10px;font-weight:700;color:#aaa;padding:0;transition:background .12s,color .12s,border-color .12s}'
    + '.egr-seg button:hover{border-color:#bb1919;color:#bb1919}'
    + '.egr-seg button.on{background:#bb1919;border-color:#bb1919;color:#fff}'
+   + '@media (max-width:760px){.egr-seg button{height:30px;font-size:13px}.egr-ring{width:40px;height:40px}.egr-lab{font-size:15px}}'
    + '.egr-foot{font-size:10px;color:#888;padding:9px 8px 4px;border-top:.5px solid #f1efe8;margin-top:6px;line-height:1.45}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
@@ -73,15 +81,12 @@
     trig.className = 'egr-trigger'; trig.type = 'button';
     trig.setAttribute('aria-label', 'React to this story');
     trig.innerHTML = HAND + '<span class="egr-ct" data-egr-ct></span>';
-    var backdrop = document.createElement('div'); backdrop.className = 'egr-backdrop';
     var pop = document.createElement('div'); pop.className = 'egr-pop';
     pop.innerHTML = '<div class="egr-h">How did this land?</div>'
-      + '<div class="egr-hs">Tap the circle for a quick moderate, or pick an exact strength 1\u20135. React to as many or as few as you like.</div>'
+      + '<div class="egr-hs">Tap the circle for a quick moderate, or pick an exact strength 1\u20135.</div>'
       + '<div data-egr-list></div>'
       + '<div class="egr-foot">Private. Everyone sees totals \u2014 no one, including us, sees it was you.</div>';
     wrap.appendChild(trig); wrap.appendChild(pop); host.appendChild(wrap);
-    document.body.appendChild(backdrop);
-    function isMobile() { return window.matchMedia('(max-width:760px)').matches; }
 
     var listEl = pop.querySelector('[data-egr-list]');
     var ctEl = trig.querySelector('[data-egr-ct]');
@@ -126,27 +131,22 @@
           b.classList.toggle('on', parseInt(b.getAttribute('data-egr-lvl'), 10) === level);
         });
       }
-
       function current() {
         var mine = window.egleze.reactions.getMine(storyId) || {};
         return mine[r.k] || 0;
       }
       function setLevel(lvl) {
         paint(lvl);
-        window.egleze.reactions.setForStory(storyId, r.k, lvl); // 0 => delete row
+        window.egleze.reactions.setForStory(storyId, r.k, lvl);
       }
 
-      // CIRCLE: empty -> 3 ; anything set -> empty
-      function circleTap(e) {
+      circle.addEventListener('click', function (e) {
         e.preventDefault(); e.stopPropagation();
         setLevel(current() > 0 ? 0 : FAST_LEVEL);
-      }
-      circle.addEventListener('click', circleTap);
-      circle.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') circleTap(e);
       });
-
-      // NUMBERS: set exact level; tapping the active level again clears
+      circle.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setLevel(current() > 0 ? 0 : FAST_LEVEL); }
+      });
       segBtns.forEach(function (b) {
         b.addEventListener('click', function (e) {
           e.stopPropagation();
@@ -156,72 +156,23 @@
       });
     });
 
-    function positionPop() {
-      if (isMobile()) { pop.style.left=''; pop.style.top=''; return; }
-      var r = trig.getBoundingClientRect();
-      var vw = window.innerWidth, vh = window.innerHeight, M = 8;
-      // measure panel
-      pop.style.left = '0px'; pop.style.top = '0px';
-      var pw = pop.offsetWidth || 284, ph = pop.offsetHeight || 320;
-      // horizontal: align panel's right edge to the trigger's right edge,
-      // clamp into viewport
-      var left = r.right - pw;
-      if (left < M) left = M;
-      if (left + pw > vw - M) left = vw - M - pw;
-      // vertical: prefer below the trigger; flip above if not enough room
-      var spaceBelow = vh - r.bottom, spaceAbove = r.top;
-      var top;
-      if (spaceBelow >= ph + M || spaceBelow >= spaceAbove) {
-        top = r.bottom + 6;
-        if (top + ph > vh - M) top = Math.max(M, vh - M - ph);
-      } else {
-        top = r.top - 6 - ph;
-        if (top < M) top = M;
-      }
-      pop.style.left = Math.round(left) + 'px';
-      pop.style.top = Math.round(top) + 'px';
-    }
-    // a fixed panel won't follow the button on scroll; close instead (clean).
-    function closePop() {
-      pop.classList.remove('open'); backdrop.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-    function closeOnMove() {
-      if (!isMobile() && pop.classList.contains('open')) closePop();
-    }
-    window.addEventListener('scroll', closeOnMove, true);
-    window.addEventListener('resize', closeOnMove);
-    backdrop.addEventListener('click', closePop);
-
+    // ---- the SIMPLE close model that worked: pop swallows its own clicks;
+    //      a plain document click closes it. No capture phase, no containment,
+    //      no backdrop. This is the known-good pattern. ----
     trig.addEventListener('click', function (e) {
       e.stopPropagation();
       var willOpen = !pop.classList.contains('open');
       document.querySelectorAll('.egr-pop.open').forEach(function (p) { p.classList.remove('open'); });
-      document.querySelectorAll('.egr-backdrop.open').forEach(function (b) { b.classList.remove('open'); });
-      document.body.style.overflow = '';
       if (willOpen) {
-        if (isMobile()) {
-          backdrop.classList.add('open');
-          document.body.style.overflow = 'hidden';
-        }
         pop.classList.add('open');
-        positionPop();
         window.egleze.reactions.refreshTotals(storyId);
         if (window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(storyId);
       }
     });
-    // Robust outside-close: only close if the interaction is genuinely
-    // outside the panel AND not on the trigger. Does not rely on
-    // stopPropagation (unreliable across touch+click on mobile).
-    function maybeCloseFromOutside(e) {
-      if (!pop.classList.contains('open')) return;
-      var t = e.target;
-      if (pop.contains(t) || trig.contains(t)) return; // tap inside sheet/trigger: ignore
-      // a tap on the backdrop is handled by backdrop's own closePop
-      if (t === backdrop) return;
-      closePop();
-    }
-    document.addEventListener('click', maybeCloseFromOutside, true);
+    pop.addEventListener('click', function (e) { e.stopPropagation(); });
+    document.addEventListener('click', function () {
+      pop.classList.remove('open');
+    });
 
     function render() {
       var totals = window.egleze.reactions.getTotals(storyId) || [];
