@@ -196,9 +196,9 @@
     trig.addEventListener('click', function (e) {
       e.stopPropagation();
       var willOpen = !pop.classList.contains('open');
-      document.querySelectorAll('.egr-pop.open').forEach(function (p) {
-        p.classList.remove('open'); p.classList.remove('up'); p.classList.remove('down');
-      });
+      document.querySelectorAll('.egr-pop.open').forEach(function (p) { p.classList.remove('open'); });
+      document.querySelectorAll('.egr-backdrop.open').forEach(function (b) { b.classList.remove('open'); });
+      document.body.style.overflow = '';
       if (willOpen) {
         if (isMobile()) {
           backdrop.classList.add('open');
@@ -210,10 +210,18 @@
         if (window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(storyId);
       }
     });
-    pop.addEventListener('click', function (e) { e.stopPropagation(); });
-    document.addEventListener('click', function () {
-      if (pop.classList.contains('open')) closePop();
-    });
+    // Robust outside-close: only close if the interaction is genuinely
+    // outside the panel AND not on the trigger. Does not rely on
+    // stopPropagation (unreliable across touch+click on mobile).
+    function maybeCloseFromOutside(e) {
+      if (!pop.classList.contains('open')) return;
+      var t = e.target;
+      if (pop.contains(t) || trig.contains(t)) return; // tap inside sheet/trigger: ignore
+      // a tap on the backdrop is handled by backdrop's own closePop
+      if (t === backdrop) return;
+      closePop();
+    }
+    document.addEventListener('click', maybeCloseFromOutside, true);
 
     function render() {
       var totals = window.egleze.reactions.getTotals(storyId) || [];
