@@ -38,7 +38,7 @@
    // overflow:hidden. NO JS involved in this — only this media query.
    + '@media (max-width:760px){'
    +   '.egr-pop{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;max-width:100%;'
-   +     'box-sizing:border-box;border-radius:14px 14px 0 0;max-height:88vh;'
+   +     'box-sizing:border-box;border-radius:14px 14px 0 0;max-height:92vh;'
    +     'padding:10px 12px calc(16px + env(safe-area-inset-bottom));'
    +     'box-shadow:0 -8px 30px rgba(0,0,0,.22);z-index:99999;overscroll-behavior:contain}'
    +   '.egr-pop::after{display:none}'
@@ -168,6 +168,10 @@
       document.querySelectorAll('.egr-pop.open').forEach(function (p) { p.classList.remove('open'); });
       if (willOpen) {
         pop.classList.add('open');
+        // ensure the sheet always opens showing the FIRST reaction, not
+        // scrolled past it (bottom-anchored fixed sheet can open mid-scroll).
+        pop.scrollTop = 0;
+        requestAnimationFrame(function () { pop.scrollTop = 0; });
         window.egleze.reactions.refreshTotals(storyId);
         if (window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(storyId);
       }
