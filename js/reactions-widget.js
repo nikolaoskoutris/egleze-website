@@ -94,6 +94,9 @@
     wrap.appendChild(trig); wrap.appendChild(pop); host.appendChild(wrap);
 
     var listEl = pop.querySelector('[data-egr-list]');
+    function egrIsMobile(){ return window.matchMedia('(max-width:760px)').matches; }
+    function egrDetachToBody(){ if (pop.parentNode !== document.body) document.body.appendChild(pop); }
+    function egrReattach(){ if (pop.parentNode !== wrap) wrap.appendChild(pop); }
     var ctEl = trig.querySelector('[data-egr-ct]');
 
     R.forEach(function (r) {
@@ -169,9 +172,8 @@
       var willOpen = !pop.classList.contains('open');
       document.querySelectorAll('.egr-pop.open').forEach(function (p) { p.classList.remove('open'); });
       if (willOpen) {
+        if (egrIsMobile()) egrDetachToBody();   // escape transformed ancestor (proven fix)
         pop.classList.add('open');
-        // ensure the sheet always opens showing the FIRST reaction, not
-        // scrolled past it (bottom-anchored fixed sheet can open mid-scroll).
         pop.scrollTop = 0;
         requestAnimationFrame(function () { pop.scrollTop = 0; });
         window.egleze.reactions.refreshTotals(storyId);
@@ -180,7 +182,10 @@
     });
     pop.addEventListener('click', function (e) { e.stopPropagation(); });
     document.addEventListener('click', function () {
-      pop.classList.remove('open');
+      if (pop.classList.contains('open')) {
+        pop.classList.remove('open');
+        egrReattach();
+      }
     });
 
     function render() {
