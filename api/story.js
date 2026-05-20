@@ -285,6 +285,7 @@ function renderStoryHtml(story, artworkUrl) {
     .story-act-btn{display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:#888780;padding:6px 4px;font-family:inherit;line-height:1;font-size:13px;transition:color .15s}
     .story-act-btn:hover{color:#bb1919}
     .eg-bookmark.is-saved{color:#bb1919}
+    .eg-bookmark.is-saved svg path{fill:#bb1919;stroke:#bb1919}
     .story-act-label{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700}
     .story-act-react{display:inline-flex;align-items:center}
     @media (max-width:520px){.story-actions{gap:14px}}
