@@ -150,6 +150,7 @@
     }
     btn.disabled = true;
     setStatus('Opening Google…', 'loading');
+    console.log('[egleze signin-modal] redirecting to:', window.location.href);
     try {
       await window.egleze.auth.signInWithGoogle(window.location.href);
     } catch (err) {
@@ -177,6 +178,7 @@
     }
     if (btn) btn.disabled = true;
     setStatus('Sending magic link…', 'loading');
+    console.log('[egleze signin-modal] magic link redirect to:', window.location.href);
     try {
       var res = await window.egleze.auth.signInWithMagicLink(email, window.location.href);
       if (res && res.error) {
