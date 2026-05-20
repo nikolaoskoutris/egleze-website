@@ -1,12 +1,15 @@
-// /js/reactions-widget.js — Egleze reaction UI
-// KNOWN-GOOD base (desktop event logic that worked) + a CSS-ONLY mobile fix.
-// Deliberately NO capture-phase listeners, NO containment checks, NO backdrop
-// element, NO body-scroll-lock. Those additions caused regressions. The event
-// model here is the simple one that worked; mobile clipping is solved purely
-// in CSS via position:fixed + a media-query bottom sheet.
+// /js/reactions-widget.js — Egleze reaction UI (Option A: labeled React + inline expansion)
+// Renders into any element with data-reactions-for="<storyId>".
+// Wires to window.egleze.reactions (data layer, already proven). Load AFTER auth.js + reactions.js.
 //
-// Interaction (LOCKED): everything empty by default; circle = quick toggle
-// (empty->3->empty); numbers 1..5 = exact (tap active again clears). Stores 1..5.
+// LOCKED design (Option A — chosen after the popup approach hit unfixable mobile positioning bugs):
+//  - A "React" button in the card foot (hand icon + the word "REACT" + optional count).
+//  - Tap it -> panel expands INLINE in the card (no popup, no position:fixed, no clipping).
+//  - Panel shows 5 LABELED reactions. Each row has its own circle (quick = 3) + 1..5 picker.
+//  - Tap circle = quick toggle (empty -> 3 -> empty). Tap a number = exact set. Tap active = clear.
+//  - Untouched reactions = no DB row (silence stays silence).
+//  - Logged-out tap goes through reactions.js -> existing sign-in modal.
+//  - Same on mobile and desktop. No breakpoint behaviour, no positioning logic.
 
 (function () {
   if (!window.egleze || !window.egleze.reactions) {
@@ -23,80 +26,86 @@
   ];
   var LV = ['', 'Slightly', 'Somewhat', 'Moderately', 'Strongly', 'Intensely'];
   var FAST_LEVEL = 3;
-  var CIRC = 2 * Math.PI * 15;
+  var CIRC = 2 * Math.PI * 12;
 
   var css = ''
-   + '.egr-wrap{position:relative;display:inline-flex;align-items:center}'
-   + '.egr-trigger{display:inline-flex;align-items:center;background:none;border:none;cursor:pointer;padding:0;color:#888780;line-height:1;font:inherit}'
-   + '.egr-trigger:hover{color:#bb1919}.egr-trigger.has{color:#bb1919}'
-   + '.egr-ct{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;margin-left:4px;letter-spacing:.5px}'
-   // DESKTOP: anchored dropdown (this is the version that worked).
-   + '.egr-pop{position:absolute;right:0;bottom:140%;width:284px;background:#fff;border:.5px solid #e0e0da;border-radius:4px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;z-index:9000;display:none;max-height:min(74vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch}'
-   + '.egr-pop.open{display:block}'
-   + '.egr-pop::after{content:"";position:absolute;bottom:-6px;right:16px;width:11px;height:11px;background:#fff;border-right:.5px solid #e0e0da;border-bottom:.5px solid #e0e0da;transform:rotate(45deg)}'
-   // MOBILE: pure-CSS bottom sheet. position:fixed escapes the card's
-   // overflow:hidden. NO JS involved in this — only this media query.
-   + '@media (max-width:760px){'
-   +   '.egr-pop{position:fixed;left:0;right:0;bottom:0;top:max(8vh,env(safe-area-inset-top));'
-   +     'width:100%;max-width:100%;max-height:none;box-sizing:border-box;'
-   +     'display:flex;flex-direction:column;border-radius:14px 14px 0 0;'
-   +     'padding:10px 12px calc(12px + env(safe-area-inset-bottom));'
-   +     'box-shadow:0 -8px 30px rgba(0,0,0,.22);z-index:99999;overscroll-behavior:contain}'
-   +   '.egr-pop::after{display:none}'
-   +   '.egr-pop::before{content:"";display:block;flex:none;width:38px;height:4px;border-radius:3px;background:#d8d4ca;margin:0 auto 8px}'
-   +   '.egr-pop .egr-h{flex:none;padding:0 8px 2px}'
-   +   '.egr-pop .egr-hs{flex:none;padding:0 8px 6px;margin-bottom:4px}'
-   +   '.egr-pop [data-egr-list]{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;padding-top:2px}'
-   +   '.egr-pop .egr-foot{flex:none}'
-   + '}'
-   + '.egr-h{font-family:"Roboto Condensed",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;padding:4px 8px 6px}'
-   + '.egr-hs{font-size:10px;color:#888;padding:0 8px 8px;border-bottom:.5px solid #f1efe8;margin-bottom:6px}'
-   + '.egr-row{padding:8px;border-radius:3px;transition:background .12s}'
+   // The trigger sits inline in the card foot beside bookmark/share. No popup.
+   + '.egr-trig{display:inline-flex;align-items:center;gap:5px;color:#888780;background:none;border:none;cursor:pointer;padding:0;font:inherit;line-height:1}'
+   + '.egr-trig:hover{color:#bb1919}.egr-trig.has{color:#bb1919}'
+   + '.egr-trig .lbl{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700}'
+   + '.egr-trig .ct{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;font-weight:600}'
+   + '.egr-trig.has .ct{color:#bb1919}'
+   // The inline panel — expands INSIDE the card. No fixed, no absolute, no popup.
+   + '.egr-panel{max-height:0;overflow:hidden;opacity:0;transition:max-height .28s ease,opacity .22s ease,padding .28s ease;border-top:.5px solid #f1efe8;margin-top:10px;padding:0}'
+   + '.egr-panel.open{max-height:620px;opacity:1;padding:8px 0 2px}'
+   + '.egr-panel-h{font-family:"Roboto Condensed",sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#888;padding:0 2px 4px}'
+   + '.egr-panel-hs{font-size:10px;color:#888;padding:0 2px 8px;margin-bottom:4px;border-bottom:.5px solid #f1efe8}'
+   + '.egr-row{padding:7px 4px;border-radius:3px;transition:background .12s}'
    + '.egr-row:hover{background:#faf8f3}.egr-row.set{background:#fbeeee}'
-   + '.egr-top{display:flex;align-items:center;gap:11px}'
-   + '.egr-ring{position:relative;width:34px;height:34px;flex-shrink:0;cursor:pointer}'
+   + '.egr-top{display:flex;align-items:center;gap:10px}'
+   + '.egr-ring{position:relative;width:30px;height:30px;flex-shrink:0;cursor:pointer}'
    + '.egr-ring svg{transform:rotate(-90deg);display:block}'
    + '.egr-ring .bg{stroke:#eceae2}'
-   + '.egr-ring .fg{stroke:#bb1919;stroke-linecap:round;transition:stroke-dashoffset .18s ease}'
-   + '.egr-ring .ctr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;color:#bbb}'
+   + '.egr-ring .fg{stroke:#bb1919;stroke-linecap:round;transition:stroke-dashoffset .2s ease}'
+   + '.egr-ring .ctr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Roboto Condensed",sans-serif;font-size:11px;font-weight:700;color:#bbb}'
    + '.egr-row.set .egr-ring .ctr{color:#bb1919}'
    + '.egr-info{flex:1;min-width:0}'
-   + '.egr-lab{font-size:13px;color:#111;font-weight:500;display:flex;align-items:center;gap:8px}'
+   + '.egr-lab{font-size:13px;color:#111;font-weight:500;display:flex;align-items:center;gap:7px}'
    + '.egr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}'
-   + '.egr-meta{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;letter-spacing:.5px;margin-top:2px}'
+   + '.egr-meta{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;letter-spacing:.5px;margin-top:1px}'
    + '.egr-cnt{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;letter-spacing:.5px;flex-shrink:0}'
-   + '.egr-seg{display:flex;gap:4px;margin:9px 0 1px;padding-left:45px}'
-   + '.egr-seg button{flex:1;height:18px;border:.5px solid #e0e0da;background:#f4f2ec;border-radius:3px;cursor:pointer;font-family:"Roboto Condensed",sans-serif;font-size:10px;font-weight:700;color:#aaa;padding:0;transition:background .12s,color .12s,border-color .12s}'
-   + '.egr-seg button:hover{border-color:#bb1919;color:#bb1919}'
-   + '.egr-seg button.on{background:#bb1919;border-color:#bb1919;color:#fff}'
-   + '@media (max-width:760px){.egr-seg button{height:30px;font-size:13px}.egr-ring{width:40px;height:40px}.egr-lab{font-size:15px}}'
-   + '.egr-foot{font-size:10px;color:#888;padding:9px 8px 4px;border-top:.5px solid #f1efe8;margin-top:6px;line-height:1.45}';
+   + '.egr-segs{display:flex;gap:4px;margin-top:7px;padding-left:40px}'
+   + '.egr-segs button{flex:1;height:28px;border:.5px solid #e0e0da;background:#f4f2ec;border-radius:3px;cursor:pointer;font-family:"Roboto Condensed",sans-serif;font-size:11px;font-weight:700;color:#aaa;padding:0;transition:all .12s}'
+   + '.egr-segs button:hover{border-color:#bb1919;color:#bb1919}'
+   + '.egr-segs button.on{background:#bb1919;border-color:#bb1919;color:#fff}'
+   // bigger tap targets on mobile (touch ergonomics)
+   + '@media (max-width:760px){.egr-segs button{height:34px;font-size:13px}.egr-ring{width:36px;height:36px}.egr-lab{font-size:14px}}'
+   + '.egr-foot{font-size:10px;color:#888;padding:9px 2px 2px;border-top:.5px solid #f1efe8;margin-top:6px;line-height:1.45}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
   var HAND = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V4a1.4 1.4 0 0 1 2.8 0v4.5"/><path d="M10.8 8.8V2.6a1.4 1.4 0 0 1 2.8 0v6"/><path d="M13.6 3.4a1.4 1.4 0 0 1 2.8 0v9.8c0 3.8-2.3 6.6-5.8 6.6-2.6 0-4.3-1.3-5.5-3.6l-2-3.6a1.35 1.35 0 0 1 2.3-1.4l1.8 2.8"/><path d="M9.5 22h3"/></svg>';
-  var HAND_S = HAND.replace('width="15" height="15"', 'width="11" height="11"');
+
+  // The widget needs the panel to be INSIDE the card so it expands the card,
+  // NOT trapped in the card foot's row. We render:
+  //   <trigger> in the host element (the card foot)
+  //   <panel>   appended to the card's body (so the card grows when it opens)
+  // The host's data-reactions-for tells us the story id; we walk up to find
+  // the card body (.rc-body) and append the panel there.
+  function findCardBody(host) {
+    var n = host;
+    for (var i = 0; i < 6 && n; i++) {
+      if (n.classList && n.classList.contains('rc-body')) return n;
+      n = n.parentNode;
+    }
+    // fallback: append next to the host so at least it works
+    return host.parentNode;
+  }
 
   function build(host) {
     var storyId = host.getAttribute('data-reactions-for');
     if (!storyId || host._egrBuilt) return;
     host._egrBuilt = true;
 
-    var wrap = document.createElement('span'); wrap.className = 'egr-wrap';
+    // The trigger button replaces the host's content.
     var trig = document.createElement('button');
-    trig.className = 'egr-trigger'; trig.type = 'button';
+    trig.className = 'egr-trig'; trig.type = 'button';
     trig.setAttribute('aria-label', 'React to this story');
-    trig.innerHTML = HAND + '<span class="egr-ct" data-egr-ct></span>';
-    var pop = document.createElement('div'); pop.className = 'egr-pop';
-    pop.innerHTML = '<div class="egr-h">How did this land?</div>'
-      + '<div class="egr-hs">Tap the circle for a quick moderate, or pick an exact strength 1\u20135.</div>'
+    trig.innerHTML = HAND + '<span class="lbl">React</span><span class="ct" data-egr-ct></span>';
+    host.innerHTML = '';
+    host.appendChild(trig);
+
+    // The panel goes INSIDE the card body so it expands the card cleanly.
+    var cardBody = findCardBody(host);
+    var panel = document.createElement('div');
+    panel.className = 'egr-panel';
+    panel.setAttribute('data-egr-panel-for', storyId);
+    panel.innerHTML = '<div class="egr-panel-h">How did this land?</div>'
+      + '<div class="egr-panel-hs">Tap a circle for a quick moderate, or pick an exact strength 1\u20135.</div>'
       + '<div data-egr-list></div>'
       + '<div class="egr-foot">Private. Everyone sees totals \u2014 no one, including us, sees it was you.</div>';
-    wrap.appendChild(trig); wrap.appendChild(pop); host.appendChild(wrap);
+    cardBody.appendChild(panel);
 
-    var listEl = pop.querySelector('[data-egr-list]');
-    function egrIsMobile(){ return window.matchMedia('(max-width:760px)').matches; }
-    function egrDetachToBody(){ if (pop.parentNode !== document.body) document.body.appendChild(pop); }
-    function egrReattach(){ if (pop.parentNode !== wrap) wrap.appendChild(pop); }
+    var listEl = panel.querySelector('[data-egr-list]');
     var ctEl = trig.querySelector('[data-egr-ct]');
 
     R.forEach(function (r) {
@@ -109,16 +118,16 @@
       row.innerHTML =
         '<div class="egr-top">'
         + '<div class="egr-ring" data-egr-circle role="button" tabindex="0" aria-label="Quick moderate reaction">'
-        + '<svg width="34" height="34" viewBox="0 0 34 34">'
-        + '<circle class="bg" cx="17" cy="17" r="15" fill="none" stroke-width="3"/>'
-        + '<circle class="fg" cx="17" cy="17" r="15" fill="none" stroke-width="3" '
+        + '<svg width="30" height="30" viewBox="0 0 30 30">'
+        + '<circle class="bg" cx="15" cy="15" r="12" fill="none" stroke-width="2.5"/>'
+        + '<circle class="fg" cx="15" cy="15" r="12" fill="none" stroke-width="2.5" '
         + 'stroke-dasharray="' + CIRC + '" stroke-dashoffset="' + CIRC + '"/></svg>'
-        + '<div class="ctr">' + HAND_S + '</div></div>'
+        + '<div class="ctr"></div></div>'
         + '<div class="egr-info"><div class="egr-lab"><span class="egr-dot" style="background:' + r.c + '"></span>' + r.l + '</div>'
         + '<div class="egr-meta" data-egr-meta>Circle = quick \u00b7 numbers = exact</div></div>'
         + '<div class="egr-cnt" data-egr-cnt>\u00b7</div>'
         + '</div>'
-        + '<div class="egr-seg">' + segs + '</div>';
+        + '<div class="egr-segs">' + segs + '</div>';
       listEl.appendChild(row);
 
       var fg = row.querySelector('.fg'),
@@ -129,8 +138,7 @@
 
       function paint(level) {
         fg.setAttribute('stroke-dashoffset', CIRC * (1 - level / 5));
-        if (level > 0) { ctr.textContent = level; }
-        else { ctr.innerHTML = HAND_S; }
+        ctr.textContent = level > 0 ? level : '';
         meta.textContent = level > 0
           ? (level + ' \u00b7 ' + LV[level])
           : 'Circle = quick \u00b7 numbers = exact';
@@ -153,7 +161,10 @@
         setLevel(current() > 0 ? 0 : FAST_LEVEL);
       });
       circle.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setLevel(current() > 0 ? 0 : FAST_LEVEL); }
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault(); e.stopPropagation();
+          setLevel(current() > 0 ? 0 : FAST_LEVEL);
+        }
       });
       segBtns.forEach(function (b) {
         b.addEventListener('click', function (e) {
@@ -164,28 +175,24 @@
       });
     });
 
-    // ---- the SIMPLE close model that worked: pop swallows its own clicks;
-    //      a plain document click closes it. No capture phase, no containment,
-    //      no backdrop. This is the known-good pattern. ----
+    // Trigger toggles the inline panel. Same simple model on every device.
     trig.addEventListener('click', function (e) {
       e.stopPropagation();
-      var willOpen = !pop.classList.contains('open');
-      document.querySelectorAll('.egr-pop.open').forEach(function (p) { p.classList.remove('open'); });
-      if (willOpen) {
-        if (egrIsMobile()) egrDetachToBody();   // escape transformed ancestor (proven fix)
-        pop.classList.add('open');
-        pop.scrollTop = 0;
-        requestAnimationFrame(function () { pop.scrollTop = 0; });
+      // close any other open panels first
+      document.querySelectorAll('.egr-panel.open').forEach(function (p) {
+        if (p !== panel) p.classList.remove('open');
+      });
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) {
         window.egleze.reactions.refreshTotals(storyId);
         if (window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(storyId);
       }
     });
-    pop.addEventListener('click', function (e) { e.stopPropagation(); });
+    // Clicks inside the panel never close it.
+    panel.addEventListener('click', function (e) { e.stopPropagation(); });
+    // Click anywhere else on the page closes the panel.
     document.addEventListener('click', function () {
-      if (pop.classList.contains('open')) {
-        pop.classList.remove('open');
-        egrReattach();
-      }
+      panel.classList.remove('open');
     });
 
     function render() {
@@ -211,7 +218,7 @@
           meta.textContent = lvl + ' \u00b7 ' + LV[lvl];
           row.classList.add('set');
         } else {
-          ctr.innerHTML = HAND_S;
+          ctr.textContent = '';
           meta.textContent = 'Circle = quick \u00b7 numbers = exact';
           row.classList.remove('set');
         }
@@ -219,8 +226,11 @@
           b.classList.toggle('on', parseInt(b.getAttribute('data-egr-lvl'), 10) === lvl);
         });
       });
-      ctEl.textContent = sum > 0 ? sum : '';
-      trig.classList.toggle('has', Object.keys(mine).length > 0);
+      // trigger label shows count of MY reactions (not the public sum) so the
+      // user sees their own engagement reflected on the trigger.
+      var myCount = Object.keys(mine).length;
+      ctEl.textContent = myCount > 0 ? ('\u00b7 ' + myCount) : '';
+      trig.classList.toggle('has', myCount > 0);
     }
     window.egleze.reactions.onChange(function (changed) {
       if (String(changed) === String(storyId)) render();
