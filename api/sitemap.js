@@ -3,12 +3,6 @@
 // Vercel rewrite: /sitemap.xml -> /api/sitemap
 // Add ?debug=1 to URL for diagnostic JSON output instead of XML
 
-import { createRequire } from 'module';
-
-export const config = {
-  runtime: 'nodejs'
-};
-
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
 
@@ -27,7 +21,6 @@ const TOPICS = [
 // noindex' in Search Console). Sourced from the SAME file the build uses
 // so this can never drift from the deployed pages. Falls back to the full
 // list if the file can't be loaded — the sitemap never breaks.
-const require = createRequire(import.meta.url);
 let INDEXABLE_TOPICS = TOPICS;
 try {
   const topicData = require('../scripts/topic-data.json');
@@ -98,7 +91,7 @@ async function supabaseFetch(path, label) {
   }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const today = formatDate();
   const urls = [];
   const debug = req.query && req.query.debug === '1';
