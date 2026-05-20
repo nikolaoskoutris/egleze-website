@@ -79,19 +79,10 @@
     var pop = document.createElement('div');
     pop.id = 'eg-share-popover';
     pop.setAttribute('role', 'menu');
+    // Render off-screen + hidden first so we can measure REAL width after items added.
     pop.style.cssText = 'position:fixed;z-index:9999;background:#fff;border:1px solid rgba(0,0,0,.12);'
       + 'box-shadow:0 8px 28px rgba(0,0,0,.18);border-radius:6px;min-width:200px;padding:6px;'
-      + 'font-family:"DM Sans",sans-serif';
-    // Position below the button, right-aligned to it (same as homepage).
-    // Append first so we can measure actual width, then position safely
-    document.body.appendChild(pop);
-    var pw = pop.offsetWidth || 220;
-    var top = rect.bottom + 6;
-    var left = rect.right - pw;             // right-edge align to button
-    if (left < 8) left = 8;                 // clamp to viewport left
-    if (left + pw > window.innerWidth - 8) left = window.innerWidth - 8 - pw;
-    pop.style.top = top + 'px';
-    pop.style.left = left + 'px';
+      + 'font-family:"DM Sans",sans-serif;top:-9999px;left:-9999px;visibility:hidden';
 
     var itemStyle = 'display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;'
       + 'background:none;border:none;font-size:13px;color:#1a1a1a;text-align:left;cursor:pointer;'
@@ -140,6 +131,19 @@
       };
       pop.appendChild(shareBtn);
     }
+
+    // Append (still hidden), measure real width/height with content, then position
+    document.body.appendChild(pop);
+    var pw = pop.offsetWidth;
+    var ph = pop.offsetHeight;
+    var top = rect.bottom + 6;
+    var left = rect.right - pw;
+    if (left < 8) left = 8;
+    if (left + pw > window.innerWidth - 8) left = window.innerWidth - 8 - pw;
+    if (top + ph > window.innerHeight - 8) top = Math.max(8, rect.top - ph - 6);
+    pop.style.top = top + 'px';
+    pop.style.left = left + 'px';
+    pop.style.visibility = 'visible';
 
     // attach outside-click + esc listeners on next tick so the opening click
     // doesn't immediately close the popover
