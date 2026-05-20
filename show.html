@@ -264,10 +264,18 @@ a{color:inherit}
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- shared libs loaded early so the inline script can use window.egleze.auth.client -->
+<script src="/js/auth.js"></script>
+<script src="/js/signin-modal.js"></script>
+<script src="/js/bookmarks.js"></script>
+<script src="/js/share.js"></script>
+<script src="/js/reactions.js"></script>
+<script src="/js/reactions-widget.js"></script>
 <script>
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Use the shared auth client to avoid dual-GoTrueClient warning
+const db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const STORIES_PAGE_SIZE = 12;
 const state = {
@@ -730,13 +738,6 @@ document.addEventListener('keydown', function(e){
   if (href) window.location.href = href;
 });
 
-// === shared libs (auth, modal, bookmarks, share, reactions) ===
 </script>
-<script src="/js/auth.js"></script>
-<script src="/js/signin-modal.js"></script>
-<script src="/js/bookmarks.js"></script>
-<script src="/js/share.js"></script>
-<script src="/js/reactions.js"></script>
-<script src="/js/reactions-widget.js"></script>
 </body>
 </html>
