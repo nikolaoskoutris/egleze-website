@@ -105,7 +105,7 @@ a{color:inherit}
 .sc-score{background:var(--cream);color:#754a1d;padding:1px 5px;font-weight:700}
 
 /* card action footer (share / bookmark / react) */
-.sc-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:6px 12px 10px;border-top:.5px solid #f1efe8;margin-top:6px}
+.sc-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:6px 12px 10px;border-top:.5px solid #f1efe8;margin-top:auto}
 .sc-foot .eg-share,.sc-foot .eg-bookmark{background:none;border:none;cursor:pointer;color:#888780;padding:2px;line-height:0;transition:color .15s}
 .sc-foot .eg-share:hover,.sc-foot .eg-bookmark:hover{color:#bb1919}
 .sc-foot .eg-bookmark.is-saved{color:#bb1919}
@@ -497,6 +497,7 @@ async function loadStoriesPage(append){
       return;
     }
     rows.forEach(s => grid.appendChild(buildStoryCard(s, false)));
+    if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
     state.storiesOffset += rows.length;
     state.hasMoreStories = rows.length === STORIES_PAGE_SIZE;
     attachStoriesObserver();
@@ -615,6 +616,7 @@ async function loadPopular(){
     const grid = document.getElementById('popular-grid');
     grid.innerHTML = '';
     data.forEach(s => grid.appendChild(buildStoryCard(s, true)));
+    if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
     document.getElementById('popular-section').style.display = 'block';
   } catch(e) {
     console.warn('[show-page] popular load failed:', e);
