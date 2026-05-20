@@ -30,7 +30,7 @@
 
   var css = ''
    // The trigger sits inline in the card foot beside bookmark/share. No popup.
-   + '.egr-trig{display:inline-flex;align-items:center;gap:5px;color:#888780;background:none;border:none;cursor:pointer;padding:0;font:inherit;line-height:1}'
+   + '.egr-trig{display:inline-flex;align-items:center;gap:5px;color:#888780;background:none;border:none;cursor:pointer;padding:0;margin:0;font:inherit;line-height:1;vertical-align:middle;-webkit-appearance:none;appearance:none}'
    + '.egr-trig:hover{color:#bb1919}.egr-trig.has{color:#bb1919}'
    + '.egr-trig .lbl{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700}'
    + '.egr-trig .ct{font-family:"Roboto Condensed",sans-serif;font-size:10px;color:#888;font-weight:600}'
