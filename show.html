@@ -104,6 +104,15 @@ a{color:inherit}
 .sc-meta{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:6px}
 .sc-score{background:var(--cream);color:#754a1d;padding:1px 5px;font-weight:700}
 
+/* card action footer (share / bookmark / react) */
+.sc-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:6px 12px 10px;border-top:.5px solid #f1efe8;margin-top:6px}
+.sc-foot .eg-share,.sc-foot .eg-bookmark{background:none;border:none;cursor:pointer;color:#888780;padding:2px;line-height:0;transition:color .15s}
+.sc-foot .eg-share:hover,.sc-foot .eg-bookmark:hover{color:#bb1919}
+.sc-foot .eg-bookmark.is-saved{color:#bb1919}
+.sc-foot .eg-bookmark.is-saved svg path{fill:#bb1919;stroke:#bb1919}
+.sc-foot .rc-react{display:inline-flex;align-items:center}
+.story-card{cursor:pointer}
+
 .popular-card{background:var(--cream)}
 .popular-card .sc-art{display:none}
 #popular-grid{grid-template-columns:repeat(3,1fr)}
@@ -491,9 +500,13 @@ async function loadStoriesPage(append){
 }
 
 function buildStoryCard(s, isPopular){
-  const card = document.createElement('a');
+  // div + role=link so buttons inside work properly
+  const card = document.createElement('div');
   card.className = 'story-card' + (isPopular ? ' popular-card' : '');
-  card.href = '/story/' + s.id;
+  card.setAttribute('role','link');
+  card.setAttribute('tabindex','0');
+  card.setAttribute('data-story-id', s.id);
+  card.dataset.storyHref = '/story/' + s.id;
   if (!isPopular && state.show.artwork_url) {
     const art = document.createElement('div');
     art.className = 'sc-art';
@@ -529,6 +542,23 @@ function buildStoryCard(s, isPopular){
   t.textContent = s.episode ? s.episode + ' · ' + timeAgo(s.created_at) : timeAgo(s.created_at);
   meta.appendChild(t);
   body.appendChild(meta);
+
+  // action footer
+  const foot = document.createElement('div');
+  foot.className = 'sc-foot';
+  foot.innerHTML =
+    '<button type="button" class="eg-share" data-story-id="'+s.id+'"'
+    + ' data-share-url="https://egleze.com/story/'+s.id+'"'
+    + ' data-share-title="'+(s.headline||'Story').replace(/"/g,'&quot;')+'"'
+    + ' aria-label="Share">'
+    + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
+    + '</button>'
+    + '<button type="button" class="eg-bookmark" data-story-id="'+s.id+'" aria-label="Bookmark">'
+    + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4Z"/></svg>'
+    + '</button>'
+    + '<span class="rc-react" data-reactions-for="'+s.id+'"></span>';
+  body.appendChild(foot);
+
   card.appendChild(body);
   return card;
 }
@@ -681,6 +711,32 @@ function showNotFound(){
 }
 
 init();
+
+// === navigate to story on card-body click; skip buttons + reactions widget ===
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('.eg-bookmark, .eg-share, .rc-react, .egr-panel, .egr-trig');
+  if (btn) return;
+  const card = e.target.closest('.story-card');
+  if (!card) return;
+  const href = card.dataset.storyHref;
+  if (href) window.location.href = href;
+});
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const card = document.activeElement && document.activeElement.closest('.story-card');
+  if (!card) return;
+  e.preventDefault();
+  const href = card.dataset.storyHref;
+  if (href) window.location.href = href;
+});
+
+// === shared libs (auth, modal, bookmarks, share, reactions) ===
 </script>
+<script src="/js/auth.js"></script>
+<script src="/js/signin-modal.js"></script>
+<script src="/js/bookmarks.js"></script>
+<script src="/js/share.js"></script>
+<script src="/js/reactions.js"></script>
+<script src="/js/reactions-widget.js"></script>
 </body>
 </html>
