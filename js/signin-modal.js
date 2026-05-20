@@ -10,7 +10,11 @@
 // this one file and gets a working sign-in.
 
 (function () {
-  if (document.getElementById('eg-modal')) return; // already present (e.g. on the homepage)
+  if (document.getElementById('eg-modal')) {
+    console.log('[egleze signin-modal] modal already in page, skipping inject');
+    return; // already present (e.g. on the homepage)
+  }
+  console.log('[egleze signin-modal] injecting modal');
 
   // ---- CSS ----
   var css = '#eg-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s}'
@@ -94,7 +98,17 @@
 
   function openModal() {
     var m = document.getElementById('eg-modal');
-    if (!m) return;
+    if (!m) {
+      // Modal wasn't attached yet (script ran before body). Attach now.
+      if (document.body) {
+        document.body.appendChild(modal);
+        m = document.getElementById('eg-modal');
+      }
+      if (!m) {
+        console.error('[egleze signin-modal] openSignIn called but modal could not be attached');
+        return;
+      }
+    }
     m.classList.add('is-shown');
     document.body.style.overflow = 'hidden';
     requestAnimationFrame(function () { m.classList.add('is-open'); });
