@@ -83,8 +83,15 @@
       + 'box-shadow:0 8px 28px rgba(0,0,0,.18);border-radius:6px;min-width:200px;padding:6px;'
       + 'font-family:"DM Sans",sans-serif';
     // Position below the button, right-aligned to it (same as homepage).
-    pop.style.top = (rect.bottom + 6) + 'px';
-    pop.style.right = Math.max(8, window.innerWidth - rect.right) + 'px';
+    // Append first so we can measure actual width, then position safely
+    document.body.appendChild(pop);
+    var pw = pop.offsetWidth || 220;
+    var top = rect.bottom + 6;
+    var left = rect.right - pw;             // right-edge align to button
+    if (left < 8) left = 8;                 // clamp to viewport left
+    if (left + pw > window.innerWidth - 8) left = window.innerWidth - 8 - pw;
+    pop.style.top = top + 'px';
+    pop.style.left = left + 'px';
 
     var itemStyle = 'display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;'
       + 'background:none;border:none;font-size:13px;color:#1a1a1a;text-align:left;cursor:pointer;'
@@ -134,7 +141,6 @@
       pop.appendChild(shareBtn);
     }
 
-    document.body.appendChild(pop);
     // attach outside-click + esc listeners on next tick so the opening click
     // doesn't immediately close the popover
     setTimeout(function () {
