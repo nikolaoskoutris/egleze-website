@@ -279,6 +279,15 @@ function renderStoryHtml(story, artworkUrl) {
     .video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:transparent;border:0;cursor:pointer;padding:0;transition:transform 0.15s}
     .video-wrap:hover .video-play{transform:translate(-50%,-50%) scale(1.08)}
     .video-wrap.playing .video-poster,.video-wrap.playing .video-play{display:none}
+    /* === story-page action row (share / bookmark / react) === */
+    .story-action-row{margin:18px 0 6px;padding:14px 0;border-top:.5px solid #efece4;border-bottom:.5px solid #efece4}
+    .story-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+    .story-act-btn{display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:#888780;padding:6px 4px;font-family:inherit;line-height:1;font-size:13px;transition:color .15s}
+    .story-act-btn:hover{color:#bb1919}
+    .eg-bookmark.is-saved{color:#bb1919}
+    .story-act-label{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700}
+    .story-act-react{display:inline-flex;align-items:center}
+    @media (max-width:520px){.story-actions{gap:14px}}
     .summary{font-family:'DM Sans',sans-serif;font-size:18px;line-height:1.65;color:#222;margin:24px 0 32px;font-weight:400}
     .story-quote{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;line-height:1.4;color:var(--dark);border-left:4px solid var(--red);padding:8px 0 8px 24px;margin:32px 0}
     .episode-summary, .key-points{margin-top:40px;padding-top:32px;border-top:0.5px solid var(--border)}
@@ -329,6 +338,25 @@ function renderStoryHtml(story, artworkUrl) {
 
     ${videoHtml}
 
+    <!-- Action row: share (no login needed), bookmark (login), React (login). -->
+    <div class="rc-body story-action-row">
+      <div class="story-actions">
+        <button type="button" class="eg-share story-act-btn" data-story-id="${story.id}"
+                data-share-url="https://egleze.com/story/${slug}"
+                data-share-title="${escapeHtml(title)}"
+                data-share-text="${escapeHtml(title)}"
+                aria-label="Share this story">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span class="story-act-label">Share</span>
+        </button>
+        <button type="button" class="eg-bookmark story-act-btn" data-story-id="${story.id}" aria-label="Bookmark this story">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4Z"/></svg>
+          <span class="story-act-label">Bookmark</span>
+        </button>
+        <span class="rc-react story-act-react" data-reactions-for="${story.id}"></span>
+      </div>
+    </div>
+
     ${artworkUrl ? `
     <div class="artwork-block">
       <img src="${escapeHtml(artworkUrl)}" alt="${escapeHtml(showName)}" loading="lazy">
@@ -376,6 +404,15 @@ function renderStoryHtml(story, artworkUrl) {
       if (btn) btn.addEventListener('click', function(e){ e.stopPropagation(); play(); });
     })();
   </script>
+
+  <!-- Shared libraries (loaded in dependency order). -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/signin-modal.js"></script>
+  <script src="/js/bookmarks.js"></script>
+  <script src="/js/share.js"></script>
+  <script src="/js/reactions.js"></script>
+  <script src="/js/reactions-widget.js"></script>
 </body>
 </html>`;
 }
