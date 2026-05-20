@@ -1,0 +1,15 @@
+# Egleze — robots.txt
+# All search engines are welcome to crawl public content.
+
+User-agent: *
+Allow: /
+
+# Private and admin areas — exclude from crawl
+Disallow: /dashboard
+Disallow: /dashboard.html
+Disallow: /saved
+Disallow: /saved.html
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://egleze.com/sitemap.xml
