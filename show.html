@@ -111,6 +111,23 @@ a{color:inherit}
 .sc-foot .eg-bookmark.is-saved{color:#bb1919}
 .sc-foot .eg-bookmark.is-saved svg path{fill:#bb1919;stroke:#bb1919}
 .sc-foot .rc-react{display:inline-flex;align-items:center}
+
+/* aggregate reaction pill — show page cards */
+.sc-pill-mount{display:block;padding:8px 12px 12px;text-align:right}
+.rc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;line-height:1;white-space:nowrap}
+.rc-pill .rc-pill-dot{display:inline-block;width:6px;height:6px;border-radius:50%}
+.rc-pill[data-dom="inspires"]{background:#EAF3DE;color:#27500A}
+.rc-pill[data-dom="inspires"] .rc-pill-dot{background:#639922}
+.rc-pill[data-dom="concerns"]{background:#FAEEDA;color:#412402}
+.rc-pill[data-dom="concerns"] .rc-pill-dot{background:#BA7517}
+.rc-pill[data-dom="curious"]{background:#EEEDFE;color:#26215C}
+.rc-pill[data-dom="curious"] .rc-pill-dot{background:#534AB7}
+.rc-pill[data-dom="changed"]{background:#E6F1FB;color:#042C53}
+.rc-pill[data-dom="changed"] .rc-pill-dot{background:#185FA5}
+.rc-pill[data-dom="validates"]{background:#E1F5EE;color:#04342C}
+.rc-pill[data-dom="validates"] .rc-pill-dot{background:#1D9E75}
+.rc-pill-empty{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;background:#F1EFE8;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:#5F5E5A;line-height:1;white-space:nowrap}
+.rc-pill-empty svg{width:11px;height:11px;flex-shrink:0}
 .story-card{cursor:pointer}
 
 .popular-card{background:var(--cream)}
@@ -276,6 +293,65 @@ const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
 // Use the shared auth client to avoid dual-GoTrueClient warning
 const db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// === aggregate reaction pill — shared helper (cache + render) ===
+window.__egAgg = window.__egAgg || { cache: {}, pending: {} };
+window.__egAggTTL = 5 * 60 * 1000;
+window.__egAggThreshold = 10;
+window.__egAggLabels = { inspires:'Inspired', concerns:'Concerned', curious:'Curious', changed:'Changed how I think', validates:'Validates' };
+window.__egAggFetch = window.__egAggFetch || function(ids) {
+  var now = Date.now();
+  var need = [];
+  for (var i=0;i<ids.length;i++) {
+    var id = String(ids[i]);
+    var c = window.__egAgg.cache[id];
+    if (!c || (now - c.t) > window.__egAggTTL) need.push(ids[i]);
+  }
+  if (!need.length) return Promise.resolve();
+  need = need.filter(function(id){ return !window.__egAgg.pending[id]; });
+  if (!need.length) return Promise.resolve();
+  need.forEach(function(id){ window.__egAgg.pending[id] = 1; });
+  return db.rpc('get_story_reaction_aggregates', { story_ids: need }).then(function(r){
+    var rows = (r && r.data) || [];
+    var seen = {};
+    rows.forEach(function(row){
+      window.__egAgg.cache[String(row.story_id)] = { t: Date.now(), v: row };
+      seen[String(row.story_id)] = 1;
+    });
+    need.forEach(function(id){
+      var key = String(id);
+      if (!seen[key]) window.__egAgg.cache[key] = { t: Date.now(), v: null };
+      delete window.__egAgg.pending[id];
+    });
+  }).catch(function(err){
+    console.warn('[rc-pill] aggregate fetch failed:', err);
+    need.forEach(function(id){ delete window.__egAgg.pending[id]; });
+  });
+};
+window.__egAggRender = window.__egAggRender || function(card) {
+  var id = card.getAttribute('data-story-id');
+  if (!id) return;
+  var mount = card.querySelector('.rc-pill-mount');
+  if (!mount) return;
+  var c = window.__egAgg.cache[String(id)];
+  var v = c && c.v;
+  var total = v ? Number(v.total_reactions || 0) : 0;
+  if (total >= window.__egAggThreshold && v.dominant_reaction) {
+    var label = window.__egAggLabels[v.dominant_reaction] || v.dominant_reaction;
+    mount.innerHTML = '<span class="rc-pill" data-dom="' + v.dominant_reaction + '"><span class="rc-pill-dot"></span>' + label + ' \u00b7 ' + total + '</span>';
+  } else {
+    mount.innerHTML = '<span class="rc-pill-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/></svg>Be the first to react</span>';
+  }
+};
+window.__egAggPaintAll = window.__egAggPaintAll || function(grid) {
+  var cards = grid.querySelectorAll('[data-story-id]');
+  var ids = [];
+  cards.forEach(function(c){ var id = c.getAttribute('data-story-id'); if (id) ids.push(parseInt(id, 10)); });
+  if (!ids.length) return;
+  window.__egAggFetch(ids).then(function(){
+    cards.forEach(function(c){ window.__egAggRender(c); });
+  });
+};
 
 const STORIES_PAGE_SIZE = 12;
 const state = {
@@ -498,6 +574,7 @@ async function loadStoriesPage(append){
     }
     rows.forEach(s => grid.appendChild(buildStoryCard(s, false)));
     if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
+    if (window.__egAggPaintAll) window.__egAggPaintAll(grid);
     state.storiesOffset += rows.length;
     state.hasMoreStories = rows.length === STORIES_PAGE_SIZE;
     attachStoriesObserver();
@@ -568,6 +645,12 @@ function buildStoryCard(s, isPopular){
     + '<span class="rc-react" data-reactions-for="'+s.id+'"></span>';
   body.appendChild(foot);
 
+  // aggregate reaction pill — its own row, right-aligned below action icons
+  const pillMount = document.createElement('div');
+  pillMount.className = 'sc-pill-mount';
+  pillMount.innerHTML = '<span class="rc-pill-mount"></span>';
+  body.appendChild(pillMount);
+
   card.appendChild(body);
   return card;
 }
@@ -617,6 +700,7 @@ async function loadPopular(){
     grid.innerHTML = '';
     data.forEach(s => grid.appendChild(buildStoryCard(s, true)));
     if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
+    if (window.__egAggPaintAll) window.__egAggPaintAll(grid);
     document.getElementById('popular-section').style.display = 'block';
   } catch(e) {
     console.warn('[show-page] popular load failed:', e);
