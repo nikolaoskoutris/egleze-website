@@ -618,6 +618,21 @@ header{position:relative}
 .reveals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .reveal-card{background:#fff;border:0.5px solid var(--border);border-radius:2px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .reveal-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+
+/* aggregate reaction pill on cards — N>=10 threshold; colour by dominant dimension */
+.rc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;line-height:1;white-space:nowrap}
+.rc-pill .rc-pill-dot{display:inline-block;width:6px;height:6px;border-radius:50%}
+.rc-pill[data-dom="inspires"]{background:#EAF3DE;color:#27500A}
+.rc-pill[data-dom="inspires"] .rc-pill-dot{background:#639922}
+.rc-pill[data-dom="concerns"]{background:#FAEEDA;color:#412402}
+.rc-pill[data-dom="concerns"] .rc-pill-dot{background:#BA7517}
+.rc-pill[data-dom="curious"]{background:#EEEDFE;color:#26215C}
+.rc-pill[data-dom="curious"] .rc-pill-dot{background:#534AB7}
+.rc-pill[data-dom="changed"]{background:#E6F1FB;color:#042C53}
+.rc-pill[data-dom="changed"] .rc-pill-dot{background:#185FA5}
+.rc-pill[data-dom="validates"]{background:#E1F5EE;color:#04342C}
+.rc-pill[data-dom="validates"] .rc-pill-dot{background:#1D9E75}
+.rc-pill-empty{display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:11px;font-style:italic;color:#888780;line-height:1}
 .rc-art{position:relative;aspect-ratio:1/1;background:var(--dark);background-size:cover;background-position:center;overflow:hidden}
 .rc-art-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .rc-art-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.25);font-family:'Playfair Display',serif;font-size:42px;letter-spacing:1px;font-weight:700}
@@ -1553,6 +1568,86 @@ function paintReveals() {
 
   if (pageStories.length === 0) { state.page = 0; return paintReveals(); }
 
+  // === aggregate reaction pill — shared helper (cache + render) ===
+window.__egAgg = window.__egAgg || { cache: {}, pending: {} };
+window.__egAggTTL = 5 * 60 * 1000; // 5 min
+window.__egAggThreshold = 10;
+window.__egAggLabels = { inspires:'Inspired', concerns:'Concerned', curious:'Curious', changed:'Changed how I think', validates:'Validates' };
+window.__egAggFetch = function(ids) {
+  var now = Date.now();
+  var need = [];
+  for (var i=0;i<ids.length;i++) {
+    var id = String(ids[i]);
+    var c = window.__egAgg.cache[id];
+    if (!c || (now - c.t) > window.__egAggTTL) need.push(ids[i]);
+  }
+  if (!need.length) return Promise.resolve();
+  // dedupe pending
+  need = need.filter(function(id){ return !window.__egAgg.pending[id]; });
+  if (!need.length) return Promise.resolve();
+  need.forEach(function(id){ window.__egAgg.pending[id] = 1; });
+  return db.rpc('get_story_reaction_aggregates', { story_ids: need }).then(function(r){
+    var rows = (r && r.data) || [];
+    var seen = {};
+    rows.forEach(function(row){
+      window.__egAgg.cache[String(row.story_id)] = { t: Date.now(), v: row };
+      seen[String(row.story_id)] = 1;
+    });
+    // stories with 0 reactions returned no row — cache as null so we don't refetch immediately
+    need.forEach(function(id){
+      var key = String(id);
+      if (!seen[key]) window.__egAgg.cache[key] = { t: Date.now(), v: null };
+      delete window.__egAgg.pending[id];
+    });
+  }).catch(function(err){
+    console.warn('[rc-pill] aggregate fetch failed:', err);
+    need.forEach(function(id){ delete window.__egAgg.pending[id]; });
+  });
+};
+window.__egAggRender = function(card) {
+  var id = card.getAttribute('data-story-id');
+  if (!id) return;
+  var mount = card.querySelector('.rc-pill-mount');
+  if (!mount) return;
+  var c = window.__egAgg.cache[String(id)];
+  var v = c && c.v;
+  var total = v ? Number(v.total_reactions || 0) : 0;
+  if (total >= window.__egAggThreshold && v.dominant_reaction) {
+    var label = window.__egAggLabels[v.dominant_reaction] || v.dominant_reaction;
+    mount.innerHTML = '<span class="rc-pill" data-dom="' + v.dominant_reaction + '"><span class="rc-pill-dot"></span>' + label + ' · ' + total + '</span>';
+  } else {
+    mount.innerHTML = '<span class="rc-pill-empty">be the first to react</span>';
+  }
+};
+window.__egAggPaintAll = function(grid) {
+  var cards = grid.querySelectorAll('[data-story-id]');
+  var ids = [];
+  cards.forEach(function(c){ var id = c.getAttribute('data-story-id'); if (id) ids.push(parseInt(id, 10)); });
+  if (!ids.length) return;
+  window.__egAggFetch(ids).then(function(){
+    cards.forEach(function(c){ window.__egAggRender(c); });
+  });
+};
+// Optimistic local bump — called when user adds/removes a reaction
+window.__egAggBump = function(storyId, reactionKey, delta) {
+  var key = String(storyId);
+  var c = window.__egAgg.cache[key];
+  if (!c) {
+    window.__egAgg.cache[key] = { t: Date.now(), v: { story_id: storyId, total_reactions: Math.max(0, delta), dominant_reaction: delta > 0 ? reactionKey : null, inspires_count:0, concerns_count:0, curious_count:0, changed_count:0, validates_count:0 } };
+    c = window.__egAgg.cache[key];
+  }
+  if (!c.v) c.v = { story_id: storyId, total_reactions: 0, dominant_reaction: null, inspires_count:0, concerns_count:0, curious_count:0, changed_count:0, validates_count:0 };
+  c.v[reactionKey + '_count'] = Math.max(0, Number(c.v[reactionKey + '_count'] || 0) + delta);
+  c.v.total_reactions = Math.max(0, Number(c.v.total_reactions || 0) + delta);
+  // recompute dominant from current counts
+  var keys = ['inspires','concerns','curious','changed','validates'];
+  var best = null, bestN = -1;
+  keys.forEach(function(k){ var n = Number(c.v[k + '_count'] || 0); if (n > bestN) { bestN = n; best = k; } });
+  c.v.dominant_reaction = bestN > 0 ? best : null;
+  // repaint any visible mounts for this story
+  document.querySelectorAll('[data-story-id="' + storyId + '"]').forEach(function(card){ window.__egAggRender(card); });
+};
+
   // Build cards
   grid.innerHTML = '';
   var _artHits = 0, _artMisses = 0;
@@ -1589,6 +1684,7 @@ function paintReveals() {
         '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
         '<div class="rc-foot">' +
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
+          '<span class="rc-pill-mount"></span>' +
           '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
           '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
           '<span class="rc-react" data-reactions-for="' + s.id + '"></span>' +
@@ -1597,7 +1693,8 @@ function paintReveals() {
     grid.appendChild(card);
     if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
   });
-  console.log('[reveals] painted ' + pageStories.length + ' cards · artwork hits=' + _artHits + ' misses=' + _artMisses);
+  if (window.__egAggPaintAll) window.__egAggPaintAll(grid);
+    console.log('[reveals] painted ' + pageStories.length + ' cards · artwork hits=' + _artHits + ' misses=' + _artMisses);
 
   // Update dots
   if (dotsHost) {
@@ -1846,6 +1943,7 @@ function paintCarousel(state) {
         '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
         '<div class="rc-foot">' +
           '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
+          '<span class="rc-pill-mount"></span>' +
           '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
           '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
           '<span class="rc-react" data-reactions-for="' + s.id + '"></span>' +
@@ -1854,6 +1952,8 @@ function paintCarousel(state) {
     grid.appendChild(card);
     if (window.egleze && window.egleze.reactions && window.egleze.reactions._rescan) window.egleze.reactions._rescan();
   });
+
+  if (window.__egAggPaintAll) window.__egAggPaintAll(grid);
 
   // Dots
   if (dotsHost) {
