@@ -105,7 +105,7 @@ a{color:inherit}
 .sc-score{background:var(--cream);color:#754a1d;padding:1px 5px;font-weight:700}
 
 /* card action footer (share / bookmark / react) */
-.sc-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 12px 12px;border-top:.5px solid #f1efe8;margin-top:auto}
+.sc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px 12px;border-top:.5px solid #f1efe8;margin-top:auto;flex-wrap:wrap}
 .sc-foot .eg-share,.sc-foot .eg-bookmark{background:none;border:none;cursor:pointer;color:#888780;padding:2px;line-height:0;transition:color .15s}
 .sc-foot .eg-share:hover,.sc-foot .eg-bookmark:hover{color:#bb1919}
 .sc-foot .eg-bookmark.is-saved{color:#bb1919}
@@ -113,7 +113,7 @@ a{color:inherit}
 .sc-foot .rc-react{display:inline-flex;align-items:center}
 
 /* aggregate reaction pill — show page cards */
-.sc-pill-mount{display:block;padding:8px 12px 12px;text-align:right}
+.sc-pill-mount{display:inline-flex;align-items:center;min-width:0;margin-right:auto}
 .rc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;line-height:1;white-space:nowrap}
 .rc-pill .rc-pill-dot{display:inline-block;width:6px;height:6px;border-radius:50%}
 .rc-pill[data-dom="inspires"]{background:#EAF3DE;color:#27500A}
@@ -643,13 +643,12 @@ function buildStoryCard(s, isPopular){
     + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4Z"/></svg>'
     + '</button>'
     + '<span class="rc-react" data-reactions-for="'+s.id+'"></span>';
-  body.appendChild(foot);
-
-  // aggregate reaction pill — its own row, right-aligned below action icons
+  // aggregate reaction pill — left-anchored in foot, sharing the row with action icons
   const pillMount = document.createElement('div');
   pillMount.className = 'sc-pill-mount';
   pillMount.innerHTML = '<span class="rc-pill-mount"></span>';
-  body.appendChild(pillMount);
+  foot.insertBefore(pillMount, foot.firstChild);
+  body.appendChild(foot);
 
   card.appendChild(body);
   return card;
