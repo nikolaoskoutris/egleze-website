@@ -289,6 +289,18 @@ function renderStoryHtml(story, artworkUrl) {
     .story-act-label{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700}
     .story-act-react{display:inline-flex;align-items:center}
     @media (max-width:520px){.story-actions{gap:14px}}
+    /* === aggregate community reactions bar === */
+    .story-agg{margin:14px 0 6px;padding:10px 12px;background:#FAFAF7;border:.5px solid #f0eee5;border-radius:8px;font-family:'DM Sans',sans-serif}
+    .story-agg-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+    .story-agg-label{font-size:10px;color:#888780;text-transform:uppercase;letter-spacing:1.5px;font-weight:500}
+    .story-agg-dom{font-size:12px;font-weight:500}
+    .story-agg-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#f1efe8}
+    .story-agg-bar > div{transition:flex 0.3s}
+    .story-agg-legend{display:flex;gap:14px;margin-top:8px;font-size:10px;color:#888780;flex-wrap:wrap}
+    .story-agg-legend span{display:inline-flex;align-items:center;gap:5px}
+    .story-agg-legend .dot{display:inline-block;width:6px;height:6px;border-radius:50%}
+    .story-agg-empty{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#F1EFE8;border-radius:100px;font-size:11px;font-weight:500;color:#5F5E5A;line-height:1}
+    .story-agg-empty svg{width:11px;height:11px;flex-shrink:0}
     .summary{font-family:'DM Sans',sans-serif;font-size:18px;line-height:1.65;color:#222;margin:24px 0 32px;font-weight:400}
     .story-quote{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;line-height:1.4;color:var(--dark);border-left:4px solid var(--red);padding:8px 0 8px 24px;margin:32px 0}
     .episode-summary, .key-points{margin-top:40px;padding-top:32px;border-top:0.5px solid var(--border)}
@@ -358,6 +370,9 @@ function renderStoryHtml(story, artworkUrl) {
       </div>
     </div>
 
+    <!-- Aggregate community reactions (bar when N>=10, gray pill otherwise). -->
+    <div class="story-agg" id="story-agg-mount" data-story-id="${story.id}"></div>
+
     ${artworkUrl ? `
     <div class="artwork-block">
       <img src="${escapeHtml(artworkUrl)}" alt="${escapeHtml(showName)}" loading="lazy">
@@ -414,6 +429,70 @@ function renderStoryHtml(story, artworkUrl) {
   <script src="/js/share.js"></script>
   <script src="/js/reactions.js"></script>
   <script src="/js/reactions-widget.js"></script>
+
+  <!-- Aggregate community reactions: fetch + render bar (or gray pill if N<10). -->
+  <script>
+  (function(){
+    var THRESHOLD = 10;
+    var LABELS = { inspires:'Inspired', concerns:'Concerned', curious:'Curious', changed:'Changed how I think', validates:'Validates' };
+    var COLORS = { inspires:'#639922', concerns:'#BA7517', curious:'#534AB7', changed:'#185FA5', validates:'#1D9E75' };
+    var TEXT_COLORS = { inspires:'#27500A', concerns:'#412402', curious:'#26215C', changed:'#042C53', validates:'#04342C' };
+    var ORDER = ['inspires','concerns','curious','changed','validates'];
+
+    function renderEmpty(mount){
+      mount.innerHTML = '<span class="story-agg-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/></svg>Be the first to react</span>';
+      mount.style.background = 'transparent';
+      mount.style.border = '0';
+      mount.style.padding = '8px 0';
+    }
+
+    function renderBar(mount, v){
+      var total = Number(v.total_reactions || 0);
+      // sort by count desc
+      var sorted = ORDER.map(function(k){ return { k: k, n: Number(v[k + '_count'] || 0) }; })
+        .filter(function(x){ return x.n > 0; })
+        .sort(function(a,b){ return b.n - a.n; });
+      var domLabel = LABELS[v.dominant_reaction] || v.dominant_reaction;
+      var domColor = TEXT_COLORS[v.dominant_reaction] || '#222';
+      var barHtml = sorted.map(function(x){
+        return '<div style="flex:' + x.n + ';background:' + COLORS[x.k] + ';"></div>';
+      }).join('');
+      var legendHtml = sorted.map(function(x){
+        var pct = Math.round((x.n / total) * 100);
+        return '<span><span class="dot" style="background:' + COLORS[x.k] + ';"></span>' + LABELS[x.k] + ' ' + pct + '%</span>';
+      }).join('');
+      mount.innerHTML =
+        '<div class="story-agg-head">' +
+          '<span class="story-agg-label">Community \u00b7 ' + total + ' reactions</span>' +
+          '<span class="story-agg-dom" style="color:' + domColor + ';">Mostly ' + domLabel + '</span>' +
+        '</div>' +
+        '<div class="story-agg-bar">' + barHtml + '</div>' +
+        '<div class="story-agg-legend">' + legendHtml + '</div>';
+    }
+
+    function fetchAndRender(){
+      var mount = document.getElementById('story-agg-mount');
+      if (!mount) return;
+      var id = mount.getAttribute('data-story-id');
+      if (!id) return;
+      var db = (window.egleze && window.egleze.auth && window.egleze.auth.client);
+      if (!db) { setTimeout(fetchAndRender, 100); return; }
+      db.rpc('get_story_reaction_aggregates', { story_ids: [parseInt(id, 10)] }).then(function(r){
+        var rows = (r && r.data) || [];
+        var v = rows[0];
+        var total = v ? Number(v.total_reactions || 0) : 0;
+        if (total >= THRESHOLD) renderBar(mount, v);
+        else renderEmpty(mount);
+      }).catch(function(err){
+        console.warn('[story-agg] fetch failed:', err);
+        renderEmpty(mount);
+      });
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fetchAndRender);
+    else fetchAndRender();
+  })();
+  </script>
 </body>
 </html>`;
 }
