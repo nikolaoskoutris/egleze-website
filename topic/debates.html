@@ -1,6 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Consent-gated analytics: GA4 makes NO network call until explicit consent (Egleze: no tracking until Accept) -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied',
+    'wait_for_update': 500
+  });
+  gtag('js', new Date());
+  window.EGLEZE_GA_ID = 'G-18MJKYD86Y';
+  window.eglezeLoadAnalytics = function(){
+    if (window.__eglezeGALoaded) return;
+    window.__eglezeGALoaded = true;
+    gtag('consent', 'update', { 'analytics_storage': 'granted' });
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.EGLEZE_GA_ID;
+    document.head.appendChild(s);
+    gtag('config', window.EGLEZE_GA_ID, { 'anonymize_ip': true });
+  };
+  try {
+    if (localStorage.getItem('egleze_cookie') === 'accepted') { window.eglezeLoadAnalytics(); }
+  } catch (e) {}
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Top Debate Podcasts — Politics, Philosophy, Ideas | Egleze</title>
@@ -18,10 +45,11 @@
 <meta name="author" content="Egleze Limited">
 <meta name="robots" content="noindex, follow">
 <link rel="canonical" href="https://egleze.com/topic/debates">
+<meta name="google-site-verification" content="rNxDHlJLJlcENKY5EyvvYSllFud6qDhckUJMbPfKDHo">
 
 <!-- ── OPEN GRAPH ────────────────────────────────────────────── -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Egleze — Podcast Intelligence Network">
+<meta property="og:site_name" content="Egleze">
 <meta property="og:title" content="Top Debate Podcasts — Politics, Philosophy, Ideas | Egleze">
 <meta property="og:description" content="The biggest moments from Destiny, Shapiro, Murray, Harris, and the rest of the debate world.">
 <meta property="og:url" content="https://egleze.com/topic/debates">
@@ -41,11 +69,11 @@
   "@context": "https://schema.org",
   "@type": "NewsMediaOrganization",
   "name": "Egleze",
-  "alternateName": "Egleze — Podcast Intelligence Network",
+  "alternateName": "Egleze",
   "url": "https://egleze.com",
   "sameAs": ["https://x.com/egleze_news","https://www.instagram.com/eglezemedia/","https://www.tiktok.com/@egleze.media","https://www.youtube.com/@Egleze","https://www.linkedin.com/company/egleze-the-podcast-intelligence-network/"],
   "foundingDate": "2026",
-  "description": "Egleze is the Podcast Intelligence Network — surfacing the most important revelations from the world top podcasts and presenting them as breaking news.",
+  "description": "Egleze surfaces the most important moments from independent podcasts, daily. Editorial coverage of conversations from Joe Rogan, Lex Fridman, Huberman Lab, Tucker Carlson and 80+ top shows.",
   "publishingPrinciples": "https://egleze.com/legal#editorial"
 }
 </script>
@@ -64,7 +92,6 @@
   }
 }
 </script>
-
 <!-- ── JSON-LD: COLLECTION PAGE (TOPIC) ─────────────────────── -->
 <script type="application/ld+json">
 {
@@ -97,6 +124,8 @@
   }
 }
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=Roboto+Condensed:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -128,10 +157,10 @@ header{background:var(--white);border-bottom:3px solid var(--red)}
 .header-top{max-width:1320px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
 .logo-wrap{display:flex;align-items:center;gap:0}
 .logo-block{display:flex;flex-direction:column}
-.logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;letter-spacing:5px;color:var(--dark);line-height:1}
+.logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:900;letter-spacing:-0.8px;color:var(--dark);line-height:1}
 .logo .e-red{color:var(--red)}
-.logo-rule{width:100%;height:3px;background:var(--red);margin:4px 0 3px}
-.logo-sub{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:3.5px;color:var(--muted);text-transform:uppercase;line-height:1}
+.logo-rule{display:none}
+.logo-sub{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:3.5px;color:var(--muted);text-transform:uppercase;line-height:1;margin-top:6px}
 .header-right{display:flex;align-items:center;gap:16px}
 .live-pill{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;padding:4px 12px;font-weight:700;text-transform:uppercase}
 .live-dot{width:6px;height:6px;background:#fff;border-radius:50%;animation:blink 1.2s ease-in-out infinite}
@@ -140,12 +169,27 @@ header{background:var(--white);border-bottom:3px solid var(--red)}
 .search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--border);padding:6px 12px;background:var(--light)}
 .search-box input{border:none;background:none;outline:none;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--dark);width:160px}
 .search-box input::placeholder{color:var(--muted)}
+
+/* ── MOBILE HEADER: stack vertically (Option 1A) ──────────────── */
+@media (max-width:760px){
+  .header-top{flex-direction:column;align-items:stretch;gap:12px;padding:12px 16px}
+  .logo-wrap{justify-content:flex-start}
+  .logo{font-size:34px}
+  .header-right{flex-direction:column;align-items:stretch;gap:10px;width:100%}
+  .search-wrap{width:100%}
+  .search-box{width:100%}
+  .search-box input{width:100%;font-size:14px}
+  .header-right > div:last-child{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .live-pill{flex-shrink:0;letter-spacing:1.2px;padding:4px 10px}
+  .header-date{margin-top:0 !important;text-align:right !important}
+}
 .search-dropdown{position:absolute;top:calc(100% + 6px);right:0;width:380px;max-height:480px;overflow-y:auto;background:#fff;border:1px solid var(--border);box-shadow:0 8px 28px rgba(0,0,0,0.18);font-family:'DM Sans',sans-serif;z-index:1200}
 .search-dropdown .sd-section{padding:10px 14px 6px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:#fafafa}
 .search-dropdown .sd-item{display:flex;gap:12px;padding:11px 14px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background .12s}
 .search-dropdown .sd-item:hover{background:#fff8f0}
 .search-dropdown .sd-item:last-child{border-bottom:none}
-.search-dropdown .sd-thumb{flex-shrink:0;width:48px;height:48px;background:var(--light) center/cover no-repeat;border:1px solid var(--border)}
+.search-dropdown .sd-thumb{flex-shrink:0;width:48px;height:48px;background:var(--light) center/cover no-repeat;border:1px solid var(--border);overflow:hidden;position:relative}
+.search-dropdown .sd-thumb-img{width:100%;height:100%;object-fit:cover;display:block}
 .search-dropdown .sd-body{flex:1;min-width:0}
 .search-dropdown .sd-headline{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:var(--dark);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .search-dropdown .sd-meta{font-size:11px;color:var(--muted)}
@@ -292,11 +336,11 @@ header{position:relative}
 /* ── BROADCAST SECTION ─────────────────────────────────────── */
 .broadcast{display:grid;grid-template-columns:1fr 360px;gap:0;background:var(--ink, #1a1a1a);color:#fafafa;margin:0 -28px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;z-index:1}
 @media (min-width:1340px){
-  .broadcast{margin:0 calc((100vw - 1284px) / -2 - 28px) 28px}
+  .broadcast{margin:0 max(-28px, calc((100vw - 1284px) / -2 - 28px)) 28px}
 }
 .bc-player{position:relative;background:#000;aspect-ratio:16/9;overflow:hidden}
-.bc-player .bc-yt-host{position:absolute;inset:0;background:#000}
-.bc-player .bc-yt-host iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.bc-player .bc-yt-host{position:absolute;inset:0;background:#000;z-index:1}
+.bc-player .bc-yt-host iframe{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1}
 .bc-player .bc-poster{position:absolute;inset:0;background:linear-gradient(135deg,#0d0d0d 0%,#1f1612 50%,#1a0e0e 100%);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
 .bc-player .bc-poster.gone{display:none}
 .bc-player .bc-poster::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center bottom,rgba(187,25,25,.18) 0%,transparent 60%);pointer-events:none}
@@ -305,19 +349,19 @@ header{position:relative}
 .bc-poster .bc-station-name{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2.6px;text-transform:uppercase}
 .bc-poster .bc-clock{position:absolute;top:18px;right:24px;color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;background:rgba(0,0,0,.55);padding:5px 11px}
 .bc-poster .bc-press-play{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#d6c79e;position:absolute;bottom:24px;left:50%;transform:translateX(-50%);text-align:center}
-.bc-poster .bc-pretitle{position:absolute;left:36px;bottom:90px;color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
-.bc-poster .bc-postertitle{position:absolute;left:36px;bottom:48px;right:36px;color:#fff;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;line-height:1.18;max-width:80%}
+.bc-poster .bc-pretitle{position:absolute;left:36px;bottom:130px;color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.bc-poster .bc-postertitle{position:absolute;left:36px;bottom:60px;right:36px;color:#fff;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;line-height:1.18;max-width:80%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .bc-poster .bc-postertitle em{font-style:italic;color:#ffd687}
 .bc-play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;border-radius:50%;background:rgba(187,25,25,.92);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 8px rgba(187,25,25,.18);z-index:3}
 .bc-play-btn:hover{transform:translate(-50%,-50%) scale(1.06);background:var(--red)}
 .bc-play-btn::after{content:"";border-style:solid;border-width:14px 0 14px 22px;border-color:transparent transparent transparent #fff;margin-left:5px}
 
 /* Lower third overlay during playback */
-.bc-lower-third{position:absolute;left:24px;bottom:54px;max-width:62%;display:flex;flex-direction:column;z-index:4;pointer-events:none;opacity:0;transition:opacity .25s}
+.bc-lower-third{position:absolute;left:24px;bottom:54px;max-width:62%;display:flex;flex-direction:column;align-items:flex-start;gap:4px;z-index:4;pointer-events:none;opacity:0;transition:opacity .25s}
 .bc-lower-third.show{opacity:1}
-.bc-lower-third .lt-stripe{display:inline-block;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;width:fit-content;font-weight:700}
-.bc-lower-third .lt-headline{background:rgba(20,12,8,.92);color:#fff;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.2;padding:9px 14px;max-width:100%;border-left:3px solid var(--red);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.bc-lower-third .lt-meta{background:rgba(20,12,8,.78);color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;padding:4px 14px;text-transform:uppercase}
+.bc-lower-third .lt-stripe{align-self:flex-start;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;font-weight:700;margin:0}
+.bc-lower-third .lt-headline{background:rgba(20,12,8,.92);color:#fff;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.2;padding:9px 14px;max-width:100%;border-left:3px solid var(--red);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:0}
+.bc-lower-third .lt-meta{background:rgba(20,12,8,.78);color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;padding:4px 14px;text-transform:uppercase;margin:0}
 
 /* Bottom progress overlay */
 .bc-progress-row{position:absolute;left:0;right:0;bottom:0;height:34px;display:flex;align-items:center;gap:12px;padding:0 18px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.85) 100%);z-index:5;pointer-events:none}
@@ -332,7 +376,10 @@ header{position:relative}
 .bc-player.audio-only .bc-poster.gone{display:flex}
 
 /* QUEUE PANEL */
-.bc-queue{padding:0;background:#16110d;border-left:1px solid #2a2018;display:flex;flex-direction:column;max-height:none}
+.bc-queue{padding:0;background:#16110d;border-left:1px solid #2a2018;display:flex;flex-direction:column}
+@media (min-width:921px){
+  .bc-queue{height:var(--bc-queue-height,auto);max-height:var(--bc-queue-height,none);overflow:hidden}
+}
 .bc-queue-header{padding:14px 20px;border-bottom:1px solid #2a2018;display:flex;align-items:baseline;gap:10px;background:#0e0a07}
 .bc-queue-header .bc-qh-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;color:#d6c79e;text-transform:uppercase}
 .bc-queue-header .bc-qh-time{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;color:#7a6f5d;margin-left:auto;text-transform:uppercase}
@@ -341,17 +388,31 @@ header{position:relative}
 .bc-q-item{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:12px 18px;border-bottom:1px solid #2a2018;cursor:pointer;transition:background .15s}
 .bc-q-item:hover{background:#1f1814}
 .bc-q-item.now-playing{background:linear-gradient(90deg,rgba(187,25,25,.18) 0%,transparent 100%);border-left:3px solid var(--red);padding-left:15px}
-.bc-q-item .bc-qi-thumb{width:48px;height:48px;background:var(--light) center/cover no-repeat;position:relative;flex-shrink:0;border:1px solid #2a2018}
+.bc-q-item .bc-qi-thumb{width:48px;height:48px;background:var(--light) center/cover no-repeat;position:relative;flex-shrink:0;border:1px solid #2a2018;overflow:hidden}
+.bc-q-item .bc-qi-thumb-img{width:100%;height:100%;object-fit:cover;display:block}
 .bc-q-item .bc-qi-meta{display:flex;flex-direction:column;gap:3px;min-width:0}
 .bc-q-item .bc-qi-cat{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.2px;color:#d6b878;text-transform:uppercase;font-weight:700}
 .bc-q-item.now-playing .bc-qi-cat{color:#ffb4b4}
 .bc-q-item .bc-qi-title{font-family:'Playfair Display',serif;font-size:12px;color:#fafafa;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .bc-q-item .bc-qi-when{font-family:'Roboto Condensed',sans-serif;font-size:9px;color:#7a6f5d;letter-spacing:.5px;text-transform:uppercase}
+.bc-queue-sentinel{display:flex;justify-content:center;align-items:center;gap:6px;padding:18px 14px;border-top:0.5px solid #2a2018;flex-shrink:0}
+.bc-queue-sentinel.is-done{padding:14px;color:#5a4d3a;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;justify-content:center}
+.bcq-spinner-dot{width:6px;height:6px;border-radius:50%;background:#5a4d3a;animation:bcqSpin 1.2s ease-in-out infinite}
+.bcq-spinner-dot:nth-child(2){animation-delay:.15s}
+.bcq-spinner-dot:nth-child(3){animation-delay:.3s}
+@keyframes bcqSpin{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
 
 .bc-queue-footer{padding:12px 18px;background:#0e0a07;border-top:1px solid #2a2018;display:flex;gap:8px;align-items:center;flex-shrink:0}
 .bc-queue-footer .bc-mode-label{flex:1;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;color:#d6c79e;text-transform:uppercase}
 .bc-toggle{display:inline-flex;align-items:center;gap:5px;background:#1f1814;color:#d6c79e;padding:6px 11px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid #2a2018;user-select:none}
 .bc-toggle.on{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* Mobile-only headline block that sits below the video (Option 2A).
+   Hidden on desktop; shown on mobile via the @media block below. */
+.bc-mobile-info{display:none}
+.bc-mobile-info .bc-mobile-stripe{display:inline-block;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:5px 11px;width:fit-content;font-weight:700}
+.bc-mobile-info .bc-mobile-headline{background:none;color:#fafafa;font-family:'Playfair Display',serif;font-size:17px;font-weight:700;line-height:1.25;padding:8px 0 6px;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bc-mobile-info .bc-mobile-meta{color:#d6c79e;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;line-height:1.5}
 
 /* Mobile */
 @media (max-width:920px){
@@ -359,7 +420,9 @@ header{position:relative}
   .bc-queue{max-height:340px;border-left:none;border-top:1px solid #2a2018}
   .bc-queue-list{max-height:240px}
   .bc-poster .bc-postertitle{font-size:16px}
-  .bc-lower-third .lt-headline{font-size:14px}
+  /* Hide the over-video overlay on mobile — show the below-video block instead */
+  .bc-lower-third{display:none}
+  .bc-mobile-info{display:block;padding:14px 18px 16px;background:#16110d;border-top:1px solid #2a2018}
 }
 
 /* ── INSTITUTIONAL FOOTER ──────────────────────────────────── */
@@ -561,35 +624,18 @@ header{position:relative}
 .reveals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .reveal-card{background:#fff;border:0.5px solid var(--border);border-radius:2px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .reveal-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
-.rc-art{position:relative;aspect-ratio:1/1;background:var(--dark);background-size:cover;background-position:center}
+.rc-art{position:relative;aspect-ratio:1/1;background:var(--dark);background-size:cover;background-position:center;overflow:hidden}
+.rc-art-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .rc-art-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.25);font-family:'Playfair Display',serif;font-size:42px;letter-spacing:1px;font-weight:700}
 .rc-cat{position:absolute;top:10px;left:10px;background:rgba(187,25,25,.95);color:#fff;padding:4px 9px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;font-weight:700;border-radius:2px;text-transform:uppercase}
 .rc-dur{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);color:#fff;padding:4px 8px;font-family:'DM Sans',sans-serif;font-size:10px;border-radius:2px}
 .rc-body{padding:14px;display:flex;flex-direction:column;flex:1}
 .rc-title{font-family:'Playfair Display',serif;font-size:15px;line-height:1.3;color:var(--dark);font-weight:700;margin-bottom:8px}
 .rc-summary{font-family:'DM Sans',sans-serif;font-size:12px;color:#444441;line-height:1.5;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.rc-foot{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding-top:10px;border-top:0.5px solid #f1efe8}
-.rc-foot-row{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0}
-.rc-foot-row .rc-show{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rc-foot-row .rc-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.rc-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:0.5px solid #f1efe8}
 .rc-show{font-family:'Roboto Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
 .rc-bookmark{font-size:14px;color:#888780;background:none;border:none;cursor:pointer;padding:0;line-height:1}
 .rc-bookmark:hover{color:var(--red)}
-/* aggregate reaction pill on cards — N>=10 threshold; colour by dominant dimension */
-.rc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;line-height:1;white-space:nowrap}
-.rc-pill .rc-pill-dot{display:inline-block;width:6px;height:6px;border-radius:50%}
-.rc-pill[data-dom="inspires"]{background:#EAF3DE;color:#27500A}
-.rc-pill[data-dom="inspires"] .rc-pill-dot{background:#639922}
-.rc-pill[data-dom="concerns"]{background:#FAEEDA;color:#412402}
-.rc-pill[data-dom="concerns"] .rc-pill-dot{background:#BA7517}
-.rc-pill[data-dom="curious"]{background:#EEEDFE;color:#26215C}
-.rc-pill[data-dom="curious"] .rc-pill-dot{background:#534AB7}
-.rc-pill[data-dom="changed"]{background:#E6F1FB;color:#042C53}
-.rc-pill[data-dom="changed"] .rc-pill-dot{background:#185FA5}
-.rc-pill[data-dom="validates"]{background:#E1F5EE;color:#04342C}
-.rc-pill[data-dom="validates"] .rc-pill-dot{background:#1D9E75}
-.rc-pill-empty{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;background:#F1EFE8;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:#5F5E5A;line-height:1;white-space:nowrap}
-.rc-pill-empty svg{width:11px;height:11px;flex-shrink:0}
 .reveals-dots{display:flex;justify-content:center;gap:6px;margin-top:22px}
 .reveals-dots .rd-dot{width:8px;height:4px;background:var(--border);border-radius:0;transition:all .2s;cursor:pointer;border:none;padding:0}
 .reveals-dots .rd-dot.active{width:28px;background:var(--dark)}
@@ -613,15 +659,31 @@ header{position:relative}
 .reveals-section.reveals-editorial .ed-mark{color:var(--red);font-style:normal;margin-right:6px;font-size:18px}
 .reveals-section.reveals-editorial .reveal-card{border-color:#f0d4d4}
 
+/* ── NEW STORIES TOAST (above Today's Reveals) ──────────── */
+.new-stories-toast-wrap{display:flex;justify-content:center;padding:14px 28px 0}
+.new-stories-toast{background:var(--red);color:#fff;border:none;border-radius:999px;padding:9px 18px;display:inline-flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 2px 12px rgba(187,25,25,0.28);transition:transform .15s ease,box-shadow .2s ease;animation:nstSlideIn .35s ease}
+.new-stories-toast:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(187,25,25,0.35)}
+.new-stories-toast:active{transform:translateY(0)}
+.new-stories-toast[hidden]{display:none}
+.nst-pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;animation:nstPulse 1.5s ease-in-out infinite;flex-shrink:0}
+.nst-arrow{font-size:13px;line-height:1;font-weight:700}
+@keyframes nstPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.25)}}
+@keyframes nstSlideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* NEW badge on freshly-arrived reveals cards */
+.reveal-card.is-new{border-color:var(--red) !important}
+.reveal-card.is-new .rc-art::after{content:'New';position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:2px;z-index:4;font-weight:700;line-height:1.5}
+
 /* MOBILE RESPONSIVE — Option D layout */
 @media (max-width:760px){
   .reveals-grid{grid-template-columns:1fr;gap:14px}
   .reveals-section{padding:20px 16px}
+  .new-stories-toast-wrap{padding:14px 16px 0}
+  .new-stories-toast{font-size:12px;padding:9px 16px}
   .reveals-h2{font-size:18px}
   .ncd-headline{font-size:22px}
   .filter-bar{margin:0 -16px 14px;padding:9px 16px;font-size:10px}
 }
-
 /* TOPIC PAGE — banner + empty state */
 .topic-banner{padding:42px 22px 30px;margin-bottom:6px;background:#fff}
 .topic-breadcrumb{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -676,7 +738,7 @@ header{position:relative}
 <!-- ── LAUNCH BANNER ─────────────────────────────────────────── -->
 <div id="launch-banner" style="background:#111;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;position:relative;border-bottom:2px solid #bb1919;z-index:9999">
   <div style="background:#bb1919;color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;font-weight:700">🚀 Launching June 15</div>
-  <div style="font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.8)"><strong style="color:#fff">Egleze</strong> — The Podcast Intelligence Network officially launches June 15, 2026</div>
+  <div style="font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.8)"><strong style="color:#fff">Egleze</strong> — the most important moments from independent podcasts, surfaced daily. Launches June 15, 2026</div>
   <div style="display:flex;gap:8px;align-items:center">
     <div style="text-align:center"><div id="cd-days" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;line-height:1">—</div><div style="font-family:'Roboto Condensed',sans-serif;font-size:7px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.4)">Days</div></div>
     <div style="font-size:14px;color:rgba(255,255,255,.3);margin-bottom:8px">:</div>
@@ -719,9 +781,9 @@ header{position:relative}
   <div class="header-top">
     <div class="logo-wrap">
       <a href="/" class="logo-block" style="text-decoration:none;color:inherit;display:block">
-        <div class="logo"><span class="e-red">E</span>GLEZE</div>
+        <div class="logo"><span class="e-red">E</span>gleze</div>
         <div class="logo-rule"></div>
-        <div class="logo-sub">Where conversations become headlines</div>
+        <div class="logo-sub">The most important moments from independent podcasts, surfaced daily</div>
       </a>
     </div>
     <div class="header-right">
@@ -735,6 +797,19 @@ header{position:relative}
       <div>
         <div class="live-pill"><span class="live-dot"></span> Live Coverage</div>
         <div class="header-date" style="margin-top:4px;text-align:right" id="header-date-stats">Loading…</div>
+      </div>
+      <button id="eg-signin-btn" type="button" style="display:none;padding:8px 16px;background:#0e0a06;color:#fff;border:none;font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;cursor:pointer;flex-shrink:0">Sign in</button>
+      <div id="eg-userbox-wrap" style="position:relative;flex-shrink:0">
+        <button id="eg-userbox" type="button" hidden aria-haspopup="true" aria-expanded="false" style="align-items:center;gap:8px;padding:5px 10px 5px 5px;background:#fff;border:1px solid #ddd;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--dark);cursor:pointer">
+          <span id="eg-userbox-avatar" style="width:24px;height:24px;border-radius:50%;background:#bb1919;color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-family:'Playfair Display',serif">E</span>
+          <span id="eg-userbox-name" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">You</span>
+          <span style="font-size:9px;color:#888" aria-hidden="true">▾</span>
+        </button>
+        <div id="eg-userdrop" hidden role="menu" aria-labelledby="eg-userbox">
+          <a class="eg-userdrop-item" href="/saved.html" role="menuitem">Saved stories</a>
+          <a class="eg-userdrop-item" href="/account.html" role="menuitem">Account</a>
+          <button class="eg-userdrop-item eg-userdrop-signout" type="button" id="eg-signout-btn" role="menuitem">Sign out</button>
+        </div>
       </div>
     </div>
   </div>
@@ -847,6 +922,8 @@ header{position:relative}
   <!-- ── BROADCAST SECTION ────────────────────────────────────── -->
   <div class="broadcast" id="broadcast">
     <div class="bc-player" id="bc-player">
+      <button class="eg-bookmark bc-player-bookmark" id="bc-player-bookmark" type="button" aria-label="Save current broadcast" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>
+      <button class="eg-share bc-player-share" id="bc-player-share" type="button" aria-label="Share current broadcast" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
       <div class="bc-yt-host" id="bc-yt-host"></div>
       <div class="bc-poster" id="bc-poster">
         <div class="bc-station">
@@ -870,6 +947,12 @@ header{position:relative}
         <span class="bc-total" id="bc-total">0:00</span>
       </div>
     </div>
+    <!-- Mobile-only: same headline/meta but BELOW the video so it doesn't cover the speaker -->
+    <div class="bc-mobile-info" id="bc-mobile-info" aria-hidden="true">
+      <span class="bc-mobile-stripe" id="bc-mobile-stripe">Egleze Brief</span>
+      <h2 class="bc-mobile-headline" id="bc-mobile-headline">—</h2>
+      <div class="bc-mobile-meta" id="bc-mobile-meta">—</div>
+    </div>
     <div class="bc-queue">
       <div class="bc-queue-header">
         <span class="bc-qh-label" id="bc-qh-label">Up next in broadcast</span>
@@ -884,6 +967,15 @@ header{position:relative}
         <span class="bc-toggle" id="bc-toggle-audio" role="button" aria-pressed="false">Audio Only</span>
       </div>
     </div>
+  </div>
+
+  <!-- ── NEW STORIES TOAST ───────────────────────────────────── -->
+  <div class="new-stories-toast-wrap">
+    <button id="new-stories-toast" type="button" class="new-stories-toast" hidden aria-live="polite">
+      <span class="nst-pulse" aria-hidden="true"></span>
+      <span id="nst-text">New stories available</span>
+      <span class="nst-arrow" aria-hidden="true">↑</span>
+    </button>
   </div>
 
   <!-- ── TODAY'S FILED REVEALS — 3-CARD CAROUSEL ─────────────── -->
@@ -958,7 +1050,7 @@ header{position:relative}
         <div class="eg-brand-e">E</div>
         <div class="eg-brand-name">Egleze</div>
       </a>
-      <div class="eg-brand-tag">Where conversations become headlines.</div>
+      <div class="eg-brand-tag">The most important moments from independent podcasts, surfaced daily.</div>
       <div class="eg-brand-blurb">
         Egleze (from the Greek <em>Ekklisia</em>) is an international news institution dedicated to the curation and reporting of long-form digital media — extracting the world's most important spoken-word revelations into a permanent, searchable record.
       </div>
@@ -1215,6 +1307,93 @@ function safeFetch(input, init) {
 }
 
 let db = null;
+
+// ─── EGLEZE DIVERSIFY UTILITIES ────────────────────────────────────────────
+// Strict round-robin interleave so consecutive items never share a show_name.
+// Algorithm: group by show_name, then at each step pick the show with the
+// largest remaining bucket (excluding the show used last). When only one
+// show's stories remain, they get appended in order — this is the unavoidable
+// fallback when there's no other show available. Stable: preserves the order
+// within each show (newest first when input is sorted newest first).
+function interleaveByShow(stories) {
+  if (!Array.isArray(stories) || stories.length < 3) return stories || [];
+  // Group by show_name. Stories with no show_name go into a single bucket.
+  var groups = new Map();
+  var order = [];
+  for (var i = 0; i < stories.length; i++) {
+    var key = (stories[i] && stories[i].show_name) || '__unknown__';
+    if (!groups.has(key)) { groups.set(key, []); order.push(key); }
+    groups.get(key).push(stories[i]);
+  }
+  if (groups.size === 1) return stories.slice();
+  var result = [];
+  var lastShow = null;
+  while (result.length < stories.length) {
+    // Find the show (other than last) with the most items remaining
+    var bestKey = null;
+    var bestCount = -1;
+    groups.forEach(function(arr, key) {
+      if (arr.length === 0) return;
+      if (key === lastShow && groups.size > 1) {
+        // Skip last show if any other show still has items
+        var othersHaveItems = false;
+        groups.forEach(function(a, k) { if (k !== lastShow && a.length > 0) othersHaveItems = true; });
+        if (othersHaveItems) return;
+      }
+      if (arr.length > bestCount) { bestCount = arr.length; bestKey = key; }
+    });
+    if (bestKey === null) break;
+    result.push(groups.get(bestKey).shift());
+    lastShow = bestKey;
+  }
+  return result;
+}
+
+// ─── WATCHED-STORY TRACKING (localStorage) ─────────────────────────────────
+// Keeps last 500 watched story IDs with 14-day rolling expiry.
+// Applies only to broadcast queue — topic pages and direct links always
+// show every story (Egleze's archive/connector ethos).
+var WATCHED_KEY = 'egleze.watched';
+var WATCHED_MAX = 500;
+var WATCHED_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+function getWatchedSet() {
+  try {
+    var raw = localStorage.getItem(WATCHED_KEY);
+    if (!raw) return new Map();
+    var parsed = JSON.parse(raw);
+    var now = Date.now();
+    var m = new Map();
+    Object.keys(parsed).forEach(function(id) {
+      if (parsed[id] && (now - parsed[id]) < WATCHED_TTL_MS) {
+        m.set(String(id), parsed[id]);
+      }
+    });
+    return m;
+  } catch(e) { return new Map(); }
+}
+function markWatched(storyId) {
+  if (storyId == null) return;
+  try {
+    var m = getWatchedSet();
+    m.set(String(storyId), Date.now());
+    // Trim to most-recent WATCHED_MAX entries
+    if (m.size > WATCHED_MAX) {
+      var entries = Array.from(m.entries()).sort(function(a, b) { return b[1] - a[1]; }).slice(0, WATCHED_MAX);
+      m = new Map(entries);
+    }
+    var obj = {};
+    m.forEach(function(t, id) { obj[id] = t; });
+    localStorage.setItem(WATCHED_KEY, JSON.stringify(obj));
+  } catch(e) {}
+}
+function filterUnwatched(stories) {
+  if (!Array.isArray(stories) || stories.length === 0) return stories || [];
+  var watched = getWatchedSet();
+  if (watched.size === 0) return stories;
+  return stories.filter(function(s) { return !watched.has(String(s.id)); });
+}
+// ─── END DIVERSIFY UTILITIES ───────────────────────────────────────────────
+
 function initDB() {
   if (typeof supabase !== 'undefined') {
     db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -1228,67 +1407,6 @@ function initDB() {
 }
 // Initialize as soon as Supabase library loads
 initDB();
-
-// ── AGGREGATE REACTION PILL — N>=10 threshold; cards show dominant dimension ──
-window.__egAgg = window.__egAgg || { cache: {}, pending: {} };
-window.__egAggTTL = 5 * 60 * 1000; // 5 min
-window.__egAggThreshold = 10;
-window.__egAggLabels = { inspires:'Inspired', concerns:'Concerned', curious:'Curious', changed:'Changed how I think', validates:'Validates' };
-window.__egAggFetch = function(ids) {
-  if (!db) return Promise.resolve();
-  var now = Date.now();
-  var need = [];
-  for (var i=0;i<ids.length;i++) {
-    var id = String(ids[i]);
-    var c = window.__egAgg.cache[id];
-    if (!c || (now - c.t) > window.__egAggTTL) need.push(ids[i]);
-  }
-  if (!need.length) return Promise.resolve();
-  need = need.filter(function(id){ return !window.__egAgg.pending[id]; });
-  if (!need.length) return Promise.resolve();
-  need.forEach(function(id){ window.__egAgg.pending[id] = 1; });
-  return db.rpc('get_story_reaction_aggregates', { story_ids: need }).then(function(r){
-    var rows = (r && r.data) || [];
-    var seen = {};
-    rows.forEach(function(row){
-      window.__egAgg.cache[String(row.story_id)] = { t: Date.now(), v: row };
-      seen[String(row.story_id)] = 1;
-    });
-    need.forEach(function(id){
-      var key = String(id);
-      if (!seen[key]) window.__egAgg.cache[key] = { t: Date.now(), v: null };
-      delete window.__egAgg.pending[id];
-    });
-  }).catch(function(err){
-    console.warn('[rc-pill] aggregate fetch failed:', err);
-    need.forEach(function(id){ delete window.__egAgg.pending[id]; });
-  });
-};
-window.__egAggRender = function(card) {
-  var id = card.getAttribute('data-story-id');
-  if (!id) return;
-  var mount = card.querySelector('.rc-pill-mount');
-  if (!mount) return;
-  var c = window.__egAgg.cache[String(id)];
-  var v = c && c.v;
-  var total = v ? Number(v.total_reactions || 0) : 0;
-  if (total >= window.__egAggThreshold && v.dominant_reaction) {
-    var label = window.__egAggLabels[v.dominant_reaction] || v.dominant_reaction;
-    mount.innerHTML = '<span class="rc-pill" data-dom="' + v.dominant_reaction + '"><span class="rc-pill-dot"></span>' + label + ' · ' + total + '</span>';
-  } else {
-    mount.innerHTML = '<span class="rc-pill-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/></svg>Be the first to react</span>';
-  }
-};
-window.__egAggPaintAll = function(grid) {
-  if (!grid) return;
-  var cards = grid.querySelectorAll('[data-story-id]');
-  var ids = [];
-  cards.forEach(function(c){ var id = c.getAttribute('data-story-id'); if (id) ids.push(parseInt(id, 10)); });
-  if (!ids.length) return;
-  window.__egAggFetch(ids).then(function(){
-    cards.forEach(function(c){ window.__egAggRender(c); });
-  });
-};
 
 // ── TOPIC FILTER & NAV ──────────────────────────────────────────
 document.querySelectorAll('.topic-btn').forEach(btn=>{
@@ -1405,7 +1523,7 @@ async function loadStories(topic = null) {
     let query = db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(50);
 
     // Filter by topic field — map full category names to keyword fragments
@@ -1456,7 +1574,7 @@ async function loadStories(topic = null) {
           .select('*')
           .eq('status', 'approved')
           .contains('categories', [topic])
-          .order('created_at', { ascending: false })
+          .order('updated_at', { ascending: false, nullsFirst: false })
           .limit(50);
         if (catData && catData.length > 0) {
           // Merge and deduplicate by id
@@ -1473,7 +1591,7 @@ async function loadStories(topic = null) {
           .select('*')
           .eq('status', 'approved')
           .or(`headline.ilike.%${topic}%,summary.ilike.%${topic}%`)
-          .order('created_at', { ascending: false })
+          .order('updated_at', { ascending: false, nullsFirst: false })
           .limit(20);
         if (textData && textData.length > 0) {
           const ids = new Set(combined.map(s => s.id));
@@ -1487,7 +1605,11 @@ async function loadStories(topic = null) {
       showEmptyState(topic);
       return;
     }
+    // Interleave by show — strict round-robin so consecutive cards (and trios)
+    // never share a podcast. Surfaces variety from across our 86 shows.
+    combined = interleaveByShow(combined);
     renderRevealsCarousel(combined, topic);
+    if (typeof _setRevealsBaseline === 'function') _setRevealsBaseline(combined);
     injectStorySchema(combined);
     updateTicker(combined);
     updateFilterUI(topic, combined.length);
@@ -1515,6 +1637,7 @@ function renderRevealsCarousel(stories, topic) {
 
   window._revealsState.allStories = stories;
   window._revealsState.page = 0;
+  if (typeof _setRevealsBaseline === 'function') _setRevealsBaseline(stories);
   paintReveals();
 }
 
@@ -1533,19 +1656,21 @@ function paintReveals() {
 
   // Build cards
   grid.innerHTML = '';
+  var _artHits = 0, _artMisses = 0;
   pageStories.forEach(function(s) {
     var card = document.createElement('div');
-    card.className = 'reveal-card';
+    card.className = 'reveal-card' + (s._isNew ? ' is-new' : '');
     card.setAttribute('data-clip-trigger', '1');
     card.setAttribute('data-story-id', s.id);
 
-    var artBg = '';
-    var artFallback = '';
-    if (window._artworkCache && window._artworkCache[s.show_name]) {
-      artBg = 'background-image:url("' + window._artworkCache[s.show_name] + '")';
+    var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+    if (artUrl) { _artHits++; } else { _artMisses++; }
+    var artInner;
+    if (artUrl) {
+      artInner = '<img class="rc-art-img" src="' + escapeHtmlMini(artUrl) + '" alt="' + escapeHtmlMini(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'rc-art-failed\');">';
     } else {
       var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
-      artFallback = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
+      artInner = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
     }
 
     var clipDur = '';
@@ -1555,8 +1680,8 @@ function paintReveals() {
     }
 
     card.innerHTML =
-      '<div class="rc-art" style="' + artBg + '">' +
-        artFallback +
+      '<div class="rc-art">' +
+        artInner +
         '<div class="rc-cat">' + escapeHtmlMini(s.topic || 'Reveal') + '</div>' +
         clipDur +
       '</div>' +
@@ -1564,32 +1689,14 @@ function paintReveals() {
         '<div class="rc-title">' + escapeHtmlMini(s.headline || '') + '</div>' +
         '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
         '<div class="rc-foot">' +
-          '<div class="rc-foot-row">' +
-            '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
-            '<div class="rc-actions">' +
-              '<button class="rc-bookmark" type="button" aria-label="Save for later" onclick="event.stopPropagation();">★</button>' +
-            '</div>' +
-          '</div>' +
-          '<div class="rc-foot-row"><span class="rc-pill-mount"></span></div>' +
+          '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
+          '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
+          '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
-
-    // Try to load artwork if not cached
-    if (!window._artworkCache || !window._artworkCache[s.show_name]) {
-      tryLoadArtwork(s.show_name, function(url) {
-        var artEl = card.querySelector('.rc-art');
-        if (artEl && url) {
-          artEl.style.backgroundImage = 'url("' + url + '")';
-          var fb = artEl.querySelector('.rc-art-fallback');
-          if (fb) fb.remove();
-        }
-      });
-    }
   });
-
-  // Paint aggregate reaction pills
-  if (window.__egAggPaintAll) window.__egAggPaintAll(grid);
+  console.log('[reveals] painted ' + pageStories.length + ' cards · artwork hits=' + _artHits + ' misses=' + _artMisses);
 
   // Update dots
   if (dotsHost) {
@@ -1632,76 +1739,125 @@ function escapeHtmlMini(s) {
     .replace(/'/g, '&#39;');
 }
 
-// Try to load podcast artwork from iTunes JSONP (best-effort, async)
-function tryLoadArtwork(showName, callback) {
-  if (!showName || !callback) return;
-  window._artworkCache = window._artworkCache || {};
-  window._artworkCallbacks = window._artworkCallbacks || {};
+// ── NEW STORIES POLLING — 60s interval + tab refocus ─────────
+// Polls Supabase for stories newer than the most-recent currently
+// rendered. Shows a toast above Today's Reveals; tap prepends new
+// cards (marked .is-new with a NEW badge until next page load).
+window._newStoriesState = window._newStoriesState || {
+  lastLoadedAt: null,
+  pollInterval: null,
+  seenIds: new Set()
+};
 
-  // Already cached — fire immediately
-  if (window._artworkCache[showName]) {
-    callback(window._artworkCache[showName]);
-    return;
+function _setRevealsBaseline(stories) {
+  var state = window._newStoriesState;
+  state.seenIds.clear();
+  if (stories && stories.length) {
+    state.lastLoadedAt = stories[0].created_at;
+    stories.forEach(function(s) { if (s && s.id) state.seenIds.add(s.id); });
   }
-
-  // Already in-flight — queue this callback to fire when result arrives
-  if (window._artworkCallbacks[showName]) {
-    window._artworkCallbacks[showName].push(callback);
-    return;
-  }
-
-  // First request for this show — initiate the JSONP fetch
-  window._artworkCallbacks[showName] = [callback];
-
-  var cbName = '_artCb_' + Math.random().toString(36).substr(2, 9);
-
-  function fireAllCallbacks(url) {
-    var queued = window._artworkCallbacks[showName] || [];
-    delete window._artworkCallbacks[showName];
-    queued.forEach(function(cb) {
-      try { cb(url); } catch(e) {}
-    });
-  }
-
-  function cleanup() {
-    delete window[cbName];
-    var s = document.getElementById('artworkScript_' + cbName);
-    if (s && s.parentNode) s.remove();
-  }
-
-  window[cbName] = function(data) {
-    try {
-      if (data && data.results && data.results[0] && data.results[0].artworkUrl600) {
-        var url = data.results[0].artworkUrl600;
-        window._artworkCache[showName] = url;
-        fireAllCallbacks(url);
-      } else {
-        // No artwork found — clear the queue so future requests can retry
-        delete window._artworkCallbacks[showName];
-      }
-    } catch(e) {
-      delete window._artworkCallbacks[showName];
-    }
-    cleanup();
-  };
-
-  var script = document.createElement('script');
-  script.id = 'artworkScript_' + cbName;
-  script.src = 'https://itunes.apple.com/search?term=' + encodeURIComponent(showName) + '&media=podcast&limit=1&callback=' + cbName;
-  script.onerror = function() {
-    delete window._artworkCallbacks[showName];
-    cleanup();
-  };
-  document.head.appendChild(script);
-
-  // Timeout
-  setTimeout(function() {
-    if (window[cbName]) {
-      delete window._artworkCallbacks[showName];
-      cleanup();
-    }
-  }, 5000);
+  // Hide toast on baseline reset (e.g., topic filter change)
+  var toast = document.getElementById('new-stories-toast');
+  if (toast) toast.hidden = true;
 }
+
+async function checkForNewStories() {
+  if (!db && (typeof initDB !== 'function' || !initDB())) return;
+  var state = window._newStoriesState;
+  if (!state.lastLoadedAt) return;
+  try {
+    var res = await db
+      .from('stories')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'approved')
+      .gt('created_at', state.lastLoadedAt);
+    if (res.error) { console.warn('[new-stories] poll failed:', res.error.message); return; }
+    var count = res.count || 0;
+    var toast = document.getElementById('new-stories-toast');
+    var textEl = document.getElementById('nst-text');
+    if (!toast || !textEl) return;
+    if (count > 0) {
+      textEl.textContent = count + ' new ' + (count === 1 ? 'story' : 'stories');
+      toast.hidden = false;
+    }
+  } catch (e) {
+    console.warn('[new-stories] poll threw:', e);
+  }
+}
+
+async function onNewStoriesToastClick() {
+  var state = window._newStoriesState;
+  var toast = document.getElementById('new-stories-toast');
+  if (!state.lastLoadedAt) { if (toast) toast.hidden = true; return; }
+  try {
+    var res = await db
+      .from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .gt('created_at', state.lastLoadedAt)
+      .order('created_at', { ascending: false });
+    if (res.error || !res.data || !res.data.length) {
+      if (toast) toast.hidden = true;
+      return;
+    }
+    var newOnes = res.data.filter(function(s) { return s && s.id && !state.seenIds.has(s.id); });
+    if (newOnes.length === 0) {
+      if (toast) toast.hidden = true;
+      return;
+    }
+    newOnes.forEach(function(s) {
+      state.seenIds.add(s.id);
+      s._isNew = true;
+      // Cache new stories so other UI (broadcast, weekly, search) can find them
+      if (window._storyCache) window._storyCache[s.id] = s;
+    });
+    state.lastLoadedAt = newOnes[0].created_at;
+    var revealsState = window._revealsState;
+    if (revealsState) {
+      revealsState.allStories = newOnes.concat(revealsState.allStories || []);
+      revealsState.page = 0;
+      paintReveals();
+      // Smooth scroll to reveals so user sees the new arrivals
+      var section = document.getElementById('reveals-section');
+      if (section && typeof section.scrollIntoView === 'function') {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    if (toast) toast.hidden = true;
+  } catch (e) {
+    console.warn('[new-stories] tap handler threw:', e);
+    if (toast) toast.hidden = true;
+  }
+}
+
+function _initNewStoriesPolling() {
+  var toast = document.getElementById('new-stories-toast');
+  if (toast && !toast._wired) {
+    toast.addEventListener('click', onNewStoriesToastClick);
+    toast._wired = true;
+  }
+  var state = window._newStoriesState;
+  if (state.pollInterval) clearInterval(state.pollInterval);
+  state.pollInterval = setInterval(checkForNewStories, 60000);
+  if (!document._newStoriesVisHook) {
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') checkForNewStories();
+    });
+    document._newStoriesVisHook = true;
+  }
+  console.log('[new-stories] polling started · 60s interval + tab refocus');
+}
+
+// Auto-start when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initNewStoriesPolling);
+} else {
+  _initNewStoriesPolling();
+}
+
+// Legacy iTunes JSONP artwork loader removed. All artwork is now self-hosted —
+// preloaded once at init from Supabase shows.artwork_url via loadShowsArtwork()
+// and served through getShowArtwork(showName). No third-party dependency.
 
 // ── FILTER STATE UI ─────────────────────────────────────────────
 function updateFilterUI(topic, count) {
@@ -1763,13 +1919,13 @@ function paintCarousel(state) {
     card.setAttribute('data-clip-trigger', '1');
     card.setAttribute('data-story-id', s.id);
 
-    var artBg = '';
-    var artFallback = '';
-    if (window._artworkCache && window._artworkCache[s.show_name]) {
-      artBg = 'background-image:url("' + window._artworkCache[s.show_name] + '")';
+    var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+    var artInner;
+    if (artUrl) {
+      artInner = '<img class="rc-art-img" src="' + escapeHtmlMini(artUrl) + '" alt="' + escapeHtmlMini(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'rc-art-failed\');">';
     } else {
       var initials = (s.show_name || 'EG').split(' ').slice(0, 2).map(function(w){return w.charAt(0);}).join('').toUpperCase();
-      artFallback = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
+      artInner = '<div class="rc-art-fallback">' + escapeHtmlMini(initials) + '</div>';
     }
 
     var clipDur = '';
@@ -1779,8 +1935,8 @@ function paintCarousel(state) {
     }
 
     card.innerHTML =
-      '<div class="rc-art" style="' + artBg + '">' +
-        artFallback +
+      '<div class="rc-art">' +
+        artInner +
         '<div class="rc-cat">' + escapeHtmlMini(s.topic || 'Reveal') + '</div>' +
         clipDur +
       '</div>' +
@@ -1788,31 +1944,13 @@ function paintCarousel(state) {
         '<div class="rc-title">' + escapeHtmlMini(s.headline || '') + '</div>' +
         '<div class="rc-summary">' + escapeHtmlMini(s.summary || '') + '</div>' +
         '<div class="rc-foot">' +
-          '<div class="rc-foot-row">' +
-            '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
-            '<div class="rc-actions">' +
-              '<button class="rc-bookmark" type="button" aria-label="Save for later" onclick="event.stopPropagation();">★</button>' +
-            '</div>' +
-          '</div>' +
-          '<div class="rc-foot-row"><span class="rc-pill-mount"></span></div>' +
+          '<span class="rc-show">' + escapeHtmlMini(s.show_name || '') + ' · ' + escapeHtmlMini(timeAgo(s.created_at)) + '</span>' +
+          '<button class="eg-bookmark rc-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
+          '<button class="eg-share rc-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
         '</div>' +
       '</div>';
     grid.appendChild(card);
-
-    if (!window._artworkCache || !window._artworkCache[s.show_name]) {
-      tryLoadArtwork(s.show_name, function(url) {
-        var artEl = card.querySelector('.rc-art');
-        if (artEl && url) {
-          artEl.style.backgroundImage = 'url("' + url + '")';
-          var fb = artEl.querySelector('.rc-art-fallback');
-          if (fb) fb.remove();
-        }
-      });
-    }
   });
-
-  // Paint aggregate reaction pills
-  if (window.__egAggPaintAll) window.__egAggPaintAll(grid);
 
   // Dots
   if (dotsHost) {
@@ -1879,7 +2017,7 @@ async function loadEditorialChoice() {
       .select('*')
       .eq('status', 'approved')
       .eq('is_editorial_pick', true)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(15);
     if (error) {
       // If column doesn't exist yet (Supabase returns PGRST116/PGRST204), fall back to empty
@@ -2118,7 +2256,7 @@ async function loadSidebar() {
     const { data } = await db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(6);
     if (!data || data.length === 0) return;
     const items = document.querySelectorAll('.side-item');
@@ -2261,16 +2399,15 @@ function renderSearchDropdown(term, stories) {
 
   var html = '<div class="sd-section">' + stories.length + ' result' + (stories.length === 1 ? '' : 's') + '</div>';
   stories.forEach(function(s) {
-    var thumb = '';
-    var artwork = (window.artworkCache && s.show_name) ? window.artworkCache[s.show_name] : null;
-    if (artwork) {
-      thumb = ' style="background-image:url(' + JSON.stringify(artwork) + ')"';
-    }
+    var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+    var thumbInner = artUrl
+      ? '<img class="sd-thumb-img" src="' + escapeHtml(artUrl) + '" alt="' + escapeHtml(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';">'
+      : '';
     // Every result is clickable. If no source_url, the click handler will surface a friendly message.
     var clickAttrs = ' data-clip-trigger="1" data-story-id="' + s.id + '"';
     var hasVid = s.source_url ? '' : '<span style="color:var(--muted);font-size:10px;font-style:italic;margin-left:6px">(no video)</span>';
     html += '<div class="sd-item"' + clickAttrs + '>' +
-      '<div class="sd-thumb"' + thumb + '></div>' +
+      '<div class="sd-thumb">' + thumbInner + '</div>' +
       '<div class="sd-body">' +
         '<div class="sd-headline">' + escapeHtml(s.headline || '') + hasVid + '</div>' +
         '<div class="sd-meta"><strong>' + escapeHtml(s.show_name || '') + '</strong>' +
@@ -2429,7 +2566,7 @@ async function loadClips() {
     const { data } = await db.from('stories')
       .select('*')
       .eq('status', 'approved')
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(8);
     const grid = document.getElementById('clips-grid');
     if (!grid) return;
@@ -2570,6 +2707,31 @@ function openClipPlayer(story, pushUrl) {
     (story.episode ? ' · ' + story.episode : '') + clipDur;
   summaryEl.textContent = story.summary || '';
   cta.href = story.source_url;
+
+  // Wire bookmark in clip modal to whatever story is currently playing
+  try {
+    var cpBookmark = document.getElementById('cp-bookmark');
+    if (cpBookmark) {
+      if (story.id) {
+        cpBookmark.setAttribute('data-story-id', story.id);
+        cpBookmark.style.display = '';
+        var saved = window.egleze && window.egleze.saved && window.egleze.saved.has(String(story.id));
+        cpBookmark.classList.toggle('is-saved', !!saved);
+      } else {
+        // No story id — hide the bookmark for synthesized fallbacks
+        cpBookmark.style.display = 'none';
+      }
+    }
+    var cpShare = document.getElementById('cp-share');
+    if (cpShare) {
+      if (story.id) {
+        cpShare.setAttribute('data-story-id', story.id);
+        cpShare.style.display = '';
+      } else {
+        cpShare.style.display = 'none';
+      }
+    }
+  } catch (e) { /* don't let this break the modal */ }
 
   // Populate episode summary panel — only show when episode_summary or episode_key_points exists
   populateEpisodePanel(story);
@@ -2869,13 +3031,26 @@ var bcState = {
   autoAdvance: true, // continuous-play toggle (default ON)
   audioOnly: false,  // audio-only toggle (default OFF)
   endTimer: null,    // timeout that fires at clip_end_seconds
-  progressTimer: null
+  endTimerStartedAt: 0,    // wall-clock ms when the end timer began (or resumed)
+  endTimerTotalMs: 0,      // total ms the current timer was set for
+  endTimerRemainingMs: 0,  // ms remaining to fire when paused; 0 when running
+  isPaused: false,         // true while YouTube player is paused
+  progressTimer: null,
+  // Infinite scroll pagination
+  queueLoadingMore: false,  // mutex during load-more fetch
+  queueHasMore: true,       // false once we've hit the end
+  queueObserver: null,      // IntersectionObserver instance for sentinel
+  queueScrollHandler: null  // fallback scroll listener (older browsers)
 };
 
 async function loadBroadcastQueue(topic) {
   if (!db && !initDB()) return;
   // If topic param not provided, use the current global topic state
   if (topic === undefined) topic = window._currentTopic || null;
+  // Reset pagination state on every fresh load (initial paint, topic-filter change, periodic refresh)
+  bcState.queueLoadingMore = false;
+  bcState.queueHasMore = true;
+  if (bcState.queueObserver) { bcState.queueObserver.disconnect(); bcState.queueObserver = null; }
   try {
     var query = db.from('stories')
       .select('*')
@@ -2883,7 +3058,7 @@ async function loadBroadcastQueue(topic) {
       .not('source_url', 'is', null)
       .not('clip_start_seconds', 'is', null)
       .not('clip_end_seconds', 'is', null)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(16);
     // Apply topic filter if set
     if (topic) {
@@ -2897,6 +3072,13 @@ async function loadBroadcastQueue(topic) {
     var stories = (result.data || []).filter(function(s){
       return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
     });
+    // If we got fewer rows than requested, there's no more data to fetch
+    if ((result.data || []).length < 16) bcState.queueHasMore = false;
+    // Broadcast = live feed of unseen content. Hide what the user has watched
+    // already in this device's localStorage. Then interleave by show so the
+    // queue never plays two consecutive stories from the same podcast.
+    stories = filterUnwatched(stories);
+    stories = interleaveByShow(stories);
     bcState.queue = stories;
     bcState.currentIndex = 0;
     renderBroadcastQueue();
@@ -2932,21 +3114,168 @@ function renderBroadcastQueue() {
   }
   var html = '';
   bcState.queue.forEach(function(s, i) {
-    var artwork = (window.artworkCache && s.show_name) ? window.artworkCache[s.show_name] : null;
-    var thumbStyle = artwork ? ' style="background-image:url(' + JSON.stringify(artwork) + ')"' : '';
-    var when = timeAgo(s.created_at);
-    var isPlaying = (i === bcState.currentIndex);
-    var label = isPlaying ? '▶ Now Playing · ' + (s.topic || 'Story') : (i === bcState.currentIndex + 1 ? 'Up Next · ' + (s.topic || 'Story') : (s.topic || 'Story'));
-    html += '<div class="bc-q-item' + (isPlaying ? ' now-playing' : '') + '" data-bc-index="' + i + '">' +
-      '<div class="bc-qi-thumb"' + thumbStyle + '></div>' +
-      '<div class="bc-qi-meta">' +
-        '<span class="bc-qi-cat">' + escapeHtml(label) + '</span>' +
-        '<span class="bc-qi-title">' + escapeHtml(s.headline || '') + '</span>' +
-        '<span class="bc-qi-when"><strong style="color:#bcb09a">' + escapeHtml(s.show_name || '') + '</strong> · ' + escapeHtml(when) + '</span>' +
-      '</div>' +
-    '</div>';
+    html += buildBroadcastQueueRow(s, i);
   });
   list.innerHTML = html;
+  // Attach (or reattach) infinite-scroll sentinel + observer
+  attachQueueScrollObserver();
+  // Smooth-scroll the now-playing item into view (if any)
+  var playingEl = list.querySelector('.bc-q-item.now-playing');
+  if (playingEl) {
+    try {
+      playingEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    } catch(_) {
+      playingEl.scrollIntoView();
+    }
+  }
+}
+
+// Builds the HTML for a single broadcast queue row. Extracted so both
+// the initial render and load-more append can use the same markup.
+function buildBroadcastQueueRow(s, i) {
+  var artUrl = (typeof getShowArtwork === 'function') ? getShowArtwork(s.show_name) : null;
+  var thumbInner = artUrl
+    ? '<img class="bc-qi-thumb-img" src="' + escapeHtml(artUrl) + '" alt="' + escapeHtml(s.show_name || '') + '" loading="lazy" onerror="this.style.display=\'none\';">'
+    : '';
+  var when = timeAgo(s.created_at);
+  var isPlaying = (i === bcState.currentIndex);
+  var label = isPlaying ? '▶ Now Playing · ' + (s.topic || 'Story') : (i === bcState.currentIndex + 1 ? 'Up Next · ' + (s.topic || 'Story') : (s.topic || 'Story'));
+  return '<div class="bc-q-item' + (isPlaying ? ' now-playing' : '') + '" data-bc-index="' + i + '">' +
+    '<div class="bc-qi-thumb">' + thumbInner + '</div>' +
+    '<div class="bc-qi-meta">' +
+      '<span class="bc-qi-cat">' + escapeHtml(label) + '</span>' +
+      '<span class="bc-qi-title">' + escapeHtml(s.headline || '') + '</span>' +
+      '<span class="bc-qi-when"><strong style="color:#bcb09a">' + escapeHtml(s.show_name || '') + '</strong> · ' + escapeHtml(when) + '</span>' +
+    '</div>' +
+    '<button class="eg-bookmark bc-qi-bookmark" type="button" aria-label="Save for later" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>' +
+    '<button class="eg-share bc-qi-share" type="button" aria-label="Share story" data-story-id="' + s.id + '" onclick="event.stopPropagation();"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>' +
+  '</div>';
+}
+
+// Appends new rows (from load-more) without rebuilding the whole list.
+// Preserves the user's scroll position and avoids re-flicker on existing rows.
+function appendBroadcastQueueRows(stories, startIdx) {
+  var list = document.getElementById('bc-queue-list');
+  if (!list) return;
+  // Remove existing sentinel (it gets re-added at end after rows)
+  var oldSentinel = document.getElementById('bc-queue-sentinel');
+  if (oldSentinel) oldSentinel.remove();
+  // Build markup for the new rows only
+  var html = '';
+  stories.forEach(function(s, i) { html += buildBroadcastQueueRow(s, startIdx + i); });
+  // Insert via temp container so we don't replace existing rows
+  var temp = document.createElement('div');
+  temp.innerHTML = html;
+  while (temp.firstChild) list.appendChild(temp.firstChild);
+  // Re-attach sentinel at new bottom
+  attachQueueScrollObserver();
+}
+
+// Attaches (or re-attaches) the IntersectionObserver sentinel at the bottom
+// of the queue list. Called after renderBroadcastQueue + appendBroadcastQueueRows.
+function attachQueueScrollObserver() {
+  var list = document.getElementById('bc-queue-list');
+  if (!list) return;
+  // Disconnect old observer (if any)
+  if (bcState.queueObserver) { bcState.queueObserver.disconnect(); bcState.queueObserver = null; }
+  if (bcState.queueScrollHandler) { list.removeEventListener('scroll', bcState.queueScrollHandler); bcState.queueScrollHandler = null; }
+  // Remove old sentinel
+  var existing = document.getElementById('bc-queue-sentinel');
+  if (existing) existing.remove();
+  // Show "end of queue" indicator when fully loaded — gives clear closure
+  if (!bcState.queueHasMore) {
+    if (bcState.queue.length > 16) {
+      var endMarker = document.createElement('div');
+      endMarker.id = 'bc-queue-sentinel';
+      endMarker.className = 'bc-queue-sentinel is-done';
+      endMarker.textContent = '· End of queue ·';
+      list.appendChild(endMarker);
+    }
+    return;
+  }
+  // Attach new sentinel + observer
+  var sentinel = document.createElement('div');
+  sentinel.id = 'bc-queue-sentinel';
+  sentinel.className = 'bc-queue-sentinel';
+  sentinel.innerHTML = '<div class="bcq-spinner-dot"></div><div class="bcq-spinner-dot"></div><div class="bcq-spinner-dot"></div>';
+  list.appendChild(sentinel);
+  if ('IntersectionObserver' in window) {
+    bcState.queueObserver = new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting && !bcState.queueLoadingMore && bcState.queueHasMore) {
+        loadMoreBroadcastQueue();
+      }
+    }, { root: list, rootMargin: '300px 0px' });
+    bcState.queueObserver.observe(sentinel);
+  } else {
+    // Fallback for browsers without IntersectionObserver
+    var onScroll = function() {
+      if (list.scrollTop + list.clientHeight >= list.scrollHeight - 200 &&
+          !bcState.queueLoadingMore && bcState.queueHasMore) {
+        loadMoreBroadcastQueue();
+      }
+    };
+    list.addEventListener('scroll', onScroll);
+    bcState.queueScrollHandler = onScroll;
+  }
+}
+
+// Fetches the next page of approved + clip-eligible stories and appends them.
+// Triggered by the IntersectionObserver when the sentinel scrolls into view.
+async function loadMoreBroadcastQueue() {
+  if (bcState.queueLoadingMore || !bcState.queueHasMore) return;
+  if (!db && !initDB()) return;
+  bcState.queueLoadingMore = true;
+  var PAGE_SIZE = 16;
+  var offset = bcState.queue.length;
+  try {
+    var query = db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .not('source_url', 'is', null)
+      .not('clip_start_seconds', 'is', null)
+      .not('clip_end_seconds', 'is', null)
+      .order('updated_at', { ascending: false, nullsFirst: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+    var topic = window._currentTopic || null;
+    if (topic) query = query.ilike('topic', '%' + topic + '%');
+    var result = await query;
+    if (result.error) {
+      console.log('[broadcast] load-more error:', result.error.message || result.error);
+      return;
+    }
+    var raw = result.data || [];
+    var filtered = raw.filter(function(s){
+      return s.source_url && (typeof s.clip_start_seconds === 'number') && (typeof s.clip_end_seconds === 'number');
+    });
+    // Note: do NOT call filterUnwatched here. Session-aware: only the initial
+    // page load filters watched. Once in session, everything stays in queue
+    // so user can scroll back to a clip they just played (e.g. to share it).
+    // If we got fewer rows than requested, we've reached the end
+    if (raw.length < PAGE_SIZE) bcState.queueHasMore = false;
+    if (filtered.length > 0) {
+      var startIdx = bcState.queue.length;
+      bcState.queue = bcState.queue.concat(filtered);
+      // Cache for other UI (story modal lookups, etc.)
+      if (window._storyCache) {
+        filtered.forEach(function(s){ if (s && s.id) window._storyCache[s.id] = s; });
+      }
+      appendBroadcastQueueRows(filtered, startIdx);
+    } else {
+      // Edge case: server returned rows but all were filtered out (no clip timing).
+      // Re-attach observer so user can keep scrolling for the next page.
+      attachQueueScrollObserver();
+    }
+    // Update header counter
+    var qhTime = document.getElementById('bc-qh-time');
+    if (qhTime) {
+      qhTime.textContent = bcState.queue.length + (bcState.queueHasMore ? '+' : '') + ' bulletins · Updated ' + new Date().toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'});
+    }
+    console.log('[broadcast] loaded ' + filtered.length + ' more · total ' + bcState.queue.length + ' · hasMore=' + bcState.queueHasMore);
+  } catch(e) {
+    console.log('[broadcast] load-more exception:', e);
+  } finally {
+    bcState.queueLoadingMore = false;
+  }
 }
 
 // YouTube IFrame API: the existing modal-player code owns
@@ -3003,17 +3332,86 @@ function bcStartStory(story) {
           var clipLenSec = (typeof endSec === 'number' && endSec > startSec)
             ? (endSec - startSec)
             : 60; // safety fallback
+          var totalMs = clipLenSec * 1000 + 600;
+          bcState.endTimerStartedAt = Date.now();
+          bcState.endTimerTotalMs = totalMs;
+          bcState.endTimerRemainingMs = 0;
+          bcState.isPaused = false;
           bcState.endTimer = setTimeout(function() {
+            // Belt-and-braces: don't advance if the user is currently paused
+            if (bcState.isPaused) {
+              console.log('[bc-state] end timer fired but user is paused — skipping advance');
+              return;
+            }
             // Hard-stop: pause + trigger advance, in case YouTube's `end` param drifted.
             if (bcState.player) {
               try { bcState.player.pauseVideo(); } catch(_) {}
             }
             bcAdvance();
-          }, clipLenSec * 1000 + 600);
+          }, totalMs);
         },
         onStateChange: function(e) {
+          // DIAGNOSTIC: log every state change for debugging the pause bug
+          var stateName = ({0:'ENDED',1:'PLAYING',2:'PAUSED',3:'BUFFERING',5:'CUED','-1':'UNSTARTED'})[e.data] || ('UNKNOWN_'+e.data);
+          console.log('[bc-state]', stateName, '· isPaused=', bcState.isPaused, '· endTimer=', !!bcState.endTimer);
+
           // 0 = ended; if we hit ended naturally, advance
-          if (e.data === YT.PlayerState.ENDED) bcAdvance();
+          if (e.data === YT.PlayerState.ENDED) {
+            // If we're already paused, don't advance — the user paused, then the
+            // video later hit its "end" param. They didn't want to advance.
+            if (bcState.isPaused) {
+              console.log('[bc-state] suppressing ENDED — user is paused');
+              return;
+            }
+            bcAdvance();
+            return;
+          }
+          // 2 = paused: freeze the auto-advance countdown and progress bar
+          if (e.data === YT.PlayerState.PAUSED) {
+            if (bcState.isPaused) return;
+            bcState.isPaused = true;
+            console.log('[bc-state] PAUSE — freezing timer');
+            // Calculate how much time was left when the user paused
+            if (bcState.endTimer) {
+              var elapsed = Date.now() - bcState.endTimerStartedAt;
+              bcState.endTimerRemainingMs = Math.max(0, bcState.endTimerTotalMs - elapsed);
+              clearTimeout(bcState.endTimer);
+              bcState.endTimer = null;
+              console.log('[bc-state] · timer cleared · remainingMs=', bcState.endTimerRemainingMs);
+            }
+            // Stop the progress-bar interval too
+            if (bcState.progressTimer) {
+              clearInterval(bcState.progressTimer);
+              bcState.progressTimer = null;
+            }
+            return;
+          }
+          // 1 = playing: if we were paused, resume the countdown with remaining time
+          if (e.data === YT.PlayerState.PLAYING) {
+            if (!bcState.isPaused) return;
+            bcState.isPaused = false;
+            console.log('[bc-state] RESUME — remainingMs=', bcState.endTimerRemainingMs);
+            // Restart the end timer with the remaining time
+            if (bcState.endTimerRemainingMs > 0) {
+              bcState.endTimerStartedAt = Date.now();
+              bcState.endTimerTotalMs = bcState.endTimerRemainingMs;
+              var remaining = bcState.endTimerRemainingMs;
+              bcState.endTimerRemainingMs = 0;
+              bcState.endTimer = setTimeout(function() {
+                if (bcState.isPaused) {
+                  console.log('[bc-state] resumed end timer fired but user is paused — skipping');
+                  return;
+                }
+                if (bcState.player) {
+                  try { bcState.player.pauseVideo(); } catch(_) {}
+                }
+                bcAdvance();
+              }, remaining);
+            }
+            // Restart progress tracking
+            bcStartProgressTracking(story);
+            return;
+          }
         },
         onError: function(e) {
           console.log('[broadcast] player error:', e.data);
@@ -3029,10 +3427,29 @@ function bcUpdateLowerThird(story) {
   var stripe = document.getElementById('bc-lt-stripe');
   var headline = document.getElementById('bc-lt-headline');
   var meta = document.getElementById('bc-lt-meta');
-  if (stripe) stripe.textContent = (story.topic || 'Egleze Brief') + ' · Top Reveal';
-  if (headline) headline.textContent = story.headline || '';
-  if (meta) meta.textContent = (story.show_name || '') + ' · ' + (story.episode || '') + ' · ' + ((bcState.currentIndex + 1) + ' of ' + bcState.queue.length + ' in today\'s broadcast');
+  var stripeText = (story.topic || 'Egleze Brief') + ' · Top Reveal';
+  var headlineText = story.headline || '';
+  var metaText = (story.show_name || '') + ' · ' + (story.episode || '') + ' · ' + ((bcState.currentIndex + 1) + ' of ' + bcState.queue.length + ' in today\'s broadcast');
+  if (stripe) stripe.textContent = stripeText;
+  if (headline) headline.textContent = headlineText;
+  if (meta) meta.textContent = metaText;
   if (lt) lt.classList.add('show');
+  // Mirror to the mobile-only block sitting below the video
+  var mStripe = document.getElementById('bc-mobile-stripe');
+  var mHeadline = document.getElementById('bc-mobile-headline');
+  var mMeta = document.getElementById('bc-mobile-meta');
+  if (mStripe) mStripe.textContent = stripeText;
+  if (mHeadline) mHeadline.textContent = headlineText;
+  if (mMeta) mMeta.textContent = metaText;
+  // Sync the player bookmark to whatever story is currently playing
+  var playerBookmark = document.getElementById('bc-player-bookmark');
+  if (playerBookmark && story && story.id) {
+    playerBookmark.setAttribute('data-story-id', story.id);
+  }
+  var playerShare = document.getElementById('bc-player-share');
+  if (playerShare && story && story.id) {
+    playerShare.setAttribute('data-story-id', story.id);
+  }
 }
 
 function bcStartProgressTracking(story) {
@@ -3063,8 +3480,14 @@ function bcFmtTime(sec) {
 }
 
 function bcAdvance() {
+  // Mark the just-finished story as watched (localStorage)
+  var finishedStory = bcState.queue[bcState.currentIndex];
+  if (finishedStory && finishedStory.id) markWatched(finishedStory.id);
+
   if (bcState.endTimer) { clearTimeout(bcState.endTimer); bcState.endTimer = null; }
   if (bcState.progressTimer) { clearInterval(bcState.progressTimer); bcState.progressTimer = null; }
+  bcState.endTimerRemainingMs = 0;
+  bcState.isPaused = false;
   if (!bcState.autoAdvance) {
     bcStop();
     return;
@@ -3105,7 +3528,26 @@ function bcStartFromBeginning() {
   bcStartStory(bcState.queue[0]);
 }
 
+// Match queue's height to player's height on desktop, so the queue
+// doesn't expand the row past the 16:9 video and create a black gap.
+// On mobile (<=920px), the broadcast stacks vertically and the queue uses
+// its own static max-height — this fn no-ops via the CSS media query.
+function syncBroadcastQueueHeight() {
+  var player = document.getElementById('bc-player');
+  var queue = document.querySelector('.bc-queue');
+  if (!player || !queue) return;
+  if (window.innerWidth < 921) {
+    queue.style.removeProperty('--bc-queue-height');
+    return;
+  }
+  var h = player.getBoundingClientRect().height;
+  if (h > 0) queue.style.setProperty('--bc-queue-height', h + 'px');
+}
+
 function bcWireControls() {
+  // Sync queue height to player height (desktop only — mobile has its own static cap)
+  syncBroadcastQueueHeight();
+  window.addEventListener('resize', syncBroadcastQueueHeight);
   // Big red play button
   var playBtn = document.getElementById('bc-play-btn');
   if (playBtn) playBtn.addEventListener('click', function(e) {
@@ -3236,7 +3678,7 @@ function injectStorySchema(stories) {
   </p>
   <div style="display:flex;gap:10px;flex-shrink:0">
     <button onclick="document.getElementById('cookie-banner').style.display='none';localStorage.setItem('egleze_cookie','rejected')" style="background:transparent;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.2);padding:7px 16px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">Reject All</button>
-    <button onclick="document.getElementById('cookie-banner').style.display='none';localStorage.setItem('egleze_cookie','accepted')" style="background:#bb1919;color:#fff;border:none;padding:7px 16px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:700">Accept</button>
+    <button onclick="document.getElementById('cookie-banner').style.display='none';localStorage.setItem('egleze_cookie','accepted');window.eglezeLoadAnalytics&&window.eglezeLoadAnalytics()" style="background:#bb1919;color:#fff;border:none;padding:7px 16px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:700">Accept</button>
   </div>
 </div>
 <script>
@@ -3308,6 +3750,8 @@ async function bannerSubscribe() {
   <div class="cp-modal" id="cp-modal" onclick="event.stopPropagation()">
     <div class="cp-handle" aria-hidden="true"></div>
     <button class="cp-close" id="cp-close-btn" aria-label="Close player">✕</button>
+    <button class="eg-bookmark cp-bookmark" id="cp-bookmark" type="button" aria-label="Save this story" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>
+    <button class="eg-share cp-share" id="cp-share" type="button" aria-label="Share this story" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
     <div class="cp-video" id="cp-video"></div>
     <div class="cp-body">
       <div class="cp-tag" id="cp-tag">Podcast Reveal</div>
@@ -3361,15 +3805,794 @@ async function bannerSubscribe() {
     width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.18);
     font-size:13px;line-height:1;
   }
-  /* Hide on mobile — already in shorts on mobile */
+  /* Mobile: shrink padding/font slightly so it doesn't dominate the screen */
   @media (max-width:760px){
-    #shorts-fab{display:none}
+    #shorts-fab{right:16px;bottom:16px;padding:10px 14px;font-size:11px}
   }
 </style>
 <a id="shorts-fab" href="/shorts.html" aria-label="Switch to mobile shorts view">
   <span class="fab-icon" aria-hidden="true">▶</span>
   <span>Shorts View</span>
 </a>
+
+<!-- ── EGLEZE AUTH (Phase 1, Round 3: Sign-in button + chip + modal) ─── -->
+<script src="/js/auth.js"></script>
+
+<style id="eg-modal-styles">
+#eg-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.2s; }
+#eg-modal.is-shown { display: flex; }
+#eg-modal.is-open { opacity: 1; }
+#eg-modal-backdrop { position: absolute; inset: 0; background: rgba(14,10,6,0.55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+#eg-modal-card { position: relative; background: #fff; border-radius: 8px; padding: 32px 30px 24px; width: 100%; max-width: 380px; box-shadow: 0 12px 36px rgba(0,0,0,0.28); transform: translateY(8px); transition: transform 0.2s; font-family: 'DM Sans', -apple-system, sans-serif; }
+#eg-modal.is-open #eg-modal-card { transform: translateY(0); }
+#eg-modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #aaa; font-size: 22px; cursor: pointer; line-height: 1; padding: 4px 8px; }
+#eg-modal-close:hover { color: #0e0a06; }
+#eg-modal-logo { font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -1.2px; line-height: 1; text-align: center; color: #0e0a06; }
+#eg-modal-logo .e-red { color: #bb1919; }
+#eg-modal-headline { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; line-height: 1.25; text-align: center; margin: 16px 0 6px; color: #0e0a06; }
+#eg-modal-sub { font-size: 12px; color: #777; text-align: center; line-height: 1.5; margin: 0 0 22px; }
+#eg-btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; width: 100%; background: #fff; color: #0e0a06; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: border-color 0.15s, background 0.15s; }
+#eg-btn-google:hover { border-color: #bb1919; background: #fff8f0; }
+#eg-btn-google:disabled { opacity: 0.6; cursor: wait; }
+#eg-modal-or { text-align: center; margin: 14px 0; color: #aaa; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; font-family: 'Roboto Condensed', sans-serif; }
+#eg-modal-form { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+#eg-modal-email { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; box-sizing: border-box; color: #0e0a06; }
+#eg-modal-email:focus { border-color: #bb1919; }
+#eg-btn-magic { width: 100%; padding: 12px 16px; background: #bb1919; color: #fff; border: none; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+#eg-btn-magic:hover { opacity: 0.9; }
+#eg-btn-magic:disabled { opacity: 0.5; cursor: wait; }
+#eg-modal-status { font-size: 12px; text-align: center; min-height: 18px; margin-top: 12px; font-family: inherit; }
+#eg-modal-status.is-success { color: #2e7d32; }
+#eg-modal-status.is-error { color: #bb1919; }
+#eg-modal-status.is-loading { color: #777; }
+#eg-modal-foot { font-size: 10px; color: #999; text-align: center; margin-top: 16px; line-height: 1.5; font-family: inherit; }
+#eg-modal-foot a { color: inherit; text-decoration: underline; }
+@media (max-width: 480px) { #eg-modal-card { padding: 26px 22px 20px; max-width: 100%; } }
+#eg-userdrop { position: absolute; top: calc(100% + 6px); right: 0; min-width: 200px; background: #fff; border: 1px solid #ddd; box-shadow: 0 8px 28px rgba(0,0,0,0.18); z-index: 1300; }
+.eg-userdrop-item { display: block; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--dark, #0e0a06); text-decoration: none; cursor: pointer; background: none; border: none; width: 100%; text-align: left; transition: background 0.12s; box-sizing: border-box; }
+.eg-userdrop-item:hover { background: #fff8f0; }
+.eg-userdrop-signout { color: #bb1919; border-top: 1px solid #ddd; }
+#eg-userbox[aria-expanded="true"] { border-color: #bb1919; }
+</style>
+
+<style id="eg-bookmark-styles">
+.eg-bookmark { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; padding: 0; cursor: pointer; color: #888780; transition: background 0.15s, color 0.15s; line-height: 1; }
+.eg-bookmark:hover, .eg-bookmark:focus-visible { color: #bb1919; }
+.eg-bookmark.is-saved { color: #bb1919; }
+.eg-bookmark.is-saved svg path { fill: #bb1919; stroke: #bb1919; }
+
+/* Story card bookmark (homepage carousels) */
+.rc-bookmark { width: 26px; height: 26px; border-radius: 50%; }
+.rc-bookmark:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* Broadcast queue item bookmark */
+.bc-qi-bookmark { width: 32px; height: 32px; border-radius: 50%; color: #7a6f5d; flex-shrink: 0; align-self: center; margin-left: 6px; }
+.bc-qi-bookmark:hover { background: rgba(187,25,25,0.18); color: #bb1919; }
+.bc-qi-bookmark.is-saved { color: #bb1919; }
+
+/* Broadcast player bookmark — bottom-right overlay (above progress row) */
+.bc-player-bookmark { position: absolute; bottom: 46px; right: 14px; z-index: 20; pointer-events: auto; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-bookmark:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
+.bc-player-bookmark.is-saved { background: #bb1919; color: #fff; border-color: #bb1919; }
+.bc-player-bookmark.is-saved svg path { fill: currentColor; stroke: currentColor; }
+
+/* Clip player modal bookmark — beside the close × */
+.cp-bookmark { position: absolute; top: 12px; right: 56px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #0e0a06; z-index: 2; transition: background 0.15s, color 0.15s; }
+.cp-bookmark:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+.cp-bookmark.is-saved { background: rgba(187,25,25,0.10); color: #bb1919; }
+.cp-bookmark.is-saved svg path { fill: #bb1919; stroke: #bb1919; }
+
+@media (max-width: 768px) {
+  .bc-player-bookmark { bottom: 42px; top: auto; right: 10px; width: 34px; height: 34px; }
+  .bc-player-share { bottom: 42px; top: auto; right: 52px; width: 34px; height: 34px; }
+  .cp-bookmark { top: 6px; right: 44px; width: 28px; height: 28px; }
+}
+</style>
+
+<style id="eg-share-styles">
+.eg-share { display: inline-flex; align-items: center; justify-content: center; background: none; border: none; padding: 0; cursor: pointer; color: #888780; transition: background 0.15s, color 0.15s; line-height: 1; }
+.eg-share:hover, .eg-share:focus-visible { color: #bb1919; }
+.eg-share:disabled { opacity: 0.5; cursor: wait; }
+
+/* Story card share (sits next to bookmark in card footer) */
+.rc-share { width: 26px; height: 26px; border-radius: 50%; margin-left: 2px; }
+.rc-share:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* Broadcast queue share */
+.bc-qi-share { width: 32px; height: 32px; border-radius: 50%; color: #7a6f5d; flex-shrink: 0; align-self: center; margin-left: 2px; }
+.bc-qi-share:hover { background: rgba(187,25,25,0.18); color: #bb1919; }
+
+/* Broadcast player share — bottom-right, to the LEFT of the bookmark */
+.bc-player-share { position: absolute; bottom: 46px; right: 60px; z-index: 20; pointer-events: auto; width: 38px; height: 38px; border-radius: 50%; background: rgba(0,0,0,0.50); color: #fff; border: 1px solid rgba(255,255,255,0.18); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.bc-player-share:hover { background: rgba(187,25,25,0.85); color: #fff; border-color: rgba(187,25,25,1); }
+
+/* Clip modal share — sits LEFT of the bookmark */
+.cp-share { position: absolute; top: 12px; right: 96px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.95); color: #0e0a06; z-index: 2; transition: background 0.15s, color 0.15s; }
+.cp-share:hover { background: rgba(187,25,25,0.10); color: #bb1919; }
+
+/* "Link copied" toast — appears bottom-center for ~2s */
+#eg-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: #0e0a06; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 11px 18px; border-radius: 6px; box-shadow: 0 8px 28px rgba(0,0,0,0.28); opacity: 0; transition: opacity 0.2s, transform 0.2s; z-index: 10000; pointer-events: none; }
+#eg-toast.is-shown { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 768px) {
+  .bc-player-share { bottom: 42px; top: auto; right: 52px; width: 34px; height: 34px; }
+  .cp-share { top: 6px; right: 76px; width: 28px; height: 28px; }
+}
+</style>
+
+<div id="eg-modal" role="dialog" aria-modal="true" aria-labelledby="eg-modal-headline">
+  <div id="eg-modal-backdrop" data-eg-close></div>
+  <div id="eg-modal-card">
+    <button id="eg-modal-close" type="button" data-eg-close aria-label="Close">×</button>
+    <div id="eg-modal-logo"><span class="e-red">E</span>gleze</div>
+    <h2 id="eg-modal-headline">Sign in to save stories</h2>
+    <p id="eg-modal-sub">Bookmark stories, build a memory of what's shaping the world.</p>
+    <button id="eg-btn-google" type="button">
+      <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.27h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" fill="#4285f4"/><path d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.27c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.97v2.34A9 9 0 0 0 9 18z" fill="#34a853"/><path d="M3.95 10.69A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.16.29-1.69V4.97H.97A9 9 0 0 0 0 9c0 1.45.35 2.82.97 4.03l2.98-2.34z" fill="#fbbc04"/><path d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .97 4.97l2.98 2.34C4.66 5.18 6.65 3.58 9 3.58z" fill="#ea4335"/></svg>
+      Continue with Google
+    </button>
+    <div id="eg-modal-or">or</div>
+    <form id="eg-modal-form" novalidate>
+      <input type="email" id="eg-modal-email" placeholder="your@email.com" required autocomplete="email" />
+      <button type="submit" id="eg-btn-magic">Send magic link</button>
+    </form>
+    <div id="eg-modal-status" role="status" aria-live="polite"></div>
+    <p id="eg-modal-foot">By continuing you agree to Egleze's<br><a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  function renderAuthSlot(user){
+    try {
+      var btn = document.getElementById('eg-signin-btn');
+      var box = document.getElementById('eg-userbox');
+      if (!btn || !box) return;
+
+      if (user) {
+        var meta = user.user_metadata || {};
+        var name = meta.name || meta.full_name || (user.email ? user.email.split('@')[0] : 'You');
+        var initial = (name.charAt(0) || 'E').toUpperCase();
+        var avatarEl = document.getElementById('eg-userbox-avatar');
+        var nameEl = document.getElementById('eg-userbox-name');
+        if (avatarEl) avatarEl.textContent = initial;
+        if (nameEl) nameEl.textContent = name;
+        btn.style.display = 'none';
+        box.hidden = false;
+        box.style.display = 'flex';
+      } else {
+        btn.style.display = '';
+        box.hidden = true;
+        box.style.display = '';
+      }
+    } catch (e) {
+      console.error('[egleze] renderAuthSlot failed:', e);
+    }
+  }
+
+  function setStatus(text, kind){
+    var s = document.getElementById('eg-modal-status');
+    if (!s) return;
+    s.textContent = text || '';
+    s.className = kind ? ('is-' + kind) : '';
+  }
+
+  function openModal(){
+    var m = document.getElementById('eg-modal');
+    if (!m) return;
+    m.classList.add('is-shown');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function(){ m.classList.add('is-open'); });
+    var emailEl = document.getElementById('eg-modal-email');
+    if (emailEl) setTimeout(function(){ try { emailEl.focus(); } catch(_){} }, 120);
+  }
+
+  function closeModal(){
+    var m = document.getElementById('eg-modal');
+    if (!m) return;
+    m.classList.remove('is-open');
+    document.body.style.overflow = '';
+    setTimeout(function(){
+      m.classList.remove('is-shown');
+      setStatus('', '');
+      var magic = document.getElementById('eg-btn-magic');
+      var google = document.getElementById('eg-btn-google');
+      if (magic) magic.disabled = false;
+      if (google) google.disabled = false;
+    }, 200);
+  }
+
+  function isModalOpen(){
+    var m = document.getElementById('eg-modal');
+    return m && m.classList.contains('is-shown');
+  }
+
+  function toggleDropdown(){
+    var dd = document.getElementById('eg-userdrop');
+    var trig = document.getElementById('eg-userbox');
+    if (!dd || !trig) return;
+    var willOpen = dd.hidden;
+    dd.hidden = !willOpen;
+    trig.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  }
+
+  function closeDropdown(){
+    var dd = document.getElementById('eg-userdrop');
+    var trig = document.getElementById('eg-userbox');
+    if (dd) dd.hidden = true;
+    if (trig) trig.setAttribute('aria-expanded', 'false');
+  }
+
+  function isDropdownOpen(){
+    var dd = document.getElementById('eg-userdrop');
+    return dd && !dd.hidden;
+  }
+
+  function initAuthButton(){
+    try {
+      if (!window.egleze || !window.egleze.auth) {
+        if ((initAuthButton._tries = (initAuthButton._tries || 0) + 1) < 50) {
+          return setTimeout(initAuthButton, 100);
+        }
+        console.warn('[egleze] auth.js never loaded; sign-in disabled');
+        return;
+      }
+      var btn = document.getElementById('eg-signin-btn');
+      if (!btn) return;
+      var auth = window.egleze.auth;
+
+      auth.getUser().then(renderAuthSlot).catch(function(e){
+        console.error('[egleze] getUser failed:', e);
+      });
+
+      // Sign-in button now opens the modal
+      btn.addEventListener('click', openModal);
+
+      // Userbox click → toggle dropdown
+      var userboxEl = document.getElementById('eg-userbox');
+      if (userboxEl) {
+        userboxEl.addEventListener('click', function(e){
+          e.stopPropagation();
+          toggleDropdown();
+        });
+      }
+
+      // Sign-out button
+      var signoutBtn = document.getElementById('eg-signout-btn');
+      if (signoutBtn) {
+        signoutBtn.addEventListener('click', async function(){
+          closeDropdown();
+          try {
+            await auth.signOut();
+          } catch (e) {
+            console.error('[egleze] sign-out failed:', e);
+          }
+        });
+      }
+
+      // Click outside the userbox-wrap → close dropdown
+      document.addEventListener('click', function(e){
+        if (!e.target.closest || !e.target.closest('#eg-userbox-wrap')) {
+          if (isDropdownOpen()) closeDropdown();
+        }
+      });
+
+      // Close handlers (backdrop + × button)
+      var closeEls = document.querySelectorAll('#eg-modal [data-eg-close]');
+      for (var i = 0; i < closeEls.length; i++) {
+        closeEls[i].addEventListener('click', closeModal);
+      }
+
+      // Escape key
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape') {
+          if (isModalOpen()) closeModal();
+          if (isDropdownOpen()) closeDropdown();
+        }
+      });
+
+      // Modal: Google button
+      var googleBtn = document.getElementById('eg-btn-google');
+      if (googleBtn) {
+        googleBtn.addEventListener('click', async function(){
+          googleBtn.disabled = true;
+          setStatus('Opening Google…', 'loading');
+          try {
+            var res = await auth.signInWithGoogle();
+            if (res && res.error) throw res.error;
+          } catch (e) {
+            console.error('[egleze] google sign-in failed:', e);
+            googleBtn.disabled = false;
+            setStatus('Could not open Google sign-in. Please try again.', 'error');
+          }
+        });
+      }
+
+      // Modal: magic-link form
+      var form = document.getElementById('eg-modal-form');
+      if (form) {
+        form.addEventListener('submit', async function(e){
+          e.preventDefault();
+          var emailEl = document.getElementById('eg-modal-email');
+          var magicBtn = document.getElementById('eg-btn-magic');
+          var email = ((emailEl && emailEl.value) || '').trim();
+          if (!email || email.indexOf('@') === -1) {
+            setStatus('Please enter a valid email address.', 'error');
+            return;
+          }
+          if (magicBtn) magicBtn.disabled = true;
+          setStatus('Sending magic link…', 'loading');
+          try {
+            var res = await auth.signInWithMagicLink(email);
+            if (magicBtn) magicBtn.disabled = false;
+            if (res && res.error) {
+              var msg = (res.error.message || '').toLowerCase();
+              if (msg.indexOf('rate') !== -1) setStatus('Too many attempts. Please try again in a few minutes.', 'error');
+              else if (msg.indexOf('invalid') !== -1) setStatus('That email address looks invalid.', 'error');
+              else setStatus(res.error.message || 'Could not send link. Please try again.', 'error');
+            } else {
+              setStatus('Check your inbox — we sent you a sign-in link.', 'success');
+            }
+          } catch (err) {
+            console.error('[egleze] magic-link failed:', err);
+            if (magicBtn) magicBtn.disabled = false;
+            setStatus('Could not send link. Please try again.', 'error');
+          }
+        });
+      }
+
+      // Auth state changes
+      auth.onChange(function(payload){
+        renderAuthSlot(payload && payload.user);
+        if (payload && payload.event === 'SIGNED_IN' && isModalOpen()) closeModal();
+        if (payload && !payload.user) closeDropdown();
+      });
+
+      // Public hook for future bookmark button (Round 7c) to open the modal
+      window.egleze = window.egleze || {};
+      window.egleze.ui = { openSignIn: openModal, closeSignIn: closeModal };
+
+    } catch (e) {
+      console.error('[egleze] auth-button init failed:', e);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuthButton);
+  } else {
+    initAuthButton();
+  }
+})();
+</script>
+
+<!-- ── EGLEZE BOOKMARKS (Phase 1, Round 2A: click logic + sync + intent) ── -->
+<script>
+(function(){
+  // Cache of story IDs the current user has saved
+  window.egleze = window.egleze || {};
+  window.egleze.saved = new Set();
+
+  // Use the auth client for DB ops — it carries the user JWT, unlike window.db
+  function getDB() {
+    return (window.egleze.auth && window.egleze.auth.client) || null;
+  }
+
+  function whenReady(cb) {
+    var tries = 0;
+    function check() {
+      if (window.egleze && window.egleze.auth && window.egleze.auth.client) return cb();
+      if (tries++ < 50) setTimeout(check, 100);
+      else console.warn('[egleze bookmarks] auth client never ready');
+    }
+    check();
+  }
+
+  async function loadSavedIds() {
+    try {
+      var auth = window.egleze.auth;
+      if (!auth) return;
+      var user = await auth.getUser();
+      var db = getDB();
+      if (!user || !db) {
+        window.egleze.saved.clear();
+        syncAllBookmarks();
+        return;
+      }
+      var res = await db.from('user_saved_stories').select('story_id').eq('user_id', user.id);
+      if (res.error) {
+        console.error('[egleze bookmarks] loadSavedIds error:', res.error);
+        return;
+      }
+      window.egleze.saved = new Set((res.data || []).map(function(r){ return String(r.story_id); }));
+      console.log('[egleze bookmarks] loaded ' + window.egleze.saved.size + ' saved IDs');
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] loadSavedIds exception:', e);
+    }
+  }
+
+  function syncAllBookmarks() {
+    try {
+      var set = window.egleze.saved;
+      var els = document.querySelectorAll('.eg-bookmark[data-story-id]');
+      for (var i = 0; i < els.length; i++) {
+        var id = els[i].getAttribute('data-story-id');
+        if (!id) continue;
+        els[i].classList.toggle('is-saved', set.has(String(id)));
+      }
+    } catch (e) {
+      console.error('[egleze bookmarks] syncAllBookmarks exception:', e);
+    }
+  }
+
+  async function toggleBookmark(storyId) {
+    if (!storyId) return;
+    storyId = String(storyId);
+    console.log('[egleze bookmarks] toggle:', storyId);
+
+    if (!window.egleze.auth) { console.error('[egleze bookmarks] no auth'); return; }
+    var user = await window.egleze.auth.getUser();
+
+    if (!user) {
+      console.log('[egleze bookmarks] not signed in — saving intent and opening modal');
+      try { localStorage.setItem('egleze_pending_save', storyId); } catch(_){}
+      if (window.egleze.ui && window.egleze.ui.openSignIn) {
+        window.egleze.ui.openSignIn();
+      }
+      return;
+    }
+
+    var db = getDB();
+    if (!db) { console.error('[egleze bookmarks] auth client not available'); return; }
+
+    var set = window.egleze.saved;
+    var wasSaved = set.has(storyId);
+    console.log('[egleze bookmarks] user:', user.id, 'wasSaved:', wasSaved);
+
+    // Optimistic UI: flip every bookmark for this story
+    var els = document.querySelectorAll('.eg-bookmark[data-story-id="' + storyId + '"]');
+    for (var i = 0; i < els.length; i++) {
+      els[i].classList.toggle('is-saved', !wasSaved);
+    }
+
+    if (wasSaved) {
+      set.delete(storyId);
+      var del = await db.from('user_saved_stories').delete().eq('user_id', user.id).eq('story_id', parseInt(storyId, 10));
+      if (del.error) {
+        console.error('[egleze bookmarks] unsave failed:', del.error);
+        set.add(storyId);
+        for (var j = 0; j < els.length; j++) els[j].classList.add('is-saved');
+      } else {
+        console.log('[egleze bookmarks] unsaved successfully');
+      }
+    } else {
+      set.add(storyId);
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(storyId, 10) });
+      if (ins.error && ins.error.code !== '23505') {
+        console.error('[egleze bookmarks] save failed:', ins.error);
+        set.delete(storyId);
+        for (var k = 0; k < els.length; k++) els[k].classList.remove('is-saved');
+      } else {
+        console.log('[egleze bookmarks] saved successfully');
+      }
+    }
+  }
+
+  async function applyPendingSave() {
+    try {
+      var pending = null;
+      try { pending = localStorage.getItem('egleze_pending_save'); } catch(_){}
+      if (!pending) return;
+      try { localStorage.removeItem('egleze_pending_save'); } catch(_){}
+      console.log('[egleze bookmarks] applying pending save for story:', pending);
+      var db = getDB();
+      if (!window.egleze.auth || !db) return;
+      var user = await window.egleze.auth.getUser();
+      if (!user) return;
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(pending, 10) });
+      if (ins.error && ins.error.code !== '23505') {
+        console.error('[egleze bookmarks] applyPendingSave failed:', ins.error);
+        return;
+      }
+      window.egleze.saved.add(String(pending));
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] applyPendingSave exception:', e);
+    }
+  }
+
+  // Click delegation — capture phase so we beat card-level click handlers
+  document.addEventListener('click', function(e){
+    try {
+      var btn = e.target.closest && e.target.closest('.eg-bookmark');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      console.log('[egleze bookmarks] click captured, story-id:', id);
+      if (!id) return;
+      toggleBookmark(id);
+    } catch (err) {
+      console.error('[egleze bookmarks] click handler exception:', err);
+    }
+  }, true);
+
+  // Init once auth is ready
+  whenReady(function(){
+    console.log('[egleze bookmarks] auth ready, loading saved IDs');
+    loadSavedIds().then(applyPendingSave);
+
+    if (window.egleze.auth && window.egleze.auth.onChange) {
+      window.egleze.auth.onChange(function(payload){
+        try {
+          if (payload && payload.event === 'SIGNED_IN') {
+            console.log('[egleze bookmarks] signed in, reloading saved IDs');
+            loadSavedIds().then(applyPendingSave);
+          } else if (payload && payload.event === 'SIGNED_OUT') {
+            console.log('[egleze bookmarks] signed out, clearing saved IDs');
+            window.egleze.saved.clear();
+            syncAllBookmarks();
+          }
+        } catch (e) { console.error('[egleze bookmarks] onChange exception:', e); }
+      });
+    }
+
+    // Re-sync as cards re-render (debounced)
+    var debounce;
+    try {
+      var observer = new MutationObserver(function(){
+        clearTimeout(debounce);
+        debounce = setTimeout(syncAllBookmarks, 80);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    } catch (e) {
+      console.warn('[egleze bookmarks] mutation observer failed:', e);
+    }
+
+    setTimeout(syncAllBookmarks, 600);
+    setTimeout(syncAllBookmarks, 2000);
+  });
+
+  // Public hook for debugging
+  window.egleze.bookmarks = {
+    toggle: toggleBookmark,
+    sync: syncAllBookmarks,
+    refresh: loadSavedIds
+  };
+})();
+</script>
+
+<!-- ── EGLEZE SHARE (Phase 1, Round 2B: Web Share API + clipboard fallback + tracking) ── -->
+<div id="eg-toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  // Cache of story metadata so share can build URLs without an extra DB call
+  // window._storyCache is already populated by renderRevealsCarousel
+  function getStoryById(id) {
+    try {
+      var cache = window._storyCache || {};
+      return cache[id] || cache[String(id)] || cache[parseInt(id, 10)] || null;
+    } catch (e) { return null; }
+  }
+
+  function showToast(text) {
+    var el = document.getElementById('eg-toast');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('is-shown');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ el.classList.remove('is-shown'); }, 2200);
+  }
+
+  // Build share URL — uses existing /story/[slug] pattern + storySlug() helper
+  async function buildShareUrl(storyId) {
+    var story = getStoryById(storyId);
+    if (!story) {
+      // Fallback: fetch from DB if not cached
+      try {
+        var db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || window.db;
+        if (db) {
+          var res = await db.from('stories').select('*').eq('id', parseInt(storyId, 10)).single();
+          if (!res.error && res.data) story = res.data;
+        }
+      } catch (e) { console.warn('[egleze share] story lookup failed:', e); }
+    }
+    var slug = '';
+    try {
+      if (typeof storySlug === 'function' && story) slug = storySlug(story) || '';
+    } catch (e) {}
+    var base = (window.location && window.location.origin) || 'https://egleze.com';
+    return slug ? (base + '/story/' + slug) : base;
+  }
+
+  function buildShareTitle(storyId) {
+    var story = getStoryById(storyId);
+    if (story && story.headline) return story.headline + ' — Egleze';
+    return 'Egleze · The most important moments from independent podcasts';
+  }
+
+  function buildShareText(storyId) {
+    var story = getStoryById(storyId);
+    if (story && story.headline) {
+      var prefix = story.show_name ? ('From ' + story.show_name + ': ') : '';
+      return prefix + story.headline;
+    }
+    return 'Worth a listen on Egleze';
+  }
+
+  async function logShareEvent(storyId, method) {
+    try {
+      var db = (window.egleze && window.egleze.auth && window.egleze.auth.client) || null;
+      if (!db) return;
+      var user = null;
+      try { user = await window.egleze.auth.getUser(); } catch (e) {}
+      var sessionKey = 'egleze_session_id';
+      var sessionId = '';
+      try {
+        sessionId = sessionStorage.getItem(sessionKey) || '';
+        if (!sessionId) {
+          sessionId = 'eg-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+          sessionStorage.setItem(sessionKey, sessionId);
+        }
+      } catch (e) {}
+      var row = {
+        story_id: parseInt(storyId, 10),
+        user_id: user ? user.id : null,
+        session_id: sessionId,
+        share_method: method
+      };
+      var ins = await db.from('share_events').insert(row);
+      if (ins.error) console.warn('[egleze share] log failed:', ins.error);
+    } catch (e) {
+      console.warn('[egleze share] log exception:', e);
+    }
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (e) { /* fall through */ }
+    // Fallback: hidden textarea
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  // Close any open share popover (called on outside click + Escape + after action)
+  function closeSharePopover() {
+    var existing = document.getElementById('eg-share-popover');
+    if (existing) existing.remove();
+    document.removeEventListener('click', onPopoverOutsideClick, true);
+    document.removeEventListener('keydown', onPopoverKeyDown, true);
+  }
+  function onPopoverOutsideClick(e) {
+    var pop = document.getElementById('eg-share-popover');
+    if (!pop) return;
+    if (pop.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('.eg-share')) return;
+    closeSharePopover();
+  }
+  function onPopoverKeyDown(e) {
+    if (e.key === 'Escape') closeSharePopover();
+  }
+
+  function openSharePopover(btn, storyId) {
+    closeSharePopover();
+    var rect = btn.getBoundingClientRect();
+    var pop = document.createElement('div');
+    pop.id = 'eg-share-popover';
+    pop.setAttribute('role', 'menu');
+    pop.style.cssText = 'position:fixed;z-index:9999;background:#fff;border:1px solid rgba(0,0,0,.12);box-shadow:0 8px 28px rgba(0,0,0,.18);border-radius:6px;min-width:200px;padding:6px;font-family:"DM Sans",sans-serif;';
+    // Position below the button, right-aligned to it
+    var top = rect.bottom + 6;
+    var right = Math.max(8, window.innerWidth - rect.right);
+    pop.style.top = top + 'px';
+    pop.style.right = right + 'px';
+
+    var hasNative = !!navigator.share;
+
+    var copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.setAttribute('role', 'menuitem');
+    copyBtn.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;background:none;border:none;font-size:13px;color:#1a1a1a;text-align:left;cursor:pointer;border-radius:4px;font-family:inherit;';
+    copyBtn.onmouseover = function(){ copyBtn.style.background = '#f5f3ed'; };
+    copyBtn.onmouseout = function(){ copyBtn.style.background = 'none'; };
+    copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Copy link</span>';
+    copyBtn.onclick = async function(){
+      try {
+        var url = await buildShareUrl(storyId);
+        var ok = await copyToClipboard(url);
+        if (ok) {
+          showToast('Link copied to clipboard');
+          logShareEvent(storyId, 'clipboard');
+        } else {
+          showToast('Could not copy link');
+        }
+      } catch(err) {
+        console.error('[egleze share] copy failed:', err);
+        showToast('Could not copy link');
+      } finally {
+        closeSharePopover();
+      }
+    };
+    pop.appendChild(copyBtn);
+
+    if (hasNative) {
+      var shareBtn = document.createElement('button');
+      shareBtn.type = 'button';
+      shareBtn.setAttribute('role', 'menuitem');
+      shareBtn.style.cssText = copyBtn.style.cssText;
+      shareBtn.onmouseover = function(){ shareBtn.style.background = '#f5f3ed'; };
+      shareBtn.onmouseout = function(){ shareBtn.style.background = 'none'; };
+      shareBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span>Share via apps…</span>';
+      shareBtn.onclick = async function(){
+        try {
+          var url = await buildShareUrl(storyId);
+          var title = buildShareTitle(storyId);
+          var text = buildShareText(storyId);
+          closeSharePopover();
+          try {
+            await navigator.share({ title: title, text: text, url: url });
+            logShareEvent(storyId, 'native');
+          } catch(e) {
+            if (e && (e.name === 'AbortError' || /abort|cancel/i.test(e.message || ''))) return;
+            console.warn('[egleze share] native share failed:', e);
+            var ok = await copyToClipboard(url);
+            if (ok) {
+              showToast('Link copied to clipboard');
+              logShareEvent(storyId, 'clipboard');
+            }
+          }
+        } catch(err) {
+          console.error('[egleze share] share via apps exception:', err);
+        }
+      };
+      pop.appendChild(shareBtn);
+    }
+
+    document.body.appendChild(pop);
+    setTimeout(function(){
+      document.addEventListener('click', onPopoverOutsideClick, true);
+      document.addEventListener('keydown', onPopoverKeyDown, true);
+    }, 0);
+  }
+
+  async function handleShare(storyId, btn) {
+    if (!storyId) return;
+    openSharePopover(btn, storyId);
+  }
+
+  // Click delegation — capture phase, mirror to bookmark pattern
+  document.addEventListener('click', function(e){
+    try {
+      var btn = e.target.closest && e.target.closest('.eg-share');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      if (!id) return;
+      handleShare(id, btn);
+    } catch (err) {
+      console.error('[egleze share] click handler exception:', err);
+    }
+  }, true);
+
+  // Public hook
+  window.egleze = window.egleze || {};
+  window.egleze.share = handleShare;
+})();
+</script>
 
 <!-- ── TOPIC PAGE INITIALIZATION ─────────────────────────── -->
 <script>
@@ -3533,6 +4756,5 @@ async function bannerSubscribe() {
   }
 })();
 </script>
-
 </body>
 </html>
