@@ -374,6 +374,29 @@ function escapeHtml(s){
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+// Slugify a headline for story URLs. Matches the algorithm used by /api/story.js
+// so the canonical URL on the rendered page equals the link we generate here.
+function slugify(text){
+  if (!text) return '';
+  return String(text)
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 80);
+}
+
+// Build the public URL for a story: /story/{id}-{slug-from-headline}.
+// Falls back to /story/{id} if headline is empty (page still renders correctly
+// because /api/story.js looks up by ID; the slug words are decorative for SEO).
+function storyPath(story){
+  const base = slugify(story.headline || '');
+  return '/story/' + story.id + (base ? '-' + base : '');
+}
+
 function getInitial(name){
   const parts = String(name||'').trim().split(/\s+/);
   return ((parts[0]||'?')[0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
@@ -592,7 +615,7 @@ function buildStoryCard(s, isPopular){
   card.setAttribute('role','link');
   card.setAttribute('tabindex','0');
   card.setAttribute('data-story-id', s.id);
-  card.dataset.storyHref = '/story/' + s.id;
+  card.dataset.storyHref = storyPath(s);
   if (!isPopular && state.show.artwork_url) {
     const art = document.createElement('div');
     art.className = 'sc-art';
@@ -634,7 +657,7 @@ function buildStoryCard(s, isPopular){
   foot.className = 'sc-foot';
   foot.innerHTML =
     '<button type="button" class="eg-share" data-story-id="'+s.id+'"'
-    + ' data-share-url="https://egleze.com/story/'+s.id+'"'
+    + ' data-share-url="https://egleze.com'+storyPath(s)+'"'
     + ' data-share-title="'+(s.headline||'Story').replace(/"/g,'&quot;')+'"'
     + ' aria-label="Share">'
     + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
