@@ -114,7 +114,7 @@ html,body{
 
 /* per-story video lives here, fills the story */
 .story-video{
-  width:100%;height:100%;object-fit:cover;
+  width:100%;height:100%;object-fit:contain;
   background:#000;display:block;
 }
 /* Hide native video controls — we have our own UI */
@@ -140,10 +140,15 @@ html,body{
 .audio-mode .story.active .audio-art{display:block}
 .story .audio-art.fallback{background:linear-gradient(135deg,var(--red) 0%,var(--red-deep) 100%)}
 
-/* gradient overlay for readability — sits BELOW iframe; comes back ABOVE for body legibility */
-.story .overlay{
-  position:absolute;inset:0;z-index:4;pointer-events:none;
-  background:linear-gradient(180deg,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 45%,rgba(0,0,0,0.85) 75%,rgba(0,0,0,0.95) 100%);
+/* The MP4 carries its own editorial overlay (headline/summary/quote
+   baked into the pixels). The HTML overlay below is now actions-only:
+   Save / Share / Show button + CTAs. So we only need a soft gradient at
+   the very bottom for CTA legibility against bright video frames — the
+   former full-height overlay used to compete with the MP4's tagline. */
+.story .body.body-actions-only::before{
+  content:"";position:absolute;left:0;right:-80px;bottom:0;height:160px;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 70%,rgba(0,0,0,0.92) 100%);
+  z-index:-1;pointer-events:none;
 }
 
 /* MOBILE TAP-TO-ADVANCE: invisible button covering main video area, sits ABOVE iframe so taps go to us */
@@ -175,6 +180,12 @@ html,body{
   position:absolute;bottom:0;left:0;right:80px;
   padding:18px 18px calc(max(env(safe-area-inset-bottom),12px) + 12px);
   color:#fff;z-index:8;
+}
+/* When the body carries only CTAs (no headline/summary, because the MP4
+   already has those), keep it compact and centered against the bottom
+   black-bar area produced by object-fit:contain. */
+.story .body.body-actions-only{
+  padding:14px 18px calc(max(env(safe-area-inset-bottom),12px) + 10px);
 }
 .topic-line{
   display:inline-block;margin-bottom:12px;
@@ -522,10 +533,16 @@ function storyHTML(s, idx) {
   const len = (s.clip_end_seconds && s.clip_start_seconds) ? (s.clip_end_seconds - s.clip_start_seconds) : 60;
   const m = Math.floor(len/60), ss = len%60;
   const dur = m > 0 ? `${m}:${String(ss).padStart(2,'0')}` : `0:${String(ss).padStart(2,'0')}`;
-  const summary = (s.summary || '').replace(/"/g,'&quot;');
   const headline = (s.headline || '').replace(/"/g,'&quot;');
   // R2 MP4: native HTML5 <video>. muted+playsinline+preload=metadata is the
   // exact incantation TikTok/Reels use to satisfy iOS Safari autoplay rules.
+  //
+  // The MP4 ALREADY contains the editorial overlay (headline, topic, show,
+  // summary, quote, tagline) baked into the pixels by egleze-render-service.
+  // So the shorts player must NOT duplicate that text in HTML — that was
+  // the visual collision Nikolaos saw. The HTML overlay now only carries
+  // INTERACTIVE elements that a static MP4 can't: Save / Share / Show
+  // shortcut, the two CTAs, and the tap-zone.
   return `
     <div class="story" data-idx="${idx}" data-id="${s.id}">
       <div class="poster ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
@@ -541,7 +558,6 @@ function storyHTML(s, idx) {
           x-webkit-airplay="allow"></video>
       </div>
       <div class="audio-art ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
-      <div class="overlay"></div>
       <div class="tap-zone" onclick="onTapZone(${idx})"></div>
       <div class="play-hint">▶</div>
       ${idx === 0 ? '<div class="tap-hint">Tap to play · tap again to skip</div>' : ''}
@@ -553,11 +569,7 @@ function storyHTML(s, idx) {
         <div class="action-btn show-mark" title="${s.show_name}" style="${artwork?`background-image:url('${artwork}')`:`background:linear-gradient(135deg,#3a2818,#1a1208);font-size:14px;color:#fff;`}">${!artwork?initials:''}</div>
         <div class="action-label">Show</div>
       </div>
-      <div class="body">
-        <div class="topic-line">${s.topic || 'Story'}</div>
-        <h2 class="headline">${headline}</h2>
-        <div class="show-line"><strong>${s.show_name || ''}</strong>${s.episode ? ' · ' + truncate(s.episode, 50) : ''}</div>
-        <p class="summary">${summary}</p>
+      <div class="body body-actions-only">
         <div class="ctas">
           ${s.source_url ? `<a class="cta primary" href="${s.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▸ Watch full episode</a>` : ''}
           <a class="cta secondary" href="${buildStoryUrl(s.id, headline)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Egleze</a>
