@@ -51,22 +51,15 @@ html,body{
 }
 
 /* HEADER */
-.shorts-header{
-  position:absolute;top:0;left:0;right:0;
-  padding:max(env(safe-area-inset-top),14px) 18px 10px;
-  display:flex;align-items:center;justify-content:space-between;
-  z-index:30;background:linear-gradient(180deg,rgba(0,0,0,0.85),rgba(0,0,0,0));
-  pointer-events:none;
-}
-.shorts-header > *{pointer-events:auto}
-.brand{display:flex;align-items:center;gap:8px}
+/* Top masthead removed — the MP4 carries the Egleze Shorts wordmark.
+   The categories strip now sits at the top of the screen. The sound
+   toggle floats top-right as a single circular button.
+   .brand-e survives only for the loading + empty states. */
 .brand-e{
   width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;
   font-family:'Playfair Display',serif;font-weight:900;font-size:20px;
   display:flex;align-items:center;justify-content:center;
 }
-.brand-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:-.3px}
-.brand-name em{font-style:italic;color:var(--gold);font-weight:400}
 .icon-btn{
   width:40px;height:40px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;font-size:18px;
@@ -74,10 +67,13 @@ html,body{
   transition:transform .15s ease;
 }
 .icon-btn:active{transform:scale(0.9)}
+.icon-btn-floating{
+  position:absolute;top:max(env(safe-area-inset-top),14px);right:14px;z-index:30;
+}
 
 /* CATEGORY STRIP */
 .cat-strip{
-  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 54px);left:0;right:0;
+  position:absolute;top:max(env(safe-area-inset-top),14px);left:0;right:64px;
   display:flex;gap:6px;overflow-x:auto;padding:4px 14px;z-index:25;
   scrollbar-width:none;
 }
@@ -140,16 +136,8 @@ html,body{
 .audio-mode .story.active .audio-art{display:block}
 .story .audio-art.fallback{background:linear-gradient(135deg,var(--red) 0%,var(--red-deep) 100%)}
 
-/* The MP4 carries its own editorial overlay (headline/summary/quote
-   baked into the pixels). The HTML overlay below is now actions-only:
-   Save / Share / Show button + CTAs. So we only need a soft gradient at
-   the very bottom for CTA legibility against bright video frames — the
-   former full-height overlay used to compete with the MP4's tagline. */
-.story .body.body-actions-only::before{
-  content:"";position:absolute;left:0;right:-80px;bottom:0;height:160px;
-  background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 70%,rgba(0,0,0,0.92) 100%);
-  z-index:-1;pointer-events:none;
-}
+/* Old bottom-body + CTAs styles removed — the MP4 carries the headline,
+   summary, etc. The right-side action stack carries the actions. */
 
 /* MOBILE TAP-TO-ADVANCE: invisible button covering main video area, sits ABOVE iframe so taps go to us */
 .tap-zone{
@@ -176,44 +164,14 @@ html,body{
 }
 .story .progress-fill{height:100%;background:var(--red);width:0%;transition:width .2s linear}
 
-.story .body{
-  position:absolute;bottom:0;left:0;right:80px;
-  padding:18px 18px calc(max(env(safe-area-inset-bottom),12px) + 12px);
-  color:#fff;z-index:8;
-}
-/* When the body carries only CTAs (no headline/summary, because the MP4
-   already has those), keep it compact and centered against the bottom
-   black-bar area produced by object-fit:contain. */
-.story .body.body-actions-only{
-  padding:14px 18px calc(max(env(safe-area-inset-bottom),12px) + 10px);
-}
-.topic-line{
-  display:inline-block;margin-bottom:12px;
-  font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;
-  color:var(--gold);padding:4px 9px;background:rgba(0,0,0,0.6);border-left:3px solid var(--red);
-}
-.headline{
-  font-family:'Playfair Display',serif;font-weight:700;font-size:21px;line-height:1.18;
-  margin-bottom:10px;letter-spacing:-.3px;text-shadow:0 2px 12px rgba(0,0,0,0.7);
-}
-.show-line{
-  font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.8px;text-transform:uppercase;
-  color:#e6dfd6;margin-bottom:12px;
-}
-.show-line strong{color:#fff;font-weight:700}
-.summary{
-  font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.45;color:#dfd6c8;
-  margin-bottom:14px;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
-}
-.ctas{display:flex;gap:8px;flex-wrap:wrap}
+/* CTAs styles kept only for empty-state "View all" and unmute-button below.
+   Story-level CTAs were removed; the MP4 carries that content. */
 .cta{
   display:inline-flex;align-items:center;gap:6px;padding:8px 13px;
   font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
   border-radius:20px;cursor:pointer;border:none;color:#fff;text-decoration:none;
 }
 .cta.primary{background:var(--red)}
-.cta.secondary{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.25);backdrop-filter:blur(10px)}
 .cta:active{transform:scale(0.95)}
 
 .actions{
@@ -224,12 +182,20 @@ html,body{
   width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,0.55);
   display:flex;align-items:center;justify-content:center;
   color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.1);transition:transform .15s ease;
+  border:1px solid rgba(255,255,255,0.1);transition:transform .15s ease,color .15s ease;
+  padding:0;font-family:inherit;
+  -webkit-appearance:none;appearance:none;
 }
 .action-btn:active{transform:scale(0.85)}
+/* Bookmark "saved" state — red fill + red icon, matching the website */
+.action-btn.eg-bookmark.is-saved{color:#bb1919}
+.action-btn.eg-bookmark.is-saved svg path{fill:#bb1919;stroke:#bb1919}
 .action-btn.show-mark{
   background-size:cover;background-position:center;border:2px solid #fff;
   font-family:'Playfair Display',serif;font-weight:900;
+  /* When the show mark is a link to YouTube, override the default reset
+     so it doesn't pick up underline styling from <a> */
+  text-decoration:none;
 }
 .action-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:.6px;color:#fff;text-align:center;margin-top:-8px}
 
@@ -279,8 +245,8 @@ html,body{
 .empty p{color:#bcb09a;font-size:14px;line-height:1.6;margin-bottom:18px}
 
 /* INACTIVE STORIES are dimmed */
-.story:not(.active) .body, .story:not(.active) .actions{opacity:0.4;transition:opacity .3s ease}
-.story.active .body, .story.active .actions{opacity:1}
+.story:not(.active) .actions{opacity:0.4;transition:opacity .3s ease}
+.story.active .actions{opacity:1}
 
 /* TAP TO START OVERLAY */
 .tap-unmute{
@@ -312,13 +278,10 @@ html,body{
 <div class="app">
   <div class="shell" id="shell">
 
-    <div class="shorts-header">
-      <div class="brand">
-        <div class="brand-e">E</div>
-        <div class="brand-name">Egleze<em>Shorts</em></div>
-      </div>
-      <button class="icon-btn" id="sound-toggle" title="Sound mode">📺</button>
-    </div>
+    <!-- Top brand masthead REMOVED — the MP4 already has the Egleze Shorts
+         wordmark baked in. Only the sound toggle stays, repositioned as a
+         floating button so it doesn't compete with the MP4's masthead. -->
+    <button class="icon-btn icon-btn-floating" id="sound-toggle" title="Sound mode">📺</button>
 
     <div class="sound-toast" id="sound-toast">Video + Sound</div>
     <div class="cat-strip" id="cat-strip"></div>
@@ -564,17 +527,39 @@ function storyHTML(s, idx) {
       <div class="clip-dur">▸ ${dur}</div>
       <div class="progress"><div class="progress-fill" id="progress-${idx}"></div></div>
       <div class="actions">
-        <div class="action-btn" title="Save">⊕</div>
-        <div class="action-btn" title="Share" onclick="event.stopPropagation();shareStory(${s.id}, '${headline.replace(/'/g,"\\'")}')">↗</div>
-        <div class="action-btn show-mark" title="${s.show_name}" style="${artwork?`background-image:url('${artwork}')`:`background:linear-gradient(135deg,#3a2818,#1a1208);font-size:14px;color:#fff;`}">${!artwork?initials:''}</div>
+        <!-- 1. BOOKMARK — uses website's exact SVG + .eg-bookmark class.
+             /js/auth.js + the inline bookmarks module handle clicks.
+             If logged-out, opens the sign-in modal (intent persisted to
+             localStorage and replayed on sign-in). -->
+        <button type="button" class="action-btn eg-bookmark" data-story-id="${s.id}" aria-label="Save story">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z"/></svg>
+        </button>
+
+        <!-- 2. SHARE — uses website's exact 3-circle network SVG. Inline
+             share already works in this file via shareStory(). -->
+        <button type="button" class="action-btn" aria-label="Share story"
+                onclick="event.stopPropagation();shareStory(${s.id}, '${headline.replace(/'/g,"\\'")}')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+
+        <!-- 3. REACT — hand icon from /js/reactions-widget.js. Tap navigates
+             to the story page where the full reactions panel (with intensity)
+             handles the interaction. Shorts is for swiping, story page is
+             for the rich react UX. -->
+        <a class="action-btn" href="${buildStoryUrl(s.id, headline)}#react"
+           onclick="event.stopPropagation()" aria-label="React on Egleze">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10V4a1.4 1.4 0 0 1 2.8 0v4.5"/><path d="M10.8 8.8V2.6a1.4 1.4 0 0 1 2.8 0v6"/><path d="M13.6 3.4a1.4 1.4 0 0 1 2.8 0v9.8c0 3.8-2.3 6.6-5.8 6.6-2.6 0-4.3-1.3-5.5-3.6l-2-3.6a1.35 1.35 0 0 1 2.3-1.4l1.8 2.8"/><path d="M9.5 22h3"/></svg>
+        </a>
+
+        <!-- 4. SHOW ARTWORK — tap opens the source YouTube URL directly
+             (the creator's full episode). Falls back to host show page if no
+             source_url for some reason. -->
+        ${s.source_url ? `<a class="action-btn show-mark" href="${s.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${s.show_name}" style="${artwork?`background-image:url('${artwork}')`:`background:linear-gradient(135deg,#3a2818,#1a1208);font-size:14px;color:#fff;`}">${!artwork?initials:''}</a>` : `<div class="action-btn show-mark" title="${s.show_name}" style="${artwork?`background-image:url('${artwork}')`:`background:linear-gradient(135deg,#3a2818,#1a1208);font-size:14px;color:#fff;`}">${!artwork?initials:''}</div>`}
         <div class="action-label">Show</div>
       </div>
-      <div class="body body-actions-only">
-        <div class="ctas">
-          ${s.source_url ? `<a class="cta primary" href="${s.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▸ Watch full episode</a>` : ''}
-          <a class="cta secondary" href="${buildStoryUrl(s.id, headline)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Egleze</a>
-        </div>
-      </div>
+      <!-- Bottom CTAs REMOVED — the MP4's editorial overlay carries the
+           context (headline, summary, quote, tagline). The right-side action
+           stack handles all interactions: bookmark, share, react, source. -->
     </div>
   `;
 }
@@ -625,15 +610,31 @@ function attachOrPlayVideo(idx, story) {
   // Always start from 0 when a story activates
   try { video.currentTime = 0; } catch(_) {}
 
-  // iOS Safari only autoplays muted. Unmute happens on first tap (state.soundUnlocked).
   if (state.soundMode === 'silent') {
     video.muted = true;
     video.pause();
-  } else {
-    video.muted = !state.soundUnlocked;
-    const playPromise = video.play();
-    if (playPromise) playPromise.catch(() => {
-      // Autoplay rejected. The tap-to-unmute overlay handles this case.
+    return;
+  }
+
+  // Autoplay reliability strategy:
+  //   - Try with the user's current sound preference (muted if not yet
+  //     unlocked, unmuted if they've tapped at least once).
+  //   - If iOS rejects unmuted autoplay (happens when the tap that
+  //     unlocked sound is too far in the past), retry MUTED so the
+  //     video plays anyway. The user can tap to unmute again.
+  //   - This means continuous swipe always plays something, never
+  //     freezes on a black frame waiting for a tap.
+  video.muted = !state.soundUnlocked;
+  const tryPlay = video.play();
+  if (tryPlay && tryPlay.catch) {
+    tryPlay.catch(() => {
+      // Unmuted autoplay was blocked. Fall back to muted.
+      video.muted = true;
+      const retry = video.play();
+      if (retry && retry.catch) retry.catch(() => {
+        // Even muted autoplay failed (very rare). The unmute overlay
+        // will catch the user's next interaction.
+      });
     });
   }
 }
@@ -839,5 +840,334 @@ function shareStory(id, headline) {
 
 init();
 </script>
+
+<!-- ──────────────────────────────────────────────────────────────────────
+     EGLEZE AUTH + BOOKMARKS (mirrors index.html, shorts-only subset)
+     ──────────────────────────────────────────────────────────────────────
+     We load the same /js/auth.js + /js/reactions.js the rest of the site
+     uses, then inline a trimmed sign-in modal + bookmarks click delegation.
+     The reactions-widget script is NOT loaded here — shorts navigates to
+     /story/{id}#react for the full reaction UX (the widget needs a card
+     body to expand into, which shorts deliberately does not have).
+─────────────────────────────────────────────────────────────────────── -->
+<style id="eg-modal-styles">
+#eg-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.2s; }
+#eg-modal.is-shown { display: flex; }
+#eg-modal.is-open { opacity: 1; }
+#eg-modal-backdrop { position: absolute; inset: 0; background: rgba(14,10,6,0.55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+#eg-modal-card { position: relative; background: #fff; border-radius: 8px; padding: 32px 30px 24px; width: 100%; max-width: 380px; box-shadow: 0 12px 36px rgba(0,0,0,0.28); transform: translateY(8px); transition: transform 0.2s; font-family: 'DM Sans', -apple-system, sans-serif; }
+#eg-modal.is-open #eg-modal-card { transform: translateY(0); }
+#eg-modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #aaa; font-size: 22px; cursor: pointer; line-height: 1; padding: 4px 8px; }
+#eg-modal-close:hover { color: #0e0a06; }
+#eg-modal-logo { font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -1.2px; line-height: 1; text-align: center; color: #0e0a06; }
+#eg-modal-logo .e-red { color: #bb1919; }
+#eg-modal-headline { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; line-height: 1.25; text-align: center; margin: 16px 0 6px; color: #0e0a06; }
+#eg-modal-sub { font-size: 12px; color: #777; text-align: center; line-height: 1.5; margin: 0 0 22px; }
+#eg-btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; width: 100%; background: #fff; color: #0e0a06; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: border-color 0.15s, background 0.15s; }
+#eg-btn-google:hover { border-color: #bb1919; background: #fff8f0; }
+#eg-btn-google:disabled { opacity: 0.6; cursor: wait; }
+#eg-modal-or { text-align: center; margin: 14px 0; color: #aaa; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; font-family: 'Roboto Condensed', sans-serif; }
+#eg-modal-form { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+#eg-modal-email { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; box-sizing: border-box; color: #0e0a06; }
+#eg-modal-email:focus { border-color: #bb1919; }
+#eg-btn-magic { width: 100%; padding: 12px 16px; background: #bb1919; color: #fff; border: none; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+#eg-btn-magic:hover { opacity: 0.9; }
+#eg-btn-magic:disabled { opacity: 0.5; cursor: wait; }
+#eg-modal-status { font-size: 12px; text-align: center; min-height: 18px; margin-top: 12px; font-family: inherit; }
+#eg-modal-status.is-success { color: #2e7d32; }
+#eg-modal-status.is-error { color: #bb1919; }
+#eg-modal-status.is-loading { color: #777; }
+#eg-modal-foot { font-size: 10px; color: #999; text-align: center; margin-top: 16px; line-height: 1.5; font-family: inherit; }
+#eg-modal-foot a { color: inherit; text-decoration: underline; }
+@media (max-width: 480px) { #eg-modal-card { padding: 26px 22px 20px; max-width: 100%; } }
+</style>
+
+<!-- Sign-in modal — opened by window.egleze.ui.openSignIn() (called by the
+     bookmarks module when an unauthenticated user taps the bookmark icon). -->
+<div id="eg-modal" role="dialog" aria-modal="true" aria-labelledby="eg-modal-headline">
+  <div id="eg-modal-backdrop" data-eg-close></div>
+  <div id="eg-modal-card">
+    <button id="eg-modal-close" type="button" data-eg-close aria-label="Close">×</button>
+    <div id="eg-modal-logo"><span class="e-red">E</span>gleze</div>
+    <h2 id="eg-modal-headline">Sign in to save stories</h2>
+    <p id="eg-modal-sub">Bookmark stories, build a memory of what's shaping the world.</p>
+    <button id="eg-btn-google" type="button">
+      <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.27h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" fill="#4285f4"/><path d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.27c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.97v2.34A9 9 0 0 0 9 18z" fill="#34a853"/><path d="M3.95 10.69A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.16.29-1.69V4.97H.97A9 9 0 0 0 0 9c0 1.45.35 2.82.97 4.03l2.98-2.34z" fill="#fbbc04"/><path d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .97 4.97l2.98 2.34C4.66 5.18 6.65 3.58 9 3.58z" fill="#ea4335"/></svg>
+      Continue with Google
+    </button>
+    <div id="eg-modal-or">or</div>
+    <form id="eg-modal-form" novalidate>
+      <input type="email" id="eg-modal-email" placeholder="your@email.com" required autocomplete="email" />
+      <button type="submit" id="eg-btn-magic">Send magic link</button>
+    </form>
+    <div id="eg-modal-status" role="status" aria-live="polite"></div>
+    <p id="eg-modal-foot">By continuing you agree to Egleze's<br><a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+  </div>
+</div>
+
+<!-- Shared auth + reactions data layer (same files the rest of the site loads) -->
+<script src="/js/auth.js"></script>
+<script src="/js/reactions.js"></script>
+
+<script>
+// ─── SIGN-IN MODAL HANDLER (shorts-only subset of index.html's auth controls).
+// Exposes window.egleze.ui.openSignIn so the bookmarks module can call it.
+(function(){
+  function setStatus(text, kind){
+    var s = document.getElementById('eg-modal-status');
+    if (!s) return;
+    s.textContent = text || '';
+    s.className = kind ? ('is-' + kind) : '';
+  }
+  function openModal(){
+    var m = document.getElementById('eg-modal');
+    if (!m) return;
+    m.classList.add('is-shown');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function(){ m.classList.add('is-open'); });
+    var emailEl = document.getElementById('eg-modal-email');
+    if (emailEl) setTimeout(function(){ try { emailEl.focus(); } catch(_){} }, 120);
+  }
+  function closeModal(){
+    var m = document.getElementById('eg-modal');
+    if (!m) return;
+    m.classList.remove('is-open');
+    document.body.style.overflow = '';
+    setTimeout(function(){
+      m.classList.remove('is-shown');
+      setStatus('', '');
+      var magic = document.getElementById('eg-btn-magic');
+      var google = document.getElementById('eg-btn-google');
+      if (magic) magic.disabled = false;
+      if (google) google.disabled = false;
+    }, 200);
+  }
+  function isModalOpen(){
+    var m = document.getElementById('eg-modal');
+    return m && m.classList.contains('is-shown');
+  }
+
+  function wire(){
+    if (!window.egleze || !window.egleze.auth) {
+      if ((wire._tries = (wire._tries || 0) + 1) < 50) return setTimeout(wire, 100);
+      console.warn('[egleze shorts] auth.js never loaded; sign-in disabled');
+      return;
+    }
+    var auth = window.egleze.auth;
+
+    // Backdrop + × close
+    document.querySelectorAll('#eg-modal [data-eg-close]').forEach(function(el){
+      el.addEventListener('click', closeModal);
+    });
+    // Escape closes
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && isModalOpen()) closeModal();
+    });
+
+    // Google button
+    var googleBtn = document.getElementById('eg-btn-google');
+    if (googleBtn) {
+      googleBtn.addEventListener('click', async function(){
+        googleBtn.disabled = true;
+        setStatus('Opening Google…', 'loading');
+        try {
+          var res = await auth.signInWithGoogle();
+          if (res && res.error) throw res.error;
+        } catch (e) {
+          console.error('[egleze shorts] google sign-in failed:', e);
+          googleBtn.disabled = false;
+          setStatus('Could not open Google sign-in. Please try again.', 'error');
+        }
+      });
+    }
+
+    // Magic-link form
+    var form = document.getElementById('eg-modal-form');
+    if (form) {
+      form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        var emailEl = document.getElementById('eg-modal-email');
+        var magicBtn = document.getElementById('eg-btn-magic');
+        var email = ((emailEl && emailEl.value) || '').trim();
+        if (!email || email.indexOf('@') === -1) {
+          setStatus('Please enter a valid email address.', 'error');
+          return;
+        }
+        if (magicBtn) magicBtn.disabled = true;
+        setStatus('Sending magic link…', 'loading');
+        try {
+          var res = await auth.signInWithMagicLink(email);
+          if (magicBtn) magicBtn.disabled = false;
+          if (res && res.error) {
+            var msg = (res.error.message || '').toLowerCase();
+            if (msg.indexOf('rate') !== -1) setStatus('Too many attempts. Please try again in a few minutes.', 'error');
+            else if (msg.indexOf('invalid') !== -1) setStatus('That email address looks invalid.', 'error');
+            else setStatus(res.error.message || 'Could not send link. Please try again.', 'error');
+          } else {
+            setStatus('Check your inbox — we sent you a sign-in link.', 'success');
+          }
+        } catch (err) {
+          console.error('[egleze shorts] magic-link failed:', err);
+          if (magicBtn) magicBtn.disabled = false;
+          setStatus('Could not send link. Please try again.', 'error');
+        }
+      });
+    }
+
+    // Auto-close on successful sign-in
+    auth.onChange(function(payload){
+      if (payload && payload.event === 'SIGNED_IN' && isModalOpen()) closeModal();
+    });
+
+    // Public hook for bookmarks module
+    window.egleze = window.egleze || {};
+    window.egleze.ui = { openSignIn: openModal, closeSignIn: closeModal };
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+  else wire();
+})();
+</script>
+
+<!-- ── EGLEZE BOOKMARKS (Phase 1, Round 2A: click logic + sync + intent)
+     Copied verbatim from index.html — bookmarks delegate clicks on any
+     `.eg-bookmark[data-story-id]` element, which is exactly what we emit
+     in storyHTML(). The shorts page inherits the full save flow. ── -->
+<script>
+(function(){
+  window.egleze = window.egleze || {};
+  window.egleze.saved = new Set();
+
+  function getDB() {
+    return (window.egleze.auth && window.egleze.auth.client) || null;
+  }
+  function whenReady(cb) {
+    var tries = 0;
+    (function check() {
+      if (window.egleze && window.egleze.auth && window.egleze.auth.client) return cb();
+      if (tries++ < 50) setTimeout(check, 100);
+      else console.warn('[egleze bookmarks] auth client never ready');
+    })();
+  }
+
+  async function loadSavedIds() {
+    try {
+      var auth = window.egleze.auth;
+      if (!auth) return;
+      var user = await auth.getUser();
+      var db = getDB();
+      if (!user || !db) {
+        window.egleze.saved.clear();
+        syncAllBookmarks();
+        return;
+      }
+      var res = await db.from('user_saved_stories').select('story_id').eq('user_id', user.id);
+      if (res.error) { console.error('[egleze bookmarks] loadSavedIds error:', res.error); return; }
+      window.egleze.saved = new Set((res.data || []).map(function(r){ return String(r.story_id); }));
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] loadSavedIds exception:', e);
+    }
+  }
+
+  function syncAllBookmarks() {
+    try {
+      var set = window.egleze.saved;
+      var els = document.querySelectorAll('.eg-bookmark[data-story-id]');
+      for (var i = 0; i < els.length; i++) {
+        var id = els[i].getAttribute('data-story-id');
+        if (!id) continue;
+        els[i].classList.toggle('is-saved', set.has(String(id)));
+      }
+    } catch (e) {
+      console.error('[egleze bookmarks] syncAllBookmarks exception:', e);
+    }
+  }
+
+  async function toggleBookmark(storyId) {
+    if (!storyId) return;
+    storyId = String(storyId);
+    if (!window.egleze.auth) { console.error('[egleze bookmarks] no auth'); return; }
+    var user = await window.egleze.auth.getUser();
+    if (!user) {
+      try { localStorage.setItem('egleze_pending_save', storyId); } catch(_){}
+      if (window.egleze.ui && window.egleze.ui.openSignIn) window.egleze.ui.openSignIn();
+      return;
+    }
+    var db = getDB();
+    if (!db) { console.error('[egleze bookmarks] auth client unavailable'); return; }
+    var set = window.egleze.saved;
+    var wasSaved = set.has(storyId);
+    var els = document.querySelectorAll('.eg-bookmark[data-story-id="' + storyId + '"]');
+    for (var i = 0; i < els.length; i++) els[i].classList.toggle('is-saved', !wasSaved);
+    if (wasSaved) {
+      set.delete(storyId);
+      var del = await db.from('user_saved_stories').delete().eq('user_id', user.id).eq('story_id', parseInt(storyId, 10));
+      if (del.error) {
+        set.add(storyId);
+        for (var j = 0; j < els.length; j++) els[j].classList.add('is-saved');
+        console.error('[egleze bookmarks] unsave failed:', del.error);
+      }
+    } else {
+      set.add(storyId);
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(storyId, 10) });
+      if (ins.error && ins.error.code !== '23505') {
+        set.delete(storyId);
+        for (var k = 0; k < els.length; k++) els[k].classList.remove('is-saved');
+        console.error('[egleze bookmarks] save failed:', ins.error);
+      }
+    }
+  }
+
+  async function applyPendingSave() {
+    try {
+      var pending = null;
+      try { pending = localStorage.getItem('egleze_pending_save'); } catch(_){}
+      if (!pending) return;
+      try { localStorage.removeItem('egleze_pending_save'); } catch(_){}
+      var db = getDB();
+      if (!window.egleze.auth || !db) return;
+      var user = await window.egleze.auth.getUser();
+      if (!user) return;
+      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(pending, 10) });
+      if (ins.error && ins.error.code !== '23505') return;
+      window.egleze.saved.add(String(pending));
+      syncAllBookmarks();
+    } catch (e) {
+      console.error('[egleze bookmarks] applyPendingSave exception:', e);
+    }
+  }
+
+  // Click delegation (capture phase, beats card-level tap handlers)
+  document.addEventListener('click', function(e){
+    try {
+      var btn = e.target.closest && e.target.closest('.eg-bookmark');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      if (!id) return;
+      toggleBookmark(id);
+    } catch (err) {
+      console.error('[egleze bookmarks] click handler exception:', err);
+    }
+  }, true);
+
+  whenReady(function(){
+    loadSavedIds();
+    window.egleze.auth.onChange(function(payload){
+      if (payload && (payload.event === 'SIGNED_IN' || payload.event === 'SIGNED_OUT')) {
+        loadSavedIds().then(applyPendingSave);
+      }
+    });
+    // Re-sync bookmarks whenever the feed re-renders (category change, etc.)
+    var feed = document.getElementById('feed');
+    if (feed) {
+      new MutationObserver(syncAllBookmarks).observe(feed, { childList: true, subtree: false });
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
