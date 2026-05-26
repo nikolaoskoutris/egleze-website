@@ -112,14 +112,20 @@ html,body{
 }
 .story .poster.fallback{background:linear-gradient(135deg,#1f1612 0%,#3a2818 50%,#0d0a07 100%)}
 
-/* per-story iframe lives here, fills the story */
+/* per-story video lives here, fills the story */
+.story-video{
+  width:100%;height:100%;object-fit:cover;
+  background:#000;display:block;
+}
+/* Hide native video controls — we have our own UI */
+.story-video::-webkit-media-controls{display:none!important}
+.story-video::-webkit-media-controls-enclosure{display:none!important}
 .story .yt-mount{
   position:absolute;inset:0;z-index:2;
   background:#000;opacity:0;
   transition:opacity .25s ease;
 }
 .story.video-ready .yt-mount{opacity:1}
-.story .yt-mount iframe{width:100%;height:100%;border:0}
 
 /* AUDIO MODE: hide video, show artwork in middle */
 .audio-mode .story .yt-mount{opacity:0}
@@ -417,15 +423,13 @@ const state = {
   currentIndex: 0,
   soundMode: 'video',
   soundUnlocked: false,
-  players: new Map(),       // story.id -> YT.Player
-  ytApiReady: false,
-  pendingPlayerCreations: [],
+  players: new Map(),       // story.id -> HTMLVideoElement
 };
 
 async function init() {
   setupSoundToggle();
   setupUnmuteOverlay();
-  loadYouTubeAPI();
+  // No YouTube API needed — using native <video> with R2 MP4s.
   await Promise.all([loadShows(), loadStories()]);
   renderCategories();
   applyFilter();
@@ -449,7 +453,10 @@ async function loadShows() {
 }
 async function loadStories() {
   try {
-    const path = `stories?select=*&status=eq.approved&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&source_url=not.is.null&order=updated_at.desc.nullslast&limit=500`;
+    // CRITICAL: only fetch stories that have a rendered MP4 in R2.
+    // Stories without clip_vertical_url are skipped here — the worker
+    // backfills them, and the next page-load will pick them up.
+    const path = `stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=500`;
     state.allStories = await fetchSupabase(path);
   } catch (e) { console.error('[shorts] stories failed:', e); state.allStories = []; }
 }
@@ -487,8 +494,8 @@ function applyFilter() {
   // Strict round-robin so consecutive shorts never share a podcast
   state.filteredStories = interleaveByShow(base);
   state.currentIndex = 0;
-  // Tear down all existing players when filter changes
-  state.players.forEach(p => { try { p.destroy(); } catch(_) {} });
+  // Tear down all existing video references when filter changes
+  state.players.forEach(v => { try { v.pause(); v.removeAttribute('src'); v.load(); } catch(_) {} });
   state.players.clear();
   renderFeed();
   document.getElementById('feed').scrollTo({ top: 0 });
@@ -511,17 +518,28 @@ function renderFeed() {
 function storyHTML(s, idx) {
   const show = state.shows[s.show_name] || {};
   const artwork = show.artwork_url || '';
-  const ytId = extractYouTubeId(s.source_url);
   const initials = (s.show_name || 'E').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
   const len = (s.clip_end_seconds && s.clip_start_seconds) ? (s.clip_end_seconds - s.clip_start_seconds) : 60;
   const m = Math.floor(len/60), ss = len%60;
   const dur = m > 0 ? `${m}:${String(ss).padStart(2,'0')}` : `0:${String(ss).padStart(2,'0')}`;
   const summary = (s.summary || '').replace(/"/g,'&quot;');
   const headline = (s.headline || '').replace(/"/g,'&quot;');
+  // R2 MP4: native HTML5 <video>. muted+playsinline+preload=metadata is the
+  // exact incantation TikTok/Reels use to satisfy iOS Safari autoplay rules.
   return `
-    <div class="story" data-idx="${idx}" data-id="${s.id}" data-yt="${ytId || ''}" data-start="${s.clip_start_seconds||0}" data-end="${s.clip_end_seconds||0}">
+    <div class="story" data-idx="${idx}" data-id="${s.id}">
       <div class="poster ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
-      <div class="yt-mount" id="yt-mount-${idx}"><div id="yt-player-${idx}"></div></div>
+      <div class="yt-mount" id="yt-mount-${idx}">
+        <video
+          id="video-${idx}"
+          class="story-video"
+          src="${s.clip_vertical_url}"
+          playsinline
+          webkit-playsinline
+          muted
+          preload="metadata"
+          x-webkit-airplay="allow"></video>
+      </div>
       <div class="audio-art ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
       <div class="overlay"></div>
       <div class="tap-zone" onclick="onTapZone(${idx})"></div>
@@ -556,131 +574,97 @@ function extractYouTubeId(url) {
   return null;
 }
 
-// ─── YOUTUBE API ──────────────────────────────────────────────────
-function loadYouTubeAPI() {
-  if (window.YT && window.YT.Player) { state.ytApiReady = true; return; }
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-  window.onYouTubeIframeAPIReady = () => {
-    state.ytApiReady = true;
-    while (state.pendingPlayerCreations.length) state.pendingPlayerCreations.shift()();
-  };
-}
+// ─── NATIVE VIDEO HELPERS ──────────────────────────────────────────
+// No YouTube API. Each story has a native <video> element pointing at R2.
+// state.players is now a Map<storyId, HTMLVideoElement>.
 
-// ─── ACTIVATE STORY (creates player, plays it) ─────────────────────
+// ─── ACTIVATE STORY (plays the active one, pauses others) ──────────
 function activateStory(idx) {
   const story = state.filteredStories[idx];
   if (!story) return;
   const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
   if (!storyEl) return;
-  
+
   // Mark active
   document.querySelectorAll('.story').forEach(s => s.classList.remove('active'));
   storyEl.classList.add('active');
   state.currentIndex = idx;
 
-  // Pause all OTHER players
-  state.players.forEach((p, id) => {
+  // Pause all OTHER videos
+  state.players.forEach((video, id) => {
     if (id !== story.id) {
-      try { p.pauseVideo(); } catch(_) {}
+      try { video.pause(); video.currentTime = 0; } catch(_) {}
     }
   });
 
-  // Create or resume this story's player
-  const create = () => createPlayerForStory(idx, story);
-  if (state.ytApiReady) create();
-  else state.pendingPlayerCreations.push(create);
+  attachOrPlayVideo(idx, story);
 }
 
-function createPlayerForStory(idx, story) {
-  if (state.players.has(story.id)) {
-    // Player exists, just play it
-    try {
-      const p = state.players.get(story.id);
-      if (state.soundMode !== 'silent') {
-        if (state.soundUnlocked) p.unMute();
-        p.playVideo();
-      }
-    } catch(_) {}
-    return;
+function attachOrPlayVideo(idx, story) {
+  const video = document.getElementById(`video-${idx}`);
+  if (!video) return;
+
+  // Register once
+  if (!state.players.has(story.id)) {
+    state.players.set(story.id, video);
+    attachVideoEvents(idx, video, story);
   }
-  const ytId = extractYouTubeId(story.source_url);
-  if (!ytId) return;
-  const start = story.clip_start_seconds || 0;
-  const end = story.clip_end_seconds || (start + 60);
-  
-  new window.YT.Player(`yt-player-${idx}`, {
-    videoId: ytId,
-    playerVars: {
-      autoplay: state.soundMode !== 'silent' ? 1 : 0,
-      controls: 0, modestbranding: 1, playsinline: 1,
-      mute: 1, // ALWAYS start muted (browser policy)
-      start, end, rel: 0, iv_load_policy: 3,
-      origin: window.location.origin
-    },
-    events: {
-      onReady: e => {
-        state.players.set(story.id, e.target);
-        try { e.target.mute(); } catch(_) {}
-        if (state.soundMode !== 'silent') {
-          try { e.target.playVideo(); } catch(_) {}
-          if (state.soundUnlocked) {
-            try { e.target.unMute(); } catch(_) {}
-          }
-        }
-        const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
-        if (storyEl) storyEl.classList.add('video-ready');
-        startProgressTimer(idx, start, end, story.id);
-      },
-      onStateChange: ev => {
-        // Mark as played once it actually starts
-        if (ev.data === window.YT.PlayerState.PLAYING) {
-          const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
-          if (storyEl) storyEl.classList.add('has-played');
-        }
-        if (ev.data === window.YT.PlayerState.ENDED) {
-          // Verify we played to end (not insta-end from autoplay block)
-          try {
-            if (e_target_safe(ev) >= end - 1) advanceTo(idx + 1);
-          } catch(_) {}
-        }
-      }
-    }
-  });
-}
-function e_target_safe(ev) {
-  try { return ev.target.getCurrentTime(); } catch(_) { return 0; }
+
+  // Always start from 0 when a story activates
+  try { video.currentTime = 0; } catch(_) {}
+
+  // iOS Safari only autoplays muted. Unmute happens on first tap (state.soundUnlocked).
+  if (state.soundMode === 'silent') {
+    video.muted = true;
+    video.pause();
+  } else {
+    video.muted = !state.soundUnlocked;
+    const playPromise = video.play();
+    if (playPromise) playPromise.catch(() => {
+      // Autoplay rejected. The tap-to-unmute overlay handles this case.
+    });
+  }
 }
 
-function startProgressTimer(idx, start, end, storyId) {
-  const fill = document.getElementById(`progress-${idx}`);
-  if (!fill) return;
-  fill.style.width = '0%';
-  const total = (end - start) || 60;
-  const interval = setInterval(() => {
-    const player = state.players.get(storyId);
-    if (!player) { clearInterval(interval); return; }
-    let cur;
-    try { cur = player.getCurrentTime(); } catch(_) { return; }
-    if (typeof cur !== 'number') return;
-    const elapsed = Math.max(0, cur - start);
-    const pct = Math.min(100, (elapsed / total) * 100);
+function attachVideoEvents(idx, video, story) {
+  // Once we have enough data to play, mark the story as video-ready
+  // so the poster fades out and the video shows through.
+  video.addEventListener('loadeddata', () => {
+    const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
+    if (storyEl) storyEl.classList.add('video-ready');
+  });
+
+  // Drive the progress bar from the native timeupdate event
+  video.addEventListener('timeupdate', () => {
+    const fill = document.getElementById(`progress-${idx}`);
+    if (!fill || !video.duration) return;
+    const pct = Math.min(100, (video.currentTime / video.duration) * 100);
     fill.style.width = pct + '%';
-    if (elapsed >= total) {
-      clearInterval(interval);
-      try { player.pauseVideo(); } catch(_) {}
-      // Auto-advance only on desktop with sound unlocked
-      if (state.soundUnlocked && state.soundMode !== 'silent' && !isMobile()) {
-        advanceTo(idx + 1);
-      }
-    }
-    // Stop tracking if user navigated away
+  });
+
+  // Mark as played once it actually starts
+  video.addEventListener('playing', () => {
+    const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
+    if (storyEl) storyEl.classList.add('has-played');
+  });
+
+  // Auto-advance when clip ends (TikTok-style, on both mobile and desktop)
+  video.addEventListener('ended', () => {
+    // Only auto-advance if this story is still the active one
     const activeEl = document.querySelector('.story.active');
-    if (!activeEl || parseInt(activeEl.dataset.idx, 10) !== idx) {
-      clearInterval(interval);
+    if (activeEl && parseInt(activeEl.dataset.idx, 10) === idx) {
+      advanceTo(idx + 1);
     }
-  }, 250);
+  });
+
+  // If the video errors (R2 hiccup, network glitch), advance rather than dead-end
+  video.addEventListener('error', () => {
+    console.warn(`[shorts] video error story ${story.id}, advancing`);
+    const activeEl = document.querySelector('.story.active');
+    if (activeEl && parseInt(activeEl.dataset.idx, 10) === idx) {
+      setTimeout(() => advanceTo(idx + 1), 800);
+    }
+  });
 }
 
 function advanceTo(idx) {
@@ -690,38 +674,35 @@ function advanceTo(idx) {
 
 function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
 
-// ─── TAP-ZONE HANDLER (mobile) ─────────────────────────────────────
+// ─── TAP-ZONE HANDLER ──────────────────────────────────────────────
 function onTapZone(idx) {
   const story = state.filteredStories[idx];
   if (!story) return;
 
-  // First-time tap on first story = unlock sound globally
+  // First-time tap on any story = unlock sound globally
   if (!state.soundUnlocked) {
     state.soundUnlocked = true;
     document.getElementById('tap-unmute')?.classList.add('hidden');
-    const player = state.players.get(story.id);
-    if (player) {
-      try { player.unMute(); player.playVideo(); } catch(_) {}
+    const video = state.players.get(story.id);
+    if (video) {
+      try {
+        video.muted = false;
+        const p = video.play();
+        if (p) p.catch(() => {});
+      } catch(_) {}
     }
     return;
   }
 
-  // Otherwise, decide: is current video playing? If not, play it. If yes, advance.
-  const player = state.players.get(story.id);
-  let isPlaying = false;
-  if (player) {
-    try {
-      const s = player.getPlayerState();
-      // YT.PlayerState: -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
-      isPlaying = (s === window.YT.PlayerState.PLAYING || s === window.YT.PlayerState.BUFFERING);
-    } catch(_) {}
-  }
+  // Otherwise: is current video playing? If not, play. If yes, advance.
+  const video = state.players.get(story.id);
+  const isPlaying = video && !video.paused && !video.ended;
 
-  if (!isPlaying && player) {
-    // First tap on this story → play it (synchronous, counts as user gesture)
+  if (!isPlaying && video) {
     try {
-      player.unMute();
-      player.playVideo();
+      video.muted = false;
+      const p = video.play();
+      if (p) p.catch(() => {});
     } catch(_) {}
     return;
   }
@@ -767,15 +748,16 @@ function setupSoundToggle() {
 function applySoundMode() {
   const story = state.filteredStories[state.currentIndex];
   if (!story) return;
-  const player = state.players.get(story.id);
-  if (!player) return;
+  const video = state.players.get(story.id);
+  if (!video) return;
   try {
     if (state.soundMode === 'silent') {
-      player.mute();
-      player.pauseVideo();
+      video.muted = true;
+      video.pause();
     } else {
-      if (state.soundUnlocked) player.unMute();
-      player.playVideo();
+      video.muted = !state.soundUnlocked;
+      const p = video.play();
+      if (p) p.catch(() => {});
     }
   } catch(_) {}
 }
@@ -795,9 +777,13 @@ function setupUnmuteOverlay() {
     overlay.classList.add('hidden');
     // Unmute current player
     const story = state.filteredStories[state.currentIndex];
-    const player = story && state.players.get(story.id);
-    if (player) {
-      try { player.unMute(); player.playVideo(); } catch(_) {}
+    const video = story && state.players.get(story.id);
+    if (video) {
+      try {
+        video.muted = false;
+        const p = video.play();
+        if (p) p.catch(() => {});
+      } catch(_) {}
     }
   });
 }
