@@ -67,13 +67,14 @@ html,body{
   transition:transform .15s ease;
 }
 .icon-btn:active{transform:scale(0.9)}
-.icon-btn-floating{
-  position:absolute;top:max(env(safe-area-inset-top),14px);right:14px;z-index:30;
-}
-
-/* CATEGORY STRIP */
+/* CATEGORY STRIP — positioned to clear the MP4's baked-in masthead.
+   The MP4 occupies the middle ~70-80% of screen height with object-fit:contain.
+   On a 9:16-ish phone the MP4's "Egleze Shorts" wordmark sits roughly at
+   the top 6-8% of the visible video area. We push the strip down to
+   12vh so it lands below that wordmark on every phone aspect ratio. */
 .cat-strip{
-  position:absolute;top:max(env(safe-area-inset-top),14px);left:0;right:64px;
+  position:absolute;top:calc(12vh + max(env(safe-area-inset-top),0px));
+  left:0;right:64px;
   display:flex;gap:6px;overflow-x:auto;padding:4px 14px;z-index:25;
   scrollbar-width:none;
 }
@@ -81,13 +82,18 @@ html,body{
 .cat-pill{
   flex-shrink:0;padding:7px 14px;
   font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;
-  color:#fff;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.15);border-radius:20px;
+  color:#fff;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);border-radius:20px;
   white-space:nowrap;cursor:pointer;backdrop-filter:blur(10px);font-weight:500;transition:all .15s ease;
 }
 .cat-pill.active{background:var(--red);border-color:var(--red);font-weight:700}
 .cat-pill:active{transform:scale(0.95)}
 .cat-pill .count{display:inline-block;margin-left:4px;font-size:9px;opacity:0.6;font-weight:400}
 .cat-pill.active .count{opacity:0.85}
+
+/* Sound toggle floats at the very top-right corner, well above the cat strip */
+.icon-btn-floating{
+  position:absolute;top:max(env(safe-area-inset-top),14px);right:14px;z-index:30;
+}
 
 /* FEED */
 .feed{
@@ -175,8 +181,13 @@ html,body{
 .cta:active{transform:scale(0.95)}
 
 .actions{
-  position:absolute;right:14px;bottom:max(env(safe-area-inset-bottom),12px);z-index:8;
-  display:flex;flex-direction:column;gap:14px;align-items:center;padding-bottom:120px;
+  /* Positioned in the bottom black-bar area / right below the MP4's editorial
+     overlay. The MP4 with object-fit:contain ends around y = 88-92% of viewport
+     on most phones. We pin the stack to bottom:env(safe-area-inset-bottom) so
+     the buttons live in the strip between the MP4 and the device bottom — no
+     overlap with the baked-in headline / quote / tagline text. */
+  position:absolute;right:14px;bottom:calc(max(env(safe-area-inset-bottom),12px) + 6px);z-index:8;
+  display:flex;flex-direction:column;gap:12px;align-items:center;
 }
 .action-btn{
   width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,0.55);
@@ -616,25 +627,31 @@ function attachOrPlayVideo(idx, story) {
     return;
   }
 
-  // Autoplay reliability strategy:
-  //   - Try with the user's current sound preference (muted if not yet
-  //     unlocked, unmuted if they've tapped at least once).
-  //   - If iOS rejects unmuted autoplay (happens when the tap that
-  //     unlocked sound is too far in the past), retry MUTED so the
-  //     video plays anyway. The user can tap to unmute again.
-  //   - This means continuous swipe always plays something, never
-  //     freezes on a black frame waiting for a tap.
-  video.muted = !state.soundUnlocked;
+  // Autoplay strategy:
+  //   - BEFORE first user interaction (state.soundUnlocked=false): do NOT call
+  //     play() at all. iOS would reject unmuted autoplay, and if the muted
+  //     fallback succeeded the 'ended' event would fire instantly causing a
+  //     skip-cascade (the bug Nikolaos saw: every tap jumps forward). Instead,
+  //     leave the tap-unmute overlay visible — the user's tap on "Start
+  //     watching" unmutes and plays the first video, which then plays normally
+  //     through to the end and naturally advances.
+  //   - AFTER unlock: play unmuted. Same gesture rules iOS uses for any
+  //     subsequent video in a session: once the user has interacted, all
+  //     other videos can autoplay with sound. If play() still rejects (very
+  //     rare — sometimes on aggressive Safari content blockers), fall back to
+  //     muted so the swipe doesn't dead-end.
+  if (!state.soundUnlocked) {
+    video.muted = true;
+    video.pause();
+    return;
+  }
+  video.muted = false;
   const tryPlay = video.play();
   if (tryPlay && tryPlay.catch) {
     tryPlay.catch(() => {
-      // Unmuted autoplay was blocked. Fall back to muted.
       video.muted = true;
       const retry = video.play();
-      if (retry && retry.catch) retry.catch(() => {
-        // Even muted autoplay failed (very rare). The unmute overlay
-        // will catch the user's next interaction.
-      });
+      if (retry && retry.catch) retry.catch(() => {});
     });
   }
 }
@@ -661,9 +678,12 @@ function attachVideoEvents(idx, video, story) {
     if (storyEl) storyEl.classList.add('has-played');
   });
 
-  // Auto-advance when clip ends (TikTok-style, on both mobile and desktop)
+  // Auto-advance when clip ends (TikTok-style, on both mobile and desktop).
+  // Guard: only advance if the video actually played past 1 second — without
+  // this guard, an iOS-blocked autoplay can fire 'ended' instantly (currentTime=0,
+  // duration=0) and cascade-skip the whole feed. We saw this on first load.
   video.addEventListener('ended', () => {
-    // Only auto-advance if this story is still the active one
+    if (video.currentTime < 1) return;
     const activeEl = document.querySelector('.story.active');
     if (activeEl && parseInt(activeEl.dataset.idx, 10) === idx) {
       advanceTo(idx + 1);
