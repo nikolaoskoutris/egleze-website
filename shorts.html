@@ -611,7 +611,7 @@ function slideInner(s, idx){
         ${fullSummary ? `<div class="panel-label">The story</div><div class="panel-summary">${fullSummary}</div>` : ''}
         ${epSummary ? `<div class="panel-label">From this episode</div><div class="panel-summary">${epSummary}</div>` : ''}
         ${kpHtml}
-        <a class="panel-cta" href="${buildStoryUrl(s.id, s.headline)}">Read on Egleze →</a>
+        <a class="panel-cta" href="${buildStoryUrl(s.id, s.headline)}" target="_blank" rel="noopener">Read on Egleze →</a>
       </div>
     </div>`;
 }
@@ -742,6 +742,13 @@ function activateStory(idx){
   hydrateWindow(idx);
   const el = document.querySelector(`.story[data-idx="${idx}"]`);
   if(!el) return;
+
+  // Close ANY open editorial panel when we move to a new slide — prevents
+  // a stale panel from a previous slide bleeding through (Bug 2a).
+  document.querySelectorAll('.story.panel-open').forEach(p=>{
+    if(parseInt(p.dataset.idx,10) !== idx) p.classList.remove('panel-open');
+  });
+
   state.currentIndex = idx;
 
   // maintain the sliding window of live videos around this index
@@ -771,13 +778,25 @@ function wireVideoEvents(idx, video){
   video.addEventListener('loadeddata', ()=>{
     const el = document.querySelector(`.story[data-idx="${idx}"]`);
     if(el) el.classList.add('video-ready');
+    // If sound is already unlocked and this is the active slide, ensure
+    // this freshly-loaded video is unmuted (fixes the "re-mutes on 4th/5th
+    // video" bug — new elements default to muted).
+    if(state.soundUnlocked && idx === state.currentIndex){
+      try{ video.muted = false; }catch(_){}
+    }
   });
   video.addEventListener('timeupdate', ()=>{
     const f = document.getElementById(`vprog-${idx}`);
     if(!f || !video.duration) return;
     f.style.width = Math.min(100,(video.currentTime/video.duration)*100)+'%';
   });
-  video.addEventListener('playing', ()=>{ video._played = true; });
+  video.addEventListener('playing', ()=>{
+    video._played = true;
+    // Re-assert unmuted on play start for the active slide once unlocked.
+    if(state.soundUnlocked && idx === state.currentIndex){
+      try{ video.muted = false; }catch(_){}
+    }
+  });
   video.addEventListener('ended', ()=>{
     if(!video._played || video.currentTime < 1) return;
     if(document.querySelector('.story.panel-open')) return;
@@ -940,6 +959,18 @@ async function init(){
 }
 
 init();
+
+// If the page is restored from the back/forward cache (e.g. user tapped a
+// link, then hit Back), re-sync: close any stale panels and re-activate the
+// current slide so playback + state are correct rather than frozen.
+window.addEventListener('pageshow', function(e){
+  if(e.persisted){
+    document.querySelectorAll('.story.panel-open').forEach(p=> p.classList.remove('panel-open'));
+    if(state.filtered.length){
+      try{ activateStory(state.currentIndex || 0); }catch(_){}
+    }
+  }
+});
 </script>
 </body>
 </html>
