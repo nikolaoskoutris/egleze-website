@@ -350,26 +350,6 @@ html,body{
 </div>
 
 <script>
-// ── MOBILE ERROR CATCHER (temporary diagnostic) ──
-// Shows any JS error as on-screen text instead of a silent crash,
-// so we can read the actual error on the phone. Remove once fixed.
-(function(){
-  function showErr(msg){
-    var d = document.createElement('div');
-    d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#bb1919;color:#fff;font:12px/1.4 monospace;padding:10px;white-space:pre-wrap;word-break:break-word;max-height:50vh;overflow:auto;';
-    d.textContent = 'ERROR: ' + msg;
-    document.body && document.body.appendChild(d);
-  }
-  window.addEventListener('error', function(e){
-    showErr((e.message||'unknown') + '\n@ ' + (e.filename||'') + ':' + (e.lineno||'') + ':' + (e.colno||''));
-  });
-  window.addEventListener('unhandledrejection', function(e){
-    showErr('Promise: ' + ((e.reason && (e.reason.message||e.reason)) || 'unknown'));
-  });
-})();
-</script>
-
-<script>
 // ════════════════════════════════════════════════════════════════════
 // EGLEZE SHORTS — clean rebuild (X.com architecture)
 //   • Video zone (top, clean clip from clips/{id}.mp4)
@@ -1086,9 +1066,9 @@ window.addEventListener('pageshow', function(e){
     document.querySelectorAll('#eg-modal [data-eg-close]').forEach(function(el){el.addEventListener('click',closeModal);});
     document.addEventListener('keydown',function(e){if(e.key==='Escape'&&isOpen())closeModal();});
     var gb=document.getElementById('eg-btn-google');
-    if(gb)gb.addEventListener('click',async function(){gb.disabled=true;setStatus('Opening Google…','loading');try{var r=await window.egleze.auth.signInWithGoogle();if(r&&r.error)throw r.error;}catch(e){console.error('[shorts] google failed',e);gb.disabled=false;setStatus('Could not open Google sign-in.','error');}});
+    if(gb)gb.addEventListener('click',async function(){gb.disabled=true;setStatus('Opening Google…','loading');try{var r=await window.egleze.auth.signInWithGoogle(window.location.href);if(r&&r.error)throw r.error;}catch(e){console.error('[shorts] google failed',e);gb.disabled=false;setStatus('Could not open Google sign-in.','error');}});
     var f=document.getElementById('eg-modal-form');
-    if(f)f.addEventListener('submit',async function(e){e.preventDefault();var i=document.getElementById('eg-modal-email');var b=document.getElementById('eg-btn-magic');var em=((i&&i.value)||'').trim();if(!em||em.indexOf('@')===-1){setStatus('Please enter a valid email.','error');return;}if(b)b.disabled=true;setStatus('Sending magic link…','loading');try{var r=await window.egleze.auth.signInWithMagicLink(em);if(b)b.disabled=false;if(r&&r.error){var m=(r.error.message||'').toLowerCase();if(m.indexOf('rate')!==-1)setStatus('Too many attempts. Try again in a few minutes.','error');else setStatus(r.error.message||'Could not send link.','error');}else{setStatus('Check your inbox — we sent you a sign-in link.','success');}}catch(err){console.error('[shorts] magic failed',err);if(b)b.disabled=false;setStatus('Could not send link. Please try again.','error');}});
+    if(f)f.addEventListener('submit',async function(e){e.preventDefault();var i=document.getElementById('eg-modal-email');var b=document.getElementById('eg-btn-magic');var em=((i&&i.value)||'').trim();if(!em||em.indexOf('@')===-1){setStatus('Please enter a valid email.','error');return;}if(b)b.disabled=true;setStatus('Sending magic link…','loading');try{var r=await window.egleze.auth.signInWithMagicLink(em,window.location.href);if(b)b.disabled=false;if(r&&r.error){var m=(r.error.message||'').toLowerCase();if(m.indexOf('rate')!==-1)setStatus('Too many attempts. Try again in a few minutes.','error');else setStatus(r.error.message||'Could not send link.','error');}else{setStatus('Check your inbox — we sent you a sign-in link.','success');}}catch(err){console.error('[shorts] magic failed',err);if(b)b.disabled=false;setStatus('Could not send link. Please try again.','error');}});
     window.egleze.auth.onChange(function(p){if(p&&p.event==='SIGNED_IN'&&isOpen())closeModal();});
     window.egleze=window.egleze||{};
     window.egleze.ui={openSignIn:openModal,closeSignIn:closeModal};
@@ -1131,22 +1111,17 @@ window.addEventListener('pageshow', function(e){
   async function toggleBookmark(id){
     if(!id) return;
     id = String(id);
-    if(!window.egleze.auth){ diagToast('toggle: no auth', true); return; }
-    var u;
-    try{ u = await window.egleze.auth.getUser(); }
-    catch(e){ diagToast('getUser threw: '+(e&&e.message||e), true); return; }
+    if(!window.egleze.auth) return;
+    var u = await window.egleze.auth.getUser();
     if(!u){
-      diagToast('not signed in → opening modal');
       try{ localStorage.setItem('egleze_pending_save', id); }catch(_){}
       if(window.egleze.ui && window.egleze.ui.openSignIn) window.egleze.ui.openSignIn();
-      else diagToast('signed out but no modal hook', true);
       return;
     }
     var db = getDB();
-    if(!db){ diagToast('no db client', true); return; }
+    if(!db) return;
     var set = window.egleze.saved;
     var was = set.has(id);
-    diagToast(was ? 'unsaving '+id+'...' : 'saving '+id+'...');
     document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.toggle('is-saved', !was); });
     if(was){
       set.delete(id);
@@ -1154,9 +1129,7 @@ window.addEventListener('pageshow', function(e){
       if(d.error){
         set.add(id);
         document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.add('is-saved'); });
-        diagToast('unsave err: '+d.error.message, true);
-      } else {
-        diagToast('unsaved ✓');
+        console.error('[shorts bookmarks] unsave failed', d.error);
       }
     } else {
       set.add(id);
@@ -1164,9 +1137,7 @@ window.addEventListener('pageshow', function(e){
       if(i.error && i.error.code !== '23505'){
         set.delete(id);
         document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.remove('is-saved'); });
-        diagToast('save err: '+i.error.message+' (code '+i.error.code+')', true);
-      } else {
-        diagToast('saved ✓');
+        console.error('[shorts bookmarks] save failed', i.error);
       }
     }
   }
@@ -1187,36 +1158,14 @@ window.addEventListener('pageshow', function(e){
     }catch(e){ console.error('[shorts bookmarks] applyPendingSave', e); }
   }
 
-  // Diagnostic toast — temporary, shows on phone what bookmark click does.
-  // Remove once the issue is identified.
-  function diagToast(msg, isError){
-    var t = document.createElement('div');
-    t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);'
-      + 'background:' + (isError?'#bb1919':'rgba(0,0,0,0.92)') + ';color:#fff;'
-      + 'padding:10px 16px;border-radius:6px;font:12px/1.3 -apple-system,sans-serif;'
-      + 'z-index:99999;max-width:85vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(function(){ try{ t.remove(); }catch(_){} }, 3000);
-  }
-
   document.addEventListener('click', function(e){
     try{
       var btn = e.target.closest && e.target.closest('.eg-bookmark');
       if(!btn) return;
       e.preventDefault(); e.stopPropagation();
       var id = btn.getAttribute('data-story-id');
-      if(!id){ diagToast('no story id on button', true); return; }
-      // Step-by-step diagnostic
-      if(!window.egleze){ diagToast('egleze object missing', true); return; }
-      if(!window.egleze.auth){ diagToast('auth not loaded', true); return; }
-      if(!window.egleze.auth.client){ diagToast('supabase client not ready', true); return; }
-      diagToast('clicked id=' + id + ' — calling toggle...');
-      toggleBookmark(id);
-    }catch(err){
-      diagToast('click err: ' + (err && err.message || err), true);
-      console.error('[shorts bookmarks] click', err);
-    }
+      if(id) toggleBookmark(id);
+    }catch(err){ console.error('[shorts bookmarks] click', err); }
   }, true);
 
   whenReady(function(){
