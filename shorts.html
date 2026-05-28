@@ -44,6 +44,17 @@ html,body{
   display:flex;flex-direction:column;
   background:var(--bg);overflow:hidden;
 }
+/* a shell is an un-hydrated slide — full height for scroll-snap, but empty.
+   A subtle pulsing E keeps it from looking broken if the user lands on one
+   mid-hydration. */
+.story.shell{display:block}
+.story.shell::after{
+  content:"E";position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+  width:48px;height:48px;border-radius:50%;background:var(--red);color:#fff;
+  font-family:'Playfair Display',serif;font-weight:900;font-size:28px;
+  display:flex;align-items:center;justify-content:center;opacity:.5;
+  animation:pulse 1.4s infinite;
+}
 
 /* ─── TOP CHROME: back + menu ────────────────────────────────────── */
 .top-chrome{
@@ -69,7 +80,7 @@ html,body{
   display:flex;align-items:center;justify-content:center;
 }
 .story-video{
-  width:100%;height:100%;object-fit:cover;background:#000;display:block;
+  width:100%;height:100%;object-fit:contain;background:#000;display:block;
 }
 .story-video::-webkit-media-controls{display:none!important}
 .story-video::-webkit-media-controls-enclosure{display:none!important}
@@ -486,7 +497,7 @@ async function loadStories(){
     // Only stories with a rendered clip. We use the clean clips/ file for
     // playback, but clip_vertical_url being set is our proof the render
     // pipeline finished for this story (so the clip exists).
-    const path = 'stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=8';
+    const path = 'stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=300';
     state.allStories = await fetchSupabase(path);
   }catch(e){ console.error('[shorts] stories failed', e); state.allStories=[]; }
 }
@@ -530,7 +541,7 @@ function applyFilter(){
   setTimeout(()=> activateStory(0), 60);
 }
 
-function storyHTML(s, idx){
+function slideInner(s, idx){
   const show = state.shows[s.show_name] || {};
   const artwork = show.artwork_url || '';
   const ini = initials(s.show_name);
@@ -550,7 +561,6 @@ function storyHTML(s, idx){
   const fullQuote = s.quote ? esc(s.quote) : '';
 
   return `
-  <div class="story" data-idx="${idx}" data-id="${s.id}">
     <div class="video-zone" id="vzone-${idx}">
       <div class="video-poster ${artwork?'':'fallback'}" style="${artStyle}"></div>
       <div class="tap-zone" data-tap="${idx}"></div>
@@ -603,8 +613,7 @@ function storyHTML(s, idx){
         ${kpHtml}
         <a class="panel-cta" href="${buildStoryUrl(s.id, s.headline)}">Read on Egleze →</a>
       </div>
-    </div>
-  </div>`;
+    </div>`;
 }
 
 function renderFeed(){
@@ -616,9 +625,52 @@ function renderFeed(){
     return;
   }
   empty.classList.add('hidden');
-  feed.innerHTML = state.filtered.map((s,i)=> storyHTML(s,i)).join('');
-  wireStoryEvents();
+  // SLIDE VIRTUALIZATION: render an empty full-height shell for EVERY story
+  // (cheap — one div each, scroll-snap works across all of them), then
+  // hydrate only the slides near the viewport with real content + video.
+  feed.innerHTML = state.filtered.map((s,i)=>
+    `<div class="story shell" data-idx="${i}" data-id="${s.id}"></div>`
+  ).join('');
   attachObserver();
+  hydrateWindow(0);
+}
+
+// Fill a shell with the real story content (text zone + action row + panel).
+function hydrateSlide(idx){
+  const el = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(!el || !el.classList.contains('shell')) return;  // already hydrated or gone
+  const s = state.filtered[idx];
+  if(!s) return;
+  el.classList.remove('shell');
+  el.innerHTML = slideInner(s, idx);
+  wireSlideEvents(el, idx);
+}
+
+// Empty a slide back to a shell (frees DOM + video).
+function dehydrateSlide(idx){
+  const el = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(!el || el.classList.contains('shell')) return;
+  destroyVideo(idx);
+  el.classList.add('shell');
+  el.classList.remove('video-ready','paused','panel-open');
+  el.innerHTML = '';
+}
+
+// Hydrate slides within a window of `center`, dehydrate the rest.
+const SLIDE_WINDOW = 3;  // hydrate current ±3 slides
+function hydrateWindow(center){
+  const lo = Math.max(0, center - SLIDE_WINDOW);
+  const hi = Math.min(state.filtered.length - 1, center + SLIDE_WINDOW);
+  state.filtered.forEach((s,i)=>{
+    const el = document.querySelector(`.story[data-idx="${i}"]`);
+    if(!el) return;
+    const isShell = el.classList.contains('shell');
+    if(i >= lo && i <= hi){
+      if(isShell) hydrateSlide(i);
+    } else {
+      if(!isShell) dehydrateSlide(i);
+    }
+  });
 }
 
 // ─── VIRTUALIZED VIDEO WINDOW ──────────────────────────────────────
@@ -686,6 +738,8 @@ function updateWindow(center){
 function activateStory(idx){
   const story = state.filtered[idx];
   if(!story) return;
+  // make sure this slide (and its neighbors) are hydrated before we touch video
+  hydrateWindow(idx);
   const el = document.querySelector(`.story[data-idx="${idx}"]`);
   if(!el) return;
   state.currentIndex = idx;
@@ -795,42 +849,33 @@ function dismissSwipeHint(){
 }
 
 // ─── per-story event wiring (taps, swipe, buttons) ─────────────────
-function wireStoryEvents(){
-  // tap zones (pause/play)
-  document.querySelectorAll('.tap-zone').forEach(tz=>{
-    tz.addEventListener('click', ()=> onTap(parseInt(tz.dataset.tap,10)));
-  });
-  // panel back buttons
-  document.querySelectorAll('[data-back]').forEach(b=>{
-    b.addEventListener('click', e=>{ e.stopPropagation(); closePanel(parseInt(b.dataset.back,10)); });
-  });
-  // share buttons
-  document.querySelectorAll('[data-share]').forEach(b=>{
-    b.addEventListener('click', e=>{
-      e.stopPropagation(); e.preventDefault();
-      shareStory(b.dataset.share, b.dataset.headline);
-    });
-  });
-  // horizontal swipe detection per story (swipe-left = panel, swipe-right = close)
-  document.querySelectorAll('.story').forEach(st=>{
-    let x0=null, y0=null, t0=0;
-    st.addEventListener('touchstart', e=>{
-      if(e.touches.length!==1) return;
-      x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now();
-    }, {passive:true});
-    st.addEventListener('touchend', e=>{
-      if(x0===null) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - x0, dy = t.clientY - y0;
-      x0=null;
-      // horizontal intent: |dx| dominant, fast enough, far enough
-      if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)*1.8 && (Date.now()-t0) < 600){
-        const idx = parseInt(st.dataset.idx,10);
-        if(dx < 0) openPanel(idx);   // swipe left → open
-        else closePanel(idx);        // swipe right → close
-      }
-    }, {passive:true});
-  });
+// Wire events for a SINGLE hydrated slide (called from hydrateSlide).
+function wireSlideEvents(el, idx){
+  // tap zone (pause/play)
+  const tz = el.querySelector('.tap-zone');
+  if(tz) tz.addEventListener('click', ()=> onTap(idx));
+  // panel back button
+  const back = el.querySelector('[data-back]');
+  if(back) back.addEventListener('click', e=>{ e.stopPropagation(); closePanel(idx); });
+  // share button
+  const sh = el.querySelector('[data-share]');
+  if(sh) sh.addEventListener('click', e=>{ e.stopPropagation(); e.preventDefault(); shareStory(sh.dataset.share, sh.dataset.headline); });
+  // horizontal swipe (left = open panel, right = close)
+  let x0=null, y0=null, t0=0;
+  el.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now();
+  }, {passive:true});
+  el.addEventListener('touchend', e=>{
+    if(x0===null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0, dy = t.clientY - y0;
+    x0=null;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)*1.8 && (Date.now()-t0) < 600){
+      if(dx < 0) openPanel(idx);
+      else closePanel(idx);
+    }
+  }, {passive:true});
 }
 
 // ─── share ─────────────────────────────────────────────────────────
@@ -851,12 +896,17 @@ function attachObserver(){
     entries.forEach(en=>{
       if(en.isIntersecting && en.intersectionRatio > 0.6){
         const idx = parseInt(en.target.dataset.idx,10);
+        // hydrate the window around this slide (creates content + videos),
+        // then activate it. hydrateWindow also dehydrates far slides.
+        hydrateWindow(idx);
         if(idx !== state.currentIndex){
           activateStory(idx);
         }
       }
     });
   }, { root: feed, threshold:[0.6] });
+  // observe the shells (they persist across hydration — we only swap innerHTML
+  // and toggle the .shell class, never replace the .story element itself).
   document.querySelectorAll('.story').forEach(st=> obs.observe(st));
   state._obs = obs;
 }
