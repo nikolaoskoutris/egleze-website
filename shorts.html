@@ -697,11 +697,16 @@ function ensureVideo(idx){
   video.setAttribute('playsinline','');
   video.setAttribute('webkit-playsinline','');
   video.muted = true;
-  video.preload = 'metadata';
+  video.preload = 'auto';  // changed from 'metadata' to 'auto' — start buffering
+                           // the data NOW so the next slide is ready to play
+                           // the moment we activate it (fixes the "tap to start"
+                           // bug on every 3rd-4th video during fast swiping).
   // insert as the FIRST child so poster/tap-zone overlay it
   zone.insertBefore(video, zone.firstChild);
   state.players.set(story.id, video);
   wireVideoEvents(idx, video);
+  // explicitly kick off loading (some browsers wait for play())
+  try{ video.load(); }catch(_){}
   return video;
 }
 
@@ -763,15 +768,40 @@ function activateStory(idx){
   video._played = false;
   el.classList.remove('paused');
 
-  if(!state.soundUnlocked){
-    video.muted = true;
+  // Robust play sequence. iOS sometimes rejects play() because:
+  //   (a) the video hasn't loaded enough data yet — fixed by retrying when
+  //       'loadeddata' fires, by which time the element is ready
+  //   (b) the user-gesture window expired during fast swipe — fixed by
+  //       falling back to muted (always allowed)
+  // We chain: try desired-sound → if it rejects, retry muted → if THAT
+  // rejects, set up a one-shot 'loadeddata' listener to try again later.
+  // The result: a video either plays right away (best case) or plays as soon
+  // as it's loaded (worst case), but NEVER ends up paused and waiting for tap.
+  function tryPlay(wantUnmuted){
+    if(wantUnmuted) video.muted = false; else video.muted = true;
     const p = video.play();
-    if(p&&p.catch) p.catch(()=>{});
-  } else {
-    video.muted = false;
-    const p = video.play();
-    if(p&&p.catch) p.catch(()=>{ video.muted=true; const r=video.play(); if(r&&r.catch)r.catch(()=>{}); });
+    if(p && p.catch){
+      p.catch(()=>{
+        if(wantUnmuted){
+          // unmuted denied — fall to muted (always allowed once page touched)
+          tryPlay(false);
+        } else {
+          // even muted failed — wait until the video is actually loaded
+          const onReady = ()=>{
+            video.removeEventListener('loadeddata', onReady);
+            if(idx !== state.currentIndex) return;  // user already scrolled away
+            try{
+              video.muted = !state.soundUnlocked;
+              const p2 = video.play();
+              if(p2 && p2.catch) p2.catch(()=>{ video.muted = true; const r = video.play(); if(r&&r.catch) r.catch(()=>{}); });
+            }catch(_){}
+          };
+          video.addEventListener('loadeddata', onReady, { once: true });
+        }
+      });
+    }
   }
+  tryPlay(state.soundUnlocked);
 }
 
 function wireVideoEvents(idx, video){
