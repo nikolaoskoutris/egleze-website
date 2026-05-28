@@ -531,8 +531,7 @@ function storyHTML(s, idx){
 
   return `
   <div class="story" data-idx="${idx}" data-id="${s.id}">
-    <div class="video-zone">
-      <video id="video-${idx}" class="story-video" src="${cleanClipUrl(s.id)}" playsinline webkit-playsinline muted preload="metadata" x-webkit-airplay="allow"></video>
+    <div class="video-zone" id="vzone-${idx}">
       <div class="video-poster ${artwork?'':'fallback'}" style="${artStyle}"></div>
       <div class="tap-zone" data-tap="${idx}"></div>
       <div class="play-hint">▶</div>
@@ -602,6 +601,67 @@ function renderFeed(){
   attachObserver();
 }
 
+// ─── VIRTUALIZED VIDEO WINDOW ──────────────────────────────────────
+// Only a handful of <video> elements exist at once. As the current index
+// changes, we create videos for slides within WINDOW of current, and
+// destroy any outside it. This keeps memory flat whether the feed has
+// 50 stories or 50,000.
+const WINDOW_AHEAD = 2;   // how many slides ahead to preload
+const WINDOW_BEHIND = 1;  // how many behind to keep
+
+function ensureVideo(idx){
+  const story = state.filtered[idx];
+  if(!story) return null;
+  const zone = document.getElementById(`vzone-${idx}`);
+  if(!zone) return null;
+  let video = zone.querySelector('video');
+  if(video) return video;  // already exists
+
+  video = document.createElement('video');
+  video.id = `video-${idx}`;
+  video.className = 'story-video';
+  video.src = cleanClipUrl(story.id);
+  video.playsInline = true;
+  video.setAttribute('playsinline','');
+  video.setAttribute('webkit-playsinline','');
+  video.muted = true;
+  video.preload = 'metadata';
+  // insert as the FIRST child so poster/tap-zone overlay it
+  zone.insertBefore(video, zone.firstChild);
+  state.players.set(story.id, video);
+  wireVideoEvents(idx, video);
+  return video;
+}
+
+function destroyVideo(idx){
+  const story = state.filtered[idx];
+  if(!story) return;
+  const zone = document.getElementById(`vzone-${idx}`);
+  if(!zone) return;
+  const video = zone.querySelector('video');
+  if(video){
+    try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(_){}
+    video.remove();
+  }
+  state.players.delete(story.id);
+  const el = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(el) el.classList.remove('video-ready');
+}
+
+function updateWindow(center){
+  const lo = Math.max(0, center - WINDOW_BEHIND);
+  const hi = Math.min(state.filtered.length - 1, center + WINDOW_AHEAD);
+  // destroy anything outside [lo,hi]
+  state.filtered.forEach((s,i)=>{
+    if(i < lo || i > hi){
+      const zone = document.getElementById(`vzone-${i}`);
+      if(zone && zone.querySelector('video')) destroyVideo(i);
+    }
+  });
+  // create anything inside [lo,hi]
+  for(let i=lo; i<=hi; i++) ensureVideo(i);
+}
+
 // ─── playback ──────────────────────────────────────────────────────
 function activateStory(idx){
   const story = state.filtered[idx];
@@ -610,22 +670,19 @@ function activateStory(idx){
   if(!el) return;
   state.currentIndex = idx;
 
-  // pause others
+  // maintain the sliding window of live videos around this index
+  updateWindow(idx);
+
+  // pause every video except the active one
   state.players.forEach((v,id)=>{ if(id!==story.id){ try{ v.pause(); v.currentTime=0; }catch(_){} } });
 
-  const video = document.getElementById(`video-${idx}`);
+  const video = ensureVideo(idx);
   if(!video) return;
-  if(!state.players.has(story.id)){
-    state.players.set(story.id, video);
-    wireVideoEvents(idx, video);
-  }
   try{ video.currentTime=0; }catch(_){}
   video._played = false;
   el.classList.remove('paused');
 
   if(!state.soundUnlocked){
-    // Before first interaction we still autoplay MUTED so the feed is alive,
-    // but unmuted comes on first tap. Muted autoplay is allowed by iOS.
     video.muted = true;
     const p = video.play();
     if(p&&p.catch) p.catch(()=>{});
@@ -649,15 +706,13 @@ function wireVideoEvents(idx, video){
   video.addEventListener('playing', ()=>{ video._played = true; });
   video.addEventListener('ended', ()=>{
     if(!video._played || video.currentTime < 1) return;
-    const active = document.querySelector('.story.panel-open');
-    if(active) return; // don't advance while reading the panel
+    if(document.querySelector('.story.panel-open')) return;
     advanceTo(idx+1);
   });
   video.addEventListener('error', ()=>{
     if(!video._played){
-      // clip failed to load — skip forward after a beat
       const cur = document.querySelector('.story[data-idx="'+idx+'"]');
-      if(cur && parseInt(cur.dataset.idx,10)===idx) setTimeout(()=>advanceTo(idx+1), 800);
+      if(cur && parseInt(cur.dataset.idx,10)===state.currentIndex) setTimeout(()=>advanceTo(idx+1), 800);
     }
   });
 }
