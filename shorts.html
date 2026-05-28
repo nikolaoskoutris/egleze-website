@@ -486,7 +486,7 @@ async function loadStories(){
     // Only stories with a rendered clip. We use the clean clips/ file for
     // playback, but clip_vertical_url being set is our proof the render
     // pipeline finished for this story (so the clip exists).
-    const path = 'stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=500';
+    const path = 'stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=8';
     state.allStories = await fetchSupabase(path);
   }catch(e){ console.error('[shorts] stories failed', e); state.allStories=[]; }
 }
