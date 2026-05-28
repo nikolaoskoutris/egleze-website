@@ -1130,17 +1130,22 @@ window.addEventListener('pageshow', function(e){
   async function toggleBookmark(id){
     if(!id) return;
     id = String(id);
-    if(!window.egleze.auth) return;
-    var u = await window.egleze.auth.getUser();
+    if(!window.egleze.auth){ diagToast('toggle: no auth', true); return; }
+    var u;
+    try{ u = await window.egleze.auth.getUser(); }
+    catch(e){ diagToast('getUser threw: '+(e&&e.message||e), true); return; }
     if(!u){
+      diagToast('not signed in → opening modal');
       try{ localStorage.setItem('egleze_pending_save', id); }catch(_){}
       if(window.egleze.ui && window.egleze.ui.openSignIn) window.egleze.ui.openSignIn();
+      else diagToast('signed out but no modal hook', true);
       return;
     }
     var db = getDB();
-    if(!db) return;
+    if(!db){ diagToast('no db client', true); return; }
     var set = window.egleze.saved;
     var was = set.has(id);
+    diagToast(was ? 'unsaving '+id+'...' : 'saving '+id+'...');
     document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.toggle('is-saved', !was); });
     if(was){
       set.delete(id);
@@ -1148,7 +1153,9 @@ window.addEventListener('pageshow', function(e){
       if(d.error){
         set.add(id);
         document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.add('is-saved'); });
-        console.error('[shorts bookmarks] unsave failed', d.error);
+        diagToast('unsave err: '+d.error.message, true);
+      } else {
+        diagToast('unsaved ✓');
       }
     } else {
       set.add(id);
@@ -1156,7 +1163,9 @@ window.addEventListener('pageshow', function(e){
       if(i.error && i.error.code !== '23505'){
         set.delete(id);
         document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.remove('is-saved'); });
-        console.error('[shorts bookmarks] save failed', i.error);
+        diagToast('save err: '+i.error.message+' (code '+i.error.code+')', true);
+      } else {
+        diagToast('saved ✓');
       }
     }
   }
@@ -1177,14 +1186,36 @@ window.addEventListener('pageshow', function(e){
     }catch(e){ console.error('[shorts bookmarks] applyPendingSave', e); }
   }
 
+  // Diagnostic toast — temporary, shows on phone what bookmark click does.
+  // Remove once the issue is identified.
+  function diagToast(msg, isError){
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);'
+      + 'background:' + (isError?'#bb1919':'rgba(0,0,0,0.92)') + ';color:#fff;'
+      + 'padding:10px 16px;border-radius:6px;font:12px/1.3 -apple-system,sans-serif;'
+      + 'z-index:99999;max-width:85vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ try{ t.remove(); }catch(_){} }, 3000);
+  }
+
   document.addEventListener('click', function(e){
     try{
       var btn = e.target.closest && e.target.closest('.eg-bookmark');
       if(!btn) return;
       e.preventDefault(); e.stopPropagation();
       var id = btn.getAttribute('data-story-id');
-      if(id) toggleBookmark(id);
-    }catch(err){ console.error('[shorts bookmarks] click', err); }
+      if(!id){ diagToast('no story id on button', true); return; }
+      // Step-by-step diagnostic
+      if(!window.egleze){ diagToast('egleze object missing', true); return; }
+      if(!window.egleze.auth){ diagToast('auth not loaded', true); return; }
+      if(!window.egleze.auth.client){ diagToast('supabase client not ready', true); return; }
+      diagToast('clicked id=' + id + ' — calling toggle...');
+      toggleBookmark(id);
+    }catch(err){
+      diagToast('click err: ' + (err && err.message || err), true);
+      console.error('[shorts bookmarks] click', err);
+    }
   }, true);
 
   whenReady(function(){
