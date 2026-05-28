@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--red:#bb1919;--red-deep:#8a1414;--gold:#d6c79e;--ink:#1a1a1a;--bg:#000}
+:root{--red:#bb1919;--red-deep:#8a1414;--gold:#d6c79e;--cream:#f5ede0;--ink:#1a1a1a;--bg:#0a0a0a;--panel:#161310}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
   height:100%;height:100dvh;background:var(--bg);color:#fff;
@@ -29,1165 +29,792 @@ html,body{
   overflow:hidden;position:fixed;inset:0;width:100%;
 }
 
-.app{
-  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at 30% 20%,#1a1208 0%,#0a0a0a 50%,#000 100%);
-}
-@media(min-width:768px){
-  .app::before{
-    content:"📱 Best on phone — desktop preview shown";
-    position:fixed;top:18px;left:50%;transform:translateX(-50%);
-    color:#fff;background:rgba(0,0,0,0.7);
-    padding:8px 16px;border-radius:20px;font-size:12px;z-index:1000;
-    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);
-  }
-}
-.shell{width:100%;height:100%;height:100dvh;position:relative;overflow:hidden;background:var(--bg)}
-@media(min-width:768px){
-  .shell{
-    width:420px;height:840px;border-radius:42px;overflow:hidden;
-    box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 90px rgba(187,25,25,0.08),0 0 0 14px #1a1a1a,0 0 0 16px #2a2a2a;
-  }
-}
-
-/* HEADER */
-/* Top masthead removed — the MP4 carries the Egleze Shorts wordmark.
-   The categories strip now sits at the top of the screen. The sound
-   toggle floats top-right as a single circular button.
-   .brand-e survives only for the loading + empty states. */
-.brand-e{
-  width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;
-  font-family:'Playfair Display',serif;font-weight:900;font-size:20px;
-  display:flex;align-items:center;justify-content:center;
-}
-.icon-btn{
-  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;font-size:18px;
-  border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(10px);cursor:pointer;
-  transition:transform .15s ease;
-}
-.icon-btn:active{transform:scale(0.9)}
-/* CATEGORY STRIP — positioned to clear the MP4's baked-in masthead.
-   The MP4 occupies the middle ~70-80% of screen height with object-fit:contain.
-   On a 9:16-ish phone the MP4's "Egleze Shorts" wordmark sits roughly at
-   the top 6-8% of the visible video area. We push the strip down to
-   12vh so it lands below that wordmark on every phone aspect ratio. */
-.cat-strip{
-  position:absolute;top:calc(12vh + max(env(safe-area-inset-top),0px));
-  left:0;right:64px;
-  display:flex;gap:6px;overflow-x:auto;padding:4px 14px;z-index:25;
-  scrollbar-width:none;
-}
-.cat-strip::-webkit-scrollbar{display:none}
-.cat-pill{
-  flex-shrink:0;padding:7px 14px;
-  font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;
-  color:#fff;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);border-radius:20px;
-  white-space:nowrap;cursor:pointer;backdrop-filter:blur(10px);font-weight:500;transition:all .15s ease;
-}
-.cat-pill.active{background:var(--red);border-color:var(--red);font-weight:700}
-.cat-pill:active{transform:scale(0.95)}
-.cat-pill .count{display:inline-block;margin-left:4px;font-size:9px;opacity:0.6;font-weight:400}
-.cat-pill.active .count{opacity:0.85}
-
-/* Sound toggle floats at the very top-right corner, well above the cat strip */
-.icon-btn-floating{
-  position:absolute;top:max(env(safe-area-inset-top),14px);right:14px;z-index:30;
-}
-
-/* FEED */
+/* ─── FEED: vertical scroll-snap container ───────────────────────── */
 .feed{
-  position:absolute;inset:0;z-index:5;
-  scroll-snap-type:y mandatory;overflow-y:scroll;scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  position:absolute;inset:0;z-index:1;
+  overflow-y:scroll;scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
 .feed::-webkit-scrollbar{display:none}
+
+/* Each story is a full-screen snap slide */
 .story{
-  height:100%;scroll-snap-align:start;scroll-snap-stop:always;
-  position:relative;display:flex;flex-direction:column;overflow:hidden;background:#000;
+  position:relative;width:100%;height:100dvh;
+  scroll-snap-align:start;scroll-snap-stop:always;
+  display:flex;flex-direction:column;
+  background:var(--bg);overflow:hidden;
 }
 
-.story .poster{
-  position:absolute;inset:0;
-  background-size:cover;background-position:center;
-  filter:brightness(0.5) blur(2px);z-index:1;
+/* ─── TOP CHROME: back + menu ────────────────────────────────────── */
+.top-chrome{
+  position:absolute;top:0;left:0;right:0;z-index:20;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:max(env(safe-area-inset-top),12px) 12px 8px;
+  pointer-events:none;
 }
-.story .poster.fallback{background:linear-gradient(135deg,#1f1612 0%,#3a2818 50%,#0d0a07 100%)}
+.top-chrome > *{pointer-events:auto}
+.chrome-btn{
+  width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.5);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  border:none;cursor:pointer;backdrop-filter:blur(10px);font-size:18px;
+  transition:transform .15s ease;
+}
+.chrome-btn:active{transform:scale(0.9)}
 
-/* per-story video lives here, fills the story */
+/* ─── VIDEO ZONE (top, clean, no overlay) ────────────────────────── */
+.video-zone{
+  position:relative;width:100%;
+  height:58%;flex-shrink:0;
+  background:#000;
+  display:flex;align-items:center;justify-content:center;
+}
 .story-video{
-  width:100%;height:100%;object-fit:contain;
-  background:#000;display:block;
+  width:100%;height:100%;object-fit:cover;background:#000;display:block;
 }
-/* Hide native video controls — we have our own UI */
 .story-video::-webkit-media-controls{display:none!important}
 .story-video::-webkit-media-controls-enclosure{display:none!important}
-.story .yt-mount{
-  position:absolute;inset:0;z-index:2;
-  background:#000;opacity:0;
-  transition:opacity .25s ease;
+/* Show artwork poster while video loads / for audio-only fallback */
+.video-poster{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:1;transition:opacity .3s ease;pointer-events:none;
 }
-.story.video-ready .yt-mount{opacity:1}
-
-/* AUDIO MODE: hide video, show artwork in middle */
-.audio-mode .story .yt-mount{opacity:0}
-.story .audio-art{
-  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
-  width:240px;height:240px;
-  background-size:cover;background-position:center;
-  border-radius:18px;
-  box-shadow:0 30px 60px rgba(0,0,0,0.6);
-  z-index:3;display:none;border:2px solid rgba(214,199,158,0.3);
+.story.video-ready .video-poster{opacity:0}
+.video-poster.fallback{
+  background:linear-gradient(135deg,#241a10,#0f0d0a);
+  display:flex;align-items:center;justify-content:center;
 }
-.audio-mode .story.active .audio-art{display:block}
-.story .audio-art.fallback{background:linear-gradient(135deg,var(--red) 0%,var(--red-deep) 100%)}
-
-/* Old bottom-body + CTAs styles removed — the MP4 carries the headline,
-   summary, etc. The right-side action stack carries the actions. */
-
-/* MOBILE TAP-TO-ADVANCE: invisible button covering main video area, sits ABOVE iframe so taps go to us */
-.tap-zone{
-  position:absolute;left:0;right:0;
-  top:calc(max(env(safe-area-inset-top),14px) + 110px);
-  bottom:200px;
-  z-index:6;
-  cursor:pointer;background:transparent;
-  display:none;
-}
-@media(max-width:767px){.tap-zone{display:block}}
-
+/* clip duration badge */
 .clip-dur{
-  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 100px);left:18px;z-index:7;
+  position:absolute;bottom:10px;left:12px;z-index:4;
   display:inline-flex;align-items:center;gap:5px;
   background:rgba(0,0,0,0.6);color:#fff;
-  font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1px;
+  font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.5px;
   padding:4px 9px;border-radius:3px;backdrop-filter:blur(10px);
 }
-.story .progress{
-  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 94px);right:18px;
-  width:120px;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;
-  z-index:7;overflow:hidden;
-}
-.story .progress-fill{height:100%;background:var(--red);width:0%;transition:width .2s linear}
-
-/* CTAs styles kept only for empty-state "View all" and unmute-button below.
-   Story-level CTAs were removed; the MP4 carries that content. */
-.cta{
-  display:inline-flex;align-items:center;gap:6px;padding:8px 13px;
-  font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
-  border-radius:20px;cursor:pointer;border:none;color:#fff;text-decoration:none;
-}
-.cta.primary{background:var(--red)}
-.cta:active{transform:scale(0.95)}
-
-.actions{
-  /* Positioned in the bottom black-bar area / right below the MP4's editorial
-     overlay. The MP4 with object-fit:contain ends around y = 88-92% of viewport
-     on most phones. We pin the stack to bottom:env(safe-area-inset-bottom) so
-     the buttons live in the strip between the MP4 and the device bottom — no
-     overlap with the baked-in headline / quote / tagline text. */
-  position:absolute;right:14px;bottom:calc(max(env(safe-area-inset-bottom),12px) + 6px);z-index:8;
-  display:flex;flex-direction:column;gap:12px;align-items:center;
-}
-.action-btn{
-  width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,0.55);
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.1);transition:transform .15s ease,color .15s ease;
-  padding:0;font-family:inherit;
-  -webkit-appearance:none;appearance:none;
-}
-.action-btn:active{transform:scale(0.85)}
-/* Bookmark "saved" state — red fill + red icon, matching the website */
-.action-btn.eg-bookmark.is-saved{color:#bb1919}
-.action-btn.eg-bookmark.is-saved svg path{fill:#bb1919;stroke:#bb1919}
-.action-btn.show-mark{
-  background-size:cover;background-position:center;border:2px solid #fff;
-  font-family:'Playfair Display',serif;font-weight:900;
-  /* When the show mark is a link to YouTube, override the default reset
-     so it doesn't pick up underline styling from <a> */
-  text-decoration:none;
-}
-.action-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:.6px;color:#fff;text-align:center;margin-top:-8px}
-
-/* MOBILE-ONLY tap hint that appears on first story */
-.tap-hint{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  z-index:9;color:rgba(255,255,255,0.9);
-  font-family:'DM Sans',sans-serif;font-size:13px;text-align:center;pointer-events:none;
-  background:rgba(0,0,0,0.6);padding:10px 16px;border-radius:24px;
-  backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);
-  opacity:0;animation:hint-fade 4s ease 1s forwards;display:none;
-}
-@media(max-width:767px){.tap-hint{display:block}}
-@keyframes hint-fade{0%{opacity:0}15%{opacity:1}85%{opacity:1}100%{opacity:0}}
-
-/* Play indicator on stories that haven't started — only on mobile */
+/* center pause/play hint */
 .play-hint{
-  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
-  z-index:9;width:80px;height:80px;
-  border-radius:50%;background:rgba(0,0,0,0.55);
-  display:none;align-items:center;justify-content:center;
-  color:#fff;font-size:32px;backdrop-filter:blur(10px);
-  border:2px solid rgba(255,255,255,0.3);
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:5;width:64px;height:64px;border-radius:50%;
+  background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;color:#fff;opacity:0;transition:opacity .2s ease;
   pointer-events:none;
-  animation:play-pulse 2s ease-in-out infinite;
 }
-@media(max-width:767px){
-  .story.active:not(.has-played) .play-hint{display:flex}
+.story.paused .play-hint{opacity:1}
+/* video progress bar at bottom of video zone */
+.v-progress{
+  position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:rgba(255,255,255,0.18);z-index:4;
 }
-@keyframes play-pulse{50%{transform:translate(-50%,-50%) scale(1.05);opacity:0.7}}
+.v-progress-fill{height:100%;background:var(--red);width:0%;transition:width .15s linear}
 
-/* LOADING */
-.loading{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:50;color:#fff;background:#000;
+/* tap zone covers just the video so taps = pause/play */
+.tap-zone{
+  position:absolute;inset:0;z-index:3;cursor:pointer;background:transparent;
 }
-.loading .brand-e{width:54px;height:54px;font-size:32px;margin-bottom:18px;animation:pulse 1.4s infinite}
-.loading p{font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
-@keyframes pulse{50%{opacity:0.4;transform:scale(0.95)}}
 
-/* EMPTY STATE */
-.empty{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:40px;color:#fff;z-index:40;
+/* ─── EDITORIAL ZONE (middle, HTML text) ─────────────────────────── */
+.edit-zone{
+  flex:1;min-height:0;
+  padding:14px 16px 0;
+  display:flex;flex-direction:column;gap:0;
+  overflow:hidden;
 }
-.empty h2{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:12px}
-.empty p{color:#bcb09a;font-size:14px;line-height:1.6;margin-bottom:18px}
-
-/* INACTIVE STORIES are dimmed */
-.story:not(.active) .actions{opacity:0.4;transition:opacity .3s ease}
-.story.active .actions{opacity:1}
-
-/* TAP TO START OVERLAY */
-.tap-unmute{
-  position:absolute;inset:0;z-index:200;background:rgba(0,0,0,0.85);
-  display:flex;align-items:center;justify-content:center;padding:24px;
-  backdrop-filter:blur(20px);
+.show-pill{
+  display:inline-flex;align-items:center;gap:7px;align-self:flex-start;
+  background:rgba(255,255,255,0.07);border-radius:14px;padding:4px 10px 4px 4px;
+  margin-bottom:10px;max-width:100%;
 }
-.tap-unmute.hidden{display:none}
-.tap-card{text-align:center;color:#fff;max-width:300px}
-.tap-card .speaker{font-size:54px;margin-bottom:16px;animation:speaker-pulse 1.5s ease-in-out infinite}
-@keyframes speaker-pulse{50%{transform:scale(1.15)}}
-.tap-card h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:10px}
-.tap-card p{font-size:13px;line-height:1.5;color:#bcb09a;margin-bottom:18px}
-.tap-card .cta{margin:0 auto;display:inline-flex;font-size:11px;padding:12px 24px}
-
-/* TOAST for sound mode change */
-.sound-toast{
-  position:absolute;top:calc(max(env(safe-area-inset-top),14px) + 60px);right:18px;z-index:35;
-  background:rgba(0,0,0,0.85);color:#fff;
-  font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:600;
-  padding:6px 12px;border-radius:14px;
-  opacity:0;transform:translateY(-6px);transition:all .25s ease;
-  pointer-events:none;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);
+.show-pill .art{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background-size:cover;background-position:center;
+  background:linear-gradient(135deg,#3a2818,#1a1208);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-weight:900;font-size:10px;color:#fff;
 }
-.sound-toast.visible{opacity:1;transform:translateY(0)}
+.show-pill .txt{
+  font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:.3px;
+  color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.cat-line{
+  display:flex;align-items:center;gap:6px;margin-bottom:9px;
+}
+.cat-line .bar{width:3px;height:13px;background:var(--red)}
+.cat-line .cat{
+  font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);font-weight:700;
+}
+.headline{
+  font-family:'Playfair Display',serif;font-weight:700;font-size:22px;line-height:1.18;
+  letter-spacing:-.3px;margin-bottom:12px;color:#fff;
+}
+.quote{
+  display:flex;gap:9px;align-items:flex-start;
+}
+.quote .bar{width:3px;align-self:stretch;background:var(--red);flex-shrink:0;border-radius:0}
+.quote .txt{
+  font-family:'Playfair Display',serif;font-style:italic;font-size:15px;line-height:1.35;
+  color:var(--cream);
+}
+
+/* ─── ACTION ROW (bottom strip, horizontal) ──────────────────────── */
+.action-row{
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px calc(max(env(safe-area-inset-bottom),12px) + 10px);
+  border-top:0.5px solid rgba(255,255,255,0.1);
+}
+.action-left{display:flex;align-items:center;gap:22px}
+.act-btn{
+  background:none;border:none;color:#fff;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s ease,color .15s ease;
+  -webkit-appearance:none;appearance:none;text-decoration:none;
+}
+.act-btn:active{transform:scale(0.85)}
+.act-btn svg{width:24px;height:24px;display:block}
+.act-btn.eg-bookmark.is-saved{color:var(--red)}
+.act-btn.eg-bookmark.is-saved svg path{fill:var(--red);stroke:var(--red)}
+/* swipe hint chevrons */
+.swipe-hint{
+  display:flex;align-items:center;gap:1px;
+  opacity:0.85;transition:opacity .4s ease;
+}
+.swipe-hint.gone{opacity:0;pointer-events:none}
+.swipe-hint .c1{color:var(--gold);font-size:20px;animation:nudge 1.6s ease-in-out infinite}
+.swipe-hint .c2{color:var(--gold);font-size:15px;opacity:0.5;animation:nudge 1.6s ease-in-out infinite .15s}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(-4px)}}
+
+/* ─── EDITORIAL PANEL (slides in from right on swipe-left) ───────── */
+.edit-panel{
+  position:absolute;inset:0;z-index:30;background:var(--panel);
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+}
+.story.panel-open .edit-panel{transform:translateX(0)}
+.panel-head{
+  flex-shrink:0;display:flex;align-items:center;gap:7px;
+  padding:max(env(safe-area-inset-top),12px) 16px 12px;
+  border-bottom:0.5px solid rgba(255,255,255,0.08);
+}
+.panel-back{
+  display:flex;align-items:center;gap:6px;background:none;border:none;
+  color:var(--gold);font-family:'Roboto Condensed',sans-serif;font-size:13px;
+  letter-spacing:.5px;cursor:pointer;padding:0;
+}
+.panel-back svg{width:18px;height:18px}
+.panel-body{
+  flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px;
+}
+.panel-body::-webkit-scrollbar{display:none}
+.panel-headline{
+  font-family:'Playfair Display',serif;font-weight:700;font-size:21px;line-height:1.2;
+  margin-bottom:14px;color:#fff;
+}
+.panel-quote{
+  display:flex;gap:9px;align-items:flex-start;margin-bottom:18px;
+}
+.panel-quote .bar{width:3px;align-self:stretch;background:var(--red);flex-shrink:0}
+.panel-quote .txt{
+  font-family:'Playfair Display',serif;font-style:italic;font-size:16px;line-height:1.4;color:var(--cream);
+}
+.panel-label{
+  font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:#8a7560;margin-bottom:7px;
+}
+.panel-summary{
+  font-size:15px;line-height:1.6;color:#cdc6ba;margin-bottom:22px;
+}
+.panel-kp{list-style:none;margin:0 0 22px;padding:0}
+.panel-kp li{
+  display:flex;gap:9px;margin-bottom:11px;font-size:14px;line-height:1.45;color:#cdc6ba;
+}
+.panel-kp li::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--red);margin-top:7px}
+.panel-cta{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--red);color:#fff;text-decoration:none;
+  font-family:'Roboto Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:700;
+  padding:12px 20px;border-radius:24px;margin-bottom:10px;
+}
+
+/* ─── LOADING + EMPTY ────────────────────────────────────────────── */
+.loading,.empty{
+  position:absolute;inset:0;z-index:50;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:24px;
+}
+.loading.hidden,.empty.hidden{display:none}
+.spinner-e{
+  width:54px;height:54px;border-radius:50%;background:var(--red);color:#fff;
+  font-family:'Playfair Display',serif;font-weight:900;font-size:32px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:18px;
+  animation:pulse 1.4s infinite;
+}
+@keyframes pulse{50%{opacity:0.55;transform:scale(0.94)}}
+.loading p{color:#8a8378;font-size:13px}
+.empty h2{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:10px}
+.empty p{color:#8a8378;font-size:14px;line-height:1.5;max-width:280px;margin-bottom:18px}
+.empty button{
+  background:var(--red);color:#fff;border:none;border-radius:24px;
+  font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:700;
+  padding:12px 24px;cursor:pointer;
+}
+
+/* ─── FILTER SHEET ───────────────────────────────────────────────── */
+.sheet-backdrop{
+  position:absolute;inset:0;z-index:60;background:rgba(0,0,0,0.6);
+  opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;
+}
+.sheet-backdrop.open{opacity:1;visibility:visible}
+.sheet{
+  position:absolute;bottom:0;left:0;right:0;z-index:61;
+  background:#0a0a0a;border-radius:20px 20px 0 0;
+  padding:14px 14px calc(max(env(safe-area-inset-bottom),12px) + 14px);
+  max-height:72vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .25s ease;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.sheet.open{transform:translateY(0)}
+.sheet::-webkit-scrollbar{display:none}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.25);margin:0 auto 14px}
+.sheet-title{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;padding:0 4px 10px}
+.sheet-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 12px;cursor:pointer;border-radius:6px;width:100%;
+  background:none;border:none;text-align:left;color:#fff;font:inherit;font-size:15px;
+}
+.sheet-item:active{background:rgba(255,255,255,0.04)}
+.sheet-item.active{background:rgba(187,25,25,0.18);color:var(--gold)}
+.sheet-item.active::before{content:"✓";color:var(--red);margin-right:8px;font-weight:700}
+.sheet-item .count{font-family:'Roboto Condensed',sans-serif;font-size:11px;color:#888}
+.sheet-item.active .count{color:var(--gold)}
+
+/* current category label next to filter btn */
+.filter-current{
+  display:inline-flex;align-items:center;height:38px;padding:0 14px;
+  font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+  color:#fff;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);
+  border-radius:19px;backdrop-filter:blur(10px);margin-left:8px;
+  max-width:48vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  pointer-events:none;
+}
+.top-left-group{display:flex;align-items:center}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="shell" id="shell">
 
-    <!-- Top brand masthead REMOVED — the MP4 already has the Egleze Shorts
-         wordmark baked in. Only the sound toggle stays, repositioned as a
-         floating button so it doesn't compete with the MP4's masthead. -->
-    <button class="icon-btn icon-btn-floating" id="sound-toggle" title="Sound mode">📺</button>
+<div class="feed" id="feed"></div>
 
-    <div class="sound-toast" id="sound-toast">Video + Sound</div>
-    <div class="cat-strip" id="cat-strip"></div>
-
-    <div class="loading" id="loading">
-      <div class="brand-e">E</div>
-      <p>Loading conversations…</p>
-    </div>
-
-    <div class="feed" id="feed"></div>
-
-    <div class="empty" id="empty" style="display:none">
-      <div class="brand-e" style="width:54px;height:54px;font-size:32px;margin-bottom:18px"></div>
-      <h2>No stories in this category</h2>
-      <p>Try a different category, or come back later — new conversations land throughout the day.</p>
-      <button class="cta primary" onclick="document.querySelector('.cat-pill[data-cat=all]').click()">View all</button>
-    </div>
-
-    <div class="tap-unmute" id="tap-unmute">
-      <div class="tap-card">
-        <div class="speaker">🔊</div>
-        <h3>Tap to start with sound</h3>
-        <p>One tap unlocks audio for the session.</p>
-        <button class="cta primary" id="unmute-btn">▸ Start watching</button>
-      </div>
-    </div>
-
+<!-- top chrome lives outside the feed so it stays fixed -->
+<div class="top-chrome">
+  <div class="top-left-group">
+    <button class="chrome-btn" id="filter-btn" aria-label="Filter by category">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+    </button>
+    <span class="filter-current" id="filter-current">For You</span>
   </div>
+  <button class="chrome-btn" id="sound-btn" aria-label="Sound mode" title="Sound mode">📺</button>
+</div>
+
+<!-- filter sheet -->
+<div class="sheet-backdrop" id="sheet-backdrop"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Filter categories">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Filter by category</div>
+  <div id="sheet-list"></div>
+</div>
+
+<!-- loading -->
+<div class="loading" id="loading">
+  <div class="spinner-e">E</div>
+  <p>Loading shorts…</p>
+</div>
+
+<!-- empty -->
+<div class="empty hidden" id="empty">
+  <h2>Nothing here yet</h2>
+  <p>Try a different category, or come back later — new conversations land throughout the day.</p>
+  <button id="empty-all">View all</button>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// EGLEZE SHORTS V2 — clean rebuild, per-story iframe
-// ═══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+// EGLEZE SHORTS — clean rebuild (X.com architecture)
+//   • Video zone (top, clean clip from clips/{id}.mp4)
+//   • Editorial zone (middle, HTML text)
+//   • Action row (bottom, horizontal)
+//   • Swipe-left → editorial panel (full story + key moments)
+// Phase 1a: feed + video + text + actions + filter
+// Phase 1b: editorial panel (swipe-left / hint)
+// ════════════════════════════════════════════════════════════════════
 
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
 
+// R2 public base — clean clips live at clips/{id}.mp4 (confirmed public)
+const R2_PUBLIC = 'https://pub-29a35954b8244d9db19a07ed7e4f58ce.r2.dev';
+function cleanClipUrl(storyId) { return `${R2_PUBLIC}/clips/${storyId}.mp4`; }
+
 const CATEGORIES = [
-  { id: 'all', label: 'For You', emoji: '' },
-  { id: 'AI & Tech', label: 'AI & Tech', emoji: '' },
-  { id: 'Combat & UFC', label: 'Combat & UFC', emoji: '' },
-  { id: 'Comedy', label: 'Comedy', emoji: '' },
-  { id: 'Consciousness & Medicine', label: 'Consciousness & Medicine', emoji: '' },
-  { id: 'Controversial', label: 'Controversial', emoji: '' },
-  { id: 'Crime & Justice', label: 'Crime & Justice', emoji: '' },
-  { id: 'Debates', label: 'Debates', emoji: '' },
-  { id: 'Education & Learning', label: 'Education & Learning', emoji: '' },
-  { id: 'Energy & Climate', label: 'Energy & Climate', emoji: '' },
-  { id: 'Entertainment', label: 'Entertainment', emoji: '' },
-  { id: 'Espionage', label: 'Espionage', emoji: '' },
-  { id: 'Faith & Spirituality', label: 'Faith & Spirituality', emoji: '' },
-  { id: 'Geopolitics', label: 'Geopolitics', emoji: '' },
-  { id: 'Health, Longevity & Biohacking', label: 'Health & Longevity', emoji: '' },
-  { id: 'History', label: 'History', emoji: '' },
-  { id: 'Media & Journalism', label: 'Media & Journalism', emoji: '' },
-  { id: 'Military', label: 'Military', emoji: '' },
-  { id: 'Money', label: 'Money', emoji: '' },
-  { id: 'Monologues', label: 'Monologues', emoji: '' },
-  { id: 'Politics', label: 'Politics', emoji: '' },
-  { id: 'Psychology', label: 'Psychology', emoji: '' },
-  { id: 'Relationships & Family', label: 'Relationships & Family', emoji: '' },
-  { id: 'Science', label: 'Science', emoji: '' },
-  { id: 'Society', label: 'Society', emoji: '' },
-  { id: 'Sports', label: 'Sports', emoji: '' },
-  { id: 'UFO & Paranormal', label: 'UFO & Paranormal', emoji: '' }
+  { id: 'all', label: 'For You' },
+  { id: 'AI & Tech', label: 'AI & Tech' },
+  { id: 'Combat & UFC', label: 'Combat & UFC' },
+  { id: 'Comedy', label: 'Comedy' },
+  { id: 'Consciousness & Medicine', label: 'Consciousness & Medicine' },
+  { id: 'Controversial', label: 'Controversial' },
+  { id: 'Crime & Justice', label: 'Crime & Justice' },
+  { id: 'Debates', label: 'Debates' },
+  { id: 'Education & Learning', label: 'Education & Learning' },
+  { id: 'Energy & Climate', label: 'Energy & Climate' },
+  { id: 'Entertainment', label: 'Entertainment' },
+  { id: 'Espionage', label: 'Espionage' },
+  { id: 'Faith & Spirituality', label: 'Faith & Spirituality' },
+  { id: 'Geopolitics', label: 'Geopolitics' },
+  { id: 'Health, Longevity & Biohacking', label: 'Health & Longevity' },
+  { id: 'History', label: 'History' },
+  { id: 'Media & Journalism', label: 'Media & Journalism' },
+  { id: 'Military', label: 'Military' },
+  { id: 'Money', label: 'Money' },
+  { id: 'Monologues', label: 'Monologues' },
+  { id: 'Politics', label: 'Politics' },
+  { id: 'Psychology', label: 'Psychology' },
+  { id: 'Relationships & Family', label: 'Relationships & Family' },
+  { id: 'Science', label: 'Science' },
+  { id: 'Society', label: 'Society' },
+  { id: 'Sports', label: 'Sports' },
+  { id: 'UFO & Paranormal', label: 'UFO & Paranormal' }
 ];
-
-const SOUND_MODES = [
-  { id: 'video',  icon: '📺', label: 'Video + Sound' },
-  { id: 'audio',  icon: '🎧', label: 'Audio Only' },
-  { id: 'silent', icon: '🔇', label: 'Silent' }
-];
-
-// ─── Strict round-robin interleave by show_name ──────────────────────────
-// Ensures the Shorts feed never plays two consecutive clips from the same
-// podcast. Same algorithm as homepage broadcast queue (kept in sync).
-function interleaveByShow(stories) {
-  if (!Array.isArray(stories) || stories.length < 3) return stories || [];
-  var groups = new Map();
-  for (var i = 0; i < stories.length; i++) {
-    var key = (stories[i] && stories[i].show_name) || '__unknown__';
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(stories[i]);
-  }
-  if (groups.size === 1) return stories.slice();
-  var result = [];
-  var lastShow = null;
-  while (result.length < stories.length) {
-    var bestKey = null;
-    var bestCount = -1;
-    groups.forEach(function(arr, key) {
-      if (arr.length === 0) return;
-      if (key === lastShow && groups.size > 1) {
-        var othersHaveItems = false;
-        groups.forEach(function(a, k) { if (k !== lastShow && a.length > 0) othersHaveItems = true; });
-        if (othersHaveItems) return;
-      }
-      if (arr.length > bestCount) { bestCount = arr.length; bestKey = key; }
-    });
-    if (bestKey === null) break;
-    result.push(groups.get(bestKey).shift());
-    lastShow = bestKey;
-  }
-  return result;
-}
 
 const state = {
   allStories: [],
   shows: {},
-  filteredStories: [],
-  currentCategory: 'all',
+  filtered: [],
+  category: 'all',
   currentIndex: 0,
-  soundMode: 'video',
   soundUnlocked: false,
-  players: new Map(),       // story.id -> HTMLVideoElement
+  swipeHintDismissed: false,
+  players: new Map(),   // story.id -> <video>
 };
 
-async function init() {
+// ─── helpers ───────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function truncate(s,n){ return s && s.length>n ? s.slice(0,n)+'…' : (s||''); }
+function initials(name){ return (String(name||'E').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('')||'E').toUpperCase(); }
+
+function slugifyHeadline(text){
+  if(!text) return '';
+  return String(text).toLowerCase()
+    .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+    .replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-')
+    .replace(/^-|-$/g,'').substring(0,80);
+}
+function buildStoryUrl(id, headline){
+  const base = slugifyHeadline(headline);
+  return '/story/' + id + (base ? '-'+base : '');
+}
+
+// pull first sentence of the quote for the compact quote line
+function firstSentence(q, max){
+  if(!q) return '';
+  const s = String(q).trim();
+  const m = s.match(/^[^.!?]*[.!?]/);
+  let out = m ? m[0] : s;
+  if(out.length > max) out = out.slice(0, max).replace(/\s+\S*$/,'') + '…';
+  return out;
+}
+
+// strict round-robin so consecutive shorts aren't from the same show
+function interleaveByShow(stories){
+  if(!Array.isArray(stories) || stories.length < 3) return stories || [];
+  const groups = new Map();
+  stories.forEach(s=>{ const k=(s&&s.show_name)||'__u__'; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(s); });
+  if(groups.size === 1) return stories.slice();
+  const result=[]; let last=null;
+  while(result.length < stories.length){
+    let bestK=null,bestC=-1;
+    groups.forEach((arr,k)=>{
+      if(arr.length===0) return;
+      if(k===last && groups.size>1){
+        let others=false; groups.forEach((a,kk)=>{ if(kk!==last&&a.length>0)others=true; });
+        if(others) return;
+      }
+      if(arr.length>bestC){bestC=arr.length;bestK=k;}
+    });
+    if(bestK===null) break;
+    result.push(groups.get(bestK).shift()); last=bestK;
+  }
+  return result;
+}
+
+// ─── data ──────────────────────────────────────────────────────────
+async function fetchSupabase(path){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{
+    headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'Accept-Profile':'public' }
+  });
+  if(!res.ok) throw new Error('Supabase '+res.status);
+  return res.json();
+}
+async function loadShows(){
+  try{
+    const shows = await fetchSupabase('shows?select=name,artwork_url,website_url&active=eq.true');
+    shows.forEach(s=> state.shows[s.name]=s);
+  }catch(e){ console.warn('[shorts] shows failed', e); }
+}
+async function loadStories(){
+  try{
+    // Only stories with a rendered clip. We use the clean clips/ file for
+    // playback, but clip_vertical_url being set is our proof the render
+    // pipeline finished for this story (so the clip exists).
+    const path = 'stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=500';
+    state.allStories = await fetchSupabase(path);
+  }catch(e){ console.error('[shorts] stories failed', e); state.allStories=[]; }
+}
+
+// ─── categories (sheet) ────────────────────────────────────────────
+function renderCategories(){
+  const list = document.getElementById('sheet-list');
+  const counts = {};
+  state.allStories.forEach(s=>{ if(s.topic) counts[s.topic]=(counts[s.topic]||0)+1; });
+  const populated = CATEGORIES.filter(c=>c.id!=='all' && counts[c.id]>0).sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0));
+  const all = CATEGORIES.find(c=>c.id==='all');
+  const visible = [all, ...populated];
+  list.innerHTML = visible.map(c=>{
+    const n = c.id==='all' ? state.allStories.length : (counts[c.id]||0);
+    const active = c.id===state.category ? ' active' : '';
+    return `<button class="sheet-item${active}" data-cat="${esc(c.id)}"><span>${esc(c.label)}</span><span class="count">${n}</span></button>`;
+  }).join('');
+  list.onclick = e=>{
+    const it = e.target.closest('.sheet-item');
+    if(!it) return;
+    state.category = it.dataset.cat;
+    const meta = CATEGORIES.find(c=>c.id===state.category);
+    document.getElementById('filter-current').textContent = meta ? meta.label : 'For You';
+    closeSheet();
+    applyFilter();
+  };
+}
+function openSheet(){ document.getElementById('sheet').classList.add('open'); document.getElementById('sheet-backdrop').classList.add('open'); }
+function closeSheet(){ document.getElementById('sheet').classList.remove('open'); document.getElementById('sheet-backdrop').classList.remove('open'); }
+
+// ─── render feed ───────────────────────────────────────────────────
+function applyFilter(){
+  const base = state.category==='all' ? [...state.allStories] : state.allStories.filter(s=>s.topic===state.category);
+  state.filtered = interleaveByShow(base);
+  state.currentIndex = 0;
+  // tear down players
+  state.players.forEach(v=>{ try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(_){} });
+  state.players.clear();
+  renderFeed();
+  document.getElementById('feed').scrollTo({top:0});
+  setTimeout(()=> activateStory(0), 60);
+}
+
+function storyHTML(s, idx){
+  const show = state.shows[s.show_name] || {};
+  const artwork = show.artwork_url || '';
+  const ini = initials(s.show_name);
+  const len = (s.clip_end_seconds && s.clip_start_seconds) ? (s.clip_end_seconds - s.clip_start_seconds) : 60;
+  const mm = Math.floor(len/60), ssx = len%60;
+  const dur = mm>0 ? `${mm}:${String(ssx).padStart(2,'0')}` : `0:${String(ssx).padStart(2,'0')}`;
+  const headline = esc(s.headline||'');
+  const quoteLine = firstSentence(s.quote, 110);
+  const showLabel = esc(s.show_name||'') + (s.episode ? ' · ' + esc(truncate(s.episode,28)) : '');
+  const artStyle = artwork ? `background-image:url('${esc(artwork)}')` : '';
+
+  // editorial panel content
+  const fullSummary = esc(s.summary||'');
+  const epSummary = (typeof s.episode_summary==='string' && s.episode_summary.trim()) ? esc(s.episode_summary.trim()) : '';
+  const keyPoints = Array.isArray(s.episode_key_points) ? s.episode_key_points.filter(k=>typeof k==='string'&&k.trim()) : [];
+  const kpHtml = keyPoints.length ? `<div class="panel-label">Key moments</div><ul class="panel-kp">${keyPoints.map(k=>`<li>${esc(k)}</li>`).join('')}</ul>` : '';
+  const fullQuote = s.quote ? esc(s.quote) : '';
+
+  return `
+  <div class="story" data-idx="${idx}" data-id="${s.id}">
+    <div class="video-zone">
+      <video id="video-${idx}" class="story-video" src="${cleanClipUrl(s.id)}" playsinline webkit-playsinline muted preload="metadata" x-webkit-airplay="allow"></video>
+      <div class="video-poster ${artwork?'':'fallback'}" style="${artStyle}"></div>
+      <div class="tap-zone" data-tap="${idx}"></div>
+      <div class="play-hint">▶</div>
+      <div class="clip-dur">▸ ${dur}</div>
+      <div class="v-progress"><div class="v-progress-fill" id="vprog-${idx}"></div></div>
+    </div>
+
+    <div class="edit-zone">
+      <div class="show-pill">
+        <div class="art" style="${artStyle}">${artwork?'':ini}</div>
+        <div class="txt">${showLabel}</div>
+      </div>
+      <div class="cat-line"><div class="bar"></div><div class="cat">${esc(s.topic||'Story')}</div></div>
+      <div class="headline">${headline}</div>
+      ${quoteLine ? `<div class="quote"><div class="bar"></div><div class="txt">"${esc(quoteLine)}"</div></div>` : ''}
+    </div>
+
+    <div class="action-row">
+      <div class="action-left">
+        <button class="act-btn eg-bookmark" data-story-id="${s.id}" aria-label="Save story">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 H18 V20 L12 16 L6 20 Z"/></svg>
+        </button>
+        <button class="act-btn" data-share="${s.id}" data-headline="${esc((s.headline||'').replace(/"/g,'&quot;'))}" aria-label="Share story">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+        <a class="act-btn" href="${buildStoryUrl(s.id, s.headline)}#react" aria-label="React on Egleze">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V4a1.4 1.4 0 0 1 2.8 0v4.5"/><path d="M10.8 8.8V2.6a1.4 1.4 0 0 1 2.8 0v6"/><path d="M13.6 3.4a1.4 1.4 0 0 1 2.8 0v9.8c0 3.8-2.3 6.6-5.8 6.6-2.6 0-4.3-1.3-5.5-3.6l-2-3.6a1.35 1.35 0 0 1 2.3-1.4l1.8 2.8"/><path d="M9.5 22h3"/></svg>
+        </a>
+        ${s.source_url ? `<a class="act-btn" href="${esc(s.source_url)}" target="_blank" rel="noopener" aria-label="Watch source on YouTube">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg>
+        </a>` : ''}
+      </div>
+      <div class="swipe-hint" data-hint><span class="c1">‹</span><span class="c2">‹</span></div>
+    </div>
+
+    <!-- editorial panel (Phase 1b) -->
+    <div class="edit-panel">
+      <div class="panel-head">
+        <button class="panel-back" data-back="${idx}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          back to video
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="panel-headline">${headline}</div>
+        ${fullQuote ? `<div class="panel-quote"><div class="bar"></div><div class="txt">"${esc(fullQuote)}"</div></div>` : ''}
+        ${fullSummary ? `<div class="panel-label">The story</div><div class="panel-summary">${fullSummary}</div>` : ''}
+        ${epSummary ? `<div class="panel-label">From this episode</div><div class="panel-summary">${epSummary}</div>` : ''}
+        ${kpHtml}
+        <a class="panel-cta" href="${buildStoryUrl(s.id, s.headline)}">Read on Egleze →</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderFeed(){
+  const feed = document.getElementById('feed');
+  const empty = document.getElementById('empty');
+  if(state.filtered.length === 0){
+    feed.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  feed.innerHTML = state.filtered.map((s,i)=> storyHTML(s,i)).join('');
+  wireStoryEvents();
+  attachObserver();
+}
+
+// ─── playback ──────────────────────────────────────────────────────
+function activateStory(idx){
+  const story = state.filtered[idx];
+  if(!story) return;
+  const el = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(!el) return;
+  state.currentIndex = idx;
+
+  // pause others
+  state.players.forEach((v,id)=>{ if(id!==story.id){ try{ v.pause(); v.currentTime=0; }catch(_){} } });
+
+  const video = document.getElementById(`video-${idx}`);
+  if(!video) return;
+  if(!state.players.has(story.id)){
+    state.players.set(story.id, video);
+    wireVideoEvents(idx, video);
+  }
+  try{ video.currentTime=0; }catch(_){}
+  video._played = false;
+  el.classList.remove('paused');
+
+  if(!state.soundUnlocked){
+    // Before first interaction we still autoplay MUTED so the feed is alive,
+    // but unmuted comes on first tap. Muted autoplay is allowed by iOS.
+    video.muted = true;
+    const p = video.play();
+    if(p&&p.catch) p.catch(()=>{});
+  } else {
+    video.muted = false;
+    const p = video.play();
+    if(p&&p.catch) p.catch(()=>{ video.muted=true; const r=video.play(); if(r&&r.catch)r.catch(()=>{}); });
+  }
+}
+
+function wireVideoEvents(idx, video){
+  video.addEventListener('loadeddata', ()=>{
+    const el = document.querySelector(`.story[data-idx="${idx}"]`);
+    if(el) el.classList.add('video-ready');
+  });
+  video.addEventListener('timeupdate', ()=>{
+    const f = document.getElementById(`vprog-${idx}`);
+    if(!f || !video.duration) return;
+    f.style.width = Math.min(100,(video.currentTime/video.duration)*100)+'%';
+  });
+  video.addEventListener('playing', ()=>{ video._played = true; });
+  video.addEventListener('ended', ()=>{
+    if(!video._played || video.currentTime < 1) return;
+    const active = document.querySelector('.story.panel-open');
+    if(active) return; // don't advance while reading the panel
+    advanceTo(idx+1);
+  });
+  video.addEventListener('error', ()=>{
+    if(!video._played){
+      // clip failed to load — skip forward after a beat
+      const cur = document.querySelector('.story[data-idx="'+idx+'"]');
+      if(cur && parseInt(cur.dataset.idx,10)===idx) setTimeout(()=>advanceTo(idx+1), 800);
+    }
+  });
+}
+
+function advanceTo(idx){
+  const next = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(next) next.scrollIntoView({behavior:'smooth'});
+}
+
+// ─── tap = pause/play; first tap unlocks sound ─────────────────────
+function onTap(idx){
+  const story = state.filtered[idx];
+  if(!story) return;
+  const video = state.players.get(story.id);
+  const el = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(!video) return;
+
+  if(!state.soundUnlocked){
+    state.soundUnlocked = true;
+    try{ video.muted=false; const p=video.play(); if(p&&p.catch)p.catch(()=>{}); }catch(_){}
+    if(el) el.classList.remove('paused');
+    return;
+  }
+  try{
+    if(video.paused || video.ended){
+      video.muted=false; const p=video.play(); if(p&&p.catch)p.catch(()=>{});
+      if(el) el.classList.remove('paused');
+    } else {
+      video.pause();
+      if(el) el.classList.add('paused');
+    }
+  }catch(_){}
+}
+
+// ─── editorial panel open/close ────────────────────────────────────
+function openPanel(idx){
+  const el = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(!el) return;
+  el.classList.add('panel-open');
+  // pause the video while reading
+  const story = state.filtered[idx];
+  const video = story && state.players.get(story.id);
+  if(video){ try{ video.pause(); }catch(_){} }
+  if(el) el.classList.add('paused');
+  dismissSwipeHint();
+}
+function closePanel(idx){
+  const el = document.querySelector(`.story[data-idx="${idx}"]`);
+  if(!el) return;
+  el.classList.remove('panel-open');
+  // resume video
+  const story = state.filtered[idx];
+  const video = story && state.players.get(story.id);
+  if(video){ try{ video.muted=!state.soundUnlocked?true:false; const p=video.play(); if(p&&p.catch)p.catch(()=>{}); el.classList.remove('paused'); }catch(_){} }
+}
+function dismissSwipeHint(){
+  if(state.swipeHintDismissed) return;
+  state.swipeHintDismissed = true;
+  document.querySelectorAll('.swipe-hint').forEach(h=> h.classList.add('gone'));
+}
+
+// ─── per-story event wiring (taps, swipe, buttons) ─────────────────
+function wireStoryEvents(){
+  // tap zones (pause/play)
+  document.querySelectorAll('.tap-zone').forEach(tz=>{
+    tz.addEventListener('click', ()=> onTap(parseInt(tz.dataset.tap,10)));
+  });
+  // panel back buttons
+  document.querySelectorAll('[data-back]').forEach(b=>{
+    b.addEventListener('click', e=>{ e.stopPropagation(); closePanel(parseInt(b.dataset.back,10)); });
+  });
+  // share buttons
+  document.querySelectorAll('[data-share]').forEach(b=>{
+    b.addEventListener('click', e=>{
+      e.stopPropagation(); e.preventDefault();
+      shareStory(b.dataset.share, b.dataset.headline);
+    });
+  });
+  // horizontal swipe detection per story (swipe-left = panel, swipe-right = close)
+  document.querySelectorAll('.story').forEach(st=>{
+    let x0=null, y0=null, t0=0;
+    st.addEventListener('touchstart', e=>{
+      if(e.touches.length!==1) return;
+      x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now();
+    }, {passive:true});
+    st.addEventListener('touchend', e=>{
+      if(x0===null) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - x0, dy = t.clientY - y0;
+      x0=null;
+      // horizontal intent: |dx| dominant, fast enough, far enough
+      if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)*1.8 && (Date.now()-t0) < 600){
+        const idx = parseInt(st.dataset.idx,10);
+        if(dx < 0) openPanel(idx);   // swipe left → open
+        else closePanel(idx);        // swipe right → close
+      }
+    }, {passive:true});
+  });
+}
+
+// ─── share ─────────────────────────────────────────────────────────
+async function shareStory(id, headline){
+  const url = 'https://egleze.com' + buildStoryUrl(id, headline);
+  if(navigator.share){
+    try{ await navigator.share({ title: headline||'Egleze', url }); }catch(_){}
+  } else {
+    try{ await navigator.clipboard.writeText(url); alert('Link copied'); }catch(_){}
+  }
+}
+
+// ─── scroll observer (activate the story in view) ──────────────────
+function attachObserver(){
+  const feed = document.getElementById('feed');
+  if(state._obs){ try{ state._obs.disconnect(); }catch(_){} }
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting && en.intersectionRatio > 0.6){
+        const idx = parseInt(en.target.dataset.idx,10);
+        if(idx !== state.currentIndex){
+          activateStory(idx);
+        }
+      }
+    });
+  }, { root: feed, threshold:[0.6] });
+  document.querySelectorAll('.story').forEach(st=> obs.observe(st));
+  state._obs = obs;
+}
+
+// ─── sound toggle (simple mute/unmute for now) ─────────────────────
+function setupSoundToggle(){
+  const btn = document.getElementById('sound-btn');
+  btn.addEventListener('click', ()=>{
+    state.soundUnlocked = true;
+    const story = state.filtered[state.currentIndex];
+    const v = story && state.players.get(story.id);
+    if(v){ try{ v.muted = !v.muted; btn.textContent = v.muted ? '🔇' : '📺'; if(!v.muted){ const p=v.play(); if(p&&p.catch)p.catch(()=>{}); } }catch(_){} }
+  });
+}
+
+// ─── init ──────────────────────────────────────────────────────────
+async function init(){
   setupSoundToggle();
-  setupUnmuteOverlay();
-  // No YouTube API needed — using native <video> with R2 MP4s.
+  document.getElementById('filter-btn').addEventListener('click', openSheet);
+  document.getElementById('sheet-backdrop').addEventListener('click', closeSheet);
+  document.getElementById('empty-all').addEventListener('click', ()=>{
+    state.category='all';
+    document.getElementById('filter-current').textContent='For You';
+    applyFilter();
+  });
+
   await Promise.all([loadShows(), loadStories()]);
   renderCategories();
   applyFilter();
-  document.getElementById('loading').style.display = 'none';
-  setupScrollObserver();
-}
-
-// ─── DATA ──────────────────────────────────────────────────────────
-async function fetchSupabase(path) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Accept-Profile': 'public' }
-  });
-  if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
-  return res.json();
-}
-async function loadShows() {
-  try {
-    const shows = await fetchSupabase('shows?select=name,artwork_url,website_url&active=eq.true');
-    shows.forEach(s => state.shows[s.name] = s);
-  } catch (e) { console.warn('[shorts] shows failed:', e); }
-}
-async function loadStories() {
-  try {
-    // CRITICAL: only fetch stories that have a rendered MP4 in R2.
-    // Stories without clip_vertical_url are skipped here — the worker
-    // backfills them, and the next page-load will pick them up.
-    const path = `stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=500`;
-    state.allStories = await fetchSupabase(path);
-  } catch (e) { console.error('[shorts] stories failed:', e); state.allStories = []; }
-}
-
-// ─── CATEGORIES ────────────────────────────────────────────────────
-function renderCategories() {
-  const strip = document.getElementById('cat-strip');
-  const counts = {};
-  state.allStories.forEach(s => { if (s.topic) counts[s.topic] = (counts[s.topic] || 0) + 1; });
-  // Filter to populated categories, then sort by count desc.
-  // 'For You' (id: 'all') is pinned first so it's always the first pill.
-  const populated = CATEGORIES.filter(c => c.id !== 'all' && counts[c.id] > 0);
-  populated.sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0));
-  const allEntry = CATEGORIES.find(c => c.id === 'all');
-  const visible = allEntry ? [allEntry, ...populated] : populated;
-  strip.innerHTML = visible.map(c => {
-    const n = c.id === 'all' ? state.allStories.length : (counts[c.id] || 0);
-    const lbl = c.emoji ? `${c.emoji} ${c.label}` : c.label;
-    return `<div class="cat-pill ${c.id === 'all' ? 'active' : ''}" data-cat="${c.id}">${lbl} <span class="count">${n}</span></div>`;
-  }).join('');
-  strip.addEventListener('click', e => {
-    const pill = e.target.closest('.cat-pill');
-    if (!pill) return;
-    [...strip.querySelectorAll('.cat-pill')].forEach(p => p.classList.remove('active'));
-    pill.classList.add('active');
-    state.currentCategory = pill.dataset.cat;
-    applyFilter();
-    pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  });
-}
-function applyFilter() {
-  const base = state.currentCategory === 'all'
-    ? [...state.allStories]
-    : state.allStories.filter(s => s.topic === state.currentCategory);
-  // Strict round-robin so consecutive shorts never share a podcast
-  state.filteredStories = interleaveByShow(base);
-  state.currentIndex = 0;
-  // Tear down all existing video references when filter changes
-  state.players.forEach(v => { try { v.pause(); v.removeAttribute('src'); v.load(); } catch(_) {} });
-  state.players.clear();
-  renderFeed();
-  document.getElementById('feed').scrollTo({ top: 0 });
-  // Activate first story
-  setTimeout(() => activateStory(0), 50);
-}
-
-// ─── RENDER ────────────────────────────────────────────────────────
-function renderFeed() {
-  const feed = document.getElementById('feed');
-  const empty = document.getElementById('empty');
-  if (state.filteredStories.length === 0) {
-    feed.innerHTML = ''; empty.style.display = 'flex'; return;
-  }
-  empty.style.display = 'none';
-  feed.innerHTML = state.filteredStories.map((s, i) => storyHTML(s, i)).join('');
-  // First story marked active
-  feed.querySelector('.story')?.classList.add('active');
-}
-function storyHTML(s, idx) {
-  const show = state.shows[s.show_name] || {};
-  const artwork = show.artwork_url || '';
-  const initials = (s.show_name || 'E').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
-  const len = (s.clip_end_seconds && s.clip_start_seconds) ? (s.clip_end_seconds - s.clip_start_seconds) : 60;
-  const m = Math.floor(len/60), ss = len%60;
-  const dur = m > 0 ? `${m}:${String(ss).padStart(2,'0')}` : `0:${String(ss).padStart(2,'0')}`;
-  const headline = (s.headline || '').replace(/"/g,'&quot;');
-  // R2 MP4: native HTML5 <video>. muted+playsinline+preload=metadata is the
-  // exact incantation TikTok/Reels use to satisfy iOS Safari autoplay rules.
-  //
-  // The MP4 ALREADY contains the editorial overlay (headline, topic, show,
-  // summary, quote, tagline) baked into the pixels by egleze-render-service.
-  // So the shorts player must NOT duplicate that text in HTML — that was
-  // the visual collision Nikolaos saw. The HTML overlay now only carries
-  // INTERACTIVE elements that a static MP4 can't: Save / Share / Show
-  // shortcut, the two CTAs, and the tap-zone.
-  return `
-    <div class="story" data-idx="${idx}" data-id="${s.id}">
-      <div class="poster ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
-      <div class="yt-mount" id="yt-mount-${idx}">
-        <video
-          id="video-${idx}"
-          class="story-video"
-          src="${s.clip_vertical_url}"
-          playsinline
-          webkit-playsinline
-          muted
-          preload="metadata"
-          x-webkit-airplay="allow"></video>
-      </div>
-      <div class="audio-art ${!artwork?'fallback':''}" style="${artwork?`background-image:url('${artwork}')`:''}"></div>
-      <div class="tap-zone" onclick="onTapZone(${idx})"></div>
-      <div class="play-hint">▶</div>
-      ${idx === 0 ? '<div class="tap-hint">Tap to play · tap again to skip</div>' : ''}
-      <div class="clip-dur">▸ ${dur}</div>
-      <div class="progress"><div class="progress-fill" id="progress-${idx}"></div></div>
-      <div class="actions">
-        <!-- 1. BOOKMARK — uses website's exact SVG + .eg-bookmark class.
-             /js/auth.js + the inline bookmarks module handle clicks.
-             If logged-out, opens the sign-in modal (intent persisted to
-             localStorage and replayed on sign-in). -->
-        <button type="button" class="action-btn eg-bookmark" data-story-id="${s.id}" aria-label="Save story">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z"/></svg>
-        </button>
-
-        <!-- 2. SHARE — uses website's exact 3-circle network SVG. Inline
-             share already works in this file via shareStory(). -->
-        <button type="button" class="action-btn" aria-label="Share story"
-                onclick="event.stopPropagation();shareStory(${s.id}, '${headline.replace(/'/g,"\\'")}')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        </button>
-
-        <!-- 3. REACT — hand icon from /js/reactions-widget.js. Tap navigates
-             to the story page where the full reactions panel (with intensity)
-             handles the interaction. Shorts is for swiping, story page is
-             for the rich react UX. -->
-        <a class="action-btn" href="${buildStoryUrl(s.id, headline)}#react"
-           onclick="event.stopPropagation()" aria-label="React on Egleze">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10V4a1.4 1.4 0 0 1 2.8 0v4.5"/><path d="M10.8 8.8V2.6a1.4 1.4 0 0 1 2.8 0v6"/><path d="M13.6 3.4a1.4 1.4 0 0 1 2.8 0v9.8c0 3.8-2.3 6.6-5.8 6.6-2.6 0-4.3-1.3-5.5-3.6l-2-3.6a1.35 1.35 0 0 1 2.3-1.4l1.8 2.8"/><path d="M9.5 22h3"/></svg>
-        </a>
-
-        <!-- 4. SHOW ARTWORK — tap opens the source YouTube URL directly
-             (the creator's full episode). Falls back to host show page if no
-             source_url for some reason. -->
-        ${s.source_url ? `<a class="action-btn show-mark" href="${s.source_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${s.show_name}" style="${artwork?`background-image:url('${artwork}')`:`background:linear-gradient(135deg,#3a2818,#1a1208);font-size:14px;color:#fff;`}">${!artwork?initials:''}</a>` : `<div class="action-btn show-mark" title="${s.show_name}" style="${artwork?`background-image:url('${artwork}')`:`background:linear-gradient(135deg,#3a2818,#1a1208);font-size:14px;color:#fff;`}">${!artwork?initials:''}</div>`}
-        <div class="action-label">Show</div>
-      </div>
-      <!-- Bottom CTAs REMOVED — the MP4's editorial overlay carries the
-           context (headline, summary, quote, tagline). The right-side action
-           stack handles all interactions: bookmark, share, react, source. -->
-    </div>
-  `;
-}
-function truncate(s, n) { return s && s.length > n ? s.slice(0,n) + '…' : s; }
-function extractYouTubeId(url) {
-  if (!url) return null;
-  const patterns = [/youtu\.be\/([a-zA-Z0-9_-]{11})/, /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/, /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/, /youtube\.com\/live\/([a-zA-Z0-9_-]{11})/, /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/];
-  for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
-  return null;
-}
-
-// ─── NATIVE VIDEO HELPERS ──────────────────────────────────────────
-// No YouTube API. Each story has a native <video> element pointing at R2.
-// state.players is now a Map<storyId, HTMLVideoElement>.
-
-// ─── ACTIVATE STORY (plays the active one, pauses others) ──────────
-function activateStory(idx) {
-  const story = state.filteredStories[idx];
-  if (!story) return;
-  const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
-  if (!storyEl) return;
-
-  // Mark active
-  document.querySelectorAll('.story').forEach(s => s.classList.remove('active'));
-  storyEl.classList.add('active');
-  state.currentIndex = idx;
-
-  // Pause all OTHER videos
-  state.players.forEach((video, id) => {
-    if (id !== story.id) {
-      try { video.pause(); video.currentTime = 0; } catch(_) {}
-    }
-  });
-
-  attachOrPlayVideo(idx, story);
-}
-
-function attachOrPlayVideo(idx, story) {
-  const video = document.getElementById(`video-${idx}`);
-  if (!video) return;
-
-  // Register once
-  if (!state.players.has(story.id)) {
-    state.players.set(story.id, video);
-    attachVideoEvents(idx, video, story);
-  }
-
-  // Always start from 0 when a story activates
-  try { video.currentTime = 0; } catch(_) {}
-
-  if (state.soundMode === 'silent') {
-    video.muted = true;
-    video.pause();
-    return;
-  }
-
-  // Autoplay strategy:
-  //   - BEFORE first user interaction (state.soundUnlocked=false): do NOT call
-  //     play() at all. iOS would reject unmuted autoplay, and if the muted
-  //     fallback succeeded the 'ended' event would fire instantly causing a
-  //     skip-cascade (the bug Nikolaos saw: every tap jumps forward). Instead,
-  //     leave the tap-unmute overlay visible — the user's tap on "Start
-  //     watching" unmutes and plays the first video, which then plays normally
-  //     through to the end and naturally advances.
-  //   - AFTER unlock: play unmuted. Same gesture rules iOS uses for any
-  //     subsequent video in a session: once the user has interacted, all
-  //     other videos can autoplay with sound. If play() still rejects (very
-  //     rare — sometimes on aggressive Safari content blockers), fall back to
-  //     muted so the swipe doesn't dead-end.
-  if (!state.soundUnlocked) {
-    video.muted = true;
-    video.pause();
-    return;
-  }
-  video.muted = false;
-  const tryPlay = video.play();
-  if (tryPlay && tryPlay.catch) {
-    tryPlay.catch(() => {
-      video.muted = true;
-      const retry = video.play();
-      if (retry && retry.catch) retry.catch(() => {});
-    });
-  }
-}
-
-function attachVideoEvents(idx, video, story) {
-  // Once we have enough data to play, mark the story as video-ready
-  // so the poster fades out and the video shows through.
-  video.addEventListener('loadeddata', () => {
-    const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
-    if (storyEl) storyEl.classList.add('video-ready');
-  });
-
-  // Drive the progress bar from the native timeupdate event
-  video.addEventListener('timeupdate', () => {
-    const fill = document.getElementById(`progress-${idx}`);
-    if (!fill || !video.duration) return;
-    const pct = Math.min(100, (video.currentTime / video.duration) * 100);
-    fill.style.width = pct + '%';
-  });
-
-  // Mark as played once it actually starts
-  video.addEventListener('playing', () => {
-    const storyEl = document.querySelector(`.story[data-idx="${idx}"]`);
-    if (storyEl) storyEl.classList.add('has-played');
-  });
-
-  // Auto-advance when clip ends (TikTok-style, on both mobile and desktop).
-  // Guard: only advance if the video actually played past 1 second — without
-  // this guard, an iOS-blocked autoplay can fire 'ended' instantly (currentTime=0,
-  // duration=0) and cascade-skip the whole feed. We saw this on first load.
-  video.addEventListener('ended', () => {
-    if (video.currentTime < 1) return;
-    const activeEl = document.querySelector('.story.active');
-    if (activeEl && parseInt(activeEl.dataset.idx, 10) === idx) {
-      advanceTo(idx + 1);
-    }
-  });
-
-  // If the video errors (R2 hiccup, network glitch), advance rather than dead-end
-  video.addEventListener('error', () => {
-    console.warn(`[shorts] video error story ${story.id}, advancing`);
-    const activeEl = document.querySelector('.story.active');
-    if (activeEl && parseInt(activeEl.dataset.idx, 10) === idx) {
-      setTimeout(() => advanceTo(idx + 1), 800);
-    }
-  });
-}
-
-function advanceTo(idx) {
-  const next = document.querySelector(`.story[data-idx="${idx}"]`);
-  if (next) next.scrollIntoView({ behavior: 'smooth' });
-}
-
-function isMobile() { return window.matchMedia('(max-width: 767px)').matches; }
-
-// ─── TAP-ZONE HANDLER ──────────────────────────────────────────────
-function onTapZone(idx) {
-  const story = state.filteredStories[idx];
-  if (!story) return;
-
-  // First-time tap on any story = unlock sound globally
-  if (!state.soundUnlocked) {
-    state.soundUnlocked = true;
-    document.getElementById('tap-unmute')?.classList.add('hidden');
-    const video = state.players.get(story.id);
-    if (video) {
-      try {
-        video.muted = false;
-        const p = video.play();
-        if (p) p.catch(() => {});
-      } catch(_) {}
-    }
-    return;
-  }
-
-  // Otherwise: is current video playing? If not, play. If yes, advance.
-  const video = state.players.get(story.id);
-  const isPlaying = video && !video.paused && !video.ended;
-
-  if (!isPlaying && video) {
-    try {
-      video.muted = false;
-      const p = video.play();
-      if (p) p.catch(() => {});
-    } catch(_) {}
-    return;
-  }
-
-  // Already playing → advance to next
-  advanceTo(idx + 1);
-}
-
-// ─── SCROLL OBSERVER ───────────────────────────────────────────────
-function setupScrollObserver() {
-  const feed = document.getElementById('feed');
-  let scrollDebounce;
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-        const idx = parseInt(entry.target.dataset.idx, 10);
-        if (idx === state.currentIndex) return;
-        clearTimeout(scrollDebounce);
-        scrollDebounce = setTimeout(() => activateStory(idx), 80);
-      }
-    });
-  }, { root: feed, threshold: [0.6] });
-  document.querySelectorAll('.story').forEach(s => obs.observe(s));
-  const mo = new MutationObserver(() => {
-    document.querySelectorAll('.story').forEach(s => obs.observe(s));
-  });
-  mo.observe(feed, { childList: true });
-}
-
-// ─── SOUND TOGGLE ──────────────────────────────────────────────────
-function setupSoundToggle() {
-  const btn = document.getElementById('sound-toggle');
-  btn.addEventListener('click', () => {
-    const i = SOUND_MODES.findIndex(m => m.id === state.soundMode);
-    const next = SOUND_MODES[(i + 1) % SOUND_MODES.length];
-    state.soundMode = next.id;
-    btn.textContent = next.icon;
-    showToast(next.label);
-    document.getElementById('shell').classList.toggle('audio-mode', state.soundMode === 'audio');
-    applySoundMode();
-  });
-}
-function applySoundMode() {
-  const story = state.filteredStories[state.currentIndex];
-  if (!story) return;
-  const video = state.players.get(story.id);
-  if (!video) return;
-  try {
-    if (state.soundMode === 'silent') {
-      video.muted = true;
-      video.pause();
-    } else {
-      video.muted = !state.soundUnlocked;
-      const p = video.play();
-      if (p) p.catch(() => {});
-    }
-  } catch(_) {}
-}
-function showToast(label) {
-  const t = document.getElementById('sound-toast');
-  t.textContent = label;
-  t.classList.add('visible');
-  clearTimeout(window._toastT);
-  window._toastT = setTimeout(() => t.classList.remove('visible'), 1500);
-}
-
-// ─── UNMUTE OVERLAY ────────────────────────────────────────────────
-function setupUnmuteOverlay() {
-  const overlay = document.getElementById('tap-unmute');
-  document.getElementById('unmute-btn').addEventListener('click', () => {
-    state.soundUnlocked = true;
-    overlay.classList.add('hidden');
-    // Unmute current player
-    const story = state.filteredStories[state.currentIndex];
-    const video = story && state.players.get(story.id);
-    if (video) {
-      try {
-        video.muted = false;
-        const p = video.play();
-        if (p) p.catch(() => {});
-      } catch(_) {}
-    }
-  });
-}
-
-// ─── SHARE ─────────────────────────────────────────────────────────
-// Build the canonical /story/{id}-{slug} URL — same algorithm as
-// /api/story.js so server-rendered share previews match the URL.
-function slugifyHeadline(text) {
-  if (!text) return '';
-  return String(text)
-    .toLowerCase()
-    .replace(/[\u2018\u2019]/g, "'")
-    .replace(/[\u201C\u201D]/g, '"')
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .substring(0, 80);
-}
-
-function buildStoryUrl(id, headline) {
-  const slug = slugifyHeadline(headline);
-  return slug
-    ? `https://egleze.com/story/${id}-${slug}`
-    : `https://egleze.com/story/${id}`;
-}
-
-function shareStory(id, headline) {
-  const url = buildStoryUrl(id, headline);
-  if (navigator.share) {
-    navigator.share({ title: headline, url }).catch(()=>{});
-  } else {
-    navigator.clipboard?.writeText(url);
-    if (event && event.target) {
-      const orig = event.target.textContent;
-      event.target.textContent = '✓';
-      setTimeout(() => event.target.textContent = orig, 1500);
-    }
-  }
+  document.getElementById('loading').classList.add('hidden');
 }
 
 init();
 </script>
-
-<!-- ──────────────────────────────────────────────────────────────────────
-     EGLEZE AUTH + BOOKMARKS (mirrors index.html, shorts-only subset)
-     ──────────────────────────────────────────────────────────────────────
-     We load the same /js/auth.js + /js/reactions.js the rest of the site
-     uses, then inline a trimmed sign-in modal + bookmarks click delegation.
-     The reactions-widget script is NOT loaded here — shorts navigates to
-     /story/{id}#react for the full reaction UX (the widget needs a card
-     body to expand into, which shorts deliberately does not have).
-─────────────────────────────────────────────────────────────────────── -->
-<style id="eg-modal-styles">
-#eg-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.2s; }
-#eg-modal.is-shown { display: flex; }
-#eg-modal.is-open { opacity: 1; }
-#eg-modal-backdrop { position: absolute; inset: 0; background: rgba(14,10,6,0.55); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
-#eg-modal-card { position: relative; background: #fff; border-radius: 8px; padding: 32px 30px 24px; width: 100%; max-width: 380px; box-shadow: 0 12px 36px rgba(0,0,0,0.28); transform: translateY(8px); transition: transform 0.2s; font-family: 'DM Sans', -apple-system, sans-serif; }
-#eg-modal.is-open #eg-modal-card { transform: translateY(0); }
-#eg-modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: #aaa; font-size: 22px; cursor: pointer; line-height: 1; padding: 4px 8px; }
-#eg-modal-close:hover { color: #0e0a06; }
-#eg-modal-logo { font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 900; letter-spacing: -1.2px; line-height: 1; text-align: center; color: #0e0a06; }
-#eg-modal-logo .e-red { color: #bb1919; }
-#eg-modal-headline { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; line-height: 1.25; text-align: center; margin: 16px 0 6px; color: #0e0a06; }
-#eg-modal-sub { font-size: 12px; color: #777; text-align: center; line-height: 1.5; margin: 0 0 22px; }
-#eg-btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; width: 100%; background: #fff; color: #0e0a06; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: border-color 0.15s, background 0.15s; }
-#eg-btn-google:hover { border-color: #bb1919; background: #fff8f0; }
-#eg-btn-google:disabled { opacity: 0.6; cursor: wait; }
-#eg-modal-or { text-align: center; margin: 14px 0; color: #aaa; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; font-family: 'Roboto Condensed', sans-serif; }
-#eg-modal-form { display: flex; flex-direction: column; gap: 10px; margin: 0; }
-#eg-modal-email { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; box-sizing: border-box; color: #0e0a06; }
-#eg-modal-email:focus { border-color: #bb1919; }
-#eg-btn-magic { width: 100%; padding: 12px 16px; background: #bb1919; color: #fff; border: none; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-#eg-btn-magic:hover { opacity: 0.9; }
-#eg-btn-magic:disabled { opacity: 0.5; cursor: wait; }
-#eg-modal-status { font-size: 12px; text-align: center; min-height: 18px; margin-top: 12px; font-family: inherit; }
-#eg-modal-status.is-success { color: #2e7d32; }
-#eg-modal-status.is-error { color: #bb1919; }
-#eg-modal-status.is-loading { color: #777; }
-#eg-modal-foot { font-size: 10px; color: #999; text-align: center; margin-top: 16px; line-height: 1.5; font-family: inherit; }
-#eg-modal-foot a { color: inherit; text-decoration: underline; }
-@media (max-width: 480px) { #eg-modal-card { padding: 26px 22px 20px; max-width: 100%; } }
-</style>
-
-<!-- Sign-in modal — opened by window.egleze.ui.openSignIn() (called by the
-     bookmarks module when an unauthenticated user taps the bookmark icon). -->
-<div id="eg-modal" role="dialog" aria-modal="true" aria-labelledby="eg-modal-headline">
-  <div id="eg-modal-backdrop" data-eg-close></div>
-  <div id="eg-modal-card">
-    <button id="eg-modal-close" type="button" data-eg-close aria-label="Close">×</button>
-    <div id="eg-modal-logo"><span class="e-red">E</span>gleze</div>
-    <h2 id="eg-modal-headline">Sign in to save stories</h2>
-    <p id="eg-modal-sub">Bookmark stories, build a memory of what's shaping the world.</p>
-    <button id="eg-btn-google" type="button">
-      <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.27h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" fill="#4285f4"/><path d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.27c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.97v2.34A9 9 0 0 0 9 18z" fill="#34a853"/><path d="M3.95 10.69A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.16.29-1.69V4.97H.97A9 9 0 0 0 0 9c0 1.45.35 2.82.97 4.03l2.98-2.34z" fill="#fbbc04"/><path d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .97 4.97l2.98 2.34C4.66 5.18 6.65 3.58 9 3.58z" fill="#ea4335"/></svg>
-      Continue with Google
-    </button>
-    <div id="eg-modal-or">or</div>
-    <form id="eg-modal-form" novalidate>
-      <input type="email" id="eg-modal-email" placeholder="your@email.com" required autocomplete="email" />
-      <button type="submit" id="eg-btn-magic">Send magic link</button>
-    </form>
-    <div id="eg-modal-status" role="status" aria-live="polite"></div>
-    <p id="eg-modal-foot">By continuing you agree to Egleze's<br><a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
-  </div>
-</div>
-
-<!-- Shared auth + reactions data layer (same files the rest of the site loads) -->
-<script src="/js/auth.js"></script>
-<script src="/js/reactions.js"></script>
-
-<script>
-// ─── SIGN-IN MODAL HANDLER (shorts-only subset of index.html's auth controls).
-// Exposes window.egleze.ui.openSignIn so the bookmarks module can call it.
-(function(){
-  function setStatus(text, kind){
-    var s = document.getElementById('eg-modal-status');
-    if (!s) return;
-    s.textContent = text || '';
-    s.className = kind ? ('is-' + kind) : '';
-  }
-  function openModal(){
-    var m = document.getElementById('eg-modal');
-    if (!m) return;
-    m.classList.add('is-shown');
-    document.body.style.overflow = 'hidden';
-    requestAnimationFrame(function(){ m.classList.add('is-open'); });
-    var emailEl = document.getElementById('eg-modal-email');
-    if (emailEl) setTimeout(function(){ try { emailEl.focus(); } catch(_){} }, 120);
-  }
-  function closeModal(){
-    var m = document.getElementById('eg-modal');
-    if (!m) return;
-    m.classList.remove('is-open');
-    document.body.style.overflow = '';
-    setTimeout(function(){
-      m.classList.remove('is-shown');
-      setStatus('', '');
-      var magic = document.getElementById('eg-btn-magic');
-      var google = document.getElementById('eg-btn-google');
-      if (magic) magic.disabled = false;
-      if (google) google.disabled = false;
-    }, 200);
-  }
-  function isModalOpen(){
-    var m = document.getElementById('eg-modal');
-    return m && m.classList.contains('is-shown');
-  }
-
-  function wire(){
-    if (!window.egleze || !window.egleze.auth) {
-      if ((wire._tries = (wire._tries || 0) + 1) < 50) return setTimeout(wire, 100);
-      console.warn('[egleze shorts] auth.js never loaded; sign-in disabled');
-      return;
-    }
-    var auth = window.egleze.auth;
-
-    // Backdrop + × close
-    document.querySelectorAll('#eg-modal [data-eg-close]').forEach(function(el){
-      el.addEventListener('click', closeModal);
-    });
-    // Escape closes
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && isModalOpen()) closeModal();
-    });
-
-    // Google button
-    var googleBtn = document.getElementById('eg-btn-google');
-    if (googleBtn) {
-      googleBtn.addEventListener('click', async function(){
-        googleBtn.disabled = true;
-        setStatus('Opening Google…', 'loading');
-        try {
-          var res = await auth.signInWithGoogle();
-          if (res && res.error) throw res.error;
-        } catch (e) {
-          console.error('[egleze shorts] google sign-in failed:', e);
-          googleBtn.disabled = false;
-          setStatus('Could not open Google sign-in. Please try again.', 'error');
-        }
-      });
-    }
-
-    // Magic-link form
-    var form = document.getElementById('eg-modal-form');
-    if (form) {
-      form.addEventListener('submit', async function(e){
-        e.preventDefault();
-        var emailEl = document.getElementById('eg-modal-email');
-        var magicBtn = document.getElementById('eg-btn-magic');
-        var email = ((emailEl && emailEl.value) || '').trim();
-        if (!email || email.indexOf('@') === -1) {
-          setStatus('Please enter a valid email address.', 'error');
-          return;
-        }
-        if (magicBtn) magicBtn.disabled = true;
-        setStatus('Sending magic link…', 'loading');
-        try {
-          var res = await auth.signInWithMagicLink(email);
-          if (magicBtn) magicBtn.disabled = false;
-          if (res && res.error) {
-            var msg = (res.error.message || '').toLowerCase();
-            if (msg.indexOf('rate') !== -1) setStatus('Too many attempts. Please try again in a few minutes.', 'error');
-            else if (msg.indexOf('invalid') !== -1) setStatus('That email address looks invalid.', 'error');
-            else setStatus(res.error.message || 'Could not send link. Please try again.', 'error');
-          } else {
-            setStatus('Check your inbox — we sent you a sign-in link.', 'success');
-          }
-        } catch (err) {
-          console.error('[egleze shorts] magic-link failed:', err);
-          if (magicBtn) magicBtn.disabled = false;
-          setStatus('Could not send link. Please try again.', 'error');
-        }
-      });
-    }
-
-    // Auto-close on successful sign-in
-    auth.onChange(function(payload){
-      if (payload && payload.event === 'SIGNED_IN' && isModalOpen()) closeModal();
-    });
-
-    // Public hook for bookmarks module
-    window.egleze = window.egleze || {};
-    window.egleze.ui = { openSignIn: openModal, closeSignIn: closeModal };
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
-  else wire();
-})();
-</script>
-
-<!-- ── EGLEZE BOOKMARKS (Phase 1, Round 2A: click logic + sync + intent)
-     Copied verbatim from index.html — bookmarks delegate clicks on any
-     `.eg-bookmark[data-story-id]` element, which is exactly what we emit
-     in storyHTML(). The shorts page inherits the full save flow. ── -->
-<script>
-(function(){
-  window.egleze = window.egleze || {};
-  window.egleze.saved = new Set();
-
-  function getDB() {
-    return (window.egleze.auth && window.egleze.auth.client) || null;
-  }
-  function whenReady(cb) {
-    var tries = 0;
-    (function check() {
-      if (window.egleze && window.egleze.auth && window.egleze.auth.client) return cb();
-      if (tries++ < 50) setTimeout(check, 100);
-      else console.warn('[egleze bookmarks] auth client never ready');
-    })();
-  }
-
-  async function loadSavedIds() {
-    try {
-      var auth = window.egleze.auth;
-      if (!auth) return;
-      var user = await auth.getUser();
-      var db = getDB();
-      if (!user || !db) {
-        window.egleze.saved.clear();
-        syncAllBookmarks();
-        return;
-      }
-      var res = await db.from('user_saved_stories').select('story_id').eq('user_id', user.id);
-      if (res.error) { console.error('[egleze bookmarks] loadSavedIds error:', res.error); return; }
-      window.egleze.saved = new Set((res.data || []).map(function(r){ return String(r.story_id); }));
-      syncAllBookmarks();
-    } catch (e) {
-      console.error('[egleze bookmarks] loadSavedIds exception:', e);
-    }
-  }
-
-  function syncAllBookmarks() {
-    try {
-      var set = window.egleze.saved;
-      var els = document.querySelectorAll('.eg-bookmark[data-story-id]');
-      for (var i = 0; i < els.length; i++) {
-        var id = els[i].getAttribute('data-story-id');
-        if (!id) continue;
-        els[i].classList.toggle('is-saved', set.has(String(id)));
-      }
-    } catch (e) {
-      console.error('[egleze bookmarks] syncAllBookmarks exception:', e);
-    }
-  }
-
-  async function toggleBookmark(storyId) {
-    if (!storyId) return;
-    storyId = String(storyId);
-    if (!window.egleze.auth) { console.error('[egleze bookmarks] no auth'); return; }
-    var user = await window.egleze.auth.getUser();
-    if (!user) {
-      try { localStorage.setItem('egleze_pending_save', storyId); } catch(_){}
-      if (window.egleze.ui && window.egleze.ui.openSignIn) window.egleze.ui.openSignIn();
-      return;
-    }
-    var db = getDB();
-    if (!db) { console.error('[egleze bookmarks] auth client unavailable'); return; }
-    var set = window.egleze.saved;
-    var wasSaved = set.has(storyId);
-    var els = document.querySelectorAll('.eg-bookmark[data-story-id="' + storyId + '"]');
-    for (var i = 0; i < els.length; i++) els[i].classList.toggle('is-saved', !wasSaved);
-    if (wasSaved) {
-      set.delete(storyId);
-      var del = await db.from('user_saved_stories').delete().eq('user_id', user.id).eq('story_id', parseInt(storyId, 10));
-      if (del.error) {
-        set.add(storyId);
-        for (var j = 0; j < els.length; j++) els[j].classList.add('is-saved');
-        console.error('[egleze bookmarks] unsave failed:', del.error);
-      }
-    } else {
-      set.add(storyId);
-      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(storyId, 10) });
-      if (ins.error && ins.error.code !== '23505') {
-        set.delete(storyId);
-        for (var k = 0; k < els.length; k++) els[k].classList.remove('is-saved');
-        console.error('[egleze bookmarks] save failed:', ins.error);
-      }
-    }
-  }
-
-  async function applyPendingSave() {
-    try {
-      var pending = null;
-      try { pending = localStorage.getItem('egleze_pending_save'); } catch(_){}
-      if (!pending) return;
-      try { localStorage.removeItem('egleze_pending_save'); } catch(_){}
-      var db = getDB();
-      if (!window.egleze.auth || !db) return;
-      var user = await window.egleze.auth.getUser();
-      if (!user) return;
-      var ins = await db.from('user_saved_stories').insert({ user_id: user.id, story_id: parseInt(pending, 10) });
-      if (ins.error && ins.error.code !== '23505') return;
-      window.egleze.saved.add(String(pending));
-      syncAllBookmarks();
-    } catch (e) {
-      console.error('[egleze bookmarks] applyPendingSave exception:', e);
-    }
-  }
-
-  // Click delegation (capture phase, beats card-level tap handlers)
-  document.addEventListener('click', function(e){
-    try {
-      var btn = e.target.closest && e.target.closest('.eg-bookmark');
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      var id = btn.getAttribute('data-story-id');
-      if (!id) return;
-      toggleBookmark(id);
-    } catch (err) {
-      console.error('[egleze bookmarks] click handler exception:', err);
-    }
-  }, true);
-
-  whenReady(function(){
-    loadSavedIds();
-    window.egleze.auth.onChange(function(payload){
-      if (payload && (payload.event === 'SIGNED_IN' || payload.event === 'SIGNED_OUT')) {
-        loadSavedIds().then(applyPendingSave);
-      }
-    });
-    // Re-sync bookmarks whenever the feed re-renders (category change, etc.)
-    var feed = document.getElementById('feed');
-    if (feed) {
-      new MutationObserver(syncAllBookmarks).observe(feed, { childList: true, subtree: false });
-    }
-  });
-})();
-</script>
-
 </body>
 </html>
