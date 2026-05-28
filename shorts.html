@@ -339,6 +339,26 @@ html,body{
 </div>
 
 <script>
+// ── MOBILE ERROR CATCHER (temporary diagnostic) ──
+// Shows any JS error as on-screen text instead of a silent crash,
+// so we can read the actual error on the phone. Remove once fixed.
+(function(){
+  function showErr(msg){
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#bb1919;color:#fff;font:12px/1.4 monospace;padding:10px;white-space:pre-wrap;word-break:break-word;max-height:50vh;overflow:auto;';
+    d.textContent = 'ERROR: ' + msg;
+    document.body && document.body.appendChild(d);
+  }
+  window.addEventListener('error', function(e){
+    showErr((e.message||'unknown') + '\n@ ' + (e.filename||'') + ':' + (e.lineno||'') + ':' + (e.colno||''));
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    showErr('Promise: ' + ((e.reason && (e.reason.message||e.reason)) || 'unknown'));
+  });
+})();
+</script>
+
+<script>
 // ════════════════════════════════════════════════════════════════════
 // EGLEZE SHORTS — clean rebuild (X.com architecture)
 //   • Video zone (top, clean clip from clips/{id}.mp4)
