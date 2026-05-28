@@ -644,6 +644,10 @@ function hydrateSlide(idx){
   el.classList.remove('shell');
   el.innerHTML = slideInner(s, idx);
   wireSlideEvents(el, idx);
+  // Newly-created bookmark icon needs to reflect saved-or-not state.
+  // The bookmarks module (loaded after this script) syncs all visible
+  // .eg-bookmark icons against the user's saved set.
+  if(window.egleze && window.egleze.syncBookmarks) window.egleze.syncBookmarks();
 }
 
 // Empty a slide back to a shell (frees DOM + video).
@@ -1002,5 +1006,197 @@ window.addEventListener('pageshow', function(e){
   }
 });
 </script>
+
+<!-- ── AUTH + BOOKMARKS (folded back in after the clean shorts rebuild) ─
+     /js/auth.js exposes window.egleze.auth.* (Supabase wrapper, same one
+     used across the rest of the site). /js/reactions.js loads alongside.
+     Below: the sign-in modal HTML/handler, then a bookmarks click-delegation
+     module. Delegation listens on document, so it works with virtualized
+     slides — buttons can be created/destroyed freely, clicks bubble up. ── -->
+<style id="eg-modal-styles">
+#eg-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s}
+#eg-modal.is-shown{display:flex}
+#eg-modal.is-open{opacity:1}
+#eg-modal-backdrop{position:absolute;inset:0;background:rgba(14,10,6,0.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#eg-modal-card{position:relative;background:#fff;border-radius:8px;padding:32px 30px 24px;width:100%;max-width:380px;box-shadow:0 12px 36px rgba(0,0,0,0.28);transform:translateY(8px);transition:transform .2s;font-family:'DM Sans',-apple-system,sans-serif}
+#eg-modal.is-open #eg-modal-card{transform:translateY(0)}
+#eg-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;line-height:1;padding:4px 8px}
+#eg-modal-close:hover{color:#0e0a06}
+#eg-modal-logo{font-family:'Playfair Display',Georgia,serif;font-size:30px;font-weight:900;letter-spacing:-1.2px;line-height:1;text-align:center;color:#0e0a06}
+#eg-modal-logo .e-red{color:#bb1919}
+#eg-modal-headline{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;line-height:1.25;text-align:center;margin:16px 0 6px;color:#0e0a06}
+#eg-modal-sub{font-size:12px;color:#777;text-align:center;line-height:1.5;margin:0 0 22px}
+#eg-btn-google{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;width:100%;background:#fff;color:#0e0a06;border:1px solid #ddd;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+#eg-btn-google:hover{border-color:#bb1919;background:#fff8f0}
+#eg-btn-google:disabled{opacity:.6;cursor:wait}
+#eg-modal-or{text-align:center;margin:14px 0;color:#aaa;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-family:'Roboto Condensed',sans-serif}
+#eg-modal-form{display:flex;flex-direction:column;gap:10px;margin:0}
+#eg-modal-email{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box;color:#0e0a06}
+#eg-modal-email:focus{border-color:#bb1919}
+#eg-btn-magic{width:100%;padding:12px 16px;background:#bb1919;color:#fff;border:none;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+#eg-btn-magic:hover{opacity:.9}
+#eg-btn-magic:disabled{opacity:.5;cursor:wait}
+#eg-modal-status{font-size:12px;text-align:center;min-height:18px;margin-top:12px;font-family:inherit}
+#eg-modal-status.is-success{color:#2e7d32}
+#eg-modal-status.is-error{color:#bb1919}
+#eg-modal-status.is-loading{color:#777}
+#eg-modal-foot{font-size:10px;color:#999;text-align:center;margin-top:16px;line-height:1.5;font-family:inherit}
+#eg-modal-foot a{color:inherit;text-decoration:underline}
+@media (max-width:480px){#eg-modal-card{padding:26px 22px 20px;max-width:100%}}
+</style>
+
+<div id="eg-modal" role="dialog" aria-modal="true" aria-labelledby="eg-modal-headline">
+  <div id="eg-modal-backdrop" data-eg-close></div>
+  <div id="eg-modal-card">
+    <button id="eg-modal-close" type="button" data-eg-close aria-label="Close">×</button>
+    <div id="eg-modal-logo"><span class="e-red">E</span>gleze</div>
+    <h2 id="eg-modal-headline">Sign in to save stories</h2>
+    <p id="eg-modal-sub">Bookmark stories, build a memory of what's shaping the world.</p>
+    <button id="eg-btn-google" type="button">
+      <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.27h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" fill="#4285f4"/><path d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.27c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.97v2.34A9 9 0 0 0 9 18z" fill="#34a853"/><path d="M3.95 10.69A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.16.29-1.69V4.97H.97A9 9 0 0 0 0 9c0 1.45.35 2.82.97 4.03l2.98-2.34z" fill="#fbbc04"/><path d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .97 4.97l2.98 2.34C4.66 5.18 6.65 3.58 9 3.58z" fill="#ea4335"/></svg>
+      Continue with Google
+    </button>
+    <div id="eg-modal-or">or</div>
+    <form id="eg-modal-form" novalidate>
+      <input type="email" id="eg-modal-email" placeholder="your@email.com" required autocomplete="email" />
+      <button type="submit" id="eg-btn-magic">Send magic link</button>
+    </form>
+    <div id="eg-modal-status" role="status" aria-live="polite"></div>
+    <p id="eg-modal-foot">By continuing you agree to Egleze's<br><a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/reactions.js"></script>
+
+<script>
+// ─── SIGN-IN MODAL handler (exposes window.egleze.ui.openSignIn) ───
+(function(){
+  function setStatus(t,k){var s=document.getElementById('eg-modal-status');if(!s)return;s.textContent=t||'';s.className=k?('is-'+k):'';}
+  function openModal(){var m=document.getElementById('eg-modal');if(!m)return;m.classList.add('is-shown');document.body.style.overflow='hidden';requestAnimationFrame(function(){m.classList.add('is-open');});var e=document.getElementById('eg-modal-email');if(e)setTimeout(function(){try{e.focus();}catch(_){}},120);}
+  function closeModal(){var m=document.getElementById('eg-modal');if(!m)return;m.classList.remove('is-open');document.body.style.overflow='';setTimeout(function(){m.classList.remove('is-shown');setStatus('','');var b=document.getElementById('eg-btn-magic');var g=document.getElementById('eg-btn-google');if(b)b.disabled=false;if(g)g.disabled=false;},200);}
+  function isOpen(){var m=document.getElementById('eg-modal');return m && m.classList.contains('is-shown');}
+  function wire(){
+    if(!window.egleze || !window.egleze.auth){
+      if((wire._t=(wire._t||0)+1) < 50) return setTimeout(wire,100);
+      console.warn('[shorts] auth.js never loaded');
+      return;
+    }
+    document.querySelectorAll('#eg-modal [data-eg-close]').forEach(function(el){el.addEventListener('click',closeModal);});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&isOpen())closeModal();});
+    var gb=document.getElementById('eg-btn-google');
+    if(gb)gb.addEventListener('click',async function(){gb.disabled=true;setStatus('Opening Google…','loading');try{var r=await window.egleze.auth.signInWithGoogle();if(r&&r.error)throw r.error;}catch(e){console.error('[shorts] google failed',e);gb.disabled=false;setStatus('Could not open Google sign-in.','error');}});
+    var f=document.getElementById('eg-modal-form');
+    if(f)f.addEventListener('submit',async function(e){e.preventDefault();var i=document.getElementById('eg-modal-email');var b=document.getElementById('eg-btn-magic');var em=((i&&i.value)||'').trim();if(!em||em.indexOf('@')===-1){setStatus('Please enter a valid email.','error');return;}if(b)b.disabled=true;setStatus('Sending magic link…','loading');try{var r=await window.egleze.auth.signInWithMagicLink(em);if(b)b.disabled=false;if(r&&r.error){var m=(r.error.message||'').toLowerCase();if(m.indexOf('rate')!==-1)setStatus('Too many attempts. Try again in a few minutes.','error');else setStatus(r.error.message||'Could not send link.','error');}else{setStatus('Check your inbox — we sent you a sign-in link.','success');}}catch(err){console.error('[shorts] magic failed',err);if(b)b.disabled=false;setStatus('Could not send link. Please try again.','error');}});
+    window.egleze.auth.onChange(function(p){if(p&&p.event==='SIGNED_IN'&&isOpen())closeModal();});
+    window.egleze=window.egleze||{};
+    window.egleze.ui={openSignIn:openModal,closeSignIn:closeModal};
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);
+  else wire();
+})();
+</script>
+
+<script>
+// ─── BOOKMARKS — click delegation + sync, works with virtualization.
+(function(){
+  window.egleze = window.egleze || {};
+  window.egleze.saved = new Set();
+  function getDB(){return (window.egleze.auth && window.egleze.auth.client) || null;}
+  function whenReady(cb){var t=0;(function check(){if(window.egleze&&window.egleze.auth&&window.egleze.auth.client)return cb();if(t++<50)setTimeout(check,100);else console.warn('[shorts bookmarks] auth client never ready');})();}
+
+  async function loadSavedIds(){
+    try{
+      var u = await window.egleze.auth.getUser();
+      var db = getDB();
+      if(!u || !db){ window.egleze.saved.clear(); syncBookmarks(); return; }
+      var res = await db.from('user_saved_stories').select('story_id').eq('user_id', u.id);
+      if(res.error){ console.error('[shorts bookmarks] loadSavedIds', res.error); return; }
+      window.egleze.saved = new Set((res.data||[]).map(function(r){return String(r.story_id);}));
+      syncBookmarks();
+    }catch(e){ console.error('[shorts bookmarks] loadSavedIds exception', e); }
+  }
+
+  function syncBookmarks(){
+    var set = window.egleze.saved;
+    document.querySelectorAll('.eg-bookmark[data-story-id]').forEach(function(b){
+      var id = b.getAttribute('data-story-id');
+      if(!id) return;
+      b.classList.toggle('is-saved', set.has(String(id)));
+    });
+  }
+  window.egleze.syncBookmarks = syncBookmarks;
+
+  async function toggleBookmark(id){
+    if(!id) return;
+    id = String(id);
+    if(!window.egleze.auth) return;
+    var u = await window.egleze.auth.getUser();
+    if(!u){
+      try{ localStorage.setItem('egleze_pending_save', id); }catch(_){}
+      if(window.egleze.ui && window.egleze.ui.openSignIn) window.egleze.ui.openSignIn();
+      return;
+    }
+    var db = getDB();
+    if(!db) return;
+    var set = window.egleze.saved;
+    var was = set.has(id);
+    document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.toggle('is-saved', !was); });
+    if(was){
+      set.delete(id);
+      var d = await db.from('user_saved_stories').delete().eq('user_id', u.id).eq('story_id', parseInt(id,10));
+      if(d.error){
+        set.add(id);
+        document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.add('is-saved'); });
+        console.error('[shorts bookmarks] unsave failed', d.error);
+      }
+    } else {
+      set.add(id);
+      var i = await db.from('user_saved_stories').insert({ user_id: u.id, story_id: parseInt(id,10) });
+      if(i.error && i.error.code !== '23505'){
+        set.delete(id);
+        document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.remove('is-saved'); });
+        console.error('[shorts bookmarks] save failed', i.error);
+      }
+    }
+  }
+
+  async function applyPendingSave(){
+    try{
+      var p = null; try{ p = localStorage.getItem('egleze_pending_save'); }catch(_){}
+      if(!p) return;
+      try{ localStorage.removeItem('egleze_pending_save'); }catch(_){}
+      var db = getDB();
+      if(!window.egleze.auth || !db) return;
+      var u = await window.egleze.auth.getUser();
+      if(!u) return;
+      var i = await db.from('user_saved_stories').insert({ user_id: u.id, story_id: parseInt(p,10) });
+      if(i.error && i.error.code !== '23505') return;
+      window.egleze.saved.add(String(p));
+      syncBookmarks();
+    }catch(e){ console.error('[shorts bookmarks] applyPendingSave', e); }
+  }
+
+  document.addEventListener('click', function(e){
+    try{
+      var btn = e.target.closest && e.target.closest('.eg-bookmark');
+      if(!btn) return;
+      e.preventDefault(); e.stopPropagation();
+      var id = btn.getAttribute('data-story-id');
+      if(id) toggleBookmark(id);
+    }catch(err){ console.error('[shorts bookmarks] click', err); }
+  }, true);
+
+  whenReady(function(){
+    loadSavedIds();
+    window.egleze.auth.onChange(function(p){
+      if(p && (p.event==='SIGNED_IN' || p.event==='SIGNED_OUT')){
+        loadSavedIds().then(applyPendingSave);
+      }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
