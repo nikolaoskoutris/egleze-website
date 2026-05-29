@@ -411,12 +411,11 @@ header{position:relative}
 /* Mobile */
 @media (max-width:920px){
   .broadcast{grid-template-columns:1fr;margin:0 -28px 0}
-  /* Enlarge player on mobile — give it more vertical presence (like the
-     shorts player). Keep aspect-ratio:16/9 so the landscape podcast video
-     is never cropped — letterbox above/below is fine and intentional. The
-     min-height ensures the player feels substantial on portrait phones
-     where pure 16/9 would look stubby. */
-  .bc-player{min-height:56vh}
+  /* Enlarge player on mobile but CONSTRAIN to screen width — the aspect
+     ratio rule would otherwise force the player wider than the phone if
+     we apply min-height. We cap width at 100% (which trumps aspect-ratio
+     in this dimension) and let the landscape video letterbox vertically. */
+  .bc-player{width:100%;max-width:100%;aspect-ratio:auto;height:36vh;min-height:240px}
   .bc-queue{max-height:340px;border-left:none;border-top:1px solid #2a2018}
   .bc-queue-list{max-height:240px}
   .bc-poster .bc-postertitle{font-size:16px}
