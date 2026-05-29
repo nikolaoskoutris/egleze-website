@@ -3295,6 +3295,33 @@ async function loadMoreBroadcastQueue() {
 // window.onYouTubeIframeAPIReady and exposes whenYTReady() which we use here.
 // (Don't declare our own onYouTubeIframeAPIReady — it would conflict.)
 
+// Shared post-load logic: called by both bcStartStory paths (fast-path
+// loadVideoById and slow-path new YT.Player). Sets up the lower-third,
+// progress tracking, and the end-of-clip safety timer.
+function bcAfterStorySwap(story, startSec, endSec) {
+  bcUpdateLowerThird(story);
+  bcStartProgressTracking(story);
+  if (bcState.endTimer) clearTimeout(bcState.endTimer);
+  var clipLenSec = (typeof endSec === 'number' && endSec > startSec)
+    ? (endSec - startSec)
+    : 60; // safety fallback
+  var totalMs = clipLenSec * 1000 + 600;
+  bcState.endTimerStartedAt = Date.now();
+  bcState.endTimerTotalMs = totalMs;
+  bcState.endTimerRemainingMs = 0;
+  bcState.isPaused = false;
+  bcState.endTimer = setTimeout(function() {
+    if (bcState.isPaused) {
+      console.log('[bc-state] end timer fired but user is paused — skipping advance');
+      return;
+    }
+    if (bcState.player) {
+      try { bcState.player.pauseVideo(); } catch(_) {}
+    }
+    bcAdvance();
+  }, totalMs);
+}
+
 function bcStartStory(story) {
   if (!story || !story.source_url) return;
   var videoId = extractYouTubeId(story.source_url);
@@ -3309,14 +3336,37 @@ function bcStartStory(story) {
   var poster = document.getElementById('bc-poster');
   if (poster) poster.classList.add('gone');
 
-  // Use the existing modal player's API-ready callback registry
+  // ── FAST PATH: reuse the existing YT player via loadVideoById ──
+  // Tearing down + creating a new YT.Player on every queue click breaks
+  // iOS autoplay: by the time the new player's onReady fires (after
+  // network calls), the user-gesture window from the tap has expired
+  // and iOS denies the play() call — which is why the user has to tap
+  // play manually. loadVideoById is synchronous-ish from the gesture's
+  // POV, so iOS counts it as the same gesture and autoplay works.
+  if (bcState.player && typeof bcState.player.loadVideoById === 'function') {
+    try {
+      bcState.player.loadVideoById({
+        videoId: videoId,
+        startSeconds: startSec,
+        endSeconds: endSec || undefined
+      });
+      // Belt-and-braces: also call playVideo (loadVideoById usually
+      // autoplays, but some iOS Safari versions need the explicit nudge).
+      try { bcState.player.playVideo(); } catch(_) {}
+      bcAfterStorySwap(story, startSec, endSec);
+      return;
+    } catch(e) {
+      console.log('[broadcast] loadVideoById failed, falling back to recreate', e);
+      // fall through to the recreate path
+    }
+  }
+
+  // ── SLOW PATH (first click only): create the player from scratch ──
   whenYTReady(function() {
-    // Tear down any existing player
     if (bcState.player) {
       try { bcState.player.destroy(); } catch(e) {}
       bcState.player = null;
     }
-    // Re-mount the host element (YouTube replaces the element it gets)
     var host = document.getElementById('bc-yt-host');
     if (host) {
       host.innerHTML = '<div id="bc-yt-iframe"></div>';
@@ -3337,31 +3387,7 @@ function bcStartStory(story) {
       events: {
         onReady: function(e) {
           try { e.target.playVideo(); } catch(_) {}
-          bcUpdateLowerThird(story);
-          bcStartProgressTracking(story);
-          // Schedule end-of-clip handler. Always set a timer so the queue keeps advancing
-          // even if end/start metadata is missing — fallback to 60s.
-          if (bcState.endTimer) clearTimeout(bcState.endTimer);
-          var clipLenSec = (typeof endSec === 'number' && endSec > startSec)
-            ? (endSec - startSec)
-            : 60; // safety fallback
-          var totalMs = clipLenSec * 1000 + 600;
-          bcState.endTimerStartedAt = Date.now();
-          bcState.endTimerTotalMs = totalMs;
-          bcState.endTimerRemainingMs = 0;
-          bcState.isPaused = false;
-          bcState.endTimer = setTimeout(function() {
-            // Belt-and-braces: don't advance if the user is currently paused
-            if (bcState.isPaused) {
-              console.log('[bc-state] end timer fired but user is paused — skipping advance');
-              return;
-            }
-            // Hard-stop: pause + trigger advance, in case YouTube's `end` param drifted.
-            if (bcState.player) {
-              try { bcState.player.pauseVideo(); } catch(_) {}
-            }
-            bcAdvance();
-          }, totalMs);
+          bcAfterStorySwap(story, startSec, endSec);
         },
         onStateChange: function(e) {
           // DIAGNOSTIC: log every state change for debugging the pause bug
@@ -3370,8 +3396,6 @@ function bcStartStory(story) {
 
           // 0 = ended; if we hit ended naturally, advance
           if (e.data === YT.PlayerState.ENDED) {
-            // If we're already paused, don't advance — the user paused, then the
-            // video later hit its "end" param. They didn't want to advance.
             if (bcState.isPaused) {
               console.log('[bc-state] suppressing ENDED — user is paused');
               return;
