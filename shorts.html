@@ -511,6 +511,13 @@ function closeSheet(){ document.getElementById('sheet').classList.remove('open')
 // ─── render feed ───────────────────────────────────────────────────
 function applyFilter(){
   const base = state.category==='all' ? [...state.allStories] : state.allStories.filter(s=>s.topic===state.category);
+  // Shuffle base array (Fisher-Yates) so each session sees a different order —
+  // without this the feed always opens to the same top-ranked stories.
+  // interleaveByShow then ensures no two consecutive shorts share a podcast.
+  for(let i=base.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [base[i],base[j]] = [base[j],base[i]];
+  }
   state.filtered = interleaveByShow(base);
   state.currentIndex = 0;
   // tear down players
