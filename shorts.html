@@ -435,25 +435,54 @@ function firstSentence(q, max){
   return out;
 }
 
-// strict round-robin so consecutive shorts aren't from the same show
+// Minimum-gap interleaving: enforce a gap of at least DESIRED_GAP between
+// stories from the same show. If the show pool is too small to honor that
+// gap, we automatically relax to the largest gap that IS possible. This
+// guarantees max variety without dead-ending the feed.
 function interleaveByShow(stories){
   if(!Array.isArray(stories) || stories.length < 3) return stories || [];
+  const DESIRED_GAP = 10;
+
+  // Group remaining stories by show. Preserve incoming order WITHIN each
+  // group (the caller already shuffled, so this is a shuffled-stable order).
   const groups = new Map();
-  stories.forEach(s=>{ const k=(s&&s.show_name)||'__u__'; if(!groups.has(k))groups.set(k,[]); groups.get(k).push(s); });
+  stories.forEach(s=>{
+    const k = (s && s.show_name) || '__u__';
+    if(!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(s);
+  });
   if(groups.size === 1) return stories.slice();
-  const result=[]; let last=null;
+
+  // Effective gap can't exceed (numShows - 1) — beyond that we'd have nothing
+  // legal to pick. We also clamp to DESIRED_GAP.
+  const effectiveGap = Math.min(DESIRED_GAP, groups.size - 1);
+
+  const result = [];
+  // Track the last positions where each show was placed.
+  const lastPos = new Map();
+
   while(result.length < stories.length){
-    let bestK=null,bestC=-1;
-    groups.forEach((arr,k)=>{
-      if(arr.length===0) return;
-      if(k===last && groups.size>1){
-        let others=false; groups.forEach((a,kk)=>{ if(kk!==last&&a.length>0)others=true; });
-        if(others) return;
+    let bestK = null;
+    let bestC = -1;       // pick the show with the most remaining (drains big shows first)
+    let bestKAny = null;  // fallback if NO show satisfies the gap
+    let bestCAny = -1;
+
+    groups.forEach((arr, k)=>{
+      if(arr.length === 0) return;
+      if(arr.length > bestCAny){ bestCAny = arr.length; bestKAny = k; }
+      const lp = lastPos.has(k) ? lastPos.get(k) : -Infinity;
+      // gap to current slot = result.length - lp
+      if((result.length - lp) > effectiveGap){
+        if(arr.length > bestC){ bestC = arr.length; bestK = k; }
       }
-      if(arr.length>bestC){bestC=arr.length;bestK=k;}
     });
-    if(bestK===null) break;
-    result.push(groups.get(bestK).shift()); last=bestK;
+
+    // If no show satisfied the gap (shouldn't happen given effectiveGap clamp,
+    // but safety), fall back to any.
+    const pickK = bestK !== null ? bestK : bestKAny;
+    if(pickK === null) break;
+    result.push(groups.get(pickK).shift());
+    lastPos.set(pickK, result.length - 1);
   }
   return result;
 }
