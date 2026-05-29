@@ -865,12 +865,10 @@ header{position:relative}
         <span class="bc-total" id="bc-total">0:00</span>
       </div>
     </div>
-    <!-- Mobile-only: same headline/meta but BELOW the video so it doesn't cover the speaker -->
-    <div class="bc-mobile-info" id="bc-mobile-info" aria-hidden="true">
-      <span class="bc-mobile-stripe" id="bc-mobile-stripe">Egleze Brief</span>
-      <h2 class="bc-mobile-headline" id="bc-mobile-headline">—</h2>
-      <div class="bc-mobile-meta" id="bc-mobile-meta">—</div>
-    </div>
+    <!-- Mobile-only mirror of headline/meta was here. Removed: it created
+         a black gap below the broadcast player on mobile that often showed
+         empty (Egleze Brief pill + two em-dashes) and confused the layout.
+         The desktop overlay (bc-lower-third above) still carries the info. -->
     <div class="bc-queue">
       <div class="bc-queue-header">
         <span class="bc-qh-label" id="bc-qh-label">Up next in broadcast</span>
