@@ -1300,31 +1300,74 @@ let db = null;
 // show's stories remain, they get appended in order — this is the unavoidable
 // fallback when there's no other show available. Stable: preserves the order
 // within each show (newest first when input is sorted newest first).
-// Minimum-gap interleaving: enforce a gap of at least DESIRED_GAP between
-// stories from the same show. If the show pool is too small to honor that
-// gap, automatically relax to the largest possible gap. This guarantees
-// max variety in the homepage carousel AND the broadcast queue without
-// dead-ending the list. Same algorithm as the shorts player.
-function interleaveByShow(stories) {
-  if (!Array.isArray(stories) || stories.length < 3) return stories || [];
+// Minimum-gap interleaving with cross-batch awareness and per-show cap.
+//
+//   stories        — new items to place
+//   existingQueue  — items already in the visible queue (pagination context)
+//   perShowCap     — max number of stories any single show may contribute
+//                    TO THE NEW BATCH (0 / undefined = no cap)
+//
+// Enforces a gap of at least DESIRED_GAP between consecutive same-show stories.
+// When pagination calls us with `existingQueue`, we seed our "last seen" map
+// with the tail of that queue, so new items respect the boundary — e.g. if
+// the queue tail is Joe Rogan, the algorithm won't immediately place another
+// Joe Rogan up front. The per-show cap is a hard ceiling that prevents a
+// single popular podcast from saturating the visible queue even if the source
+// data is dominated by that show.
+function interleaveByShow(stories, existingQueue, perShowCap) {
+  if (!Array.isArray(stories) || stories.length < 2) return stories || [];
   var DESIRED_GAP = 10;
+  var cap = (typeof perShowCap === 'number' && perShowCap > 0) ? perShowCap : 0;
+
+  // Build remaining groups from the incoming batch
   var groups = new Map();
   stories.forEach(function(s) {
     var k = (s && s.show_name) || '__u__';
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k).push(s);
   });
-  if (groups.size === 1) return stories.slice();
-  // Effective gap can't exceed (numShows - 1) — beyond that we'd have nothing
-  // legal to pick. Clamp DESIRED_GAP down to what's actually possible.
-  var effectiveGap = Math.min(DESIRED_GAP, groups.size - 1);
+
+  // Track how many we've placed per show (for the cap) and last positions
+  // (for the gap). Seed lastPos from the existingQueue so cross-batch
+  // adjacency is respected: a show placed at the queue tail gets a recent
+  // "last position" relative to where the new batch begins (index 0).
+  var lastPos = new Map();
+  var placedFromBatch = new Map();
+  if (Array.isArray(existingQueue) && existingQueue.length) {
+    // Existing queue items occupy positions -existingQueue.length..-1
+    // (i.e. our new batch begins at position 0). This way, an item at
+    // the very tail of the queue (position -1) blocks the same show for
+    // DESIRED_GAP positions into the new batch.
+    var base = -existingQueue.length;
+    existingQueue.forEach(function(s, i) {
+      var k = (s && s.show_name) || '__u__';
+      lastPos.set(k, base + i);
+    });
+  }
+
+  var totalShows = new Set();
+  groups.forEach(function(_, k){ totalShows.add(k); });
+  if (Array.isArray(existingQueue)) {
+    existingQueue.forEach(function(s){ totalShows.add((s && s.show_name) || '__u__'); });
+  }
+  if (totalShows.size === 1) {
+    // Single show — nothing to interleave. Honor cap if set, else pass through.
+    if (cap > 0) return stories.slice(0, cap);
+    return stories.slice();
+  }
+  // Effective gap cannot exceed (numShows - 1) — otherwise no show would ever
+  // be legal to pick. Clamp DESIRED_GAP down to the achievable maximum.
+  var effectiveGap = Math.min(DESIRED_GAP, Math.max(1, totalShows.size - 1));
+
   var result = [];
-  var lastPos = new Map(); // show_name -> last index in result where it was placed
-  while (result.length < stories.length) {
+  var deferred = []; // stories pushed past the cap — appended at the end
+  while (result.length + deferred.length < stories.length) {
     var bestK = null, bestC = -1;
     var bestKAny = null, bestCAny = -1;
     groups.forEach(function(arr, k) {
       if (arr.length === 0) return;
+      // Apply per-show cap to the NEW batch — if hit, defer the remainder
+      if (cap > 0 && (placedFromBatch.get(k) || 0) >= cap) return;
       if (arr.length > bestCAny) { bestCAny = arr.length; bestKAny = k; }
       var lp = lastPos.has(k) ? lastPos.get(k) : -Infinity;
       if ((result.length - lp) > effectiveGap) {
@@ -1332,11 +1375,18 @@ function interleaveByShow(stories) {
       }
     });
     var pickK = bestK !== null ? bestK : bestKAny;
-    if (pickK === null) break;
+    if (pickK === null) {
+      // No legal pick — only capped shows remain. Drain their items into
+      // 'deferred' so they appear at the end rather than being lost.
+      groups.forEach(function(arr) { while (arr.length) deferred.push(arr.shift()); });
+      break;
+    }
     result.push(groups.get(pickK).shift());
     lastPos.set(pickK, result.length - 1);
+    placedFromBatch.set(pickK, (placedFromBatch.get(pickK) || 0) + 1);
   }
-  return result;
+  // Append deferred (capped) stories to the end so all content is reachable
+  return result.concat(deferred);
 }
 
 // ─── WATCHED-STORY TRACKING (localStorage) ─────────────────────────────────
@@ -1595,9 +1645,10 @@ async function loadStories(topic = null) {
       showEmptyState(topic);
       return;
     }
-    // Interleave by show — strict round-robin so consecutive cards (and trios)
-    // never share a podcast. Surfaces variety from across our 86 shows.
-    combined = interleaveByShow(combined);
+    // Interleave by show with cross-batch awareness + per-show cap. The cap
+    // here is higher (6) because the carousel paginates within a single load
+    // and we want enough total variety across pages.
+    combined = interleaveByShow(combined, [], 6);
     renderRevealsCarousel(combined, topic);
     if (typeof _setRevealsBaseline === 'function') _setRevealsBaseline(combined);
     injectStorySchema(combined);
@@ -3224,7 +3275,9 @@ async function loadBroadcastQueue(topic) {
     // already in this device's localStorage. Then interleave by show so the
     // queue never plays two consecutive stories from the same podcast.
     stories = filterUnwatched(stories);
-    stories = interleaveByShow(stories);
+    // Cap at 4 stories per show on the initial batch. With cross-batch
+    // awareness, future pagination respects what's already placed.
+    stories = interleaveByShow(stories, [], 4);
     bcState.queue = stories;
     bcState.currentIndex = 0;
     renderBroadcastQueue();
@@ -3400,6 +3453,11 @@ async function loadMoreBroadcastQueue() {
     if (raw.length < PAGE_SIZE) bcState.queueHasMore = false;
     if (filtered.length > 0) {
       var startIdx = bcState.queue.length;
+      // Interleave new batch against existing queue so a Joe-Rogan-heavy
+      // tail doesn't immediately get followed by more Joe Rogan up front.
+      // Cap of 4 per show per batch prevents a single popular podcast
+      // from saturating the new batch even if it dominates the source data.
+      filtered = interleaveByShow(filtered, bcState.queue, 4);
       bcState.queue = bcState.queue.concat(filtered);
       // Cache for other UI (story modal lookups, etc.)
       if (window._storyCache) {
