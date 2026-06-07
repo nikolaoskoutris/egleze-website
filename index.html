@@ -732,6 +732,24 @@ header{position:relative}
 .reveals-section.reveals-editorial .ed-mark{color:var(--red);font-style:normal;margin-right:6px;font-size:18px}
 .reveals-section.reveals-editorial .reveal-card{border-color:#f0d4d4}
 
+/* ── EDITORIAL SPLASH — single large rotating pick (reuses reveal-card + its footer) ── */
+#editorial-grid{grid-template-columns:1fr}
+.reveals-editorial .reveal-card{flex-direction:row;align-items:stretch;border:0.5px solid #e7c9c9}
+.reveals-editorial .reveal-card:hover{transform:none;box-shadow:0 6px 26px rgba(0,0,0,.10)}
+.reveals-editorial .rc-art{aspect-ratio:auto;width:46%;min-height:320px;flex-shrink:0}
+.reveals-editorial .rc-cat{top:14px;left:14px;font-size:10px;padding:5px 11px}
+.reveals-editorial .rc-body{padding:34px 40px}
+.reveals-editorial .rc-title{font-size:31px;line-height:1.14;margin-bottom:14px}
+.reveals-editorial .rc-summary{font-size:15px;line-height:1.6;-webkit-line-clamp:4}
+.reveals-editorial .rc-foot{margin-top:20px;padding-top:14px}
+@media (max-width:760px){
+  .reveals-editorial .reveal-card{flex-direction:column}
+  .reveals-editorial .rc-art{width:100%;aspect-ratio:16/10;min-height:0}
+  .reveals-editorial .rc-body{padding:20px}
+  .reveals-editorial .rc-title{font-size:22px;margin-bottom:10px}
+  .reveals-editorial .rc-summary{font-size:14px}
+}
+
 /* ── NEW STORIES TOAST (above Today's Reveals) ──────────── */
 .new-stories-toast-wrap{display:flex;justify-content:center;padding:14px 28px 0}
 .new-stories-toast{background:var(--red);color:#fff;border:none;border-radius:999px;padding:9px 18px;display:inline-flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 2px 12px rgba(187,25,25,0.28);transition:transform .15s ease,box-shadow .2s ease;animation:nstSlideIn .35s ease}
@@ -2153,7 +2171,7 @@ async function loadWeeklyReveals() {
 }
 
 // ── EDITORIAL CHOICE — hand-picked by editor (is_editorial_pick=true) ─
-window._editorialState = { allStories: [], page: 0, perPage: 3,
+window._editorialState = { allStories: [], page: 0, perPage: 1,
   gridId: 'editorial-grid', dotsId: 'editorial-dots',
   prevId: 'editorial-prev', nextId: 'editorial-next',
   emptyMsg: 'Editor\'s picks coming soon. Check back for hand-curated must-reads.' };
@@ -2166,7 +2184,7 @@ async function loadEditorialChoice() {
       .eq('status', 'approved')
       .eq('is_editorial_pick', true)
       .order('updated_at', { ascending: false, nullsFirst: false })
-      .limit(15);
+      .limit(8);
     if (error) {
       // If column doesn't exist yet (Supabase returns PGRST116/PGRST204), fall back to empty
       console.log('[editorial] error (likely missing column — run schema migration):', error.message);
@@ -2174,10 +2192,33 @@ async function loadEditorialChoice() {
       paintCarousel(window._editorialState);
       return;
     }
-    window._editorialState.allStories = data || [];
+    window._editorialState.allStories = (typeof interleaveByShow === 'function')
+      ? interleaveByShow(data || [], [], 0)
+      : (data || []);
     window._editorialState.page = 0;
     paintCarousel(window._editorialState);
+    startEditorialAutoAdvance();
   } catch(e) { console.log('[editorial] exception:', e); }
+}
+
+// Single rotating editorial splash — auto-advance (wraps), pause on hover.
+function startEditorialAutoAdvance() {
+  var st = window._editorialState;
+  if (window._editorialTimer) { clearInterval(window._editorialTimer); window._editorialTimer = null; }
+  // Wire hover-pause once
+  var sec = document.getElementById('editorial-section');
+  if (sec && !sec._autoPauseWired) {
+    sec._autoPauseWired = true;
+    sec.addEventListener('mouseenter', function(){ if (window._editorialTimer) { clearInterval(window._editorialTimer); window._editorialTimer = null; } });
+    sec.addEventListener('mouseleave', function(){ startEditorialAutoAdvance(); });
+  }
+  if (!st.allStories || st.allStories.length <= 1) return;
+  window._editorialTimer = setInterval(function() {
+    var total = st.allStories.length; // perPage is 1
+    if (total <= 1) { clearInterval(window._editorialTimer); window._editorialTimer = null; return; }
+    st.page = (st.page + 1) % total;
+    paintCarousel(st);
+  }, 6500);
 }
 
 // Wire both carousels to load on page init
