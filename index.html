@@ -727,24 +727,24 @@ header{position:relative}
 .reveals-section.reveals-week{background:#efe9db;border-top:0.5px solid #d8d1c2}
 
 /* EDITORIAL CHOICE carousel — distinctive cream-with-red-border */
-.reveals-section.reveals-editorial{background:#fff;border-top:3px solid var(--red);position:relative}
+.reveals-section.reveals-editorial{background:var(--paper);border-top:3px solid var(--red);position:relative}
 .reveals-section.reveals-editorial .reveals-h2{font-style:italic}
 .reveals-section.reveals-editorial .ed-mark{color:var(--red);font-style:normal;margin-right:6px;font-size:18px}
 .reveals-section.reveals-editorial .reveal-card{border-color:#f0d4d4}
 
 /* ── EDITORIAL SPLASH — single large rotating pick (reuses reveal-card + its footer) ── */
 #editorial-grid{grid-template-columns:1fr}
-.reveals-editorial .reveal-card{flex-direction:row;align-items:stretch;border:0.5px solid #e7c9c9}
+.reveals-editorial .reveal-card{flex-direction:row;align-items:center;border:0.5px solid #e7c9c9}
 .reveals-editorial .reveal-card:hover{transform:none;box-shadow:0 6px 26px rgba(0,0,0,.10)}
-.reveals-editorial .rc-art{aspect-ratio:auto;width:46%;min-height:320px;flex-shrink:0}
+.reveals-editorial .rc-art{aspect-ratio:1/1;width:40%;max-width:440px;min-height:0;flex-shrink:0;align-self:center}
 .reveals-editorial .rc-cat{top:14px;left:14px;font-size:10px;padding:5px 11px}
-.reveals-editorial .rc-body{padding:34px 40px}
+.reveals-editorial .rc-body{padding:34px 40px;align-self:center}
 .reveals-editorial .rc-title{font-size:31px;line-height:1.14;margin-bottom:14px}
 .reveals-editorial .rc-summary{font-size:15px;line-height:1.6;-webkit-line-clamp:4}
 .reveals-editorial .rc-foot{margin-top:20px;padding-top:14px}
 @media (max-width:760px){
-  .reveals-editorial .reveal-card{flex-direction:column}
-  .reveals-editorial .rc-art{width:100%;aspect-ratio:16/10;min-height:0}
+  .reveals-editorial .reveal-card{flex-direction:column;align-items:stretch}
+  .reveals-editorial .rc-art{width:100%;aspect-ratio:1/1;max-width:none}
   .reveals-editorial .rc-body{padding:20px}
   .reveals-editorial .rc-title{font-size:22px;margin-bottom:10px}
   .reveals-editorial .rc-summary{font-size:14px}
@@ -977,6 +977,24 @@ header{position:relative}
     </div>
   </div>
 
+  <!-- ── EDITORIAL CHOICE — hand-picked by editor in dashboard ── -->
+  <section class="reveals-section reveals-editorial" id="editorial-section">
+    <div class="reveals-header">
+      <div>
+        <h2 class="reveals-h2"><span class="ed-mark">✶</span> Editorial choice</h2>
+        <div class="reveals-sub">Hand-picked by the Egleze editor · stories worth your full attention</div>
+      </div>
+      <div class="reveals-nav">
+        <button class="rn-btn" id="editorial-prev" aria-label="Previous" type="button">‹</button>
+        <button class="rn-btn rn-btn-primary" id="editorial-next" aria-label="More" type="button">›</button>
+      </div>
+    </div>
+    <div class="reveals-grid" id="editorial-grid">
+      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading editor's picks…</div>
+    </div>
+    <div class="reveals-dots" id="editorial-dots" aria-hidden="true"></div>
+  </section>
+
   <!-- ── NEW STORIES TOAST ───────────────────────────────────── -->
   <div class="new-stories-toast-wrap">
     <button id="new-stories-toast" type="button" class="new-stories-toast" hidden aria-live="polite">
@@ -1028,24 +1046,6 @@ header{position:relative}
       <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading weekly highlights…</div>
     </div>
     <div class="reveals-dots" id="weekly-dots" aria-hidden="true"></div>
-  </section>
-
-  <!-- ── EDITORIAL CHOICE — hand-picked by editor in dashboard ── -->
-  <section class="reveals-section reveals-editorial" id="editorial-section">
-    <div class="reveals-header">
-      <div>
-        <h2 class="reveals-h2"><span class="ed-mark">✶</span> Editorial choice</h2>
-        <div class="reveals-sub">Hand-picked by the Egleze editor · stories worth your full attention</div>
-      </div>
-      <div class="reveals-nav">
-        <button class="rn-btn" id="editorial-prev" aria-label="Previous" type="button">‹</button>
-        <button class="rn-btn rn-btn-primary" id="editorial-next" aria-label="More" type="button">›</button>
-      </div>
-    </div>
-    <div class="reveals-grid" id="editorial-grid">
-      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading editor's picks…</div>
-    </div>
-    <div class="reveals-dots" id="editorial-dots" aria-hidden="true"></div>
   </section>
 
 </div>
