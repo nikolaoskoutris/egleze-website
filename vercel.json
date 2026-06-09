@@ -14,11 +14,11 @@
     },
     {
       "source": "/story/:slug",
-      "destination": "/story/:slug.html"
+      "destination": "/index.html"
     },
     {
       "source": "/story/:slug/",
-      "destination": "/story/:slug.html"
+      "destination": "/index.html"
     },
     {
       "source": "/shows/:slug",
