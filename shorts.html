@@ -134,21 +134,24 @@ html,body{
   display:flex;flex-direction:column;gap:0;
   overflow:hidden;
 }
-.show-pill{
-  display:inline-flex;align-items:center;gap:7px;align-self:flex-start;
-  background:rgba(255,255,255,0.07);border-radius:14px;padding:4px 10px 4px 4px;
-  margin-bottom:10px;max-width:100%;
+.byline{
+  display:flex;align-items:flex-start;gap:9px;align-self:flex-start;
+  margin-bottom:12px;max-width:100%;
 }
-.show-pill .art{
-  width:22px;height:22px;border-radius:50%;flex-shrink:0;
-  background-size:cover;background-position:center;
-  background:linear-gradient(135deg,#3a2818,#1a1208);
+.byline .art{
+  width:32px;height:32px;border-radius:6px;flex-shrink:0;
+  background-size:cover;background-position:center;background-color:#2a2018;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Playfair Display',serif;font-weight:900;font-size:10px;color:#fff;
+  font-family:'Playfair Display',serif;font-weight:800;font-size:13px;color:#d8c9a8;
 }
-.show-pill .txt{
-  font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:.3px;
-  color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.byline .bl-txt{min-width:0}
+.byline .bl-show{
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2px;
+  color:#e3dac9;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.byline .bl-ep{
+  font-family:'DM Sans',sans-serif;font-size:11px;color:#8f877a;line-height:1.3;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .cat-line{
   display:flex;align-items:center;gap:6px;margin-bottom:9px;
@@ -156,7 +159,7 @@ html,body{
 .cat-line .bar{width:3px;height:13px;background:var(--red)}
 .cat-line .cat{
   font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--gold);font-weight:700;
+  color:var(--red);font-weight:700;
 }
 .headline{
   font-family:'Playfair Display',serif;font-weight:700;font-size:22px;line-height:1.18;
@@ -175,7 +178,7 @@ html,body{
 .action-row{
   flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px calc(max(env(safe-area-inset-bottom),12px) + 10px);
+  padding:12px 16px;
   border-top:0.5px solid rgba(255,255,255,0.1);
 }
 .action-left{display:flex;align-items:center;gap:22px}
@@ -189,15 +192,26 @@ html,body{
 .act-btn svg{width:24px;height:24px;display:block}
 .act-btn.eg-bookmark.is-saved{color:var(--red)}
 .act-btn.eg-bookmark.is-saved svg path{fill:var(--red);stroke:var(--red)}
-/* swipe hint chevrons */
-.swipe-hint{
-  display:flex;align-items:center;gap:1px;
-  opacity:0.85;transition:opacity .4s ease;
+/* permanent 'full story' cue (replaces the old invisible chevrons) */
+.full-story-cue{
+  display:flex;align-items:center;gap:5px;
+  color:#d8c9a8;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.4px;
 }
-.swipe-hint.gone{opacity:0;pointer-events:none}
-.swipe-hint .c1{color:var(--gold);font-size:20px;animation:nudge 1.6s ease-in-out infinite}
-.swipe-hint .c2{color:var(--gold);font-size:15px;opacity:0.5;animation:nudge 1.6s ease-in-out infinite .15s}
+.full-story-cue .chev{color:var(--red);font-size:17px;line-height:1;animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(-4px)}}
+/* audio-only sound mode: keep the artwork poster visible over the playing (audible) video */
+.story.audio-only .video-poster{opacity:1}
+/* EGLEZE brand footer mark */
+.eg-mark{
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 0 calc(max(env(safe-area-inset-bottom),10px) + 4px);
+  color:#6f685d;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:1px;
+}
+.eg-mark .eg-sq{
+  width:15px;height:15px;border-radius:3px;background:#000;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-weight:800;font-size:10px;color:var(--red);
+}
 
 /* ─── EDITORIAL PANEL (slides in from right on swipe-left) ───────── */
 .edit-panel{
@@ -213,7 +227,7 @@ html,body{
 }
 .panel-back{
   display:flex;align-items:center;gap:6px;background:none;border:none;
-  color:var(--gold);font-family:'Roboto Condensed',sans-serif;font-size:13px;
+  color:#d8c9a8;font-family:'Roboto Condensed',sans-serif;font-size:13px;
   letter-spacing:.5px;cursor:pointer;padding:0;
 }
 .panel-back svg{width:18px;height:18px}
@@ -235,7 +249,7 @@ html,body{
 }
 .panel-label{
   font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:#8a7560;margin-bottom:7px;
+  color:var(--red);margin-bottom:7px;
 }
 .panel-summary{
   font-size:15px;line-height:1.6;color:#cdc6ba;margin-bottom:22px;
@@ -260,8 +274,8 @@ html,body{
 }
 .loading.hidden,.empty.hidden{display:none}
 .spinner-e{
-  width:54px;height:54px;border-radius:50%;background:var(--red);color:#fff;
-  font-family:'Playfair Display',serif;font-weight:900;font-size:32px;
+  width:54px;height:54px;border-radius:10px;background:#0e0a06;color:var(--red);
+  font-family:'Playfair Display',serif;font-weight:900;font-size:34px;
   display:flex;align-items:center;justify-content:center;margin-bottom:18px;
   animation:pulse 1.4s infinite;
 }
@@ -299,10 +313,10 @@ html,body{
   background:none;border:none;text-align:left;color:#fff;font:inherit;font-size:15px;
 }
 .sheet-item:active{background:rgba(255,255,255,0.04)}
-.sheet-item.active{background:rgba(187,25,25,0.18);color:var(--gold)}
+.sheet-item.active{background:rgba(187,25,25,0.18);color:#e3dac9}
 .sheet-item.active::before{content:"✓";color:var(--red);margin-right:8px;font-weight:700}
 .sheet-item .count{font-family:'Roboto Condensed',sans-serif;font-size:11px;color:#888}
-.sheet-item.active .count{color:var(--gold)}
+.sheet-item.active .count{color:#bb1919}
 
 /* current category label next to filter btn */
 .filter-current{
@@ -407,6 +421,7 @@ const state = {
   category: 'all',
   currentIndex: 0,
   soundUnlocked: false,
+  soundMode: 0,
   swipeHintDismissed: false,
   players: new Map(),   // story.id -> <video>
 };
@@ -589,11 +604,14 @@ function slideInner(s, idx){
     </div>
 
     <div class="edit-zone">
-      <div class="show-pill">
-        <div class="art" style="${artStyle}">${artwork?'':ini}</div>
-        <div class="txt">${showLabel}</div>
-      </div>
       <div class="cat-line"><div class="bar"></div><div class="cat">${esc(s.topic||'Story')}</div></div>
+      <div class="byline">
+        <div class="art" style="${artStyle}">${artwork?'':ini}</div>
+        <div class="bl-txt">
+          <div class="bl-show">${esc(s.show_name||'')}</div>
+          ${s.episode ? `<div class="bl-ep">${esc(s.episode)}</div>` : ''}
+        </div>
+      </div>
       <div class="headline">${headline}</div>
       ${quoteLine ? `<div class="quote"><div class="bar"></div><div class="txt">"${esc(quoteLine)}"</div></div>` : ''}
     </div>
@@ -613,8 +631,10 @@ function slideInner(s, idx){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg>
         </a>` : ''}
       </div>
-      <div class="swipe-hint" data-hint><span class="c1">‹</span><span class="c2">‹</span></div>
+      <div class="full-story-cue"><span class="chev">‹</span>full story</div>
     </div>
+
+    <div class="eg-mark"><span class="eg-sq">E</span>EGLEZE</div>
 
     <!-- editorial panel (Phase 1b) -->
     <div class="edit-panel">
@@ -814,7 +834,7 @@ function activateStory(idx){
             video.removeEventListener('loadeddata', onReady);
             if(idx !== state.currentIndex) return;  // user already scrolled away
             try{
-              video.muted = !state.soundUnlocked;
+              video.muted = (!state.soundUnlocked) || activeShouldMute();
               const p2 = video.play();
               if(p2 && p2.catch) p2.catch(()=>{ video.muted = true; const r = video.play(); if(r&&r.catch) r.catch(()=>{}); });
             }catch(_){}
@@ -824,7 +844,8 @@ function activateStory(idx){
       });
     }
   }
-  tryPlay(state.soundUnlocked);
+  tryPlay(state.soundUnlocked && !activeShouldMute());
+  applyAudioOnlyVisual();
 }
 
 function wireVideoEvents(idx, video){
@@ -835,7 +856,7 @@ function wireVideoEvents(idx, video){
     // this freshly-loaded video is unmuted (fixes the "re-mutes on 4th/5th
     // video" bug — new elements default to muted).
     if(state.soundUnlocked && idx === state.currentIndex){
-      try{ video.muted = false; }catch(_){}
+      try{ video.muted = activeShouldMute(); }catch(_){}
     }
   });
   video.addEventListener('timeupdate', ()=>{
@@ -847,7 +868,7 @@ function wireVideoEvents(idx, video){
     video._played = true;
     // Re-assert unmuted on play start for the active slide once unlocked.
     if(state.soundUnlocked && idx === state.currentIndex){
-      try{ video.muted = false; }catch(_){}
+      try{ video.muted = activeShouldMute(); }catch(_){}
     }
   });
   video.addEventListener('ended', ()=>{
@@ -884,7 +905,7 @@ function onTap(idx){
   }
   try{
     if(video.paused || video.ended){
-      video.muted=false; const p=video.play(); if(p&&p.catch)p.catch(()=>{});
+      video.muted=activeShouldMute(); const p=video.play(); if(p&&p.catch)p.catch(()=>{});
       if(el) el.classList.remove('paused');
     } else {
       video.pause();
@@ -912,7 +933,7 @@ function closePanel(idx){
   // resume video
   const story = state.filtered[idx];
   const video = story && state.players.get(story.id);
-  if(video){ try{ video.muted=!state.soundUnlocked?true:false; const p=video.play(); if(p&&p.catch)p.catch(()=>{}); el.classList.remove('paused'); }catch(_){} }
+  if(video){ try{ video.muted=(!state.soundUnlocked)||activeShouldMute(); const p=video.play(); if(p&&p.catch)p.catch(()=>{}); el.classList.remove('paused'); }catch(_){} }
 }
 function dismissSwipeHint(){
   if(state.swipeHintDismissed) return;
@@ -983,14 +1004,32 @@ function attachObserver(){
   state._obs = obs;
 }
 
-// ─── sound toggle (simple mute/unmute for now) ─────────────────────
+// ─── sound toggle (3-state: video+sound 📺 → audio-only 🎧 → mute 🔇) ──
+function activeShouldMute(){ return state.soundMode === 2; }
+function soundIcon(){ return state.soundMode===0 ? '📺' : (state.soundMode===1 ? '🎧' : '🔇'); }
+// Audio-only keeps the artwork poster visible over the still-audible video on
+// the active slide — like listening with cover art (e.g. in the car).
+function applyAudioOnlyVisual(){
+  document.querySelectorAll('.story').forEach(s=>{
+    const isActive = parseInt(s.dataset.idx,10) === state.currentIndex;
+    s.classList.toggle('audio-only', isActive && state.soundMode===1);
+  });
+}
+// Apply the current mode to the active slide's video + button icon + poster.
+function applySoundMode(){
+  const btn = document.getElementById('sound-btn');
+  if(btn){ btn.textContent = soundIcon(); btn.setAttribute('aria-label', state.soundMode===0?'Sound on':(state.soundMode===1?'Audio only':'Muted')); }
+  const story = state.filtered[state.currentIndex];
+  const v = story && state.players.get(story.id);
+  if(v){ try{ v.muted = activeShouldMute(); if(!v.muted){ const p=v.play(); if(p&&p.catch)p.catch(()=>{}); } }catch(_){} }
+  applyAudioOnlyVisual();
+}
 function setupSoundToggle(){
   const btn = document.getElementById('sound-btn');
   btn.addEventListener('click', ()=>{
     state.soundUnlocked = true;
-    const story = state.filtered[state.currentIndex];
-    const v = story && state.players.get(story.id);
-    if(v){ try{ v.muted = !v.muted; btn.textContent = v.muted ? '🔇' : '📺'; if(!v.muted){ const p=v.play(); if(p&&p.catch)p.catch(()=>{}); } }catch(_){} }
+    state.soundMode = (state.soundMode + 1) % 3;   // 📺 → 🎧 → 🔇 → 📺
+    applySoundMode();
   });
 }
 
