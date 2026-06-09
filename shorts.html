@@ -919,11 +919,10 @@ function openPanel(idx){
   const el = document.querySelector(`.story[data-idx="${idx}"]`);
   if(!el) return;
   el.classList.add('panel-open');
-  // pause the video while reading
-  const story = state.filtered[idx];
-  const video = story && state.players.get(story.id);
-  if(video){ try{ video.pause(); }catch(_){} }
-  if(el) el.classList.add('paused');
+  // Keep the video PLAYING underneath so audio continues while you read —
+  // swiping between the clip and the story should feel like one room, not two.
+  // The panel covers the video visually; the audio keeps going, and swiping
+  // back reveals the clip still playing in sync.
   dismissSwipeHint();
 }
 function closePanel(idx){
