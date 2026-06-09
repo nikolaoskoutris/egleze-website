@@ -1,0 +1,9 @@
+{
+  "name": "egleze-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": "22.x"
+  }
+}
