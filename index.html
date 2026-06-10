@@ -750,6 +750,14 @@ header{position:relative}
   .reveals-editorial .rc-summary{font-size:14px}
 }
 
+/* ── BREAKING — single rotating splash, red-accented; reuses editorial card layout ── */
+.reveals-section.reveals-breaking{background:#fcf4f4}
+.reveals-section.reveals-breaking .reveals-h2{font-style:normal}
+.reveals-section.reveals-breaking .ed-mark{color:var(--red);font-style:normal;margin-right:7px;font-size:13px;vertical-align:middle;animation:egBreakPulse 1.6s infinite}
+@keyframes egBreakPulse{50%{opacity:.35}}
+.reveals-section.reveals-breaking .reveal-card{border-color:#f0c9c9}
+.reveals-section.reveals-breaking .rc-cat{background:var(--red);color:#fff}
+
 /* ── NEW STORIES TOAST (above Today's Reveals) ──────────── */
 .new-stories-toast-wrap{display:flex;justify-content:center;padding:14px 28px 0}
 .new-stories-toast{background:var(--red);color:#fff;border:none;border-radius:999px;padding:9px 18px;display:inline-flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 2px 12px rgba(187,25,25,0.28);transition:transform .15s ease,box-shadow .2s ease;animation:nstSlideIn .35s ease}
@@ -977,24 +985,6 @@ header{position:relative}
     </div>
   </div>
 
-  <!-- ── EDITORIAL CHOICE — hand-picked by editor in dashboard ── -->
-  <section class="reveals-section reveals-editorial" id="editorial-section">
-    <div class="reveals-header">
-      <div>
-        <h2 class="reveals-h2"><span class="ed-mark">✶</span> Editorial choice</h2>
-        <div class="reveals-sub">Hand-picked by the Egleze editor · stories worth your full attention</div>
-      </div>
-      <div class="reveals-nav">
-        <button class="rn-btn" id="editorial-prev" aria-label="Previous" type="button">‹</button>
-        <button class="rn-btn rn-btn-primary" id="editorial-next" aria-label="More" type="button">›</button>
-      </div>
-    </div>
-    <div class="reveals-grid" id="editorial-grid">
-      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading editor's picks…</div>
-    </div>
-    <div class="reveals-dots" id="editorial-dots" aria-hidden="true"></div>
-  </section>
-
   <!-- ── NEW STORIES TOAST ───────────────────────────────────── -->
   <div class="new-stories-toast-wrap">
     <button id="new-stories-toast" type="button" class="new-stories-toast" hidden aria-live="polite">
@@ -1046,6 +1036,42 @@ header{position:relative}
       <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading weekly highlights…</div>
     </div>
     <div class="reveals-dots" id="weekly-dots" aria-hidden="true"></div>
+  </section>
+
+  <!-- ── EDITORIAL CHOICE — hand-picked by editor in dashboard ── -->
+  <section class="reveals-section reveals-editorial" id="editorial-section">
+    <div class="reveals-header">
+      <div>
+        <h2 class="reveals-h2"><span class="ed-mark">✶</span> Editorial choice</h2>
+        <div class="reveals-sub">Hand-picked by the Egleze editor · stories worth your full attention</div>
+      </div>
+      <div class="reveals-nav">
+        <button class="rn-btn" id="editorial-prev" aria-label="Previous" type="button">‹</button>
+        <button class="rn-btn rn-btn-primary" id="editorial-next" aria-label="More" type="button">›</button>
+      </div>
+    </div>
+    <div class="reveals-grid" id="editorial-grid">
+      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading editor's picks…</div>
+    </div>
+    <div class="reveals-dots" id="editorial-dots" aria-hidden="true"></div>
+  </section>
+
+  <!-- ── BREAKING NEWS — single rotating splash (is_breaking); hidden when empty ── -->
+  <section class="reveals-section reveals-editorial reveals-breaking" id="breaking-section" style="display:none">
+    <div class="reveals-header">
+      <div>
+        <h2 class="reveals-h2"><span class="ed-mark">●</span> Breaking news</h2>
+        <div class="reveals-sub">Major moments as they're filed · updated continuously</div>
+      </div>
+      <div class="reveals-nav">
+        <button class="rn-btn" id="breaking-prev" aria-label="Previous" type="button">‹</button>
+        <button class="rn-btn rn-btn-primary" id="breaking-next" aria-label="More" type="button">›</button>
+      </div>
+    </div>
+    <div class="reveals-grid" id="breaking-grid">
+      <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading…</div>
+    </div>
+    <div class="reveals-dots" id="breaking-dots" aria-hidden="true"></div>
   </section>
 
 </div>
@@ -2203,6 +2229,57 @@ async function loadEditorialChoice() {
   } catch(e) { console.log('[editorial] exception:', e); }
 }
 
+// ── BREAKING NEWS — single rotating splash (is_breaking=true); hidden when empty ─
+// Never filtered by topic chips (loads independently). Reuses editorial layout.
+window._breakingState = { allStories: [], page: 0, perPage: 1,
+  gridId: 'breaking-grid', dotsId: 'breaking-dots',
+  prevId: 'breaking-prev', nextId: 'breaking-next', emptyMsg: '' };
+
+async function loadBreaking() {
+  if (!db && !initDB()) return;
+  var sec = document.getElementById('breaking-section');
+  try {
+    var { data, error } = await db.from('stories')
+      .select('*')
+      .eq('status', 'approved')
+      .eq('is_breaking', true)
+      .order('created_at', { ascending: false, nullsFirst: false })
+      .limit(8);
+    if (error) {
+      console.log('[breaking] error (likely missing is_breaking column — run schema migration):', error.message);
+      if (sec) sec.style.display = 'none';
+      return;
+    }
+    var rows = data || [];
+    if (rows.length === 0) { if (sec) sec.style.display = 'none'; return; }
+    if (sec) sec.style.display = '';
+    window._breakingState.allStories = (typeof interleaveByShow === 'function')
+      ? interleaveByShow(rows, [], 0) : rows;
+    window._breakingState.page = 0;
+    paintCarousel(window._breakingState);
+    startBreakingAutoAdvance();
+  } catch(e) { console.log('[breaking] exception:', e); if (sec) sec.style.display = 'none'; }
+}
+
+// Breaking auto-advance (wraps), pause on hover — clone of editorial.
+function startBreakingAutoAdvance() {
+  var st = window._breakingState;
+  if (window._breakingTimer) { clearInterval(window._breakingTimer); window._breakingTimer = null; }
+  var sec = document.getElementById('breaking-section');
+  if (sec && !sec._autoPauseWired) {
+    sec._autoPauseWired = true;
+    sec.addEventListener('mouseenter', function(){ if (window._breakingTimer) { clearInterval(window._breakingTimer); window._breakingTimer = null; } });
+    sec.addEventListener('mouseleave', function(){ startBreakingAutoAdvance(); });
+  }
+  if (!st.allStories || st.allStories.length <= 1) return;
+  window._breakingTimer = setInterval(function() {
+    var total = st.allStories.length;
+    if (total <= 1) { clearInterval(window._breakingTimer); window._breakingTimer = null; return; }
+    st.page = (st.page + 1) % total;
+    paintCarousel(st);
+  }, 8500);
+}
+
 // Single rotating editorial splash — auto-advance (wraps), pause on hover.
 function startEditorialAutoAdvance() {
   var st = window._editorialState;
@@ -2271,6 +2348,7 @@ function startWeeklyAutoAdvance() {
 setTimeout(function() {
   loadWeeklyReveals();
   loadEditorialChoice();
+  loadBreaking();
 }, 1000);
 
 // ── HEADER DATE + STATS ────────────────────────────────────────
