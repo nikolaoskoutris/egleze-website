@@ -764,7 +764,7 @@ header{position:relative}
 
 /* ── MOST WATCHED — social-proof strip (reuses 3-up reveal cards) ──── */
 .reveals-section.reveals-mw{background:#efe9db;border-top:0.5px solid #d8d1c2}
-.reveals-mw .mw-views{position:absolute;bottom:8px;right:8px;background:rgba(14,10,7,.78);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.5px;padding:3px 9px;border-radius:3px;z-index:4;display:inline-flex;align-items:center;gap:4px;line-height:1.4}
+.reveals-mw .mw-views{position:absolute;bottom:10px;left:10px;background:rgba(14,10,7,.78);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.5px;padding:3px 9px;border-radius:3px;z-index:4;display:inline-flex;align-items:center;gap:4px;line-height:1.4}
 
 /* ── THE EGLEZE DIGEST — inline newsletter capture ───────────── */
 .eg-digest{max-width:1320px;margin:36px auto 0;padding:0 32px}
@@ -2350,6 +2350,18 @@ function paintMostWatched(){
   decorateMostWatchedViews();
 }
 
+// The carousel's own arrow/dot handlers call paintCarousel directly (skipping the
+// decorate step), so watch the grid and re-apply the views badge on any re-render.
+function ensureMostWatchedObserver(){
+  var grid = document.getElementById('mostwatched-grid');
+  if (!grid || grid._mwObserver) return;
+  try {
+    var obs = new MutationObserver(function(){ decorateMostWatchedViews(); });
+    obs.observe(grid, { childList: true });
+    grid._mwObserver = true;
+  } catch(e) { /* MutationObserver unsupported — auto-shuffle still decorates */ }
+}
+
 async function loadMostWatched(){
   if (!db && !initDB()) return;
   var sec = document.getElementById('mostwatched-section');
@@ -2371,6 +2383,7 @@ async function loadMostWatched(){
     window._mostWatchedState.allStories = rows;
     window._mostWatchedState.page = 0;
     paintMostWatched();
+    ensureMostWatchedObserver();
     startMostWatchedAutoAdvance();
   } catch(e){ console.log('[mostwatched] exception:', e); if (sec) sec.style.display = 'none'; }
 }
