@@ -1703,6 +1703,7 @@ function renderRevealsCarousel(stories, topic) {
   window._revealsState.page = 0;
   if (typeof _setRevealsBaseline === 'function') _setRevealsBaseline(stories);
   paintReveals();
+  startRevealsAutoAdvance();
 }
 
 function paintReveals() {
@@ -2167,6 +2168,7 @@ async function loadWeeklyReveals() {
     window._weeklyState.allStories = data || [];
     window._weeklyState.page = 0;
     paintCarousel(window._weeklyState);
+    startWeeklyAutoAdvance();
   } catch(e) { console.log('[weekly] exception:', e); }
 }
 
@@ -2218,7 +2220,51 @@ function startEditorialAutoAdvance() {
     if (total <= 1) { clearInterval(window._editorialTimer); window._editorialTimer = null; return; }
     st.page = (st.page + 1) % total;
     paintCarousel(st);
-  }, 6500);
+  }, 8500);
+}
+
+// Today's filed moments — auto-advance the 3-up trio (wraps), pause on hover.
+// Mirrors startEditorialAutoAdvance exactly; reads live window._revealsState so
+// topic-filter reloads are picked up automatically. Touches no existing function.
+function startRevealsAutoAdvance() {
+  var st = window._revealsState;
+  if (window._revealsTimer) { clearInterval(window._revealsTimer); window._revealsTimer = null; }
+  var sec = document.getElementById('reveals-section');
+  if (sec && !sec._autoPauseWired) {
+    sec._autoPauseWired = true;
+    sec.addEventListener('mouseenter', function(){ if (window._revealsTimer) { clearInterval(window._revealsTimer); window._revealsTimer = null; } });
+    sec.addEventListener('mouseleave', function(){ startRevealsAutoAdvance(); });
+  }
+  if (!st || !st.allStories) return;
+  var per = st.perPage || 3;
+  if (st.allStories.length <= per) return; // only one page — nothing to rotate
+  window._revealsTimer = setInterval(function() {
+    var total = Math.max(1, Math.ceil(st.allStories.length / (st.perPage || 3)));
+    if (total <= 1) { clearInterval(window._revealsTimer); window._revealsTimer = null; return; }
+    st.page = (st.page + 1) % total;
+    paintReveals();
+  }, 8000);
+}
+
+// This week's biggest — auto-advance the 3-up trio (wraps), pause on hover.
+function startWeeklyAutoAdvance() {
+  var st = window._weeklyState;
+  if (window._weeklyTimer) { clearInterval(window._weeklyTimer); window._weeklyTimer = null; }
+  var sec = document.getElementById('weekly-section');
+  if (sec && !sec._autoPauseWired) {
+    sec._autoPauseWired = true;
+    sec.addEventListener('mouseenter', function(){ if (window._weeklyTimer) { clearInterval(window._weeklyTimer); window._weeklyTimer = null; } });
+    sec.addEventListener('mouseleave', function(){ startWeeklyAutoAdvance(); });
+  }
+  if (!st || !st.allStories) return;
+  var per = st.perPage || 3;
+  if (st.allStories.length <= per) return;
+  window._weeklyTimer = setInterval(function() {
+    var total = Math.max(1, Math.ceil(st.allStories.length / (st.perPage || 3)));
+    if (total <= 1) { clearInterval(window._weeklyTimer); window._weeklyTimer = null; return; }
+    st.page = (st.page + 1) % total;
+    paintCarousel(st);
+  }, 8500);
 }
 
 // Wire both carousels to load on page init
