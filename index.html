@@ -805,28 +805,7 @@ header{position:relative}
   <button onclick="dismissBanner()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:18px;line-height:1;padding:4px">✕</button>
 </div>
 
-<!-- TICKER -->
-<div class="ticker-wrap">
-  <div class="ticker-inner">
-    <div class="ticker-tag">Breaking</div>
-    <div class="ticker-scroll">
-      <div class="ticker-track">
-        <span class="ticker-item">Joe Rogan #2187 — Retired Navy SEAL reveals classified submarine operation details</span>
-        <span class="ticker-item">Lex Fridman — Elon Musk: "Mars colony self-sustaining by 2040, no question"</span>
-        <span class="ticker-item">Tucker Carlson — Former CIA Director: "There are things the public will never be told about Ukraine"</span>
-        <span class="ticker-item">Huberman Lab — New protocol for reversing metabolic syndrome in under 90 days</span>
-        <span class="ticker-item">Shawn Ryan Show — Green Beret describes never-before-disclosed Syria mission</span>
-        <span class="ticker-item">Jordan Peterson — "The collapse of the Western family unit is the defining crisis of our time"</span>
-        <span class="ticker-item">Joe Rogan #2187 — Retired Navy SEAL reveals classified submarine operation details</span>
-        <span class="ticker-item">Lex Fridman — Elon Musk: "Mars colony self-sustaining by 2040, no question"</span>
-        <span class="ticker-item">Tucker Carlson — Former CIA Director: "There are things the public will never be told about Ukraine"</span>
-        <span class="ticker-item">Huberman Lab — New protocol for reversing metabolic syndrome in under 90 days</span>
-        <span class="ticker-item">Shawn Ryan Show — Green Beret describes never-before-disclosed Syria mission</span>
-        <span class="ticker-item">Jordan Peterson — "The collapse of the Western family unit is the defining crisis of our time"</span>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- TICKER relocated below the masthead (see after </header>) -->
 
 <!-- HEADER -->
 <header>
@@ -928,6 +907,18 @@ header{position:relative}
     </div>
   </div>
 </header>
+
+<!-- TICKER — below masthead, fed live by loadTicker() with latest filed headlines -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <div class="ticker-tag">Latest filed</div>
+    <div class="ticker-scroll">
+      <div class="ticker-track" id="ticker-track">
+        <span class="ticker-item">Loading the latest filed moments…</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="page">
 
@@ -2227,6 +2218,29 @@ async function loadEditorialChoice() {
     paintCarousel(window._editorialState);
     startEditorialAutoAdvance();
   } catch(e) { console.log('[editorial] exception:', e); }
+}
+
+// ── LATEST-FILED TICKER — live headlines below the masthead ─────
+async function loadTicker() {
+  if (!db && !initDB()) return;
+  var track = document.getElementById('ticker-track');
+  if (!track) return;
+  try {
+    var { data, error } = await db.from('stories')
+      .select('headline, show_name')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(14);
+    if (error || !data || !data.length) return;
+    function esc(t){ var d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
+    var items = data.filter(function(s){ return s && s.headline; });
+    if (!items.length) return;
+    var html = items.map(function(s){
+      var show = s.show_name ? esc(s.show_name) + ' — ' : '';
+      return '<span class="ticker-item">' + show + esc(s.headline) + '</span>';
+    }).join('');
+    track.innerHTML = html + html; // duplicate once for a seamless scroll loop
+  } catch(e) { console.log('[ticker] exception:', e); }
 }
 
 // ── BREAKING NEWS — single rotating splash (is_breaking=true); hidden when empty ─
@@ -4017,6 +4031,7 @@ function bcWireControls() {
   loadBroadcastQueue();
   bcWireControls();
   setupRealtime();
+  loadTicker();
   // If user landed on /story/[slug] (e.g., via shared link), auto-open the story modal.
   // Direct visits to /story/[slug] are normally served the standalone story.html via Vercel
   // rewrite — this handler covers the edge case where index.html is served for that path.
@@ -4032,6 +4047,7 @@ setInterval(() => {
   loadTopShows();
   loadClips();
   loadBroadcastQueue();
+  loadTicker();
 }, 5 * 60 * 1000);
 
 // ── DYNAMIC NEWS ARTICLE SCHEMA ───────────────────────────────
