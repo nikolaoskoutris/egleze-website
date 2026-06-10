@@ -138,7 +138,7 @@ html{scroll-behavior:smooth}
 body{background:var(--paper);color:var(--dark);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden}
 
 /* TICKER */
-.ticker-wrap{background:#1c1c1c;overflow:hidden;padding:6px 0}
+.ticker-wrap{background:#1c1c1c;overflow:hidden;padding:6px 0;max-width:1320px;margin:0 auto}
 .ticker-inner{display:flex;align-items:center}
 .ticker-tag{background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 14px;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
 .ticker-scroll{overflow:hidden;flex:1}
@@ -758,6 +758,29 @@ header{position:relative}
 .reveals-section.reveals-breaking .reveal-card{border-color:#f0c9c9}
 .reveals-section.reveals-breaking .rc-cat{background:var(--red);color:#fff}
 
+/* ── THE EGLEZE DIGEST — inline newsletter capture ───────────── */
+.eg-digest{max-width:1320px;margin:36px auto 0;padding:0 32px}
+.eg-digest-inner{background:#0e0a07;border-radius:10px;padding:40px 38px}
+.eg-digest-eyebrow{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:12px}
+.eg-digest-h{font-family:'Playfair Display',serif;font-weight:800;font-size:32px;line-height:1.1;color:#f5f1e8;margin:0 0 10px}
+.eg-digest-h span{color:var(--red)}
+.eg-digest-sub{font-size:14px;line-height:1.6;color:#b9b0a0;max-width:480px;margin:0 0 22px}
+.eg-digest-form{display:flex;gap:10px;max-width:460px}
+.eg-digest-input{flex:1;background:#1a140d;border:1px solid #3a332b;border-radius:5px;padding:13px 15px;color:#f5f1e8;font-family:'DM Sans',sans-serif;font-size:14px;outline:none}
+.eg-digest-input::placeholder{color:#7d756a}
+.eg-digest-input:focus{border-color:var(--red)}
+.eg-digest-btn{background:var(--red);color:#fff;border:none;border-radius:5px;padding:13px 26px;font-family:'Roboto Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:background .15s;white-space:nowrap}
+.eg-digest-btn:hover{background:var(--accent)}
+.eg-digest-btn:disabled{opacity:.7;cursor:default}
+.eg-digest-note{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.5px;color:#7d756a;margin-top:14px}
+@media (max-width:600px){
+  .eg-digest{padding:0 16px}
+  .eg-digest-inner{padding:28px 22px}
+  .eg-digest-h{font-size:25px}
+  .eg-digest-form{flex-direction:column}
+  .eg-digest-btn{padding:13px}
+}
+
 /* ── NEW STORIES TOAST (above Today's Reveals) ──────────── */
 .new-stories-toast-wrap{display:flex;justify-content:center;padding:14px 28px 0}
 .new-stories-toast{background:var(--red);color:#fff;border:none;border-radius:999px;padding:9px 18px;display:inline-flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 2px 12px rgba(187,25,25,0.28);transition:transform .15s ease,box-shadow .2s ease;animation:nstSlideIn .35s ease}
@@ -1065,6 +1088,20 @@ header{position:relative}
     <div class="reveals-dots" id="breaking-dots" aria-hidden="true"></div>
   </section>
 
+  <!-- ── THE EGLEZE DIGEST — inline newsletter capture (Mockup 2) ───── -->
+  <section class="eg-digest" id="eg-digest">
+    <div class="eg-digest-inner">
+      <div class="eg-digest-eyebrow">The Egleze Digest</div>
+      <h2 class="eg-digest-h">The morning brief, <span>delivered.</span></h2>
+      <p class="eg-digest-sub">The day's most important moments from independent shows and podcasts — one email every morning. No commentary, no agenda.</p>
+      <div class="eg-digest-form">
+        <input type="email" id="digest-email" class="eg-digest-input" placeholder="you@example.com" autocomplete="email" aria-label="Email address" onkeydown="if(event.key==='Enter')digestSubscribe()">
+        <button type="button" class="eg-digest-btn" id="digest-btn" onclick="digestSubscribe()">Subscribe</button>
+      </div>
+      <div class="eg-digest-note" id="digest-note">Free forever · Unsubscribe anytime · No spam</div>
+    </div>
+  </section>
+
 </div>
 
 <!-- FOOTER -->
@@ -1085,8 +1122,6 @@ header{position:relative}
         <a href="https://www.instagram.com/eglezemedia/" target="_blank" rel="noopener" title="Instagram" aria-label="Egleze on Instagram">◉</a>
         <a href="https://www.tiktok.com/@egleze.media" target="_blank" rel="noopener" title="TikTok" aria-label="Egleze on TikTok">♪</a>
         <a href="https://www.linkedin.com/company/egleze-the-podcast-intelligence-network/" target="_blank" rel="noopener" title="LinkedIn" aria-label="Egleze on LinkedIn">in</a>
-        <a href="#" title="Spotify Podcasts" aria-label="Egleze on Spotify (coming soon)">♫</a>
-        <a href="#" title="Apple Podcasts" aria-label="Egleze on Apple Podcasts (coming soon)">⌬</a>
         <a href="#" title="Substack" aria-label="Egleze on Substack (coming soon)">✍</a>
       </div>
     </div>
@@ -4179,6 +4214,47 @@ async function bannerSubscribe() {
       console.log('Subscribe error:', res.status, err);
     }
   } catch(e) { console.log('Subscribe error:', e); }
+}
+
+// ── INLINE DIGEST SUBSCRIBE (homepage newsletter block) ──────────
+async function digestSubscribe() {
+  var input = document.getElementById('digest-email');
+  var btn = document.getElementById('digest-btn');
+  var note = document.getElementById('digest-note');
+  if (!input) return;
+  var email = (input.value || '').trim();
+  if (!email || !email.includes('@') || email.indexOf('.') === -1) {
+    if (note) note.textContent = 'Please enter a valid email address.';
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Subscribing…'; }
+  try {
+    var res = await fetch('https://kerijdhiasrvaxssjqqg.supabase.co/rest/v1/subscribers', {
+      method: 'POST',
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+        'Accept-Profile': 'public',
+        'Content-Profile': 'public'
+      },
+      body: JSON.stringify({ email: email, source: 'homepage_digest', status: 'active', created_at: new Date().toISOString() })
+    });
+    if (res.ok || res.status === 201 || res.status === 409) {
+      input.value = '';
+      if (btn) { btn.textContent = "✓ You're in"; btn.style.background = '#1a7a2a'; }
+      if (note) note.textContent = 'Check your inbox — your first Egleze Daily is on its way.';
+    } else {
+      var t = await res.text(); console.log('[digest] subscribe error', res.status, t);
+      if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+      if (note) note.textContent = 'Something went wrong — please try again.';
+    }
+  } catch(e) {
+    console.log('[digest] exception', e);
+    if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
+    if (note) note.textContent = 'Something went wrong — please try again.';
+  }
 }
 </script>
 
