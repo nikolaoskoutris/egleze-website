@@ -721,6 +721,14 @@ header{position:relative}
 .newscast-band-d{background:var(--dark);color:#fff;padding:36px 22px;text-align:center;position:relative;overflow:hidden;margin:0}
 .newscast-band-d::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,rgba(187,25,25,.15) 100%);pointer-events:none}
 .newscast-band-d > *{position:relative}
+.topics-dir{background:var(--dark);border-radius:14px;padding:34px 34px 38px;margin-bottom:28px}
+.topics-dir .td-eyebrow{font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#d92020;margin-bottom:10px}
+.topics-dir h2{font-family:'Playfair Display',serif;font-weight:900;font-size:34px;color:var(--paper);margin-bottom:6px;letter-spacing:-0.5px;line-height:1.05}
+.topics-dir .td-sub{font-family:'DM Sans',sans-serif;font-size:14px;color:#b4a896;margin-bottom:26px}
+.topics-dir .td-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.topics-dir .td-box{display:flex;align-items:center;justify-content:center;text-align:center;padding:16px 12px;border-radius:7px;min-height:54px;text-decoration:none;transition:all .15s;font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;background:#1a1410;border:1px solid #2a2118;color:var(--paper)}
+.topics-dir .td-box:hover{background:var(--red);border-color:var(--red);color:#fff}
+@media(max-width:760px){.topics-dir{padding:26px 20px 30px}.topics-dir h2{font-size:28px}.topics-dir .td-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}}
 .ncd-eyebrow{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:3px;color:#ef9f27;font-weight:700;margin-bottom:10px;text-transform:uppercase}
 .ncd-headline{font-family:'Playfair Display',serif;font-size:30px;line-height:1.2;font-weight:700;margin:0 0 8px;color:#fff}
 .ncd-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:#b4b2a9;max-width:480px;margin:0 auto 18px;line-height:1.5}
@@ -1040,6 +1048,41 @@ header{position:relative}
     <h2 class="ncd-headline" id="ncd-headline">Today · 18 essential moments,<br>delivered from podcasts.</h2>
     <p class="ncd-sub">Curated by Egleze editors from 100+ shows. The single most important thing said today on each major topic.</p>
     <button class="ncd-cta" type="button" onclick="alert('Daily newscast launches with the platform on 1 July.')">▶ PLAY DAILY NEWSCAST</button>
+  </section>
+
+  <!-- ── DIVE INTO THE TOPICS — directory linking all 26 topic pages ── -->
+  <section class="topics-dir" id="topics-dir">
+    <div class="td-eyebrow">Browse the newsroom</div>
+    <h2>Dive into the topics</h2>
+    <p class="td-sub">Every conversation, sorted. Choose a topic and go deep.</p>
+    <div class="td-grid">
+      <a class="td-box" href="/topic/ai-tech">AI &amp; Tech</a>
+      <a class="td-box" href="/topic/geopolitics">Geopolitics</a>
+      <a class="td-box" href="/topic/military">Military</a>
+      <a class="td-box" href="/topic/politics">Politics</a>
+      <a class="td-box" href="/topic/money">Money</a>
+      <a class="td-box" href="/topic/health-longevity-biohacking">Health &amp; Longevity</a>
+      <a class="td-box" href="/topic/history">History</a>
+      <a class="td-box" href="/topic/society">Society</a>
+      <a class="td-box" href="/topic/controversial">Controversial</a>
+      <a class="td-box" href="/topic/ufo-paranormal">UFO &amp; Paranormal</a>
+      <a class="td-box" href="/topic/consciousness-medicine">Consciousness</a>
+      <a class="td-box" href="/topic/relationships-family">Relationships</a>
+      <a class="td-box" href="/topic/comedy">Comedy</a>
+      <a class="td-box" href="/topic/combat-ufc">Combat &amp; UFC</a>
+      <a class="td-box" href="/topic/crime-justice">Crime &amp; Justice</a>
+      <a class="td-box" href="/topic/science">Science</a>
+      <a class="td-box" href="/topic/psychology">Psychology</a>
+      <a class="td-box" href="/topic/faith-spirituality">Faith</a>
+      <a class="td-box" href="/topic/espionage">Espionage</a>
+      <a class="td-box" href="/topic/debates">Debates</a>
+      <a class="td-box" href="/topic/sports">Sports</a>
+      <a class="td-box" href="/topic/entertainment">Entertainment</a>
+      <a class="td-box" href="/topic/energy-climate">Energy &amp; Climate</a>
+      <a class="td-box" href="/topic/education-learning">Education</a>
+      <a class="td-box" href="/topic/media-journalism">Media</a>
+      <a class="td-box" href="/topic/monologues">Monologues</a>
+    </div>
   </section>
 
   <!-- ── THIS WEEK'S BIGGEST REVEALS — auto-ranked carousel ───── -->
