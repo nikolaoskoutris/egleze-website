@@ -22,10 +22,12 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Flip these if the editorial decision changes.
 const DEFAULT_PREFS = { pref_daily: true, pref_weekly: true, pref_breaking: false };
 
-// 'off' = no confirmation email (matches existing beehiiv-sync behaviour).
-// If marketing wants the "watch for a confirmation email" copy to be true,
-// change to 'on' — Beehiiv will then send the double-opt-in confirmation.
-const DOUBLE_OPT = 'off';
+// Decision (June 2026): Option A — double opt-in ON, then welcome.
+// Flow: signup → Beehiiv confirmation email → click → welcome email.
+// Welcome is written + enabled in Beehiiv. (beehiiv-sync.js keeps both
+// off, so backfills/syncs never re-confirm or re-greet existing people —
+// only fresh organic signups go through this flow.)
+const DOUBLE_OPT = 'on';
 
 function validEmail(e) {
   return typeof e === 'string' && e.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
@@ -92,7 +94,7 @@ module.exports = async (req, res) => {
             body: JSON.stringify({
               email: email,
               reactivate_existing: true,
-              send_welcome_email: false,
+              send_welcome_email: true,
               double_opt_override: DOUBLE_OPT,
               utm_source: source,
               custom_fields: [
