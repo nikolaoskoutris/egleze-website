@@ -8,7 +8,9 @@
     { "source": "/shows/:slug", "destination": "/show.html?slug=:slug" },
     { "source": "/shows/:slug/", "destination": "/show.html?slug=:slug" },
     { "source": "/about", "destination": "/about.html" },
-    { "source": "/about/", "destination": "/about.html" }
+    { "source": "/about/", "destination": "/about.html" },
+    { "source": "/subscribe", "destination": "/subscribe.html" },
+    { "source": "/subscribe/", "destination": "/subscribe.html" }
   ],
   "redirects": [
     { "source": "/topic/intelligence", "destination": "/topic/espionage", "permanent": true },
