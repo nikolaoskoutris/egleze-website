@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Egleze API | Coming Soon</title>
+  <meta name="description" content="The Egleze API will let developers, researchers, and platforms tap into the world's most important podcast moments, structured and attributed. Join the early-access list.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://egleze.com/api">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Egleze API | Coming Soon">
+  <meta property="og:description" content="Podcast intelligence, structured and attributed. Join the early-access list.">
+  <meta property="og:url" content="https://egleze.com/api">
+  <meta property="og:site_name" content="Egleze">
+  <meta property="og:image" content="https://egleze.com/brand-assets/og-default.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Egleze API | Coming Soon">
+  <meta name="twitter:description" content="Podcast intelligence, structured and attributed.">
+  <meta name="twitter:image" content="https://egleze.com/brand-assets/og-default.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700&family=Roboto:wght@400;500;700&family=Roboto+Condensed:wght@400;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --paper:#f5f1e8; --ink:#141210; --red:#bb1919;
+      --ink-72:rgba(20,18,16,.72); --ink-55:rgba(20,18,16,.55); --ink-40:rgba(20,18,16,.4);
+      --edge:#e3ddd0; --card:#fffdf8; --dark:#141210;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--paper);color:var(--ink);font-family:'Roboto',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .topbar{background:var(--paper);border-bottom:0.5px solid var(--edge);padding:16px 0}
+    .topbar .wrap{max-width:1000px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;letter-spacing:-0.6px;line-height:1}
+    .logo .e-red{color:var(--red)}
+    .back{font-family:'Roboto Condensed',sans-serif;font-weight:500;letter-spacing:1px;font-size:13px;color:var(--ink-55);text-transform:uppercase}
+    .back:hover{color:var(--red)}
+    .wrap{max-width:1000px;margin:0 auto;padding:0 28px}
+    .hero{padding:60px 0 36px}
+    .badge{display:inline-block;font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;color:var(--red);border:1px solid var(--red);border-radius:100px;padding:6px 14px;margin-bottom:22px}
+    h1{font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(38px,6vw,64px);line-height:1.06;margin-bottom:20px}
+    h1 em{font-style:italic;color:var(--red)}
+    .lede{font-size:18px;color:var(--ink-72);max-width:660px;line-height:1.6}
+    .lede strong{color:var(--ink);font-weight:500}
+
+    .codeblock{background:var(--dark);border-radius:10px;padding:22px 24px;margin:34px 0 8px;max-width:660px;overflow-x:auto}
+    .codeblock pre{font-family:'Roboto Mono',monospace;font-size:13px;line-height:1.7;color:#e8e3d3;white-space:pre}
+    .codeblock .c-key{color:#f0b429}
+    .codeblock .c-str{color:#9ec98f}
+    .codeblock .c-com{color:rgba(255,255,255,.4)}
+    .codecap{font-size:12px;color:var(--ink-40);max-width:660px;margin-bottom:4px;font-style:italic}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:40px 0}
+    @media(max-width:760px){.grid{grid-template-columns:1fr;gap:16px}}
+    .cap{background:var(--card);border:0.5px solid var(--edge);border-radius:10px;padding:22px}
+    .cap h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:8px}
+    .cap p{font-size:14px;color:var(--ink-72);line-height:1.55}
+
+    .signup{background:var(--dark);border-radius:12px;padding:40px;margin:24px 0 60px;color:#f5f1e8}
+    .signup .eyebrow{font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;color:#f0b429;margin-bottom:14px}
+    .signup h2{font-family:'Playfair Display',serif;font-weight:700;font-size:26px;margin-bottom:10px;color:#fff}
+    .signup p{color:rgba(245,241,232,.72);font-size:15px;max-width:520px;margin-bottom:22px}
+    .signup-row{display:flex;gap:10px;max-width:480px}
+    @media(max-width:520px){.signup-row{flex-direction:column}}
+    .signup input{flex:1;padding:13px 15px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:rgba(255,255,255,.06);color:#fff;font-family:'Roboto',sans-serif;font-size:14px}
+    .signup input::placeholder{color:rgba(255,255,255,.4)}
+    .signup input:focus{outline:none;border-color:#f0b429}
+    .signup button{padding:13px 24px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:'Roboto Condensed',sans-serif;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
+    .signup button:hover{background:#d32020}
+    .signup button:disabled{opacity:.55;cursor:default}
+    .signup-msg{margin-top:14px;font-size:14px;min-height:20px}
+    .signup-msg.ok{color:#9ec98f}
+    .signup-msg.err{color:#f5a3a3}
+    .signup .tiny{font-size:12px;color:rgba(245,241,232,.4);margin-top:14px}
+
+    footer{border-top:0.5px solid var(--edge)}
+    footer .wrap{padding:26px 28px;text-align:center;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-55)}
+    footer a{margin:0 8px}footer a:hover{color:var(--red)}
+  </style>
+</head>
+<body>
+  <div class="topbar"><div class="wrap">
+    <a class="logo" href="https://egleze.com"><span class="e-red">E</span>gleze</a>
+    <a class="back" href="https://egleze.com">← Back to Egleze</a>
+  </div></div>
+
+  <div class="wrap">
+    <div class="hero">
+      <span class="badge">API · Coming Soon</span>
+      <h1>Podcast intelligence, <em>structured</em> and attributed.</h1>
+      <p class="lede">Egleze reads thousands of hours of independent podcasts and surfaces the moments that matter. The <strong>Egleze API</strong> will open that layer to developers, researchers, and platforms — every moment tagged by topic, dated, and linked back to its source.</p>
+    </div>
+
+    <div class="codecap">A glimpse of what we're building (illustrative):</div>
+    <div class="codeblock"><pre><span class="c-com"># GET https://api.egleze.com/v1/moments?topic=ai-tech&amp;since=24h</span>
+{
+  <span class="c-key">"moment_id"</span>: <span class="c-str">"mo_8f21c…"</span>,
+  <span class="c-key">"headline"</span>:  <span class="c-str">"Researcher warns timeline may be shorter"</span>,
+  <span class="c-key">"show"</span>:      <span class="c-str">"The Cognitive Revolution"</span>,
+  <span class="c-key">"topic"</span>:     <span class="c-str">"AI &amp; Tech"</span>,
+  <span class="c-key">"source_url"</span>:<span class="c-str">"https://youtube.com/watch?v=…"</span>,
+  <span class="c-key">"clip"</span>:      { <span class="c-key">"start"</span>: 1820, <span class="c-key">"end"</span>: 1925 },
+  <span class="c-key">"published_at"</span>: <span class="c-str">"2026-06-13T09:14:00Z"</span>
+}</pre></div>
+
+    <div class="grid">
+      <div class="cap">
+        <h3>Topic feeds</h3>
+        <p>Pull the latest moments across 26 topics — from AI and geopolitics to health and science — newest first, fully attributed.</p>
+      </div>
+      <div class="cap">
+        <h3>Source-linked</h3>
+        <p>Every moment carries the show name, the original episode link, and exact clip timestamps. Provenance is built in, never stripped.</p>
+      </div>
+      <div class="cap">
+        <h3>Built for builders</h3>
+        <p>Clean JSON, sensible pagination, and webhooks for new moments. Designed for newsrooms, research tools, and apps.</p>
+      </div>
+    </div>
+
+    <div class="signup">
+      <div id="api-live">
+        <div class="eyebrow">Early Access</div>
+        <h2>Be first in line when it ships.</h2>
+        <p>We're building the API now. Leave your email and we'll reach out with early access, docs, and a key before the public launch.</p>
+        <div class="signup-row">
+          <input type="email" id="api-email" autocomplete="email" placeholder="you@company.com">
+          <button id="api-submit" type="button">Request access</button>
+        </div>
+        <div class="signup-msg" id="api-msg"></div>
+        <div class="tiny">No spam. We'll only email you about API access.</div>
+      </div>
+      <div id="api-success" style="display:none">
+        <div class="eyebrow">You're on the list</div>
+        <h2>Thanks — we'll be in touch.</h2>
+        <p>You'll hear from us with early access and documentation before the Egleze API goes public. In the meantime, questions go to hello@egleze.com.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer><div class="wrap">
+    <a href="https://egleze.com">Front page</a> · <a href="https://egleze.com/shows">Shows</a> · <a href="https://egleze.com/about">About</a> · <a href="https://egleze.com/for-podcasters">For podcasters</a> · Egleze — where conversations become headlines
+  </div></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function(){
+    var SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+    var db = null;
+    function initDB(){
+      if(db) return true;
+      if(typeof supabase === 'undefined') return false;
+      db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false}});
+      return true;
+    }
+    function val(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; }
+    function setMsg(t, cls){ var m=document.getElementById('api-msg'); m.textContent=t||''; m.className='signup-msg'+(cls?' '+cls:''); }
+
+    async function submitApi(){
+      var btn = document.getElementById('api-submit');
+      var email = val('api-email');
+      if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setMsg('Please enter a valid email.', 'err'); return; }
+      btn.disabled = true; setMsg('Sending…');
+      if(!initDB()){ setMsg('Could not connect. Please try again in a moment.', 'err'); btn.disabled=false; return; }
+
+      try{
+        var res = await db.from('api_leads').insert([{ email: email, status: 'new', source: 'api_waitlist' }]);
+        if(res.error){
+          console.error('api_leads insert error:', res.error);
+          setMsg('Something went wrong. Please email hello@egleze.com to join.', 'err');
+          btn.disabled = false;
+          return;
+        }
+        document.getElementById('api-live').style.display = 'none';
+        document.getElementById('api-success').style.display = 'block';
+      }catch(e){
+        console.error(e);
+        setMsg('Something went wrong. Please email hello@egleze.com to join.', 'err');
+        btn.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var b = document.getElementById('api-submit');
+      if(b) b.addEventListener('click', submitApi);
+      var em = document.getElementById('api-email');
+      if(em) em.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); submitApi(); } });
+    });
+  })();
+  </script>
+</body>
+</html>
