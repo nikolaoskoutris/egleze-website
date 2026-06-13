@@ -609,6 +609,10 @@ header{position:relative}
 .cp-summary{font-size:13px;color:var(--mid);line-height:1.6;margin-bottom:18px}
 .cp-cta{display:block;background:var(--red);color:var(--white);text-align:center;padding:13px 18px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none;transition:background .15s;border:none;width:100%;cursor:pointer}
 .cp-cta:hover{background:#8e1212}
+.cp-cta-row{display:flex;gap:10px;flex-wrap:wrap}
+.cp-cta-row .cp-cta{flex:1;min-width:180px}
+.cp-cta-article{background:transparent;color:var(--red);border:1.5px solid var(--red)}
+.cp-cta-article:hover{background:var(--red);color:#fff}
 .cp-cta-arrow{display:inline-block;margin-left:6px;transition:transform .15s}
 .cp-cta:hover .cp-cta-arrow{transform:translateX(4px)}
 
@@ -3294,6 +3298,7 @@ function openClipPlayer(story, pushUrl) {
   var metaEl = document.getElementById('cp-meta');
   var summaryEl = document.getElementById('cp-summary');
   var cta = document.getElementById('cp-cta');
+  var ctaArticle = document.getElementById('cp-cta-article');
 
   // Populate metadata first so DOM is ready when player initializes
   headlineEl.textContent = story.headline || '';
@@ -3308,6 +3313,10 @@ function openClipPlayer(story, pushUrl) {
     (story.episode ? ' · ' + story.episode : '') + clipDur;
   summaryEl.textContent = story.summary || '';
   cta.href = story.source_url;
+  if (ctaArticle) {
+    if (story.id) { ctaArticle.href = '/story/' + storySlug(story); ctaArticle.style.display = ''; }
+    else { ctaArticle.style.display = 'none'; }
+  }
 
   // Wire bookmark in clip modal to whatever story is currently playing
   try {
@@ -4447,7 +4456,10 @@ async function digestSubscribe() {
         </div>
       </div>
 
-      <a class="cp-cta" id="cp-cta" href="#" target="_blank" rel="noopener">Watch full episode on YouTube<span class="cp-cta-arrow">→</span></a>
+      <div class="cp-cta-row">
+        <a class="cp-cta cp-cta-article" id="cp-cta-article" href="#">Read full article<span class="cp-cta-arrow">→</span></a>
+        <a class="cp-cta" id="cp-cta" href="#" target="_blank" rel="noopener">Watch full episode on YouTube<span class="cp-cta-arrow">→</span></a>
+      </div>
     </div>
   </div>
 </div>
