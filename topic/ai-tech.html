@@ -149,9 +149,10 @@
     @media(max-width:640px){.hero{padding:32px 24px 24px}.hero h1{font-size:38px}.stories{padding:24px}.grid{grid-template-columns:1fr}}
 
     /* Two-square media: podcast cover + clickable video preview */
-    .card-media{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+    .card-media{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;align-items:start}
     .card-media.one{grid-template-columns:1fr}
-    .media-art,.media-vid{aspect-ratio:1/1;border-radius:6px;overflow:hidden;position:relative;display:block}
+    .media-art{aspect-ratio:1/1;border-radius:6px;overflow:hidden;position:relative;display:block}
+    .media-vid{aspect-ratio:16/9;border-radius:6px;overflow:hidden;position:relative;display:block}
     .media-art{background:#0e0a06 center/cover no-repeat}
     .media-art.art-ph{display:flex;align-items:center;justify-content:center}
     .media-art.art-ph span{font-family:'Playfair Display',serif;font-weight:900;font-size:34px;color:var(--red)}
@@ -258,7 +259,7 @@
   // ── Infinite-scroll feed: newest first by created_at (ingest time ≈ air date,
   //    and NOT approval time — approving an old story does not reorder it) ──
   var TOPIC_FRAG = TOPIC_MAP[TOPIC_NAME] || TOPIC_NAME;
-  var PAGE=36, _offset=0, _done=false, _loading=false, _featuredId=null, _artMap={}, _gridEl=null, _showSet={};
+  var PAGE=36, _offset=0, _done=false, _loading=false, _featuredId=null, _artMap={}, _gridEl=null, _showSet={}, _storyCache={}; window._topicStoryCache=_storyCache;
 
   function href(s){ return '/story/'+s.id+'-'+slugify(s.headline); }
   function media(s){
@@ -271,8 +272,9 @@
     if(id){
       var st=(s.clip_start_seconds!=null)?parseInt(s.clip_start_seconds,10):0;
       var en=(s.clip_end_seconds!=null)?parseInt(s.clip_end_seconds,10):0;
-      vidSq='<div class="media-vid" title="Play clip" onclick="playVid(event,this,\''+id+'\','+st+','+en+')">'
-          + '<img class="vid-thumb" loading="lazy" alt="" src="https://i.ytimg.com/vi/'+id+'/hqdefault.jpg">'
+      _storyCache[String(s.id)] = s;
+      vidSq='<div class="media-vid" title="Play clip" data-clip-id="'+s.id+'">'
+          + '<img class="vid-thumb" loading="lazy" alt="" src="https://i.ytimg.com/vi/'+id+'/sddefault.jpg" onerror="this.onerror=null;this.src=&quot;https://i.ytimg.com/vi/'+id+'/hqdefault.jpg&quot;">'
           + '<span class="vid-play">\u25B6</span></div>';
     }
     return '<div class="card-media'+(vidSq?'':' one')+'">'+artSq+vidSq+'</div>';
@@ -358,5 +360,135 @@
 
   document.addEventListener('DOMContentLoaded', loadTopic);
   </script>
+
+  <!-- ── CLIP PLAYER MODAL (popup) ─────────────────────────────── -->
+  <style>
+    .cp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9000;display:none;align-items:center;justify-content:center;transition:background .25s ease}
+    .cp-overlay.open{display:flex;background:rgba(0,0,0,.72)}
+    .cp-modal{background:#fff;width:min(760px,94vw);max-height:92vh;overflow-y:auto;position:relative;transform:translateY(20px);opacity:0;transition:transform .3s ease,opacity .25s ease;border-radius:8px}
+    .cp-overlay.open .cp-modal{transform:translateY(0);opacity:1}
+    .cp-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border:none;background:rgba(255,255,255,.95);color:#0e0a06;cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;z-index:3;border-radius:50%;transition:background .15s}
+    .cp-close:hover{background:#0e0a06;color:#fff}
+    .cp-video{width:100%;aspect-ratio:16/9;background:#000;position:relative}
+    .cp-video iframe{width:100%;height:100%;border:0;display:block}
+    .cp-video-empty{display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;height:100%}
+    .cp-body{padding:20px 24px 24px}
+    .cp-tag{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px;font-weight:700}
+    .cp-headline{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:#0e0a06;line-height:1.2;margin-bottom:10px}
+    .cp-meta{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:#8a7f6d;text-transform:uppercase;margin-bottom:14px}
+    .cp-meta strong{color:#0e0a06}
+    .cp-summary{font-size:14px;color:#3a342c;line-height:1.6;margin-bottom:18px}
+    .cp-cta-row{display:flex;gap:10px;flex-wrap:wrap}
+    .cp-cta{flex:1;min-width:180px;display:block;background:var(--red);color:#fff;text-align:center;padding:13px 18px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none;transition:background .15s;border:none;cursor:pointer;border-radius:4px}
+    .cp-cta:hover{background:#8e1212}
+    .cp-cta-article{background:transparent;color:var(--red);border:1.5px solid var(--red)}
+    .cp-cta-article:hover{background:var(--red);color:#fff}
+    .cp-cta-arrow{display:inline-block;margin-left:6px}
+    @media(max-width:640px){.cp-overlay.open{align-items:flex-end}.cp-modal{width:100%;max-width:100%;border-radius:16px 16px 0 0;max-height:90vh}.cp-headline{font-size:19px}.cp-body{padding:16px 18px 22px}}
+  </style>
+  <div class="cp-overlay" id="cp-overlay" onclick="closeClipPlayer(event)" role="dialog" aria-labelledby="cp-headline" aria-modal="true">
+    <div class="cp-modal" id="cp-modal" onclick="event.stopPropagation()">
+      <button class="cp-close" id="cp-close-btn" aria-label="Close player">✕</button>
+      <div class="cp-video" id="cp-video"></div>
+      <div class="cp-body">
+        <div class="cp-tag" id="cp-tag">Podcast Reveal</div>
+        <h2 class="cp-headline" id="cp-headline"></h2>
+        <div class="cp-meta" id="cp-meta"></div>
+        <p class="cp-summary" id="cp-summary"></p>
+        <div class="cp-cta-row">
+          <a class="cp-cta cp-cta-article" id="cp-cta-article" href="#">Read full article<span class="cp-cta-arrow">→</span></a>
+          <a class="cp-cta" id="cp-cta" href="#" target="_blank" rel="noopener">Watch full episode on YouTube<span class="cp-cta-arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ── Clip player (popup) — ported for topic pages ──
+(function(){
+  var ytApiReady=false, ytApiReadyCallbacks=[], ytPlayer=null, ytStopTimer=null, lastFocus=null;
+  (function loadYTApi(){
+    if(window.YT&&window.YT.Player){ytApiReady=true;return;}
+    var s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; s.async=true;
+    document.head.appendChild(s);
+    window.onYouTubeIframeAPIReady=function(){ ytApiReady=true; while(ytApiReadyCallbacks.length) ytApiReadyCallbacks.shift()(); };
+  })();
+  function whenYTReady(cb){ if(ytApiReady&&window.YT&&window.YT.Player){cb();return;} ytApiReadyCallbacks.push(cb); }
+  function extractYouTubeId(url){
+    if(!url) return null;
+    var m=String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{11})/);
+    return m?m[1]:null;
+  }
+  function storyHref(s){ return '/story/'+s.id+'-'+(window.slugify?slugify(s.headline||''):String(s.headline||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')); }
+
+  window.openClipPlayer=function(story){
+    if(!story||!story.source_url) return;
+    var ytId=extractYouTubeId(story.source_url);
+    var overlay=document.getElementById('cp-overlay');
+    var videoSlot=document.getElementById('cp-video');
+    document.getElementById('cp-headline').textContent=story.headline||'';
+    document.getElementById('cp-tag').textContent=story.topic||'Podcast Reveal';
+    var clipDur='';
+    if(story.clip_start_seconds!=null&&story.clip_end_seconds!=null){
+      var dur=parseInt(story.clip_end_seconds,10)-parseInt(story.clip_start_seconds,10);
+      if(dur>0) clipDur=' · '+dur+'s clip';
+    }
+    document.getElementById('cp-meta').innerHTML='<strong>'+(story.show_name||'')+'</strong>'+(story.episode?' · '+story.episode:'')+clipDur;
+    document.getElementById('cp-summary').textContent=story.summary||'';
+    var cta=document.getElementById('cp-cta'); cta.href=story.source_url;
+    var ctaA=document.getElementById('cp-cta-article');
+    if(ctaA){ if(story.id){ctaA.href=storyHref(story);ctaA.style.display='';}else{ctaA.style.display='none';} }
+    videoSlot.innerHTML='';
+    if(ytStopTimer){clearInterval(ytStopTimer);ytStopTimer=null;}
+    if(ytPlayer&&ytPlayer.destroy){try{ytPlayer.destroy();}catch(e){}ytPlayer=null;}
+    if(!ytId){
+      var msg=document.createElement('div'); msg.className='cp-video-empty';
+      msg.textContent='Preview unavailable — tap "Watch full episode" below'; videoSlot.appendChild(msg);
+    }else{
+      var holder=document.createElement('div'); holder.id='cp-yt-iframe'; videoSlot.appendChild(holder);
+      var startSec=parseInt(story.clip_start_seconds,10); var endSec=parseInt(story.clip_end_seconds,10);
+      if(isNaN(startSec)||startSec<0) startSec=0;
+      var hasEnd=!isNaN(endSec)&&endSec>startSec;
+      whenYTReady(function(){
+        var pv={autoplay:1,rel:0,modestbranding:1,playsinline:1};
+        if(startSec>0) pv.start=startSec;
+        ytPlayer=new YT.Player('cp-yt-iframe',{videoId:ytId,playerVars:pv,events:{onReady:function(e){
+          try{e.target.playVideo();}catch(err){}
+          if(hasEnd){ ytStopTimer=setInterval(function(){ try{ if(e.target.getCurrentTime()>=endSec){e.target.pauseVideo();clearInterval(ytStopTimer);ytStopTimer=null;} }catch(err){} },250); }
+        }}});
+      });
+    }
+    lastFocus=document.activeElement;
+    overlay.classList.add('open'); document.body.style.overflow='hidden';
+    setTimeout(function(){var b=document.getElementById('cp-close-btn');if(b)b.focus();},50);
+  };
+
+  window.closeClipPlayer=function(event){
+    if(event&&event.target&&event.target.id!=='cp-overlay'&&event.type==='click') return;
+    var overlay=document.getElementById('cp-overlay'); if(!overlay) return;
+    overlay.classList.remove('open'); document.body.style.overflow='';
+    if(ytStopTimer){clearInterval(ytStopTimer);ytStopTimer=null;}
+    if(ytPlayer&&ytPlayer.destroy){try{ytPlayer.destroy();}catch(e){}ytPlayer=null;}
+    var slot=document.getElementById('cp-video'); if(slot) slot.innerHTML='';
+    if(lastFocus&&lastFocus.focus){try{lastFocus.focus();}catch(e){}}
+  };
+
+  // Delegated clicks: video tile opens player; X closes it
+  document.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('#cp-close-btn')){ e.preventDefault();e.stopPropagation();window.closeClipPlayer();return; }
+    var tile=e.target.closest&&e.target.closest('.media-vid[data-clip-id]');
+    if(tile){
+      var id=tile.getAttribute('data-clip-id');
+      var s=window._topicStoryCache&&window._topicStoryCache[String(id)];
+      if(s){ e.preventDefault(); window.openClipPlayer(s); }
+    }
+  });
+  document.addEventListener('keydown',function(e){
+    var ov=document.getElementById('cp-overlay');
+    if(e.key==='Escape'&&ov&&ov.classList.contains('open')) window.closeClipPlayer();
+  });
+})();
+</script>
+
 </body>
 </html>
