@@ -1177,7 +1177,7 @@ function closeClipPlayer(event) {
 
 // Escape closes clip player
 document.addEventListener("keydown", function(e){ var ov=document.getElementById("cp-overlay"); if(e.key==="Escape"&&ov&&ov.classList.contains("open")) closeClipPlayer({type:"key"}); });
-document.addEventListener("click", function(e){ if (e.target && e.target.closest && e.target.closest("#cp-close-btn")) { e.preventDefault(); e.stopPropagation(); closeClipPlayer(); } });
+(function(){function wireClose(){var b=document.getElementById("cp-close-btn");if(b&&!b._wired){b._wired=1;b.addEventListener("click",function(ev){ev.preventDefault();ev.stopPropagation();(window.closeClipPlayer||closeClipPlayer)();});}}if(document.readyState!=="loading")wireClose();else document.addEventListener("DOMContentLoaded",wireClose);})();
 
 async function onDigestSubmit(){
   const emailInput = document.getElementById('digest-email');
