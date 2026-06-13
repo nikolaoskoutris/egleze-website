@@ -43,7 +43,7 @@
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--light);min-height:100vh}
 a{color:inherit}
-.site-header{background:#fff;border-bottom:1px solid var(--border);border-top:3px solid var(--red);position:sticky;top:0;z-index:100}
+.site-header{background:var(--light);border-bottom:1px solid var(--border);border-top:3px solid var(--red);position:sticky;top:0;z-index:100}
 .header-inner{max-width:1400px;margin:0 auto;padding:0 32px;height:52px;display:flex;align-items:center;gap:16px}
 .logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:-0.4px;color:var(--ink);text-decoration:none}
 .logo span{color:var(--red)}
@@ -101,6 +101,7 @@ a{color:inherit}
 .story-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.06)}
 .sc-art{aspect-ratio:1;background:var(--dark);position:relative;overflow:hidden;flex-shrink:0}
 .sc-art img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.sc-art .sc-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px;text-shadow:0 2px 10px rgba(0,0,0,.6);pointer-events:none;opacity:.92}
 .sc-art-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:28px;color:rgba(255,255,255,.22);font-weight:900;position:absolute;inset:0}
 .sc-cat-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.78);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:7px;letter-spacing:1.3px;text-transform:uppercase;padding:2px 6px;z-index:2}
 .sc-body{padding:10px 12px;flex:1;display:flex;flex-direction:column}
@@ -193,6 +194,55 @@ a{color:inherit}
 .not-found h1{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--ink);margin-bottom:14px}
 .not-found p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px}
 .not-found a{display:inline-block;background:var(--red);color:#fff;padding:10px 20px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none}
+
+/* ── Clip player modal (ported from index) ── */
+.cp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9999;display:none;align-items:center;justify-content:center;transition:background .25s ease}
+.cp-overlay.open{display:flex;background:rgba(0,0,0,.7)}
+.cp-modal{background:var(--white);width:min(720px,92vw);max-height:90vh;overflow-y:auto;position:relative;transform:translateY(20px);opacity:0;transition:transform .3s ease,opacity .25s ease;border:1px solid var(--border)}
+.cp-overlay.open .cp-modal{transform:translateY(0);opacity:1}
+.cp-handle{display:none}
+.cp-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border:none;background:rgba(255,255,255,.95);color:var(--dark);cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;z-index:2;transition:background .15s}
+.cp-close:hover{background:var(--dark);color:var(--white)}
+.cp-video{width:100%;aspect-ratio:16/9;background:#000;position:relative}
+.cp-video iframe{width:100%;height:100%;border:0;display:block}
+.cp-video-empty{display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;height:100%}
+.cp-body{padding:20px 24px 24px}
+.cp-tag{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px;font-weight:700}
+.cp-headline{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark);line-height:1.2;margin-bottom:10px}
+.cp-meta{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.cp-meta strong{color:var(--dark)}
+.cp-summary{font-size:13px;color:var(--mid);line-height:1.6;margin-bottom:18px}
+.cp-cta{display:block;background:var(--red);color:var(--white);text-align:center;padding:13px 18px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none;transition:background .15s;border:none;width:100%;cursor:pointer}
+.cp-cta:hover{background:#8e1212}
+.cp-cta-arrow{display:inline-block;margin-left:6px;transition:transform .15s}
+.cp-cta:hover .cp-cta-arrow{transform:translateX(4px)}
+
+/* Episode summary panel inside clip player modal */
+.cp-episode{margin:0 0 18px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:#faf7f1}
+.cp-episode-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:14px 0;background:none;border:none;cursor:pointer;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:var(--dark);font-weight:700;text-align:left}
+.cp-episode-toggle:hover{color:var(--red)}
+.cp-episode-icon{display:inline-block;font-size:9px;color:var(--muted);transition:transform .2s ease}
+.cp-episode-toggle[aria-expanded="true"] .cp-episode-icon{transform:rotate(90deg)}
+.cp-episode-body{padding:0 0 16px;animation:cpEpisodeFade .25s ease}
+@keyframes cpEpisodeFade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+.cp-episode-section{margin-bottom:14px}
+.cp-episode-section:last-child{margin-bottom:0}
+.cp-episode-section-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+.cp-episode-summary-text{font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--mid);margin:0}
+.cp-episode-keypoints{list-style:none;margin:0;padding:0}
+.cp-episode-keypoints li{position:relative;padding:5px 0 5px 16px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.55;color:var(--mid)}
+.cp-episode-keypoints li::before{content:'';position:absolute;left:0;top:13px;width:5px;height:5px;background:var(--red);border-radius:50%}
+@media (max-width:760px){
+  .cp-episode-summary-text{font-size:12.5px}
+  .cp-episode-keypoints li{font-size:12.5px}
+}
+
+/* Mobile: bottom sheet style */
+@media (max-width:640px){
+  .cp-overlay.open{align-items:flex-end}
+  .cp-modal{width:100%;max-width:100%;max-height:88vh;border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .cp-overlay.open .cp-modal{transform:translateY(0)}
+  .cp-handle{display:block;width:40px;height:4px;background:rgba(0,0,0,.18);border-radius:2px;margin:8px auto 0;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -650,15 +700,35 @@ function buildStoryCard(s, isPopular){
   card.setAttribute('tabindex','0');
   card.setAttribute('data-story-id', s.id);
   card.dataset.storyHref = storyPath(s);
-  if (!isPopular && state.show.artwork_url) {
+  // Stash the full story object on the card so the clip player can open it
+  card._story = s;
+  if (!isPopular) {
     const art = document.createElement('div');
     art.className = 'sc-art';
-    const img = document.createElement('img');
-    img.src = state.show.artwork_url;
-    img.alt = state.show.name;
-    img.loading = 'lazy';
-    img.onerror = () => img.remove();
-    art.appendChild(img);
+    const ytId = extractYouTubeId(s.source_url);
+    if (ytId) {
+      const img = document.createElement('img');
+      img.src = 'https://i.ytimg.com/vi/' + ytId + '/hqdefault.jpg';
+      img.alt = s.headline || '';
+      img.loading = 'lazy';
+      img.onerror = () => {
+        // Fall back to show artwork if the thumbnail 404s
+        if (state.show.artwork_url) { img.src = state.show.artwork_url; img.onerror = () => img.remove(); }
+        else img.remove();
+      };
+      art.appendChild(img);
+      const play = document.createElement('span');
+      play.className = 'sc-play';
+      play.textContent = '\u25B6';
+      art.appendChild(play);
+    } else if (state.show.artwork_url) {
+      const img = document.createElement('img');
+      img.src = state.show.artwork_url;
+      img.alt = state.show.name;
+      img.loading = 'lazy';
+      img.onerror = () => img.remove();
+      art.appendChild(img);
+    }
     if (s.topic) {
       const badge = document.createElement('div');
       badge.className = 'sc-cat-badge';
@@ -808,6 +878,239 @@ async function loadRelated(){
   }
 }
 
+
+// ── Clip player: YouTube IFrame API + globals (ported from index) ──
+var ytApiReady = false, ytApiReadyCallbacks = [], ytPlayer = null, ytStopTimer = null, lastFocusBeforeOpen = null;
+(function loadYTApi(){
+  if (window.YT && window.YT.Player) { ytApiReady = true; return; }
+  var s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api'; s.async = true;
+  document.head.appendChild(s);
+  window.onYouTubeIframeAPIReady = function(){
+    ytApiReady = true;
+    while (ytApiReadyCallbacks.length) ytApiReadyCallbacks.shift()();
+  };
+})();
+function whenYTReady(cb){
+  if (ytApiReady && window.YT && window.YT.Player) { cb(); return; }
+  ytApiReadyCallbacks.push(cb);
+}
+
+function extractYouTubeId(url) {
+  if (!url) return null;
+  var s = String(url);
+  var m = s.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function storySlug(story) {
+  if (!story) return null;
+  var base = (story.headline || '').toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 80);
+  return story.id ? story.id + '-' + base : base;
+}
+
+function openClipPlayer(story, pushUrl) {
+  if (!story || !story.source_url) return;
+  // Only push URL state when we have a real story (with ID and headline) — synthesized
+  // fallback stories (e.g., orphan clicks) get the modal but no URL change.
+  if (pushUrl !== false && story.id && story.headline) {
+    var slug = storySlug(story);
+    if (slug) {
+      try {
+        history.pushState({ storyModal: true, slug: slug, storyId: story.id }, '', '/story/' + slug);
+      } catch(e) { /* ignore — older browsers */ }
+    }
+  }
+  var ytId = extractYouTubeId(story.source_url);
+  var overlay = document.getElementById('cp-overlay');
+  var videoSlot = document.getElementById('cp-video');
+  var headlineEl = document.getElementById('cp-headline');
+  var tagEl = document.getElementById('cp-tag');
+  var metaEl = document.getElementById('cp-meta');
+  var summaryEl = document.getElementById('cp-summary');
+  var cta = document.getElementById('cp-cta');
+
+  // Populate metadata first so DOM is ready when player initializes
+  headlineEl.textContent = story.headline || '';
+  tagEl.textContent = story.topic || 'Podcast Reveal';
+  var clipDur = '';
+  if (story.clip_start_seconds !== null && story.clip_start_seconds !== undefined &&
+      story.clip_end_seconds !== null && story.clip_end_seconds !== undefined) {
+    var dur = parseInt(story.clip_end_seconds, 10) - parseInt(story.clip_start_seconds, 10);
+    if (dur > 0) clipDur = ' · ' + dur + 's clip';
+  }
+  metaEl.innerHTML = '<strong>' + (story.show_name || '') + '</strong>' +
+    (story.episode ? ' · ' + story.episode : '') + clipDur;
+  summaryEl.textContent = story.summary || '';
+  cta.href = story.source_url;
+
+  // Wire bookmark in clip modal to whatever story is currently playing
+  try {
+    var cpBookmark = document.getElementById('cp-bookmark');
+    if (cpBookmark) {
+      if (story.id) {
+        cpBookmark.setAttribute('data-story-id', story.id);
+        cpBookmark.style.display = '';
+        var saved = window.egleze && window.egleze.saved && window.egleze.saved.has(String(story.id));
+        cpBookmark.classList.toggle('is-saved', !!saved);
+      } else {
+        // No story id — hide the bookmark for synthesized fallbacks
+        cpBookmark.style.display = 'none';
+      }
+    }
+    var cpShare = document.getElementById('cp-share');
+    if (cpShare) {
+      if (story.id) {
+        cpShare.setAttribute('data-story-id', story.id);
+        cpShare.style.display = '';
+      } else {
+        cpShare.style.display = 'none';
+      }
+    }
+  } catch (e) { /* don't let this break the modal */ }
+
+  // Populate episode summary panel — only show when episode_summary or episode_key_points exists
+  populateEpisodePanel(story);
+
+  // Reset video slot
+  videoSlot.innerHTML = '';
+  if (ytStopTimer) { clearInterval(ytStopTimer); ytStopTimer = null; }
+  if (ytPlayer && ytPlayer.destroy) { try { ytPlayer.destroy(); } catch(e){} ytPlayer = null; }
+
+  if (!ytId) {
+    // Non-YouTube source — show a fallback message; CTA still links to source
+    var msg = document.createElement('div');
+    msg.className = 'cp-video-empty';
+    msg.textContent = 'Preview unavailable — tap "Watch full episode" below';
+    videoSlot.appendChild(msg);
+  } else {
+    // Create the iframe target
+    var holder = document.createElement('div');
+    holder.id = 'cp-yt-iframe';
+    videoSlot.appendChild(holder);
+    var startSec = parseInt(story.clip_start_seconds, 10);
+    var endSec = parseInt(story.clip_end_seconds, 10);
+    if (isNaN(startSec) || startSec < 0) startSec = 0;
+    var hasEnd = !isNaN(endSec) && endSec > startSec;
+    whenYTReady(function() {
+      var playerVars = {
+        autoplay: 1,
+        rel: 0,
+        modestbranding: 1,
+        playsinline: 1
+      };
+      if (startSec > 0) playerVars.start = startSec;
+      ytPlayer = new YT.Player('cp-yt-iframe', {
+        videoId: ytId,
+        playerVars: playerVars,
+        events: {
+          onReady: function(e) {
+            try { e.target.playVideo(); } catch(err) {}
+            if (hasEnd) {
+              // Poll currentTime every 250ms — pause when we cross endSec
+              ytStopTimer = setInterval(function() {
+                try {
+                  var t = e.target.getCurrentTime();
+                  if (t >= endSec) {
+                    e.target.pauseVideo();
+                    clearInterval(ytStopTimer);
+                    ytStopTimer = null;
+                  }
+                } catch(err) {}
+              }, 250);
+            }
+          }
+        }
+      });
+    });
+  }
+
+  // Show modal + lock body scroll
+  lastFocusBeforeOpen = document.activeElement;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Focus close button for keyboard users
+  setTimeout(function() {
+    var closeBtn = document.getElementById('cp-close-btn');
+    if (closeBtn) closeBtn.focus();
+  }, 50);
+}
+
+function populateEpisodePanel(story) {
+  var panel = document.getElementById('cp-episode');
+  var body = document.getElementById('cp-episode-body');
+  var toggle = document.getElementById('cp-episode-toggle');
+  var summaryEl = document.getElementById('cp-episode-summary-text');
+  var keypointsSection = document.getElementById('cp-episode-keypoints-section');
+  var keypointsList = document.getElementById('cp-episode-keypoints');
+  if (!panel || !body || !toggle || !summaryEl || !keypointsSection || !keypointsList) return;
+
+  var hasSummary = story && typeof story.episode_summary === 'string' && story.episode_summary.trim().length > 0;
+  var hasKeypoints = story && Array.isArray(story.episode_key_points) && story.episode_key_points.length > 0;
+
+  if (!hasSummary && !hasKeypoints) {
+    // No episode metadata — hide the whole panel
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  // Always start collapsed when a new story opens
+  body.hidden = true;
+  toggle.setAttribute('aria-expanded', 'false');
+
+  if (hasSummary) {
+    summaryEl.textContent = story.episode_summary;
+    summaryEl.parentElement.style.display = '';
+  } else {
+    summaryEl.parentElement.style.display = 'none';
+  }
+
+  if (hasKeypoints) {
+    keypointsList.innerHTML = '';
+    story.episode_key_points.forEach(function(kp) {
+      if (typeof kp !== 'string' || !kp.trim()) return;
+      var li = document.createElement('li');
+      li.textContent = kp;
+      keypointsList.appendChild(li);
+    });
+    keypointsSection.style.display = '';
+  } else {
+    keypointsSection.style.display = 'none';
+  }
+}
+
+function closeClipPlayer(event) {
+  // Only close if click target is the overlay itself (not bubbling from inside the modal)
+  if (event && event.target && event.target.id !== 'cp-overlay' && event.type === 'click') return;
+  var overlay = document.getElementById('cp-overlay');
+  if (!overlay) return;
+  // If modal was opened via URL push, pop it back. The popstate handler
+  // also calls closeClipPlayer with skipUrlPop=true to avoid recursion.
+  var skipUrlPop = (event && event._skipUrlPop) === true;
+  if (!skipUrlPop && history.state && history.state.storyModal) {
+    try { history.back(); return; } catch(e) { /* fall through to manual close */ }
+  }
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  if (ytStopTimer) { clearInterval(ytStopTimer); ytStopTimer = null; }
+  if (ytPlayer && ytPlayer.destroy) { try { ytPlayer.destroy(); } catch(e){} ytPlayer = null; }
+  // Clear iframe so audio stops even if destroy() races
+  var slot = document.getElementById('cp-video');
+  if (slot) slot.innerHTML = '';
+  if (lastFocusBeforeOpen && lastFocusBeforeOpen.focus) {
+    try { lastFocusBeforeOpen.focus(); } catch(e) {}
+  }
+}
+
+// Escape closes clip player
+document.addEventListener("keydown", function(e){ var ov=document.getElementById("cp-overlay"); if(e.key==="Escape"&&ov&&ov.classList.contains("open")) closeClipPlayer({type:"key"}); });
+
 async function onDigestSubmit(){
   const emailInput = document.getElementById('digest-email');
   const btn = document.getElementById('digest-btn');
@@ -863,6 +1166,8 @@ document.addEventListener('click', function(e){
   if (btn) return;
   const card = e.target.closest('.story-card');
   if (!card) return;
+  // Open the clip player in-place (stay on the show page) instead of navigating away
+  if (card._story && card._story.source_url) { openClipPlayer(card._story); return; }
   const href = card.dataset.storyHref;
   if (href) window.location.href = href;
 });
@@ -871,10 +1176,48 @@ document.addEventListener('keydown', function(e){
   const card = document.activeElement && document.activeElement.closest('.story-card');
   if (!card) return;
   e.preventDefault();
+  if (card._story && card._story.source_url) { openClipPlayer(card._story); return; }
   const href = card.dataset.storyHref;
   if (href) window.location.href = href;
 });
 
 </script>
+
+<!-- Clip player modal (ported from index) -->
+<div class="cp-overlay" id="cp-overlay" onclick="closeClipPlayer(event)" role="dialog" aria-labelledby="cp-headline" aria-modal="true">
+  <div class="cp-modal" id="cp-modal" onclick="event.stopPropagation()">
+    <div class="cp-handle" aria-hidden="true"></div>
+    <button class="cp-close" id="cp-close-btn" aria-label="Close player">✕</button>
+    <button class="eg-bookmark cp-bookmark" id="cp-bookmark" type="button" aria-label="Save this story" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 L12 16 L6 20 Z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg></button>
+    <button class="eg-share cp-share" id="cp-share" type="button" aria-label="Share this story" data-story-id=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <div class="cp-video" id="cp-video"></div>
+    <div class="cp-body">
+      <div class="cp-tag" id="cp-tag">Podcast Reveal</div>
+      <h2 class="cp-headline" id="cp-headline"></h2>
+      <div class="cp-meta" id="cp-meta"></div>
+      <p class="cp-summary" id="cp-summary"></p>
+
+      <!-- Episode summary panel — collapsed by default; only renders when episode_summary exists -->
+      <div class="cp-episode" id="cp-episode" style="display:none">
+        <button type="button" class="cp-episode-toggle" id="cp-episode-toggle" aria-expanded="false" aria-controls="cp-episode-body">
+          <span class="cp-episode-icon" aria-hidden="true">▶</span>
+          <span class="cp-episode-label">Read episode summary</span>
+        </button>
+        <div class="cp-episode-body" id="cp-episode-body" hidden>
+          <div class="cp-episode-section">
+            <div class="cp-episode-section-label">Episode summary</div>
+            <p class="cp-episode-summary-text" id="cp-episode-summary-text"></p>
+          </div>
+          <div class="cp-episode-section" id="cp-episode-keypoints-section" style="display:none">
+            <div class="cp-episode-section-label">Key moments</div>
+            <ul class="cp-episode-keypoints" id="cp-episode-keypoints"></ul>
+          </div>
+        </div>
+      </div>
+
+      <a class="cp-cta" id="cp-cta" href="#" target="_blank" rel="noopener">Watch full episode on YouTube<span class="cp-cta-arrow">→</span></a>
+    </div>
+  </div>
+</div>
 </body>
 </html>
