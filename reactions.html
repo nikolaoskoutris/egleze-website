@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Five Reactions | Egleze</title>
+  <meta name="description" content="Egleze removed the like button. In its place: five reactions that measure how a moment moved your thinking — each with an intensity from one to five, and every one private. Here is how they work, and why.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://egleze.com/reactions">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Five Reactions | Egleze">
+  <meta property="og:description" content="We removed the like button. We measure intellectual impact, not applause.">
+  <meta property="og:url" content="https://egleze.com/reactions">
+  <meta property="og:site_name" content="Egleze">
+  <meta property="og:image" content="https://egleze.com/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Five Reactions | Egleze">
+  <meta name="twitter:description" content="We removed the like button. We measure intellectual impact, not applause.">
+  <meta name="twitter:image" content="https://egleze.com/og-image.jpg">
+  <meta name="theme-color" content="#bb1919">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700&family=Roboto:wght@400;500;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --paper:#f5f1e8; --ink:#141210; --red:#bb1919;
+      --ink-72:rgba(20,18,16,.72); --ink-55:rgba(20,18,16,.55); --ink-40:rgba(20,18,16,.4);
+      --edge:#e3ddd0; --card:#fffdf8; --dark:#141210; --gold:#f0b429;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--paper);color:var(--ink);font-family:'Roboto',system-ui,sans-serif;line-height:1.62;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:920px;margin:0 auto;padding:0 28px}
+    .topbar{background:var(--paper);border-bottom:0.5px solid var(--edge);padding:16px 0;position:sticky;top:0;z-index:20}
+    .topbar .wrap{max-width:1000px;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;letter-spacing:-0.6px;line-height:1}
+    .logo .e-red{color:var(--red)}
+    .back{font-family:'Roboto Condensed',sans-serif;font-weight:500;letter-spacing:1px;font-size:13px;color:var(--ink-55);text-transform:uppercase}
+    .back:hover{color:var(--red)}
+
+    .hero{padding:66px 0 18px}
+    .badge{display:inline-block;font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:3px;font-size:11px;text-transform:uppercase;color:var(--red);border:1px solid var(--red);border-radius:100px;padding:6px 14px;margin-bottom:22px}
+    h1{font-family:'Playfair Display',serif;font-weight:800;font-size:clamp(40px,6.5vw,68px);line-height:1.05;margin-bottom:22px;letter-spacing:-.5px}
+    h1 em{font-style:italic;color:var(--red)}
+    .lede{font-size:20px;color:var(--ink-72);max-width:680px;line-height:1.6}
+    .lede strong{color:var(--ink);font-weight:500}
+
+    .sec{padding:50px 0 0}
+    .eyebrow{font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:4px;font-size:12px;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+    h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(26px,4vw,38px);line-height:1.12;margin-bottom:16px;max-width:22ch}
+    .intro{font-size:17px;color:var(--ink-72);max-width:680px;margin-bottom:8px}
+    .intro strong{color:var(--ink);font-weight:500}
+
+    /* the five */
+    .five{margin-top:30px;border-top:1px solid var(--edge)}
+    .rxn{display:flex;gap:22px;align-items:flex-start;padding:24px 0;border-bottom:1px solid var(--edge)}
+    .rxn .num{font-family:'Playfair Display',serif;font-weight:800;font-size:30px;color:var(--red);line-height:1;flex:none;width:42px}
+    .rxn .body{flex:1;min-width:0}
+    .rxn h3{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;margin-bottom:5px}
+    .rxn p{font-size:15.5px;color:var(--ink-72)}
+    .rxn .dots{display:flex;gap:6px;margin-top:12px}
+    .rxn .dot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--red)}
+    .rxn .dot.on{background:var(--red)}
+
+    .scale{background:var(--card);border:0.5px solid var(--edge);border-radius:10px;padding:22px 24px;margin-top:26px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+    .scale .dots{display:flex;gap:8px}
+    .scale .dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--red)}
+    .scale .dot.on{background:var(--red)}
+    .scale .lab{font-family:'Roboto Condensed',sans-serif;letter-spacing:1px;font-size:12px;text-transform:uppercase;color:var(--ink-55)}
+    .scale .txt{font-size:14.5px;color:var(--ink-72);flex:1;min-width:200px}
+
+    /* how it works */
+    .how{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+    @media(max-width:680px){.how{grid-template-columns:1fr}}
+    .how .c{background:var(--card);border:0.5px solid var(--edge);border-radius:10px;padding:22px 24px}
+    .how .c h4{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:7px}
+    .how .c p{font-size:14.5px;color:var(--ink-72);line-height:1.55}
+
+    .pull{border-left:3px solid var(--red);padding:6px 0 6px 22px;margin:26px 0 0;max-width:680px}
+    .pull p{font-family:'Playfair Display',serif;font-style:italic;font-size:21px;line-height:1.4;color:var(--ink)}
+
+    /* privacy band */
+    .band{background:var(--dark);color:#f5f1e8;border-radius:14px;padding:46px 44px;margin:52px 0 0}
+    .band .eyebrow{color:var(--gold)}
+    .band h2{color:#fff}
+    .band p{color:rgba(245,241,232,.76);max-width:640px;font-size:16px;margin-bottom:14px}
+    .band p strong{color:#fff;font-weight:500}
+
+    /* science */
+    .science{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    @media(max-width:680px){.science{grid-template-columns:1fr}}
+    .sci{background:var(--card);border:0.5px solid var(--edge);border-radius:10px;padding:24px}
+    .sci .tag{font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:1.5px;font-size:11px;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+    .sci h4{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:8px;line-height:1.2}
+    .sci p{font-size:14.5px;color:var(--ink-72);line-height:1.55}
+    .sci .src{font-size:12.5px;color:var(--ink-40);margin-top:10px;font-style:italic}
+    .humble{font-size:14px;color:var(--ink-55);max-width:680px;margin-top:20px;line-height:1.6;font-style:italic}
+
+    /* cta */
+    .cta-band{background:var(--dark);border-radius:12px;padding:44px;margin:52px 0 0;color:#f5f1e8;text-align:center}
+    .cta-band h2{color:#fff;margin:0 auto 12px;max-width:18ch}
+    .cta-band p{color:rgba(245,241,232,.72);font-size:15px;max-width:480px;margin:0 auto 24px}
+    .cta-band a{display:inline-block;background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:1.5px;font-size:14px;text-transform:uppercase;padding:14px 32px;border-radius:6px}
+    .cta-band a:hover{background:#d32020}
+    .cta-band .tiny{font-size:12px;color:rgba(245,241,232,.4);margin-top:14px}
+
+    footer{border-top:0.5px solid var(--edge);margin-top:56px}
+    footer .wrap{max-width:1000px;padding:26px 28px;text-align:center;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-55)}
+    footer a{margin:0 8px}footer a:hover{color:var(--red)}
+  </style>
+</head>
+<body>
+  <div class="topbar"><div class="wrap">
+    <a class="logo" href="https://egleze.com"><span class="e-red">E</span>gleze</a>
+    <a class="back" href="https://egleze.com">← Back to Egleze</a>
+  </div></div>
+
+  <div class="wrap">
+
+    <div class="hero">
+      <span class="badge">The Five Reactions</span>
+      <h1>We removed the <em>like</em> button.</h1>
+      <p class="lede">Every other platform asks whether you approve. We ask something better: <strong>how did this moment move your thinking?</strong> In place of a thumb, five honest reactions — each with an intensity from one to five, and every one private.</p>
+    </div>
+
+    <div class="sec">
+      <div class="eyebrow">The five</div>
+      <h2>Five ways a moment can land.</h2>
+      <p class="intro">A single moment can do very different things to a thinking person. These five cover the range — and you set how strongly each one landed, from one to five.</p>
+
+      <div class="five">
+        <div class="rxn"><div class="num">01</div><div class="body"><h3>It inspired me</h3><p>It lifted you — gave you momentum to act, to believe, or to keep going.</p><div class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot"></span></div></div></div>
+        <div class="rxn"><div class="num">02</div><div class="body"><h3>It concerned me</h3><p>Something here worried you — about where things are heading, or what is at stake.</p><div class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div></div>
+        <div class="rxn"><div class="num">03</div><div class="body"><h3>It made me curious</h3><p>It opened a question you did not have before, and sent you looking further.</p><div class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span></div></div></div>
+        <div class="rxn"><div class="num">04</div><div class="body"><h3>It changed how I think</h3><p>It shifted a conclusion you held. You arrived with one view and left with another.</p><div class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span></div></div></div>
+        <div class="rxn"><div class="num">05</div><div class="body"><h3>It validated what I knew</h3><p>It confirmed something you already suspected but could not quite put into words.</p><div class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot"></span></div></div></div>
+      </div>
+
+      <div class="scale">
+        <div class="dots"><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span><span class="dot on"></span></div>
+        <span class="lab">1 slightly &nbsp;→&nbsp; 5 strongly</span>
+        <span class="txt">Each reaction is registered with an intensity, so "it changed how I think, a little" and "it changed how I think, completely" are not the same signal.</span>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="eyebrow">How it works</div>
+      <h2>One tap, or pick your number.</h2>
+      <div class="how">
+        <div class="c"><h4>Tap once for a quick read</h4><p>A single tap on a reaction registers a moderate three — the fast way to say "this landed with me" without giving it more thought.</p></div>
+        <div class="c"><h4>Pick a number to be precise</h4><p>Want to be exact? Tap the level itself, one through five, and set how strongly the moment moved you.</p></div>
+        <div class="c"><h4>Sign in to react</h4><p>Reacting needs an account — it keeps the signal honest and free of bots. Your reactions are tied to you, and seen by no one but you.</p></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="eyebrow">Why no agree or disagree</div>
+      <h2>We measure intellectual impact, not applause.</h2>
+      <p class="intro">There is deliberately no agree and no disagree. The moment you let people vote on whether a claim is correct, you have rebuilt the upvote-versus-downvote war that turned every other platform into a tribal scoreboard.</p>
+      <div class="pull"><p>Someone who disagrees with a claim can still be made curious by it, or have their thinking changed. That is a richer, more honest signal than a thumb up or down.</p></div>
+      <p class="intro" style="margin-top:22px">If disagreement is ever voiced on Egleze, it will be as reasoned argument — never as a tally.</p>
+    </div>
+
+    <div class="band">
+      <div class="eyebrow">Radical privacy</div>
+      <h2>Your reaction is yours alone.</h2>
+      <p>We show the room's heartbeat — what the whole community felt about a moment — but never how any one person reacted. You cannot see anyone else's choice, and no one can see yours.</p>
+      <p><strong>This is a guarantee in the architecture, not a setting in the fine print.</strong> Not even Egleze can see an individual's private reaction. Public totals only appear once enough people have reacted, so no single person can ever be inferred.</p>
+      <p>When there is no audience, there is no performance. You react to what you actually think — not to how you want to be seen.</p>
+    </div>
+
+    <div class="sec">
+      <div class="eyebrow">Why this is not arbitrary</div>
+      <h2>The thinking behind the five.</h2>
+      <p class="intro">We did not invent these from nothing. The design draws on established work in how people process emotion and how they behave when they think others are watching.</p>
+
+      <div class="science">
+        <div class="sci">
+          <div class="tag">Emotional granularity</div>
+          <h4>Five beats one</h4>
+          <p>Research on emotional granularity finds that people who distinguish their feelings precisely, rather than collapsing everything into good or bad, regulate them better and cope more healthily. A single like flattens that range. Five distinct reactions let you register what you actually felt.</p>
+          <div class="src">After Barrett; Kashdan, Barrett &amp; McKnight (2015)</div>
+        </div>
+        <div class="sci">
+          <div class="tag">Valence &amp; arousal</div>
+          <h4>Intensity is real</h4>
+          <p>Affective science has long described emotion along two axes — its direction, and its intensity. Our one-to-five scale captures the second: how strongly a moment landed, not just that it did.</p>
+          <div class="src">After Russell's circumplex model of affect</div>
+        </div>
+        <div class="sci">
+          <div class="tag">The spiral of silence</div>
+          <h4>Why we hide your reaction</h4>
+          <p>When people fear standing out, they go quiet — or start echoing the majority against their own view. A meta-analysis of sixty-six studies found this effect holds online too. Remove the audience, and you remove the pressure to perform.</p>
+          <div class="src">After Noelle-Neumann; Matthes et al. meta-analysis</div>
+        </div>
+        <div class="sci">
+          <div class="tag">The assembly</div>
+          <h4>Shared judgement</h4>
+          <p>Egleze takes its name from the Athenian <em>ekklisía</em> — the assembly where citizens weighed matters together. The reactions are the modern version: a room forming a shared sense of a moment, without anyone surrendering their privacy to do it.</p>
+          <div class="src">After Arendt on shared judgement</div>
+        </div>
+      </div>
+
+      <p class="humble">A note on honesty: we make no claim to have built a clinically validated instrument. The five reactions are an editorial design informed by this research, not a peer-reviewed psychometric scale. We describe what Egleze readers felt — we do not diagnose them.</p>
+    </div>
+
+    <div class="cta-band">
+      <h2>The like button measured popularity. This measures what a moment did to you.</h2>
+      <p>Start reacting to the moments that move you — privately, honestly, and for no one's eyes but your own.</p>
+      <a href="https://egleze.com">Start reacting</a>
+      <div class="tiny">Reacting needs a free account. Your reactions stay private — always.</div>
+    </div>
+
+  </div>
+
+  <footer><div class="wrap">
+    <a href="https://egleze.com">Front page</a> · <a href="https://egleze.com/about">About</a> · <a href="https://egleze.com/shows">Shows</a> · <a href="https://egleze.com/legal.html#privacy">Privacy</a> · Egleze — where conversations become headlines
+  </div></footer>
+
+</body>
+</html>
