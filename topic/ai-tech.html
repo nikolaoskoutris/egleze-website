@@ -150,10 +150,14 @@
     @media(max-width:640px){.hero{padding:32px 24px 24px}.hero h1{font-size:38px}.stories{padding:24px}.grid{grid-template-columns:1fr}}
 
     /* Two-square media: podcast cover + clickable video preview */
-    .card-media{display:block;position:relative;margin:0 0 0}
-    .card-media .media-art{position:absolute;top:8px;left:8px;width:40px;height:40px;aspect-ratio:1;z-index:2;border:2px solid #fff;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-    .card-media .media-vid{aspect-ratio:16/9;width:100%;border-radius:0}
-    .card-media.one .media-art{position:static;width:100%;height:auto;aspect-ratio:16/9;border:0;border-radius:0;box-shadow:none}
+    .card-media{display:block;position:relative;margin:0}
+    .card-media .media-vid{aspect-ratio:16/9;width:100%;border-radius:0;display:block}
+    .card-media.one .media-art{display:block;width:100%;aspect-ratio:16/9;background-size:cover;background-position:center}
+    /* Artwork chip + timestamp row, in the white area under the thumbnail */
+    .meta-row{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+    .art-chip{width:30px;height:30px;flex-shrink:0;border-radius:5px;background:#fff center/cover no-repeat;border:1px solid var(--border,#e3ddd0);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+    .art-chip.art-ph{display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:900;font-size:15px;color:var(--red);background:#fff}
+    .meta-row .meta{margin:0}
     .media-art{aspect-ratio:1/1;border-radius:6px;overflow:hidden;position:relative;display:block}
     .media-vid{aspect-ratio:16/9;border-radius:6px;overflow:hidden;position:relative;display:block}
     .media-art{background:#0e0a06 center/cover no-repeat}
@@ -165,9 +169,7 @@
     .media-vid .vid-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;text-shadow:0 2px 8px rgba(0,0,0,.7);pointer-events:none}
     .feat-body,.card-body{display:block;color:inherit}
     .featured .card-media{max-width:560px;display:block;position:relative}
-    .featured .card-media .media-art{position:absolute;top:8px;left:8px;width:48px;height:48px;aspect-ratio:1;z-index:2;border:2px solid #fff;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
     .featured .card-media .media-vid{aspect-ratio:16/9;width:100%}
-    .featured .card-media.one .media-art{position:static;width:100%;height:auto;aspect-ratio:16/9;border:0;border-radius:0;box-shadow:none}
   </style>
 </head>
 <body>
@@ -268,27 +270,34 @@
   var PAGE=36, _offset=0, _done=false, _loading=false, _featuredId=null, _artMap={}, _gridEl=null, _showSet={}, _storyCache={}; window._topicStoryCache=_storyCache;
 
   function href(s){ return '/story/'+s.id+'-'+slugify(s.headline); }
-  function media(s){
+  // Small artwork chip (shown in the white area, next to the timestamp)
+  function artChip(s){
     var art = _artMap[s.show_name] || '';
+    return art
+      ? '<span class="art-chip" style="background-image:url(\''+String(art).replace(/'/g,'%27')+'\')" aria-hidden="true"></span>'
+      : '<span class="art-chip art-ph" aria-hidden="true">E</span>';
+  }
+  function media(s){
     var id = ytId(s.source_url);
-    var artSq = art
-      ? '<a class="media-art" href="'+href(s)+'" aria-label="Open story" style="background-image:url(\''+String(art).replace(/'/g,'%27')+'\')"></a>'
-      : '<a class="media-art art-ph" href="'+href(s)+'" aria-label="Open story"><span>E</span></a>';
-    var vidSq='';
     if(id){
       var st=(s.clip_start_seconds!=null)?parseInt(s.clip_start_seconds,10):0;
       var en=(s.clip_end_seconds!=null)?parseInt(s.clip_end_seconds,10):0;
       _storyCache[String(s.id)] = s;
-      vidSq='<div class="media-vid" title="Play clip" data-clip-id="'+s.id+'">'
+      return '<div class="card-media"><div class="media-vid" title="Play clip" data-clip-id="'+s.id+'">'
           + '<img class="vid-thumb" loading="lazy" alt="" src="https://i.ytimg.com/vi/'+id+'/sddefault.jpg" onerror="this.onerror=null;this.src=&quot;https://i.ytimg.com/vi/'+id+'/hqdefault.jpg&quot;">'
-          + '<span class="vid-play">\u25B6</span></div>';
+          + '<span class="vid-play">\u25B6</span></div></div>';
     }
-    return '<div class="card-media'+(vidSq?'':' one')+'">'+artSq+vidSq+'</div>';
+    // No video: show the artwork full-width as the media (16:9)
+    var art = _artMap[s.show_name] || '';
+    var artBlock = art
+      ? '<a class="media-art" href="'+href(s)+'" aria-label="Open story" style="background-image:url(\''+String(art).replace(/'/g,'%27')+'\')"></a>'
+      : '<a class="media-art art-ph" href="'+href(s)+'" aria-label="Open story"><span>E</span></a>';
+    return '<div class="card-media one">'+artBlock+'</div>';
   }
   function cardHtml(s){
     return '<div class="card">'+media(s)
       +'<a class="card-body" href="'+href(s)+'">'
-      +'<span class="meta">'+esc(ago(s.created_at))+'</span>'
+      +'<span class="meta-row">'+artChip(s)+'<span class="meta">'+esc(ago(s.created_at))+'</span></span>'
       +'<h3 class="title">'+esc(s.headline||'Untitled')+'</h3>'
       +(s.show_name?'<p class="show">'+esc(s.show_name)+'</p>':'')
       +'</a></div>';
@@ -349,7 +358,7 @@
 
     var html='<div class="featured">'+media(featured)
       +'<a class="feat-body" href="'+href(featured)+'">'
-      +'<span class="meta">Featured · '+esc(ago(featured.created_at))+'</span>'
+      +'<span class="meta-row">'+artChip(featured)+'<span class="meta">Featured · '+esc(ago(featured.created_at))+'</span></span>'
       +'<h2 class="title">'+esc(featured.headline||'Untitled')+'</h2>'
       +(featured.quote?'<p class="quote">\u201C'+esc(String(featured.quote).substring(0,180))+(String(featured.quote).length>180?'\u2026':'')+'\u201D</p>':'')
       +(featured.show_name?'<p class="show">'+esc(featured.show_name)+'</p>':'')
