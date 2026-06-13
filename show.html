@@ -991,14 +991,7 @@ function openClipPlayer(story, pushUrl) {
   if (!story || !story.source_url) return;
   // Only push URL state when we have a real story (with ID and headline) — synthesized
   // fallback stories (e.g., orphan clicks) get the modal but no URL change.
-  if (pushUrl !== false && story.id && story.headline) {
-    var slug = storySlug(story);
-    if (slug) {
-      try {
-        history.pushState({ storyModal: true, slug: slug, storyId: story.id }, '', '/story/' + slug);
-      } catch(e) { /* ignore — older browsers */ }
-    }
-  }
+  // (show.html keeps the user in-place — no URL push; close is a clean overlay hide)
   var ytId = extractYouTubeId(story.source_url);
   var overlay = document.getElementById('cp-overlay');
   var videoSlot = document.getElementById('cp-video');
@@ -1169,12 +1162,7 @@ function closeClipPlayer(event) {
   if (event && event.target && event.target.id !== 'cp-overlay' && event.type === 'click') return;
   var overlay = document.getElementById('cp-overlay');
   if (!overlay) return;
-  // If modal was opened via URL push, pop it back. The popstate handler
-  // also calls closeClipPlayer with skipUrlPop=true to avoid recursion.
-  var skipUrlPop = (event && event._skipUrlPop) === true;
-  if (!skipUrlPop && history.state && history.state.storyModal) {
-    try { history.back(); return; } catch(e) { /* fall through to manual close */ }
-  }
+  // (show.html does not use the URL-push/popstate pattern — close directly)
   overlay.classList.remove('open');
   document.body.style.overflow = '';
   if (ytStopTimer) { clearInterval(ytStopTimer); ytStopTimer = null; }
