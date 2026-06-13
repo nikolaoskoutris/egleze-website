@@ -1,0 +1,3513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Egleze — Editorial Dashboard v4</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#bb1919;--dark:#111;--mid:#444;--muted:#888;
+  --light:#f5f5f0;--border:#e0e0da;--white:#fff;
+  --green:#1a7a2a;--amber:#b8860b;--blue:#1a4a8a;
+  --sidebar:220px;--topbar:52px;
+}
+html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);font-size:13px}
+
+/* ── LOGIN ───────────────────────────────────────────────────── */
+#login-screen{position:fixed;inset:0;background:var(--light);display:flex;align-items:center;justify-content:center;z-index:99999}
+.login-box{background:#fff;border-top:3px solid var(--red);padding:48px 52px;width:400px;box-shadow:0 4px 40px rgba(0,0,0,0.08)}
+.login-logo{font-family:'Playfair Display',serif;font-size:42px;font-weight:900;letter-spacing:-0.8px;color:var(--dark);line-height:1}
+.login-logo span{color:var(--red)}
+.login-rule{width:100%;height:3px;background:var(--red);margin:5px 0 5px}
+.login-tag{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:28px;display:block}
+.login-label{font-size:11px;font-weight:500;color:var(--mid);margin-bottom:5px;display:block}
+.login-input{width:100%;border:1px solid var(--border);padding:10px 14px;font-size:13px;outline:none;margin-bottom:14px;color:var(--dark);font-family:'DM Sans',sans-serif}
+.login-input:focus{border-color:var(--dark)}
+.login-btn{width:100%;background:var(--dark);color:#fff;border:none;padding:12px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700}
+.login-btn:hover{background:var(--red)}
+.login-error{font-size:11px;color:var(--red);margin-bottom:10px;display:none;text-align:center}
+
+/* ── TOP BAR ─────────────────────────────────────────────────── */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:1000;border-top:3px solid var(--red)}
+.tb-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:-0.5px;color:var(--dark);flex-shrink:0;line-height:1}
+.tb-logo span{color:var(--red)}
+.tb-divider{width:1px;height:20px;background:var(--border)}
+.tb-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.tb-stats{display:flex;gap:16px;margin-left:auto}
+.tb-stat{text-align:center}
+.tb-stat-num{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--dark);line-height:1}
+.tb-stat-label{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.tb-live{display:flex;align-items:center;gap:5px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);font-weight:700}
+.live-dot{width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.tb-btn{background:var(--dark);color:#fff;border:none;padding:6px 12px;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:700}
+.tb-btn:hover{background:var(--red)}
+.tb-btn.outline{background:transparent;color:var(--dark);border:1px solid var(--border)}
+.tb-btn.outline:hover{background:var(--light)}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────── */
+.sidebar{position:fixed;top:var(--topbar);left:0;width:var(--sidebar);height:calc(100vh - var(--topbar));background:#fff;border-right:1px solid var(--border);overflow-y:auto;z-index:500;display:flex;flex-direction:column}
+.sidebar-section{padding:8px 0}
+.sidebar-label{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:8px 16px 4px}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;text-decoration:none;color:var(--dark)}
+.sidebar-item:hover{background:var(--light);color:var(--dark)}
+.sidebar-item.active{background:var(--light);border-left-color:var(--red);color:var(--red)}
+.sidebar-item.active .si-icon{color:var(--red)}
+.si-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.si-label{font-size:12px;font-weight:500}
+.si-badge{margin-left:auto;background:var(--red);color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;font-family:'Roboto Condensed',sans-serif}
+.sidebar-divider{height:1px;background:var(--border);margin:4px 0}
+
+/* ── MAIN CONTENT ────────────────────────────────────────────── */
+.main{margin-left:var(--sidebar);margin-top:var(--topbar);height:calc(100vh - var(--topbar));overflow-y:auto}
+.panel{display:none;height:100%}
+.panel.active{display:flex;flex-direction:column}
+
+/* ── PANEL HEADER ────────────────────────────────────────────── */
+.panel-header{padding:16px 20px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--dark)}
+.panel-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.panel-actions{display:flex;gap:8px}
+
+/* ── EDITORIAL PANEL (3 columns) ─────────────────────────────── */
+.editorial-layout{display:grid;grid-template-columns:280px 1fr 260px;height:calc(100vh - var(--topbar) - 61px);overflow:hidden}
+.ed-col{overflow-y:auto;border-right:1px solid var(--border)}
+.ed-col:last-child{border-right:none}
+.ed-col-head{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--light);position:sticky;top:0;z-index:10}
+.ed-col-title{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+/* ── STORY QUEUE ITEMS ───────────────────────────────────────── */
+.filter-tabs{display:flex;gap:0;padding:8px 14px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:41px;z-index:9}
+.ftab{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted)}
+.ftab.active{color:var(--red);border-bottom-color:var(--red)}
+.ftab-count{font-size:8px;color:var(--muted);font-weight:400;margin-left:2px;letter-spacing:0;text-transform:none}
+.ftab.active .ftab-count{color:var(--red)}
+#queue-list{position:relative}
+.queue-sentinel{display:flex;justify-content:center;align-items:center;gap:6px;padding:14px;border-top:0.5px solid var(--border)}
+.queue-sentinel.is-done{padding:14px;color:var(--muted);font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase}
+.queue-spinner-dot{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:qSpin 1.2s ease-in-out infinite}
+.queue-spinner-dot:nth-child(2){animation-delay:.15s}
+.queue-spinner-dot:nth-child(3){animation-delay:.3s}
+@keyframes qSpin{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+.queue-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.queue-item:hover{background:var(--light)}
+.queue-item.selected{background:#fff8f8;border-left:3px solid var(--red)}
+.qi-show{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin-bottom:3px}
+.qi-headline{font-size:12px;line-height:1.35;color:var(--dark);margin-bottom:5px;font-weight:500}
+.qi-meta{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.qi-score{font-family:'Roboto Condensed',sans-serif;font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px}
+.score-high{background:#e8f5e9;color:var(--green)}
+.score-mid{background:#fff8e1;color:var(--amber)}
+.score-low{background:#fce4e4;color:var(--red)}
+.qi-tags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.qi-tag{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:0.5px;text-transform:uppercase;padding:2px 6px;background:var(--light);color:var(--muted);border-radius:2px}
+.qi-tag.qi-pick{background:#fff3d4;color:#9a6800;border:1px solid #f0d480}
+.qi-pick-row{display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
+.qi-pick-checkbox{width:14px;height:14px;cursor:pointer;accent-color:var(--red);margin:0}
+.qi-pick-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:500;cursor:pointer;user-select:none}
+.qi-pick-label.is-picked{color:var(--red);font-weight:700}
+.qi-pick-star{color:#bb1919;font-size:10px;display:inline-block}
+
+/* Queue toolbar — search + sort + show filter */
+.queue-toolbar{padding:8px 14px;border-bottom:1px solid var(--border);background:#fff;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;z-index:11}
+.qt-search-row input{width:100%;border:1px solid var(--border);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;color:var(--dark);background:var(--light);border-radius:2px;transition:border-color .15s,background .15s}
+.qt-search-row input:focus{border-color:var(--dark);background:#fff}
+.qt-controls-row{display:flex;gap:6px}
+.qt-controls-row select{flex:1;min-width:0;border:1px solid var(--border);padding:6px 8px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--dark);background:#fff;outline:none;cursor:pointer;border-radius:2px}
+.qt-controls-row select:focus{border-color:var(--dark)}
+.filter-tabs{display:flex;gap:0;padding:7px 14px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:75px;z-index:10;align-items:center}
+.ftab[onclick*="editorial"]{margin-left:auto;padding:3px 9px;font-size:13px;color:#bb1919}
+.ftab[onclick*="editorial"].active{color:#bb1919;border-bottom-color:#bb1919}
+
+/* ── STORY DETAIL ────────────────────────────────────────────── */
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:8px}
+.detail-empty-icon{font-size:32px;opacity:.3}
+.detail-content{padding:20px}
+.detail-show{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.detail-headline{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.3;margin-bottom:12px}
+.detail-headline[contenteditable]{outline:none;border-bottom:2px solid transparent;padding-bottom:2px}
+.detail-headline[contenteditable]:focus{border-bottom-color:var(--red)}
+.detail-section{margin-bottom:16px}
+.detail-label{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.detail-text{font-size:12px;line-height:1.6;color:var(--mid)}
+.detail-text[contenteditable]{outline:none;padding:6px 8px;background:var(--light);border:1px solid transparent}
+.detail-text[contenteditable]:focus{border-color:var(--border);background:#fff}
+.detail-quote{font-size:13px;font-style:italic;color:var(--dark);border-left:3px solid var(--red);padding:8px 12px;background:var(--light);margin:8px 0;line-height:1.5}
+.score-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px}
+.score-fill{height:100%;background:var(--red);border-radius:3px;transition:width .3s}
+
+/* ── CATEGORY SELECTOR ───────────────────────────────────────── */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px}
+.cat-option{padding:5px 8px;border:1px solid var(--border);cursor:pointer;font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:center;transition:all .15s;background:#fff}
+.cat-option:hover{border-color:var(--red);color:var(--red)}
+.cat-option.selected{background:var(--red);color:#fff;border-color:var(--red)}
+.cat-option.selected::after{content:' ✓';font-size:8px}
+.d-topic-tag{display:inline-block;background:var(--light);border:1px solid var(--border);padding:3px 8px;font-size:10px;color:var(--mid);margin:2px;border-radius:2px}
+.categories-label{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.selected-cats-display{margin-bottom:8px;min-height:24px;display:flex;flex-wrap:wrap;gap:4px}
+.sel-cat-pill{background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;display:flex;align-items:center;gap:4px}
+.sel-cat-remove{cursor:pointer;opacity:.7;font-size:10px}
+.sel-cat-remove:hover{opacity:1}
+
+/* ── ACTION BUTTONS ──────────────────────────────────────────── */
+.action-bar{display:flex;gap:8px;padding:16px;border-top:1px solid var(--border);background:#fff;position:sticky;bottom:0}
+.btn-approve{background:var(--green);color:#fff;border:none;padding:10px 20px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700;flex:1}
+.btn-approve:hover{background:#145a1e}
+.btn-reject{background:#fff;color:var(--red);border:1px solid var(--red);padding:10px 20px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex:1}
+.btn-reject:hover{background:#fce4e4}
+.btn-feature{background:var(--amber);color:#fff;border:none;padding:10px 16px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-weight:700}
+.btn-save{background:var(--dark);color:#fff;border:none;padding:10px 18px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700;flex:1}
+.btn-save:hover{background:#000}
+.btn-save.dirty{background:var(--red);animation:pulse-save 1.5s ease infinite}
+@keyframes pulse-save{0%,100%{box-shadow:0 0 0 0 rgba(187,25,25,.3)}50%{box-shadow:0 0 0 4px rgba(187,25,25,0)}}
+
+/* === ROLE LOCK — approver role gets read-only on most fields === */
+.eg-locked,
+.eg-locked[contenteditable="false"],
+.eg-locked input[readonly],
+.eg-locked textarea[readonly],
+.eg-locked input[disabled],
+.eg-locked textarea[disabled],
+.eg-locked select[disabled],
+input.eg-locked,
+textarea.eg-locked,
+select.eg-locked,
+div.eg-locked{
+  background:#f5f3ed!important;color:#8a8478!important;cursor:not-allowed!important;
+  border-color:#e8e3d6!important;
+  -webkit-text-fill-color:#8a8478!important;
+}
+.eg-locked:focus,
+input.eg-locked:focus,
+textarea.eg-locked:focus{
+  outline:none!important;border-color:#e8e3d6!important;
+}
+.eg-locked-area{position:relative}
+.eg-locked-area::before{
+  content:'Locked';position:absolute;top:-1px;right:0;
+  font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1.5px;
+  text-transform:uppercase;color:#a99e88;background:#f5f3ed;padding:1px 6px;border-radius:2px;
+  pointer-events:none;
+}
+.eg-hidden-approver{display:none!important}
+
+/* ── MODAL — used for Add Story & Add Show ─────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:5000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;transition:opacity .18s,visibility .18s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal-box{background:#fff;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;border-radius:4px;border-top:3px solid var(--red);box-shadow:0 24px 80px rgba(0,0,0,.32);transform:translateY(12px);transition:transform .18s ease}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-head{padding:16px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--dark);margin:0}
+.modal-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.modal-close{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:2px;transition:all .15s}
+.modal-close:hover{background:var(--light);color:var(--dark)}
+.modal-body{padding:18px 22px;overflow-y:auto;flex:1}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:var(--light)}
+.modal-foot .tb-btn{padding:9px 16px;font-size:10px;letter-spacing:1.5px}
+.mf-row{display:grid;gap:6px;margin-bottom:14px}
+.mf-row.split{grid-template-columns:1fr 1fr;gap:12px}
+.mf-row.split > div{display:flex;flex-direction:column;gap:6px}
+.mf-label{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700}
+.mf-label .mf-req{color:var(--red);font-weight:700;margin-left:2px}
+.mf-help{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--muted);font-style:italic;margin-top:-2px}
+.mf-input,.mf-textarea,.mf-select{width:100%;border:1px solid var(--border);padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--dark);outline:none;background:#fff;transition:border-color .15s}
+.mf-input:focus,.mf-textarea:focus,.mf-select:focus{border-color:var(--dark)}
+.mf-textarea{resize:vertical;min-height:80px;line-height:1.5}
+.mf-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:5px;max-height:180px;overflow-y:auto;padding:6px;border:1px solid var(--border);background:var(--light);border-radius:2px}
+.mf-cat-opt{padding:5px 8px;font-size:11px;cursor:pointer;background:#fff;border:1px solid var(--border);border-radius:2px;transition:all .15s;user-select:none;display:flex;align-items:center;gap:6px}
+.mf-cat-opt:hover{border-color:var(--dark);background:#fff}
+.mf-cat-opt.selected{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
+.mf-cat-opt .mf-cat-icon{font-size:13px}
+
+/* ── SEARCHABLE COMBOBOX (used for show picker in Add Story) ── */
+.mf-combobox{position:relative}
+.mf-combobox-input{padding-right:30px}
+.mf-combobox::after{content:'▾';position:absolute;right:10px;top:9px;color:var(--muted);font-size:10px;pointer-events:none}
+.mf-combobox.show-list::after{content:'▴'}
+.mf-combobox-list{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-top:none;max-height:240px;overflow-y:auto;z-index:5100;display:none;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.mf-combobox.show-list .mf-combobox-list{display:block}
+.mf-combobox-item{padding:8px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background .1s}
+.mf-combobox-item:last-child{border-bottom:none}
+.mf-combobox-item:hover,.mf-combobox-item.highlighted{background:var(--light)}
+.mf-combobox-item.highlighted{background:#fff8f8;border-left:3px solid var(--red);padding-left:9px}
+.mf-combobox-item .mfc-name{flex:1;font-weight:500;color:var(--dark)}
+.mf-combobox-item .mfc-meta{font-size:10px;color:var(--muted);font-family:'Roboto Condensed',sans-serif;letter-spacing:0.5px;text-transform:uppercase}
+.mf-combobox-empty{padding:12px;font-size:11px;color:var(--muted);font-style:italic;text-align:center;line-height:1.5}
+.mf-combobox-empty a{color:var(--red);text-decoration:underline;cursor:pointer;font-style:normal}
+.mf-combobox-input.invalid{border-color:var(--red);background:#fff8f8}
+
+/* Detail-page editable form fields */
+.d-textarea{width:100%;border:1px solid var(--border);padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;line-height:1.5;color:var(--dark);outline:none;resize:vertical;min-height:90px;background:#fff;transition:border-color .15s}
+.d-textarea:focus{border-color:var(--dark)}
+.detail-meta-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+
+/* Editorial Pick row at top of detail */
+.detail-pick-row{padding:10px 14px;background:linear-gradient(180deg,#fffaf0 0%,#fff8e1 100%);border:1px solid #f0d480;border-radius:3px;margin-bottom:14px}
+.detail-pick-label{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.detail-pick-label input[type="checkbox"]{width:18px;height:18px;accent-color:var(--red);cursor:pointer;margin:0;flex-shrink:0}
+.d-pick-text{font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;color:var(--dark);flex-shrink:0}
+.d-pick-star{color:var(--red);margin-right:2px}
+.d-pick-help{font-family:'DM Sans',sans-serif;font-size:11px;color:#9a6800;font-weight:400;font-style:italic;line-height:1.3}
+.detail-break-row{padding:10px 14px;background:linear-gradient(180deg,#fff5f5 0%,#ffecec 100%);border:1px solid #e8a0a0;border-radius:3px;margin-bottom:14px}
+.detail-break-row .d-pick-help{color:#9a2a2a}
+.d-break-dot{color:var(--red);margin-right:2px}
+
+/* ── LINEUP ──────────────────────────────────────────────────── */
+.lineup-item{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px}
+.li-num{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--border);width:20px;flex-shrink:0;line-height:1.2}
+.li-content{flex:1}
+.li-show{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.li-title{font-size:11px;color:var(--dark);line-height:1.35;font-weight:500}
+.li-empty{font-size:11px;color:var(--border);font-style:italic}
+.lineup-footer{padding:10px 14px;border-top:1px solid var(--border);position:sticky;bottom:0;background:#fff}
+.btn-newscast{width:100%;background:var(--dark);color:#fff;border:none;padding:10px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700}
+.btn-newscast:hover{background:var(--red)}
+.btn-newscast:disabled{background:var(--border);cursor:not-allowed}
+
+/* ── SHOWS PANEL ─────────────────────────────────────────────── */
+.shows-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:20px}
+.show-card{background:#fff;border:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:8px}
+.show-card-top{display:flex;align-items:center;gap:10px}
+.show-avatar{width:36px;height:36px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.show-name{font-size:13px;font-weight:600;color:var(--dark);line-height:1.2}
+.show-host{font-size:11px;color:var(--muted)}
+.show-card-meta{display:flex;gap:8px;align-items:center}
+.show-category{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;background:var(--light);color:var(--muted)}
+.show-status{display:flex;align-items:center;gap:4px;font-size:10px;margin-left:auto}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.status-dot.active{background:var(--green)}
+.status-dot.paused{background:var(--muted)}
+.show-rss{font-size:10px;color:var(--muted);word-break:break-all;font-family:monospace;background:var(--light);padding:4px 6px}
+.show-toggle{background:none;border:1px solid var(--border);padding:4px 10px;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--muted)}
+.show-toggle:hover{border-color:var(--red);color:var(--red)}
+
+/* ── ANALYTICS PANEL ─────────────────────────────────────────── */
+.analytics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:20px;align-content:start}
+.metric-card{background:#fff;border:1px solid var(--border);padding:16px}
+.metric-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--dark);line-height:1}
+.metric-num span{color:var(--red)}
+.metric-label{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.metric-trend{font-size:10px;color:var(--green);margin-top:4px}
+.analytics-row{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chart-card{background:#fff;border:1px solid var(--border);padding:16px}
+.chart-title{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.bar-chart{display:flex;gap:4px;align-items:flex-end;height:80px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;background:var(--red);opacity:.7;border-radius:2px 2px 0 0;transition:height .3s}
+.bar:hover{opacity:1}
+.bar-label{font-size:8px;color:var(--muted);text-align:center;font-family:'Roboto Condensed',sans-serif}
+.top-stories-list{margin-top:8px}
+.ts-item{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}
+.ts-rank{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--border);width:20px;flex-shrink:0}
+.ts-title{font-size:11px;color:var(--dark);flex:1;line-height:1.3}
+.ts-views{font-family:'Roboto Condensed',sans-serif;font-size:9px;color:var(--muted)}
+
+/* ── CATEGORIES PANEL ────────────────────────────────────────── */
+.categories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:20px}
+.category-card{background:#fff;border:1px solid var(--border);padding:16px}
+.cat-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.cat-icon{font-size:20px}
+.cat-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--dark)}
+.cat-count{font-size:11px;color:var(--muted);margin-left:auto}
+.cat-featured-slot{background:var(--light);border:1px dashed var(--border);padding:10px;margin-bottom:6px;min-height:44px;display:flex;align-items:center}
+.cat-slot-label{font-size:10px;color:var(--muted);font-style:italic}
+.cat-slot-story{font-size:11px;color:var(--dark);font-weight:500;line-height:1.3}
+.cat-btn{background:none;border:1px solid var(--border);padding:5px 10px;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;width:100%;margin-top:6px;color:var(--muted)}
+.cat-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ── HOMEPAGE CONTROL ────────────────────────────────────────── */
+.homepage-layout{display:grid;grid-template-columns:1fr 320px;gap:0;height:calc(100vh - var(--topbar) - 61px);overflow:hidden}
+.homepage-preview{overflow-y:auto;padding:20px;background:var(--light)}
+.homepage-controls{overflow-y:auto;border-left:1px solid var(--border);background:#fff}
+.preview-section{background:#fff;border:1px solid var(--border);margin-bottom:12px;padding:14px}
+.preview-section-title{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.preview-badge{background:var(--red);color:#fff;font-size:7px;padding:2px 6px;letter-spacing:1px}
+.hero-preview{background:var(--dark);color:#fff;padding:16px;min-height:100px;position:relative}
+.hero-preview-tag{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.hero-preview-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;line-height:1.3}
+.hero-preview-meta{font-size:10px;color:rgba(255,255,255,.5);margin-top:6px}
+.change-btn{position:absolute;top:8px;right:8px;background:var(--red);color:#fff;border:none;padding:4px 8px;font-size:8px;letter-spacing:1px;font-family:'Roboto Condensed',sans-serif;text-transform:uppercase;cursor:pointer}
+.control-section{padding:14px;border-bottom:1px solid var(--border)}
+.control-title{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.control-story-item{padding:8px;background:var(--light);margin-bottom:6px;cursor:pointer;border:1px solid transparent}
+.control-story-item:hover{border-color:var(--red)}
+.control-story-item.selected-hero{border-color:var(--red);background:#fff8f8}
+.csi-show{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--red)}
+.csi-title{font-size:11px;color:var(--dark);font-weight:500;line-height:1.3;margin-top:2px}
+
+/* ── MODAL ───────────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;width:700px;max-height:80vh;overflow-y:auto;border-top:3px solid var(--red)}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)}
+.modal-body{padding:20px}
+.script-block{background:var(--light);border-left:3px solid var(--red);padding:12px 16px;margin-bottom:12px}
+.script-block-label{font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.script-text{font-size:13px;line-height:1.7;color:var(--dark)}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+/* ── TOAST ───────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:10px 16px;font-size:11px;border-left:3px solid var(--green);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:3000;max-width:300px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.red{border-left-color:var(--red)}
+
+/* ── HAMBURGER (hidden on desktop) ─────────────────────────── */
+.tb-hamburger{display:none;background:none;border:none;font-size:20px;color:var(--dark);cursor:pointer;padding:4px 8px;line-height:1;flex-shrink:0}
+.tb-hamburger:hover{color:var(--red)}
+
+/* ── MOBILE TABS (hidden on desktop) ───────────────────────── */
+.ed-mobile-tabs{display:none}
+.emt-tab{flex:1;background:#fff;border:none;border-bottom:2px solid transparent;padding:11px 8px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.emt-tab.active{color:var(--red);border-bottom-color:var(--red)}
+.emt-count{background:var(--light);color:var(--muted);font-size:9px;padding:2px 6px;border-radius:10px;font-weight:700}
+.emt-tab.active .emt-count{background:var(--red);color:#fff}
+
+/* ── SIDEBAR DRAWER OVERLAY (mobile only) ──────────────────── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:498;opacity:0;transition:opacity .2s;pointer-events:none}
+.sidebar-overlay.open{opacity:1;pointer-events:auto}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* MOBILE — narrow viewport (≤ 760px)                          */
+/* ═══════════════════════════════════════════════════════════ */
+@media (max-width: 760px) {
+  /* Top bar — simplify, show hamburger, hide stats */
+  .tb-hamburger{display:block}
+  .tb-divider, .tb-label, .tb-stats, .tb-live, #tb-date{display:none}
+  .topbar{padding:0 10px;gap:8px}
+  .tb-logo{font-size:18px}
+  .panel-actions .tb-btn{padding:6px 10px;font-size:9px;letter-spacing:1px}
+
+  /* Sidebar — slide-in drawer */
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;width:260px;box-shadow:2px 0 24px rgba(0,0,0,.15);z-index:1100}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{display:block}
+
+  /* Main content — full width on mobile */
+  .main{margin-left:0}
+
+  /* Editorial 3-column → tabs (Queue / Detail). 3rd column merged into Detail. */
+  .ed-mobile-tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+  .editorial-layout{display:block;height:auto;overflow:visible}
+  .editorial-layout > .ed-col{display:none;border-right:none;height:auto;overflow-y:auto}
+  .editorial-layout.show-queue > .ed-col:nth-child(1){display:block;min-height:calc(100vh - var(--topbar) - 105px)}
+  .editorial-layout.show-detail > .ed-col:nth-child(2){display:block;min-height:calc(100vh - var(--topbar) - 105px)}
+  .editorial-layout.show-detail > .ed-col:nth-child(3){display:block;background:var(--light);border-top:1px solid var(--border)}
+
+  /* When 3rd col (Today's Lineup) renders inside detail panel on mobile,
+     give it a header so it's clearly a separate section */
+  .editorial-layout > .ed-col:nth-child(3) > .ed-col-head{background:var(--dark);color:#fff}
+  .editorial-layout > .ed-col:nth-child(3) > .ed-col-head .ed-col-title{color:#fff}
+
+  /* Action bar — stick to TOP of detail panel on mobile (Option B mockup) */
+  .action-bar{position:sticky;top:0;bottom:auto;flex-wrap:wrap;gap:6px;padding:10px;border-bottom:1px solid var(--border);border-top:none;z-index:40;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .action-bar .btn-approve, .action-bar .btn-reject, .action-bar .btn-save{flex:1;min-width:0;padding:9px 10px;font-size:10px;letter-spacing:1px}
+  .action-bar .btn-feature{padding:9px 12px}
+
+  /* Detail content padding tightened */
+  .detail-content{padding:14px}
+  .detail-headline{font-size:18px}
+  .detail-section{margin-bottom:14px}
+  .detail-meta-grid{grid-template-columns:1fr;gap:10px}
+
+  /* Mobile detail: re-order so action bar comes BEFORE the show line */
+  #detail-content{display:flex;flex-direction:column}
+  #detail-content > .action-bar{order:-1}
+
+  /* Cat grid — single column on phone */
+  .cat-grid{grid-template-columns:1fr}
+
+  /* Modal — full screen on phone */
+  .modal-overlay{padding:0}
+  .modal-box{max-width:100%;max-height:100%;height:100%;border-radius:0;border-top:none}
+  .modal-head{padding:14px 16px 10px}
+  .modal-body{padding:14px 16px}
+  .modal-foot{padding:12px 16px;flex-direction:column-reverse}
+  .modal-foot .tb-btn{width:100%;padding:11px;font-size:11px}
+  .mf-row.split{grid-template-columns:1fr;gap:10px}
+
+  /* Queue toolbar — tighter spacing */
+  .queue-toolbar{padding:7px 10px}
+  .qt-controls-row select{font-size:11px;padding:6px 6px}
+  .filter-tabs{padding:7px 10px;top:auto;position:static}
+  .ftab{padding:4px 8px;font-size:9px}
+
+  /* Queue items */
+  .queue-item{padding:11px 12px}
+  .qi-headline{font-size:12px}
+
+  /* Shows panel — single column */
+  .shows-grid{grid-template-columns:1fr;gap:10px;padding:14px}
+
+  /* Analytics — 2 cols then full width inside */
+  .analytics-grid{grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+  .analytics-row{grid-template-columns:1fr}
+
+  /* Categories panel */
+  .categories-grid{grid-template-columns:1fr;gap:10px;padding:14px}
+
+  /* Homepage panel — stack vertically */
+  .homepage-layout{grid-template-columns:1fr;height:auto;overflow:visible}
+
+  /* Panel header — tighter */
+  .panel-header{padding:12px 14px}
+  .panel-title{font-size:16px}
+  .panel-sub{font-size:10px}
+
+  /* Login box */
+  .login-box{width:90%;max-width:380px;padding:32px 28px}
+  .login-logo{font-size:34px}
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* TABLET — 761–1024px (sidebar visible but editorial collapses) */
+/* ═══════════════════════════════════════════════════════════ */
+@media (min-width: 761px) and (max-width: 1024px) {
+  /* Editorial: 2 cols (drop the lineup column to become a small strip) */
+  .editorial-layout{grid-template-columns:280px 1fr}
+  .editorial-layout > .ed-col:nth-child(3){display:none}
+
+  /* Could add a button to bring back lineup — for now hidden */
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- LOGIN — Supabase auth + admin_users role check -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><span>E</span>gleze</div>
+    <div class="login-rule"></div>
+    <span class="login-tag">Editorial Dashboard · Authorized Access Only</span>
+
+    <!-- Loading state while we check session -->
+    <div id="login-loading" style="text-align:center;padding:20px 0;font-size:11px;color:var(--muted)">Checking session…</div>
+
+    <!-- Sign-in form (hidden until we know user is logged out) -->
+    <div id="login-form" style="display:none">
+      <label class="login-label">Email</label>
+      <input class="login-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
+      <div class="login-error" id="login-error">Sign-in failed.</div>
+      <button class="login-btn" id="login-magic-btn" type="button">Send Magic Link</button>
+      <div style="text-align:center;margin:14px 0 10px;font-size:10px;color:var(--muted);letter-spacing:1px">— OR —</div>
+      <button class="login-btn" id="login-google-btn" type="button" style="background:#fff;color:var(--dark);border:1px solid var(--border)">Continue with Google</button>
+    </div>
+
+    <!-- Magic link sent confirmation -->
+    <div id="login-sent" style="display:none;text-align:center;padding:20px 0">
+      <div style="font-size:13px;color:var(--dark);margin-bottom:8px;font-weight:500">Check your email</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">We sent a sign-in link to <span id="login-sent-email" style="color:var(--dark);font-weight:500"></span>. Click it to access the dashboard.</div>
+    </div>
+
+    <!-- Access denied (signed in, but not in admin_users) -->
+    <div id="login-denied" style="display:none;text-align:center;padding:20px 0">
+      <div style="font-size:13px;color:var(--red);margin-bottom:8px;font-weight:500">Access denied</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:14px">You are signed in as <span id="login-denied-email" style="color:var(--dark);font-weight:500"></span> but do not have dashboard access.</div>
+      <button class="login-btn" id="login-signout-btn" type="button" style="background:#fff;color:var(--dark);border:1px solid var(--border)">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- TOP BAR -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<div class="topbar">
+  <button class="tb-hamburger" onclick="toggleMobileSidebar()" aria-label="Open menu">☰</button>
+  <div class="tb-logo"><span>E</span>gleze</div>
+  <div class="tb-divider"></div>
+  <div class="tb-label">Editorial Dashboard</div>
+  <div class="tb-stats">
+    <div class="tb-stat"><div class="tb-stat-num" id="stat-queue">—</div><div class="tb-stat-label">Queue</div></div>
+    <div class="tb-stat"><div class="tb-stat-num" id="stat-approved">—</div><div class="tb-stat-label">Approved</div></div>
+    <div class="tb-stat"><div class="tb-stat-num" id="stat-subs">—</div><div class="tb-stat-label">Subscribers</div></div>
+    <div class="tb-stat"><div class="tb-stat-num" id="stat-shows">25</div><div class="tb-stat-label">Shows</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-left:12px">
+    <div class="tb-live"><span class="live-dot"></span>Live</div>
+    <div style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;color:var(--muted)" id="tb-date"></div>
+    <button class="tb-btn outline" onclick="window.open('https://egleze.com','_blank')">View Site →</button>
+    <button class="tb-btn outline" id="tb-new-user-btn" onclick="openInviteUserModal()" style="display:none">+ New User</button>
+    <button class="tb-btn" onclick="openAddStoryModal()">+ New Story</button>
+    <div id="tb-user-chip" style="display:none;align-items:center;gap:8px;padding:5px 10px;background:#f5f3ed;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:11px;color:#666">
+      <span id="tb-user-email"></span>
+      <span style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--red);font-weight:700" id="tb-user-role"></span>
+      <button onclick="dashboardSignOut()" title="Sign out" style="background:none;border:none;cursor:pointer;padding:2px 4px;color:#666;font-size:14px;line-height:1">⎋</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- SIDEBAR -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Editorial</div>
+    <a class="sidebar-item active" onclick="showPanel('editorial')" href="#">
+      <span class="si-icon">📋</span>
+      <span class="si-label">Story Queue</span>
+      <span class="si-badge" id="queue-badge">—</span>
+    </a>
+    <a class="sidebar-item" onclick="showPanel('homepage')" href="#">
+      <span class="si-icon">🏠</span>
+      <span class="si-label">Homepage Control</span>
+    </a>
+    <a class="sidebar-item" onclick="showPanel('categories')" href="#">
+      <span class="si-icon">🗂️</span>
+      <span class="si-label">Categories</span>
+    </a>
+    <a class="sidebar-item" onclick="openSocialView('social')" href="#">
+      <span class="si-icon">📲</span>
+      <span class="si-label">Social Clips</span>
+    </a>
+    <a class="sidebar-item" onclick="openSocialView('watched')" href="#">
+      <span class="si-icon">▶️</span>
+      <span class="si-label">Most Watched</span>
+    </a>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Platform</div>
+    <a class="sidebar-item" onclick="showPanel('shows')" href="#">
+      <span class="si-icon">🎙️</span>
+      <span class="si-label">Shows Manager</span>
+    </a>
+    <a class="sidebar-item" onclick="showPanel('analytics')" href="#">
+      <span class="si-icon">📊</span>
+      <span class="si-label">Analytics</span>
+    </a>
+    <a class="sidebar-item" onclick="showPanel('leads')" href="#">
+      <span class="si-icon">📥</span>
+      <span class="si-label">Leads</span>
+    </a>
+    <a class="sidebar-item" onclick="showPanel('newscast')" href="#">
+      <span class="si-icon">📺</span>
+      <span class="si-label">Newscast</span>
+    </a>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Filter by Topic</div>
+    <a class="sidebar-item" onclick="filterByCategory(null)" href="#">
+      <span class="si-icon">📰</span><span class="si-label">All Stories</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('AI &amp; Tech')" href="#">
+      <span class="si-icon">🤖</span><span class="si-label">AI &amp; Tech</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Combat &amp; UFC')" href="#">
+      <span class="si-icon">🥊</span><span class="si-label">Combat &amp; UFC</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Comedy')" href="#">
+      <span class="si-icon">😂</span><span class="si-label">Comedy</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Consciousness &amp; Medicine')" href="#">
+      <span class="si-icon">🔮</span><span class="si-label">Consciousness &amp; Medicine</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Controversial')" href="#">
+      <span class="si-icon">🔥</span><span class="si-label">Controversial</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Crime &amp; Justice')" href="#">
+      <span class="si-icon">⚖️</span><span class="si-label">Crime &amp; Justice</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Debates')" href="#">
+      <span class="si-icon">💬</span><span class="si-label">Debates</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Education &amp; Learning')" href="#">
+      <span class="si-icon">📚</span><span class="si-label">Education &amp; Learning</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Energy &amp; Climate')" href="#">
+      <span class="si-icon">⚡</span><span class="si-label">Energy &amp; Climate</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Entertainment')" href="#">
+      <span class="si-icon">🎬</span><span class="si-label">Entertainment</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Espionage')" href="#">
+      <span class="si-icon">🕵️</span><span class="si-label">Espionage</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Faith &amp; Spirituality')" href="#">
+      <span class="si-icon">🙏</span><span class="si-label">Faith &amp; Spirituality</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Geopolitics')" href="#">
+      <span class="si-icon">🌍</span><span class="si-label">Geopolitics</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Health, Longevity &amp; Biohacking')" href="#">
+      <span class="si-icon">🏥</span><span class="si-label">Health, Longevity &amp; Biohacking</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('History')" href="#">
+      <span class="si-icon">📜</span><span class="si-label">History</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Media &amp; Journalism')" href="#">
+      <span class="si-icon">📡</span><span class="si-label">Media &amp; Journalism</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Military')" href="#">
+      <span class="si-icon">⚔️</span><span class="si-label">Military</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Money')" href="#">
+      <span class="si-icon">💰</span><span class="si-label">Money</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Monologues')" href="#">
+      <span class="si-icon">🎙️</span><span class="si-label">Monologues</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Politics')" href="#">
+      <span class="si-icon">🏛️</span><span class="si-label">Politics</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Psychology')" href="#">
+      <span class="si-icon">🧠</span><span class="si-label">Psychology</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Relationships &amp; Family')" href="#">
+      <span class="si-icon">💞</span><span class="si-label">Relationships &amp; Family</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Science')" href="#">
+      <span class="si-icon">🔬</span><span class="si-label">Science</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Society')" href="#">
+      <span class="si-icon">🎭</span><span class="si-label">Society</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('Sports')" href="#">
+      <span class="si-icon">⚽</span><span class="si-label">Sports</span>
+    </a>
+    <a class="sidebar-item" onclick="filterByCategory('UFO &amp; Paranormal')" href="#">
+      <span class="si-icon">👽</span><span class="si-label">UFO &amp; Paranormal</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- MAIN CONTENT -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ── EDITORIAL PANEL ── -->
+  <div id="panel-editorial" class="panel active">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Story Queue</div>
+        <div class="panel-sub">Review, edit and approve stories for egleze.com</div>
+      </div>
+      <div class="panel-actions">
+        <button class="tb-btn outline" onclick="loadStoriesFromDB()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="ed-mobile-tabs">
+      <button class="emt-tab active" data-tab="queue" onclick="setEditorialMobileTab('queue')">📋 Queue <span class="emt-count" id="emt-queue-count">0</span></button>
+      <button class="emt-tab" data-tab="detail" onclick="setEditorialMobileTab('detail')">📰 Detail</button>
+    </div>
+    <div class="editorial-layout">
+
+      <!-- Col 1: Queue -->
+      <div class="ed-col">
+        <div class="ed-col-head">
+          <div class="ed-col-title">AI Story Queue</div>
+        </div>
+        <div class="queue-toolbar">
+          <div class="qt-search-row">
+            <input type="text" id="queue-search" placeholder="🔍 Search headlines…" oninput="onQueueSearchInput()" autocomplete="off">
+          </div>
+          <div class="qt-controls-row">
+            <select id="queue-sort" onchange="loadQueuePage(false)" title="Sort">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="score-high">Score: high → low</option>
+              <option value="score-low">Score: low → high</option>
+            </select>
+            <select id="queue-show-filter" onchange="loadQueuePage(false)" title="Filter by show">
+              <option value="">All shows</option>
+            </select>
+            <select id="queue-user-filter" onchange="onUserFilterChange()" title="Filter by approver/rejecter (admin)" style="display:none">
+              <option value="">All users</option>
+            </select>
+          </div>
+        </div>
+        <div class="filter-tabs">
+          <div class="ftab" onclick="filterQueue('all',this)">All <span class="ftab-count" id="ftab-count-all"></span></div>
+          <div class="ftab active" onclick="filterQueue('pending',this)">Pending <span class="ftab-count" id="ftab-count-pending"></span></div>
+          <div class="ftab" onclick="filterQueue('approved',this)">Approved <span class="ftab-count" id="ftab-count-approved"></span></div>
+          <div class="ftab" onclick="filterQueue('rejected',this)">Rejected <span class="ftab-count" id="ftab-count-rejected"></span></div>
+          <div class="ftab" onclick="filterQueue('editorial',this)" title="Editorial Choice picks">★ <span class="ftab-count" id="ftab-count-editorial"></span></div>
+        </div>
+        <div id="bulk-bar" style="display:none;align-items:center;gap:10px;padding:8px 14px;background:#fff7f7;border-top:1px solid var(--red);border-bottom:1px solid var(--red)">
+          <span style="font-size:11px;font-family:'Roboto Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--dark)"><strong id="bulk-count">0</strong> selected</span>
+          <button onclick="bulkRejectSelected()" style="background:#fff;color:var(--red);border:1px solid var(--red);padding:6px 14px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-weight:700">✕ Reject selected</button>
+          <button onclick="selectAllLoaded()" style="background:none;border:none;color:var(--muted);font-size:10px;text-decoration:underline;cursor:pointer">Select all loaded</button>
+          <button onclick="clearRowSelection()" style="background:none;border:none;color:var(--muted);font-size:10px;text-decoration:underline;cursor:pointer">Clear</button>
+        </div>
+        <div id="queue-count-line" style="padding:4px 14px;font-size:10px;font-family:'Roboto Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--muted)"></div>
+        <div id="queue-list"></div>
+      </div>
+
+      <!-- Col 2: Story Detail -->
+      <div class="ed-col" id="detail-col">
+        <div class="detail-empty" id="detail-empty">
+          <div class="detail-empty-icon">📰</div>
+          <div style="font-size:12px">Select a story to review</div>
+        </div>
+        <div id="detail-content" style="display:none">
+          <div class="detail-content">
+            <!-- Editorial Pick toggle at top -->
+            <div class="detail-pick-row">
+              <label class="detail-pick-label">
+                <input type="checkbox" id="d-editorial-pick" onchange="onEditorialPickChange(this.checked)">
+                <span class="d-pick-text"><span class="d-pick-star">★</span> Editorial Choice</span>
+                <span class="d-pick-help">Hand-picked for the Editorial Choice carousel on the homepage.</span>
+              </label>
+            </div>
+            <!-- Breaking News toggle — editable by BOTH admin and approver -->
+            <div class="detail-break-row">
+              <label class="detail-pick-label">
+                <input type="checkbox" id="d-breaking" onchange="onBreakingChange(this.checked)">
+                <span class="d-pick-text"><span class="d-break-dot">●</span> Breaking News</span>
+                <span class="d-pick-help">Flags this story for the homepage Breaking ticker &amp; carousel. Admins and approvers can set this.</span>
+              </label>
+            </div>
+
+            <!-- Social + Most-watched controls — feed the homepage "Most watched" strip -->
+            <div style="padding:10px 14px;background:#f3f6f4;border:1px solid #cdd8d0;border-radius:3px;margin-bottom:14px">
+              <label class="detail-pick-label">
+                <input type="checkbox" id="d-social" onchange="onSocialChange(this.checked)">
+                <span class="d-pick-text">▣ Posted to social</span>
+                <span class="d-pick-help">Mark clips you've published to Instagram / TikTok. The "Social" tab lists these.</span>
+              </label>
+              <label class="detail-pick-label" style="margin-top:8px">
+                <input type="checkbox" id="d-mostwatched" onchange="onMostWatchedChange(this.checked)">
+                <span class="d-pick-text">▶ Feature in "Most watched"</span>
+                <span class="d-pick-help">Shows this clip in the homepage Most-watched strip (3 rotate at a time).</span>
+              </label>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+                <span class="d-pick-text" style="flex:0 0 auto">Views</span>
+                <input type="number" id="d-views" min="0" step="1000" placeholder="e.g. 473000" onchange="onViewsChange(this.value)" style="width:130px;padding:6px 8px;font-family:'Roboto Condensed',sans-serif;font-size:12px;border:1px solid var(--border);border-radius:2px">
+                <span class="d-pick-help" style="margin:0">Displayed on the card (e.g. 473K).</span>
+              </div>
+            </div>
+
+            <div class="detail-show" id="d-show"></div>
+            <div id="d-audit-line" style="font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px"></div>
+            <div class="detail-headline" id="d-headline" contenteditable="true"></div>
+
+            <div class="detail-section">
+              <div class="detail-label">Quote</div>
+              <div class="detail-quote" id="d-quote" contenteditable="true"></div>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Summary</div>
+              <div class="detail-text" id="d-summary" contenteditable="true"></div>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">AI Topic Tag <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(suggested by Claude — pick from below)</span></div>
+              <div id="d-topic-display" style="font-size:11px;color:var(--mid);background:var(--light);padding:5px 8px;margin-bottom:8px;font-style:italic"></div>
+              <div class="detail-label" style="margin-top:8px">Categories <span style="font-weight:300;text-transform:none;letter-spacing:0">(select all that apply — first one becomes primary topic)</span></div>
+              <div class="selected-cats-display" id="selected-cats-display"></div>
+              <div class="cat-grid" id="d-categories"></div>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Score (0–100)</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="number" id="d-score-input" min="0" max="100" step="1" style="width:80px;border:1px solid var(--border);padding:6px 8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+                <div class="score-bar" style="flex:1"><div class="score-fill" id="d-score-bar"></div></div>
+                <div style="font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--red)" id="d-score-text"></div>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Episode Summary <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(200–300 words, displayed on story page)</span></div>
+              <textarea id="d-episode-summary" class="d-textarea" rows="6" placeholder="Full episode context — what was discussed, key arguments, who said what…"></textarea>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Episode Key Points <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(one per line, 5–7 bullets)</span></div>
+              <textarea id="d-episode-keypoints" class="d-textarea" rows="6" placeholder="• Key revelation 1&#10;• Key revelation 2&#10;• Key revelation 3"></textarea>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Source Link</div>
+              <input type="text" id="d-source" placeholder="https://..." style="width:100%;border:1px solid var(--border);padding:6px 8px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none">
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Clip Highlight (optional · mm:ss)</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" id="d-clip-start" placeholder="14:32" pattern="[0-9]{1,3}:[0-9]{2}" style="flex:1;border:1px solid var(--border);padding:6px 8px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none" title="Start time in mm:ss format">
+                <span style="font-size:10px;color:var(--muted);font-family:'Roboto Condensed',sans-serif;letter-spacing:1px">TO</span>
+                <input type="text" id="d-clip-end" placeholder="15:02" pattern="[0-9]{1,3}:[0-9]{2}" style="flex:1;border:1px solid var(--border);padding:6px 8px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none" title="End time in mm:ss format">
+              </div>
+              <div style="font-size:9px;color:var(--muted);margin-top:4px;font-family:'Roboto Condensed',sans-serif;letter-spacing:0.5px">Leave blank to play full episode · Format: 14:32</div>
+            </div>
+
+            <div class="detail-section detail-meta-grid">
+              <div>
+                <div class="detail-label">Status</div>
+                <select id="d-status" style="width:100%;border:1px solid var(--border);padding:6px 8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;background:#fff">
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div>
+                <div class="detail-label">Created At <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(controls homepage order)</span></div>
+                <input type="datetime-local" id="d-created-at" style="width:100%;border:1px solid var(--border);padding:6px 8px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none">
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Show / Episode <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(rarely needs editing)</span></div>
+              <div style="display:flex;gap:8px">
+                <input type="text" id="d-show-name" placeholder="Show name" style="flex:1;border:1px solid var(--border);padding:6px 8px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none">
+                <input type="text" id="d-episode-name" placeholder="Episode title" style="flex:1.5;border:1px solid var(--border);padding:6px 8px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none">
+              </div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <button class="btn-reject" onclick="rejectSelected()">✕ Reject</button>
+            <button class="btn-feature" onclick="featureSelected()" title="Feature as hero story">⭐</button>
+            <button class="btn-save" onclick="saveSelected()">💾 Save Changes</button>
+            <button class="btn-approve" onclick="approveSelected()">✓ Approve &amp; Publish</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 3: Today's Lineup -->
+      <div class="ed-col">
+        <div class="ed-col-head">
+          <div class="ed-col-title">Today's Lineup</div>
+        </div>
+        <div id="lineup-list"></div>
+        <div class="lineup-footer">
+          <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:8px" id="lineup-count">0 of 6 approved</div>
+          <button class="btn-newscast" id="newscast-btn" onclick="generateNewscast()" disabled>Generate Newscast Script</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HOMEPAGE CONTROL PANEL ── -->
+  <div id="panel-homepage" class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Homepage Control</div>
+        <div class="panel-sub">Set the hero story and featured content for egleze.com</div>
+      </div>
+      <div class="panel-actions">
+        <button class="tb-btn" onclick="saveHomepageSettings()">Save Changes</button>
+      </div>
+    </div>
+    <div class="homepage-layout">
+      <div class="homepage-preview">
+        <div class="preview-section">
+          <div class="preview-section-title"><span class="preview-badge">HERO</span> Lead Story</div>
+          <div class="hero-preview">
+            <button class="change-btn" onclick="document.querySelector('.homepage-controls').scrollTop=0;showToast('Select a story from the list on the right →')">Change →</button>
+            <div class="hero-preview-tag" id="hero-topic">Intelligence · 🔥 Trending #1</div>
+            <div class="hero-preview-title" id="hero-title">Select a story to feature as the hero</div>
+            <div class="hero-preview-meta" id="hero-meta"></div>
+          </div>
+        </div>
+        <div class="preview-section">
+          <div class="preview-section-title"><span class="preview-badge">TICKER</span> Breaking News Ticker</div>
+          <div style="background:#1c1c1c;padding:8px 12px;display:flex;gap:10px;align-items:center;margin-bottom:8px">
+            <span style="background:var(--red);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:8px;padding:2px 6px;letter-spacing:1px">LIVE</span>
+            <span style="font-size:10px;color:#aaa;font-family:'Roboto Condensed',sans-serif" id="ticker-preview">Auto-populates from latest approved stories</span>
+          </div>
+          <div id="ticker-stories" style="font-size:10px;color:var(--muted);padding:4px 0">
+            Approve stories to see them appear in the ticker automatically
+          </div>
+        </div>
+        <div class="preview-section">
+          <div class="preview-section-title"><span class="preview-badge">GRID</span> Secondary Stories — Auto from Top Scores</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--dark);padding:10px;min-height:60px;position:relative">
+              <div style="font-size:9px;color:var(--red);font-family:'Roboto Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px" id="sec1-topic">—</div>
+              <div style="font-size:11px;color:#fff;line-height:1.3" id="sec1-title">Approve stories to populate</div>
+            </div>
+            <div style="background:var(--dark);padding:10px;min-height:60px;position:relative">
+              <div style="font-size:9px;color:var(--red);font-family:'Roboto Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px" id="sec2-topic">—</div>
+              <div style="font-size:11px;color:#fff;line-height:1.3" id="sec2-title">Approve stories to populate</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:8px">✓ Auto-fills from highest scored approved stories — no manual action needed</div>
+        </div>
+      </div>
+      <div class="homepage-controls">
+        <div class="control-section">
+          <div class="control-title">Select Hero Story</div>
+          <div id="hero-picker" style="display:block">
+            <div id="hero-story-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CATEGORIES PANEL ── -->
+  <div id="panel-categories" class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Category Manager</div>
+        <div class="panel-sub">Pin featured stories to each category page</div>
+      </div>
+    </div>
+    <div class="categories-grid" id="categories-grid"></div>
+  </div>
+
+  <!-- ── SHOWS PANEL ── -->
+  <div id="panel-shows" class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Shows Manager</div>
+        <div class="panel-sub">All monitored podcasts — manage RSS feeds and status</div>
+      </div>
+      <div class="panel-actions">
+        <button class="tb-btn outline" onclick="openAddStoryModal()">+ Add Story</button>
+        <button class="tb-btn" onclick="openAddShowModal()">+ Add Show</button>
+      </div>
+    </div>
+    <div class="shows-grid" id="shows-grid"></div>
+  </div>
+
+  <!-- ── ANALYTICS PANEL ── -->
+  <div id="panel-analytics" class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Analytics</div>
+        <div class="panel-sub">Platform performance overview</div>
+      </div>
+    </div>
+    <div class="analytics-grid">
+      <div class="metric-card">
+        <div class="metric-num" id="m-stories">—</div>
+        <div class="metric-label">Total Stories</div>
+        <div class="metric-trend">↑ Growing daily</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" id="m-approved">—</div>
+        <div class="metric-label">Approved</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" id="m-subs">—</div>
+        <div class="metric-label">Newsletter Subscribers</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" id="m-shows">25</div>
+        <div class="metric-label">Shows Monitored</div>
+      </div>
+      <div class="analytics-row">
+        <div class="chart-card">
+          <div class="chart-title">Stories by Category</div>
+          <div class="bar-chart" id="category-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Top Stories This Week</div>
+          <div class="top-stories-list" id="top-stories"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEADS PANEL ── -->
+  <div id="panel-leads" class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Leads</div>
+        <div class="panel-sub">Podcaster submissions &amp; API early-access requests</div>
+      </div>
+      <button class="tb-btn outline" onclick="loadLeads()" style="align-self:center">↻ Refresh</button>
+    </div>
+
+    <div class="analytics-grid" style="margin-bottom:18px">
+      <div class="metric-card">
+        <div class="metric-num" id="m-partners-new">—</div>
+        <div class="metric-label">New Podcaster Requests</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" id="m-partners-total">—</div>
+        <div class="metric-label">Podcaster Requests (all)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" id="m-api-new">—</div>
+        <div class="metric-label">New API Leads</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num" id="m-api-total">—</div>
+        <div class="metric-label">API Leads (all)</div>
+      </div>
+    </div>
+
+    <div class="leads-tabs" style="display:flex;gap:0;border-bottom:1px solid var(--border);margin:0 14px 0">
+      <div class="ltab active" data-ltab="partners" onclick="switchLeadsTab('partners')"
+        style="font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 14px;cursor:pointer;border-bottom:2px solid var(--red);color:var(--red)">Podcasters</div>
+      <div class="ltab" data-ltab="api" onclick="switchLeadsTab('api')"
+        style="font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 14px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted)">API Waitlist</div>
+    </div>
+
+    <div style="padding:14px">
+      <div id="leads-partners-wrap">
+        <div id="leads-partners-list" style="font-size:13px;color:var(--muted)">Loading…</div>
+      </div>
+      <div id="leads-api-wrap" style="display:none">
+        <div id="leads-api-list" style="font-size:13px;color:var(--muted)">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NEWSCAST PANEL ── -->
+  <div id="panel-newscast" class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Newscast Generator</div>
+        <div class="panel-sub">Generate daily newscast script from approved stories</div>
+      </div>
+      <div class="panel-actions">
+        <button class="tb-btn" onclick="generateNewscast()">Generate Script</button>
+      </div>
+    </div>
+    <div style="padding:20px;max-width:700px">
+      <div id="newscast-content">
+        <div style="color:var(--muted);font-size:13px;padding:40px 0;text-align:center">
+          Approve at least 5 stories then click Generate Script
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- NEWSCAST MODAL -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="script-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Daily Newscast Script</div>
+      <button class="modal-close" onclick="document.getElementById('script-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="script-body"></div>
+    <div class="modal-foot">
+      <button class="tb-btn outline" onclick="copyScript()">Copy Script</button>
+      <button class="tb-btn" onclick="saveNewscast()">Save to Database</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ADD STORY MODAL -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-add-story">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Add Story Manually</div>
+        <div class="modal-sub">For stories you want to publish that didn't come through the pipeline.</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-add-story')" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf-row split">
+        <div>
+          <label class="mf-label">Show <span class="mf-req">*</span></label>
+          <div class="mf-help">Pick from existing shows. To add a new one, use Shows Manager → Add Show first.</div>
+          <div class="mf-combobox" id="ns-show-combobox">
+            <input type="text" class="mf-input mf-combobox-input" id="ns-show-name"
+                   placeholder="Type to search shows…"
+                   autocomplete="off"
+                   oninput="onShowComboInput()"
+                   onfocus="onShowComboFocus()"
+                   onkeydown="onShowComboKey(event)">
+            <input type="hidden" id="ns-show-id" value="">
+            <div class="mf-combobox-list" id="ns-show-list"></div>
+          </div>
+        </div>
+        <div>
+          <label class="mf-label">Episode</label>
+          <input type="text" class="mf-input" id="ns-episode" placeholder="#2187 — Mike Ritland">
+        </div>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Headline <span class="mf-req">*</span></label>
+        <input type="text" class="mf-input" id="ns-headline" placeholder="Retired Navy SEAL: 'What we found on that submarine was never supposed to be public'" required>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Quote <span class="mf-req">*</span></label>
+        <textarea class="mf-textarea" id="ns-quote" rows="3" placeholder="Direct quote from the speaker that supports the headline." required></textarea>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Summary <span class="mf-req">*</span></label>
+        <textarea class="mf-textarea" id="ns-summary" rows="4" placeholder="Brief 2-3 sentence story description." required></textarea>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Topic / Categories <span class="mf-req">*</span></label>
+        <div class="mf-help">First-clicked becomes the primary topic. Multi-select allowed.</div>
+        <div class="mf-cat-grid" id="ns-cat-grid"></div>
+      </div>
+
+      <div class="mf-row split">
+        <div>
+          <label class="mf-label">Score (0–100)</label>
+          <input type="number" class="mf-input" id="ns-score" min="0" max="100" step="1" value="80">
+        </div>
+        <div>
+          <label class="mf-label">Status</label>
+          <select class="mf-select" id="ns-status">
+            <option value="pending">Pending review</option>
+            <option value="approved">Approve immediately</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Source URL <span class="mf-help">(optional — YouTube, podcast, article)</span></label>
+        <input type="text" class="mf-input" id="ns-source" placeholder="https://youtube.com/watch?v=…">
+      </div>
+
+      <div class="mf-row split">
+        <div>
+          <label class="mf-label">Clip Start (mm:ss)</label>
+          <input type="text" class="mf-input" id="ns-clip-start" placeholder="14:32">
+        </div>
+        <div>
+          <label class="mf-label">Clip End (mm:ss)</label>
+          <input type="text" class="mf-input" id="ns-clip-end" placeholder="15:02">
+        </div>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Episode Summary <span class="mf-help">(optional, 200–300 words)</span></label>
+        <textarea class="mf-textarea" id="ns-episode-summary" rows="4" placeholder="Full episode context — the broader conversation around this revelation."></textarea>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Episode Key Points <span class="mf-help">(optional, one per line)</span></label>
+        <textarea class="mf-textarea" id="ns-episode-keypoints" rows="4" placeholder="• Key point 1&#10;• Key point 2&#10;• Key point 3"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="tb-btn outline" onclick="closeModal('modal-add-story')">Cancel</button>
+      <button class="tb-btn" onclick="submitAddStory()">Add Story</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ADD SHOW MODAL -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-add-show">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Add Show / Podcast</div>
+        <div class="modal-sub">New podcast to monitor. RSS feed required for automatic ingestion.</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-add-show')" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf-row split">
+        <div>
+          <label class="mf-label">Show Name <span class="mf-req">*</span></label>
+          <input type="text" class="mf-input" id="ash-name" placeholder="Joe Rogan Experience" required>
+        </div>
+        <div>
+          <label class="mf-label">Host Name</label>
+          <input type="text" class="mf-input" id="ash-host" placeholder="Joe Rogan">
+        </div>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">RSS Feed URL <span class="mf-req">*</span></label>
+        <div class="mf-help">The podcast's RSS feed — used for episode polling. Search "[show name] RSS feed" to find it.</div>
+        <input type="text" class="mf-input" id="ash-rss" placeholder="https://feeds.megaphone.fm/joerogan" required>
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">YouTube URL <span class="mf-help">(optional — for video clips)</span></label>
+        <input type="text" class="mf-input" id="ash-youtube" placeholder="https://www.youtube.com/@joerogan">
+      </div>
+
+      <div class="mf-row">
+        <label class="mf-label">Primary Category <span class="mf-req">*</span></label>
+        <div class="mf-help">Best-fit topic. Stories can still be tagged with other categories individually.</div>
+        <select class="mf-select" id="ash-category">
+          <option value="">— Select a category —</option>
+        </select>
+      </div>
+
+      <div class="mf-row split">
+        <div>
+          <label class="mf-label">Active</label>
+          <select class="mf-select" id="ash-active">
+            <option value="true">Active — poll for episodes</option>
+            <option value="false">Inactive — don't poll yet</option>
+          </select>
+        </div>
+        <div>
+          <label class="mf-label">Description</label>
+          <input type="text" class="mf-input" id="ash-description" placeholder="Brief 1-line description (optional)">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="tb-btn outline" onclick="closeModal('modal-add-show')">Cancel</button>
+      <button class="tb-btn" onclick="submitAddShow()">Add Show</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+// (Hardcoded password removed — auth via Supabase + admin_users role check)
+const CATEGORIES = [
+  {id:'AI & Tech',icon:'🤖'},
+  {id:'Combat & UFC',icon:'🥊'},
+  {id:'Comedy',icon:'😂'},
+  {id:'Consciousness & Medicine',icon:'🔮'},
+  {id:'Controversial',icon:'🔥'},
+  {id:'Crime & Justice',icon:'⚖️'},
+  {id:'Debates',icon:'💬'},
+  {id:'Education & Learning',icon:'📚'},
+  {id:'Energy & Climate',icon:'⚡'},
+  {id:'Entertainment',icon:'🎬'},
+  {id:'Espionage',icon:'🕵️'},
+  {id:'Faith & Spirituality',icon:'🙏'},
+  {id:'Geopolitics',icon:'🌍'},
+  {id:'Health, Longevity & Biohacking',icon:'🏥'},
+  {id:'History',icon:'📜'},
+  {id:'Media & Journalism',icon:'📡'},
+  {id:'Military',icon:'⚔️'},
+  {id:'Money',icon:'💰'},
+  {id:'Monologues',icon:'🎙️'},
+  {id:'Politics',icon:'🏛️'},
+  {id:'Psychology',icon:'🧠'},
+  {id:'Relationships & Family',icon:'💞'},
+  {id:'Science',icon:'🔬'},
+  {id:'Society',icon:'🎭'},
+  {id:'Sports',icon:'⚽'},
+  {id:'UFO & Paranormal',icon:'👽'}
+];
+
+let db = null;
+let stories = [];
+let selectedStory = null;
+let heroStoryId = null;
+let currentFilter = 'pending';
+let currentPanel = 'editorial';
+
+// ── QUEUE PAGINATION STATE ──────────────────────────────────
+// Server-side filtering: every change to status tab, category, show,
+// search, or sort triggers a fresh fetch. Pagination loads 100 at a
+// time via IntersectionObserver on a sentinel at the list bottom.
+const QUEUE_PAGE_SIZE = 100;
+let queueOffset = 0;
+let queueLoadingMore = false;
+let queueHasMore = true;
+let queueObserver = null;
+let queueScrollHandler = null;
+let _statusCounts = { pending: 0, approved: 0, rejected: 0, editorial: 0, total: 0 };
+
+// ── LOGIN ─────────────────────────────────────────────────────
+// === SUPABASE AUTH + admin_users ROLE CHECK ===
+// Replaces the old shared-password login. Each user signs in with their own
+// email (magic link) or Google, then we verify they exist in admin_users with
+// active=true. Their role (admin/approver) controls what they can do.
+const _authSb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.egDashboardAuth = { sb: _authSb, user: null, adminRow: null };
+
+function _showSection(name) {
+  ['loading','form','sent','denied'].forEach(k => {
+    const el = document.getElementById('login-' + k);
+    if (el) el.style.display = (k === name) ? 'block' : 'none';
+  });
+}
+
+async function _checkSessionAndAuthorize() {
+  _showSection('loading');
+  let session = null;
+  try {
+    const { data } = await _authSb.auth.getSession();
+    session = data && data.session;
+  } catch(e) { console.warn('[auth] getSession failed', e); }
+
+  if (!session || !session.user) {
+    _showSection('form');
+    return;
+  }
+
+  const user = session.user;
+  let adminRow = null;
+  try {
+    const { data, error } = await _authSb
+      .from('admin_users')
+      .select('user_id, role, active, note')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (error) throw error;
+    adminRow = data;
+  } catch(e) {
+    console.warn('[auth] admin_users lookup failed', e);
+  }
+
+  if (!adminRow || !adminRow.active) {
+    document.getElementById('login-denied-email').textContent = user.email || '(unknown email)';
+    _showSection('denied');
+    return;
+  }
+
+  window.egDashboardAuth.user = user;
+  window.egDashboardAuth.adminRow = adminRow;
+  document.getElementById('login-screen').style.display = 'none';
+  initDashboard();
+}
+
+document.getElementById('login-magic-btn').addEventListener('click', async () => {
+  const emailInput = document.getElementById('login-email');
+  const errEl = document.getElementById('login-error');
+  const email = (emailInput.value || '').trim();
+  if (!email || !email.includes('@')) {
+    errEl.textContent = 'Enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  try {
+    const { error } = await _authSb.auth.signInWithOtp({
+      email: email,
+      options: { emailRedirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) throw error;
+    document.getElementById('login-sent-email').textContent = email;
+    _showSection('sent');
+  } catch(e) {
+    console.warn('[auth] magic link failed', e);
+    errEl.textContent = 'Could not send link: ' + (e.message || 'unknown error');
+    errEl.style.display = 'block';
+  }
+});
+
+document.getElementById('login-google-btn').addEventListener('click', async () => {
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  try {
+    const { error } = await _authSb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+    if (error) throw error;
+  } catch(e) {
+    console.warn('[auth] google sign-in failed', e);
+    errEl.textContent = 'Google sign-in failed: ' + (e.message || 'unknown error');
+    errEl.style.display = 'block';
+  }
+});
+
+document.getElementById('login-signout-btn').addEventListener('click', async () => {
+  try { await _authSb.auth.signOut(); } catch(e) {}
+  window.location.reload();
+});
+
+document.getElementById('login-email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-magic-btn').click();
+});
+
+// Kick off the session check immediately
+_checkSessionAndAuthorize();
+
+// Listen for auth changes (magic link clicked in another tab returning, etc.)
+_authSb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    if (document.getElementById('login-screen').style.display !== 'none') {
+      _checkSessionAndAuthorize();
+    }
+  }
+});
+window.addEventListener('load', () => {
+  if (sessionStorage.getItem('egleze_auth') === 'true') initDashboard();
+  else document.getElementById('login-input').focus();
+});
+
+// ── INIT ──────────────────────────────────────────────────────
+async function initDashboard() {
+  try {
+    db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch(e) { console.log('Supabase init error', e); }
+
+  // Reveal admin-only UI based on role
+  try {
+    const role = (window.egDashboardAuth && window.egDashboardAuth.adminRow && window.egDashboardAuth.adminRow.role) || null;
+    if (role === 'admin') {
+      const btn = document.getElementById('tb-new-user-btn');
+      if (btn) btn.style.display = '';
+    }
+    // Always reveal user chip (everyone signed in needs to see who they are + sign out)
+    const chip = document.getElementById('tb-user-chip');
+    const emailEl = document.getElementById('tb-user-email');
+    const roleEl = document.getElementById('tb-user-role');
+    const user = window.egDashboardAuth && window.egDashboardAuth.user;
+    if (chip && user) {
+      emailEl.textContent = user.email || '';
+      roleEl.textContent = role || '';
+      chip.style.display = 'inline-flex';
+    }
+    // Admin-only: populate user-filter dropdown for audit
+    if (role === 'admin') populateUserFilter();
+    console.log('[dashboard] signed in as', (window.egDashboardAuth.user || {}).email, 'role:', role);
+  } catch(e) { console.warn('[dashboard] role-gate check failed', e); }
+  const dateEl = document.getElementById('tb-date');
+  if (dateEl) {
+    dateEl.textContent =
+      new Date().toLocaleDateString('en-IE',{weekday:'short',year:'numeric',month:'short',day:'numeric'}) +
+      ' · ' + new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'});
+  }
+  // Initialize mobile editorial tab — Queue is the default
+  setEditorialMobileTab('queue');
+  // Get accurate counts FIRST so stats render right away, then load page 1
+  await refreshStatusCounts();
+  await loadQueuePage(false);
+  await loadStats();
+  renderCategories();
+  setInterval(loadStats, 60000);
+  setInterval(refreshStatusCounts, 60000);
+}
+
+// ── PANEL NAVIGATION ──────────────────────────────────────────
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  currentPanel = id;
+  if (id === 'shows') loadShows();
+  if (id === 'analytics') loadAnalytics();
+  if (id === 'leads') loadLeads();
+  if (id === 'homepage') loadHomepagePanel();
+  // On mobile, picking a sidebar destination closes the drawer
+  closeMobileSidebar();
+  // Always reset to Queue tab when entering editorial
+  if (id === 'editorial') setEditorialMobileTab('queue');
+}
+
+// ── MOBILE SIDEBAR DRAWER ────────────────────────────────────────
+function toggleMobileSidebar() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  const isOpen = sb && sb.classList.contains('open');
+  if (isOpen) {
+    closeMobileSidebar();
+  } else {
+    sb?.classList.add('open');
+    ov?.classList.add('open');
+  }
+}
+function closeMobileSidebar() {
+  document.querySelector('.sidebar')?.classList.remove('open');
+  document.getElementById('sidebar-overlay')?.classList.remove('open');
+}
+
+// ── EDITORIAL MOBILE TABS (Queue / Detail) ────────────────────────
+// Default to Queue. On selectStory, auto-switch to Detail.
+function setEditorialMobileTab(which) {
+  const layout = document.querySelector('.editorial-layout');
+  if (!layout) return;
+  layout.classList.toggle('show-queue', which === 'queue');
+  layout.classList.toggle('show-detail', which === 'detail');
+  document.querySelectorAll('.emt-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === which);
+  });
+}
+
+// Update the queue count shown in the mobile Queue tab
+function updateMobileQueueCount() {
+  const el = document.getElementById('emt-queue-count');
+  if (!el) return;
+  // Count visible (filtered) queue items
+  const items = document.querySelectorAll('#queue-list .queue-item');
+  el.textContent = items.length;
+}
+
+// ── LOAD STORIES FROM DB (server-side filtered) ──────────────
+// Builds a Supabase query honouring all current filter inputs:
+// status tab, sidebar category, show dropdown, search query, sort.
+// Use append=true for pagination, false for fresh fetch (filter change).
+async function loadQueuePage(append) {
+  if (!db) return;
+  if (queueLoadingMore) return;
+  if (append && !queueHasMore) return;
+  queueLoadingMore = true;
+
+  if (!append) {
+    queueOffset = 0;
+    queueHasMore = true;
+    // Disconnect any existing observer — fresh fetch
+    if (queueObserver) { queueObserver.disconnect(); queueObserver = null; }
+    if (queueScrollHandler) {
+      const list = document.getElementById('queue-list');
+      if (list) list.removeEventListener('scroll', queueScrollHandler);
+      queueScrollHandler = null;
+    }
+    // Show loading state in queue list
+    const list = document.getElementById('queue-list');
+    if (list) list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:11px">Loading…</div>';
+  }
+
+  try {
+    let q = db.from('stories').select('*');
+
+    // Status tab
+    if (currentFilter === 'editorial') {
+      q = q.eq('is_editorial_pick', true);
+    } else if (currentFilter === 'social') {
+      q = q.eq('status', 'approved').not('clip_start_seconds', 'is', null);
+    } else if (currentFilter === 'watched') {
+      q = q.eq('is_most_watched', true);
+    } else if (currentFilter && currentFilter !== 'all') {
+      q = q.eq('status', currentFilter);
+    }
+
+    // Sidebar category — match either topic field or categories array
+    if (currentCategoryFilter) {
+      const cat = currentCategoryFilter.replace(/"/g, '\\"');
+      q = q.or(`topic.eq.${cat},categories.cs.{"${cat}"}`);
+    }
+
+    // Show dropdown
+    const showFilter = (document.getElementById('queue-show-filter')?.value) || '';
+    if (showFilter) q = q.eq('show_name', showFilter);
+
+    // User filter (admin only) — filter by approved_by OR rejected_by
+    const userFilter = (document.getElementById('queue-user-filter')?.value) || '';
+    if (userFilter) {
+      q = q.or(`approved_by.eq.${userFilter},rejected_by.eq.${userFilter}`);
+    }
+
+    // Search query — match across headline, quote, summary, show_name
+    const searchQuery = ((document.getElementById('queue-search')?.value) || '').trim();
+    if (searchQuery) {
+      const sq = searchQuery.replace(/[%,()]/g, ' ');
+      q = q.or(`headline.ilike.%${sq}%,quote.ilike.%${sq}%,summary.ilike.%${sq}%,show_name.ilike.%${sq}%`);
+    }
+
+    // Sort
+    const sortMode = (document.getElementById('queue-sort')?.value) || 'newest';
+    if (sortMode === 'newest')      q = q.order('created_at', { ascending: false });
+    else if (sortMode === 'oldest') q = q.order('created_at', { ascending: true });
+    else if (sortMode === 'score-high') q = q.order('score', { ascending: false, nullsFirst: false });
+    else if (sortMode === 'score-low')  q = q.order('score', { ascending: true, nullsFirst: false });
+
+    // Pagination
+    q = q.range(queueOffset, queueOffset + QUEUE_PAGE_SIZE - 1);
+
+    const { data, error } = await q;
+    if (error) {
+      console.log('[queue] fetch error:', JSON.stringify(error));
+      showToast('Queue load failed: ' + (error.message || error.code || 'unknown'), 'red');
+      return;
+    }
+
+    const rows = data || [];
+    if (append) {
+      stories = stories.concat(rows);
+    } else {
+      stories = rows;
+    }
+    queueOffset += rows.length;
+    queueHasMore = rows.length === QUEUE_PAGE_SIZE;
+
+    // First-page work
+    if (!append) {
+      populateShowFilterDropdown();
+      // Clear selectedStory if it's no longer in the visible set
+      if (selectedStory && !stories.find(s => s.id === selectedStory.id)) {
+        // Don't clear — it might still be relevant for the user. Just leave it.
+      }
+    }
+    renderQueueList();
+  } catch (e) {
+    console.log('[queue] load exception:', e);
+    showToast('Failed to load: ' + e.message, 'red');
+  } finally {
+    queueLoadingMore = false;
+  }
+}
+
+// Backwards-compat alias used by other call sites (Add Story, Reject, etc.)
+async function loadStoriesFromDB() {
+  // Reset filters to a clean view: keep current tab but clear search/category/show
+  await loadQueuePage(false);
+  await refreshStatusCounts();
+}
+
+// Debounce for search box — 250ms after typing stops
+let _searchDebounce = null;
+function onQueueSearchInput() {
+  if (_searchDebounce) clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(() => loadQueuePage(false), 250);
+}
+
+// ── RENDER QUEUE ──────────────────────────────────────────────
+// ── UNIFIED FILTER STATE ─────────────────────────────────────────
+// All queue rendering routes through renderQueueFiltered(), which
+// reads the four UI inputs and applies them in order:
+//   1. status tab (all/pending/approved/rejected/editorial)
+//   2. sidebar category (currentCategoryFilter)
+//   3. show dropdown (queue-show-filter)
+//   4. search query (queue-search)
+//   5. sort dropdown (queue-sort)
+let currentCategoryFilter = null;
+async function populateShowFilterDropdown() {
+  const sel = document.getElementById('queue-show-filter');
+  if (!sel) return;
+  const currentValue = sel.value;
+  try {
+    // 1. Every show in the catalogue (independent of the loaded page).
+    const { data: showRows, error: showErr } =
+      await db.from('shows').select('name').order('name', { ascending: true });
+    if (showErr) throw showErr;
+    const allShows = Array.from(
+      new Set((showRows || []).map(r => r && r.name).filter(Boolean))
+    );
+
+    // 2. Pending-story count per show. One grouped pass over pending rows.
+    //    (Counts PENDING only — what is waiting for approval.)
+    const counts = {};
+    let from = 0, PAGE = 1000, more = true;
+    while (more) {
+      const { data: pend, error: pErr } = await db
+        .from('stories').select('show_name')
+        .eq('status', 'pending')
+        .range(from, from + PAGE - 1);
+      if (pErr) throw pErr;
+      (pend || []).forEach(r => {
+        const n = r && r.show_name;
+        if (n) counts[n] = (counts[n] || 0) + 1;
+      });
+      more = (pend || []).length === PAGE;
+      from += PAGE;
+    }
+
+    // 3. Build options: every show, with its pending count. Shows that
+    //    exist only in stories (not catalogue) are appended so nothing
+    //    is hidden. Zero-count shows are shown too (e.g. "Charlie Kirk (0)").
+    const seen = new Set();
+    const opts = [];
+    allShows.forEach(name => {
+      seen.add(name);
+      const c = counts[name] || 0;
+      opts.push(`<option value="${escapeAttr(name)}">${escapeHtml(name)} (${c})</option>`);
+    });
+    Object.keys(counts).sort().forEach(name => {
+      if (seen.has(name)) return;
+      opts.push(`<option value="${escapeAttr(name)}">${escapeHtml(name)} (${counts[name]}) — not in catalogue</option>`);
+    });
+
+    sel.innerHTML = '<option value="">All shows</option>' + opts.join('');
+    if (currentValue) {
+      // restore previous selection if the value still exists
+      const has = Array.from(sel.options).some(o => o.value === currentValue);
+      if (has) sel.value = currentValue;
+    }
+  } catch (e) {
+    console.log('[show-filter] population failed:', e && (e.message || e.code || e));
+    // Safe fallback: never leave the dropdown empty — sample from loaded set.
+    const fallback = Array.from(new Set(stories.map(x => x.show_name).filter(Boolean))).sort();
+    sel.innerHTML = '<option value="">All shows</option>' +
+      fallback.map(x => `<option value="${escapeAttr(x)}">${escapeHtml(x)}</option>`).join('');
+    if (currentValue) {
+      const has = Array.from(sel.options).some(o => o.value === currentValue);
+      if (has) sel.value = currentValue;
+    }
+  }
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+function renderQueueFiltered() {
+  // Server already filtered — this just renders the loaded `stories` array.
+  renderQueueList();
+}
+
+// Render the loaded stories (already server-side filtered) plus pagination sentinel.
+function renderQueueList() {
+  const list = document.getElementById('queue-list');
+  if (!list) return;
+
+  // Update badge & count UI
+  const badgeEl = document.getElementById('queue-badge');
+  if (badgeEl) badgeEl.textContent = (_statusCounts && _statusCounts[currentFilter] != null)
+    ? _statusCounts[currentFilter]
+    : stories.length;
+
+  if (stories.length === 0) {
+    let msg = 'No stories match these filters';
+    const searchQuery = ((document.getElementById('queue-search')?.value) || '').trim();
+    if (currentCategoryFilter) msg = `No ${currentFilter !== 'all' ? currentFilter + ' ' : ''}stories in ${currentCategoryFilter}`;
+    else if (searchQuery) msg = `No matches for "${searchQuery}"`;
+    else if (currentFilter && currentFilter !== 'all') msg = `No ${currentFilter} stories`;
+    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5">${escapeHtml(msg)}</div>`;
+    updateQueueCountLine(0);
+    if (typeof updateLineup === 'function') updateLineup();
+    return;
+  }
+
+  list.innerHTML = stories.map(s => buildQueueRow(s)).join('');
+  attachQueueScrollObserver();
+  updateQueueCountLine();
+
+  if (typeof updateLineup === 'function') updateLineup();
+  if (typeof updateMobileQueueCount === 'function') updateMobileQueueCount();
+}
+
+// ── Queue count line (Bug C): show loaded vs total for current filter ──
+function updateQueueCountLine(forceZero) {
+  const el = document.getElementById('queue-count-line');
+  if (!el) return;
+  if (forceZero === 0) { el.textContent = '0 stories'; return; }
+  const loaded = stories.length;
+  const total = (_statusCounts && _statusCounts[currentFilter] != null)
+    ? _statusCounts[currentFilter] : null;
+  let txt;
+  if (total != null && total > loaded) txt = `Showing ${loaded} of ${total} — scroll to load more`;
+  else if (total != null)             txt = `${loaded} of ${total}`;
+  else                                txt = `${loaded} loaded`;
+  const sel = (selectedIds && selectedIds.size) ? `  ·  ${selectedIds.size} selected` : '';
+  el.textContent = txt + sel;
+}
+
+// ── Multi-select state (Bug D / mass-reject) ──
+let selectedIds = new Set();
+function toggleRowSelect(id, checked) {
+  if (checked) selectedIds.add(id); else selectedIds.delete(id);
+  const bar = document.getElementById('bulk-bar');
+  if (bar) bar.style.display = selectedIds.size ? 'flex' : 'none';
+  const n = document.getElementById('bulk-count');
+  if (n) n.textContent = selectedIds.size;
+  updateQueueCountLine();
+}
+function clearRowSelection() {
+  selectedIds.clear();
+  document.querySelectorAll('.qi-rowselect').forEach(c => { c.checked = false; });
+  const bar = document.getElementById('bulk-bar');
+  if (bar) bar.style.display = 'none';
+  updateQueueCountLine();
+}
+function selectAllLoaded() {
+  stories.forEach(st => selectedIds.add(st.id));
+  document.querySelectorAll('.qi-rowselect').forEach(c => { c.checked = true; });
+  const bar = document.getElementById('bulk-bar');
+  if (bar) bar.style.display = 'flex';
+  const n = document.getElementById('bulk-count');
+  if (n) n.textContent = selectedIds.size;
+  updateQueueCountLine();
+}
+
+// Reversible bulk reject — soft status change only, mirrors single reject.
+// Two-step: names the exact count; rejected stories remain in DB and can
+// be restored from the Rejected tab.
+async function bulkRejectSelected() {
+  const ids = Array.from(selectedIds);
+  if (!ids.length) { showToast('Nothing selected', 'red'); return; }
+  if (!confirm(`Reject ${ids.length} selected ${ids.length === 1 ? 'story' : 'stories'}?\n\nThey move to the Rejected tab and can be restored later. Nothing is deleted.`)) return;
+  try {
+    // chunk to keep the IN() list sane
+    const CH = 100;
+    for (let i = 0; i < ids.length; i += CH) {
+      const slice = ids.slice(i, i + CH);
+      const { error } = await db.from('stories')
+        .update({ status: 'rejected', updated_at: new Date().toISOString() })
+        .in('id', slice);
+      if (error) throw error;
+    }
+    stories = stories.map(st => selectedIds.has(st.id) ? { ...st, status: 'rejected' } : st);
+    clearRowSelection();
+    showToast(`${ids.length} rejected — restorable from Rejected tab`);
+    if (typeof refreshStatusCounts === 'function') refreshStatusCounts();
+    loadQueuePage(false);
+  } catch (e) {
+    console.log('[bulk-reject] failed:', e && (e.message || e.code || e));
+    showToast('Bulk reject failed: ' + (e.message || 'unknown'), 'red');
+  }
+}
+
+// One queue row markup — extracted so initial render and append share it.
+function buildQueueRow(s) {
+  const isPicked = s.is_editorial_pick === true;
+  const _sel = selectedIds && selectedIds.has(s.id);
+  return `
+    <div class="queue-item${selectedStory?.id === s.id ? ' selected' : ''}" onclick="selectStory(${s.id})">
+      <div class="qi-rowselect-wrap" onclick="event.stopPropagation()" style="float:right;margin-left:8px">
+        <input type="checkbox" class="qi-rowselect" ${_sel ? 'checked' : ''} onchange="toggleRowSelect(${s.id}, this.checked)" title="Select for bulk action">
+      </div>
+      <div class="qi-show">${escapeHtml(s.show_name || '')}</div>
+      <div class="qi-headline">${escapeHtml(s.headline || 'No headline')}</div>
+      <div class="qi-meta">
+        <span class="qi-score ${scoreClass(s.score)}">${s.score == null ? '—' : s.score}</span>
+        <span>${timeAgo(s.created_at)}</span>
+        <span style="margin-left:auto;font-family:'Roboto Condensed',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:${statusColor(s.status)}">${escapeHtml(s.status || 'pending')}</span>
+      </div>
+      ${s.approved_at ? `<div class="qi-audit" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--green);margin-top:2px">✓ approved ${timeAgo(s.approved_at)}</div>` : ''}
+      ${s.rejected_at ? `<div class="qi-audit" style="font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin-top:2px">✕ rejected ${timeAgo(s.rejected_at)}</div>` : ''}
+      <div class="qi-tags">
+        ${s.topic ? `<span class="qi-tag">${escapeHtml(s.topic)}</span>` : ''}
+        ${isPicked ? '<span class="qi-tag qi-pick">★ Editorial</span>' : ''}
+      </div>
+      <div class="qi-pick-row" onclick="event.stopPropagation()">
+        <input type="checkbox" class="qi-pick-checkbox" id="pick-${s.id}" ${isPicked ? 'checked' : ''} onchange="toggleEditorialPick(${s.id}, this.checked)">
+        <label for="pick-${s.id}" class="qi-pick-label ${isPicked ? 'is-picked' : ''}">
+          <span class="qi-pick-star">★</span> Editorial Choice
+        </label>
+      </div>
+    </div>`;
+}
+
+// Attach (or re-attach) IntersectionObserver sentinel for infinite scroll.
+function attachQueueScrollObserver() {
+  const list = document.getElementById('queue-list');
+  if (!list) return;
+  // Disconnect prior
+  if (queueObserver) { queueObserver.disconnect(); queueObserver = null; }
+  if (queueScrollHandler) { list.removeEventListener('scroll', queueScrollHandler); queueScrollHandler = null; }
+  // Remove old sentinel
+  const existing = document.getElementById('queue-sentinel');
+  if (existing) existing.remove();
+  // End-of-list marker if no more pages
+  if (!queueHasMore) {
+    if (stories.length > QUEUE_PAGE_SIZE - 10) {
+      const endMarker = document.createElement('div');
+      endMarker.id = 'queue-sentinel';
+      endMarker.className = 'queue-sentinel is-done';
+      endMarker.textContent = '· End of list ·';
+      list.appendChild(endMarker);
+    }
+    return;
+  }
+  // Active sentinel
+  const sentinel = document.createElement('div');
+  sentinel.id = 'queue-sentinel';
+  sentinel.className = 'queue-sentinel';
+  sentinel.innerHTML = '<div class="queue-spinner-dot"></div><div class="queue-spinner-dot"></div><div class="queue-spinner-dot"></div>';
+  list.appendChild(sentinel);
+  // Find the scrolling parent — queue-list itself or its column. Try queue-list first.
+  const scrollRoot = list.scrollHeight > list.clientHeight ? list : list.closest('.ed-col') || null;
+  if ('IntersectionObserver' in window) {
+    queueObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !queueLoadingMore && queueHasMore) {
+        loadQueuePage(true);
+      }
+    }, { root: scrollRoot, rootMargin: '300px 0px' });
+    queueObserver.observe(sentinel);
+  } else {
+    const target = scrollRoot || window;
+    queueScrollHandler = function() {
+      const r = sentinel.getBoundingClientRect();
+      const visible = r.top < (window.innerHeight + 300);
+      if (visible && !queueLoadingMore && queueHasMore) loadQueuePage(true);
+    };
+    (target === window ? window : target).addEventListener('scroll', queueScrollHandler);
+  }
+}
+
+// Replaces the legacy renderQueue() — call this whenever stories change.
+function renderQueue(filter) {
+  if (filter !== undefined) currentFilter = filter;
+  renderQueueList();
+}
+
+function filterQueue(f, el) {
+  if (typeof clearRowSelection === 'function') clearRowSelection();
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  currentFilter = f;
+  // Server-side filter — fresh fetch
+  loadQueuePage(false);
+}
+
+// Open the Story Queue filtered to Posted-to-social or Most-watched, driven from
+// the left sidebar (clean placement instead of cramped top tabs).
+function openSocialView(which) {
+  showPanel('editorial');
+  document.querySelectorAll('.sidebar-section .sidebar-item').forEach(n => n.classList.remove('active'));
+  if (typeof event !== 'undefined' && event && event.currentTarget) event.currentTarget.classList.add('active');
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  currentCategoryFilter = null;
+  currentFilter = which; // 'social' or 'watched' — handled in filterQueue's loader
+  if (typeof loadQueuePage === 'function') loadQueuePage(false);
+}
+
+function filterByCategory(cat) {
+  showPanel('editorial');
+  // Highlight clicked sidebar item
+  document.querySelectorAll('.sidebar-section .sidebar-item').forEach(n => n.classList.remove('active'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  currentCategoryFilter = cat;  // null = clear filter
+  // Server-side filter — fresh fetch
+  loadQueuePage(false);
+}
+
+// ── EDITORIAL PICK TOGGLE ─────────────────────────────────────────
+async function toggleEditorialPick(storyId, isPicked) {
+  if (!db) return;
+  // Optimistic UI update
+  const story = stories.find(s => s.id === storyId);
+  if (story) story.is_editorial_pick = isPicked;
+  // Update label/star styling immediately
+  const label = document.querySelector(`#pick-${storyId}`)?.parentElement?.querySelector('.qi-pick-label');
+  if (label) label.classList.toggle('is-picked', isPicked);
+  // Refresh selectedStory state if it's the one being toggled
+  if (selectedStory && selectedStory.id === storyId) {
+    selectedStory.is_editorial_pick = isPicked;
+  }
+  try {
+    const { error } = await db.from('stories')
+      .update({ is_editorial_pick: isPicked })
+      .eq('id', storyId);
+    if (error) throw error;
+    showToast(isPicked ? 'Marked as Editorial Choice ★' : 'Removed from Editorial Choice');
+    // Re-render so the qi-tag for "★ Editorial" appears/disappears
+    renderQueueFiltered();
+  } catch (e) {
+    // Roll back on error
+    if (story) story.is_editorial_pick = !isPicked;
+    const cb = document.getElementById('pick-' + storyId);
+    if (cb) cb.checked = !isPicked;
+    showToast('Failed to update — column may not exist (run SQL migration)', 'red');
+    console.error('toggleEditorialPick error:', e);
+  }
+}
+
+// ── ROLE LOCKING ────────────────────────────────────────────────
+async function dashboardSignOut() {
+  try { await window.egDashboardAuth.sb.auth.signOut(); } catch(e) {}
+  window.location.reload();
+}
+
+// ── ADMIN AUDIT: user filter + per-story audit line ────────────
+// Cache user_id → email so we don't refetch on every render
+window.__egUserMap = window.__egUserMap || {};
+
+function onUserFilterChange() {
+  loadQueuePage(false);
+  if (typeof refreshStatusCounts === 'function') refreshStatusCounts();
+}
+
+async function populateUserFilter() {
+  // Admin only — uses /api/list-users (server-side, has service_role)
+  const role = (window.egDashboardAuth && window.egDashboardAuth.adminRow && window.egDashboardAuth.adminRow.role) || null;
+  if (role !== 'admin') return;
+  try {
+    const { data: sess } = await window.egDashboardAuth.sb.auth.getSession();
+    const token = sess && sess.session && sess.session.access_token;
+    if (!token) return;
+    const resp = await fetch('/api/list-users', { headers: { 'Authorization': 'Bearer ' + token }});
+    if (!resp.ok) { console.warn('[users] list-users failed:', resp.status); return; }
+    const data = await resp.json();
+    const users = (data && data.users) || [];
+    const sel = document.getElementById('queue-user-filter');
+    if (!sel) return;
+    sel.style.display = '';
+    sel.innerHTML = '<option value="">All users</option>' +
+      users.map(u => '<option value="' + u.user_id + '">' + (u.email || u.user_id.slice(0, 8)) + ' (' + u.role + ')</option>').join('');
+    // Cache for audit line
+    users.forEach(u => { window.__egUserMap[u.user_id] = u.email || u.user_id.slice(0, 8); });
+  } catch(e) { console.warn('[users] populateUserFilter failed:', e); }
+}
+
+function timeAgoShort(iso) {
+  if (!iso) return '';
+  const t = new Date(iso).getTime();
+  if (isNaN(t)) return '';
+  const sec = Math.floor((Date.now() - t) / 1000);
+  if (sec < 60) return sec + 's ago';
+  if (sec < 3600) return Math.floor(sec / 60) + 'm ago';
+  if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
+  return Math.floor(sec / 86400) + 'd ago';
+}
+
+function renderAuditLine() {
+  const el = document.getElementById('d-audit-line');
+  if (!el || !selectedStory) return;
+  let html = '';
+  if (selectedStory.approved_at && selectedStory.approved_by) {
+    const who = window.__egUserMap[selectedStory.approved_by] || selectedStory.approved_by.slice(0, 8);
+    html += '<span style="color:var(--green)">✓ Approved by ' + who + ' · ' + timeAgoShort(selectedStory.approved_at) + '</span>';
+  }
+  if (selectedStory.rejected_at && selectedStory.rejected_by) {
+    if (html) html += ' &nbsp;·&nbsp; ';
+    const who = window.__egUserMap[selectedStory.rejected_by] || selectedStory.rejected_by.slice(0, 8);
+    html += '<span style="color:var(--red)">✕ Rejected by ' + who + ' · ' + timeAgoShort(selectedStory.rejected_at) + '</span>';
+  }
+  el.innerHTML = html;
+  el.style.display = html ? 'block' : 'none';
+}
+
+// Approver can edit ONLY: d-source, d-clip-start, d-clip-end, d-categories (topic).
+// Everything else is locked. Reject button stays per spec (approvers can reject too,
+// admin can audit by approved_by/rejected_by).
+const APPROVER_LOCKED_IDS = [
+  'd-headline', 'd-quote', 'd-summary',
+  'd-score-input',
+  'd-episode-summary', 'd-episode-keypoints',
+  'd-status', 'd-created-at', 'd-show-name', 'd-episode-name',
+  'd-editorial-pick'
+];
+
+function isApprover() {
+  const r = window.egDashboardAuth && window.egDashboardAuth.adminRow && window.egDashboardAuth.adminRow.role;
+  return r === 'approver';
+}
+
+function applyRoleRestrictions() {
+  if (!isApprover()) return; // admins see everything as normal
+  APPROVER_LOCKED_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.disabled = true;
+      } else {
+        el.readOnly = true;
+      }
+      el.classList.add('eg-locked');
+    } else {
+      // contenteditable divs
+      el.setAttribute('contenteditable', 'false');
+      el.classList.add('eg-locked');
+    }
+  });
+  // Featured star button — disabled for approver (admin-only action)
+  const featBtn = document.querySelector('.btn-feature');
+  if (featBtn) {
+    featBtn.disabled = true;
+    featBtn.title = 'Admins only';
+    featBtn.style.opacity = '0.5';
+    featBtn.style.cursor = 'not-allowed';
+  }
+}
+
+// ── SELECT STORY ──────────────────────────────────────────────
+function selectStory(id) {
+  selectedStory = stories.find(s => s.id === id);
+  if (!selectedStory) return;
+  document.getElementById('detail-empty').style.display = 'none';
+  document.getElementById('detail-content').style.display = 'block';
+
+  // Show / episode (the readonly heading line)
+  document.getElementById('d-show').textContent = `${selectedStory.show_name || ''} · ${selectedStory.episode || ''}`;
+
+  // Editable fields
+  document.getElementById('d-headline').textContent = selectedStory.headline || '';
+  document.getElementById('d-quote').textContent = selectedStory.quote || '';
+  document.getElementById('d-summary').textContent = selectedStory.summary || '';
+  document.getElementById('d-source').value = selectedStory.source_url || '';
+  document.getElementById('d-clip-start').value = secondsToMMSS(selectedStory.clip_start_seconds);
+  document.getElementById('d-clip-end').value = secondsToMMSS(selectedStory.clip_end_seconds);
+
+  // Score input
+  const score = parseFloat(selectedStory.score) || 0;
+  const scoreInput = document.getElementById('d-score-input');
+  if (scoreInput) scoreInput.value = score;
+  updateScoreDisplay(score);
+
+  // Episode summary + key points
+  const episSummaryEl = document.getElementById('d-episode-summary');
+  if (episSummaryEl) episSummaryEl.value = selectedStory.episode_summary || '';
+  const epKpEl = document.getElementById('d-episode-keypoints');
+  if (epKpEl) {
+    if (Array.isArray(selectedStory.episode_key_points)) {
+      epKpEl.value = selectedStory.episode_key_points.map(k => k.startsWith('• ') ? k : '• ' + k).join('\n');
+    } else if (typeof selectedStory.episode_key_points === 'string') {
+      epKpEl.value = selectedStory.episode_key_points;
+    } else {
+      epKpEl.value = '';
+    }
+  }
+
+  // Status dropdown
+  const statusEl = document.getElementById('d-status');
+  if (statusEl) statusEl.value = selectedStory.status || 'pending';
+
+  // Created at — convert ISO to local datetime for input
+  const createdAtEl = document.getElementById('d-created-at');
+  if (createdAtEl) {
+    if (selectedStory.created_at) {
+      try {
+        const d = new Date(selectedStory.created_at);
+        // Format for datetime-local: yyyy-MM-ddTHH:mm
+        const pad = n => String(n).padStart(2, '0');
+        createdAtEl.value =
+          d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) +
+          'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      } catch(e) { createdAtEl.value = ''; }
+    } else { createdAtEl.value = ''; }
+    // Stash original so we can detect changes on save
+    createdAtEl.dataset.originalIso = selectedStory.created_at || '';
+  }
+
+  // Show name + episode (rare-edit fields)
+  const showEl = document.getElementById('d-show-name');
+  const epEl = document.getElementById('d-episode-name');
+  if (showEl) showEl.value = selectedStory.show_name || '';
+  if (epEl) epEl.value = selectedStory.episode || '';
+
+  // Editorial pick checkbox
+  const pickEl = document.getElementById('d-editorial-pick');
+  if (pickEl) pickEl.checked = selectedStory.is_editorial_pick === true;
+
+  // Breaking news checkbox (both roles can toggle)
+  const brkEl = document.getElementById('d-breaking');
+  if (brkEl) brkEl.checked = selectedStory.is_breaking === true;
+
+  // Social / Most-watched controls
+  const socEl = document.getElementById('d-social');
+  if (socEl) socEl.checked = selectedStory.posted_to_social === true;
+  const mwEl = document.getElementById('d-mostwatched');
+  if (mwEl) mwEl.checked = selectedStory.is_most_watched === true;
+  const vwEl = document.getElementById('d-views');
+  if (vwEl) vwEl.value = (selectedStory.social_views != null ? selectedStory.social_views : '');
+
+  // Categories — multi-select
+  if (!selectedStory._categories) {
+    selectedStory._categories = Array.isArray(selectedStory.categories) ? selectedStory.categories.slice() :
+      (selectedStory.topic ? [selectedStory.topic] : []);
+  }
+  renderCategorySelector();
+
+  const topicDisplay = document.getElementById('d-topic-display');
+  if (topicDisplay) topicDisplay.textContent = selectedStory.topic || '(none assigned)';
+
+  // Highlight selected in queue
+  document.querySelectorAll('.queue-item').forEach(el => el.classList.remove('selected'));
+  if (event && event.currentTarget) event.currentTarget.classList.add('selected');
+
+  // Wire change listeners that mark Save button as dirty (visual cue)
+  wireDetailDirtyListeners();
+  markSaveDirty(false);
+
+  // On mobile, auto-switch to Detail tab so the user sees the detail panel
+  if (window.matchMedia('(max-width: 760px)').matches) {
+    setEditorialMobileTab('detail');
+    // Scroll to top of detail
+    const detail = document.getElementById('detail-content');
+    if (detail) detail.scrollTop = 0;
+  }
+
+  // Apply role-based field locks (must run AFTER all selectStory field assignments)
+  applyRoleRestrictions();
+
+  // Render audit info (who approved/rejected + when)
+  if (typeof renderAuditLine === 'function') renderAuditLine();
+}
+
+function updateScoreDisplay(score) {
+  const n = parseFloat(score) || 0;
+  document.getElementById('d-score-bar').style.width = `${Math.max(0, Math.min(100, n))}%`;
+  document.getElementById('d-score-text').textContent = `${n}/100`;
+}
+
+let _detailListenersWired = false;
+function wireDetailDirtyListeners() {
+  if (_detailListenersWired) return;
+  _detailListenersWired = true;
+
+  const ids = ['d-headline','d-quote','d-summary','d-source','d-clip-start','d-clip-end',
+               'd-score-input','d-episode-summary','d-episode-keypoints',
+               'd-status','d-created-at','d-show-name','d-episode-name'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const evt = (el.tagName === 'DIV') ? 'input' : 'input';
+    el.addEventListener(evt, () => markSaveDirty(true));
+    el.addEventListener('change', () => markSaveDirty(true));
+  });
+
+  // Score input also updates the bar live
+  const scoreInput = document.getElementById('d-score-input');
+  if (scoreInput) {
+    scoreInput.addEventListener('input', () => updateScoreDisplay(scoreInput.value));
+  }
+}
+
+function markSaveDirty(isDirty) {
+  const btn = document.querySelector('.btn-save');
+  if (!btn) return;
+  btn.classList.toggle('dirty', !!isDirty);
+  btn.textContent = isDirty ? '💾 Save Changes *' : '💾 Save Changes';
+}
+
+// Editorial pick toggle from inside the detail panel
+async function onEditorialPickChange(isPicked) {
+  if (!selectedStory) return;
+  await toggleEditorialPick(selectedStory.id, isPicked);
+}
+
+// ── BREAKING NEWS TOGGLE ──────────────────────────────────────────
+// Editable by BOTH admin and approver (intentionally NOT in APPROVER_LOCKED_IDS).
+async function onBreakingChange(isBreaking) {
+  if (!selectedStory) return;
+  await toggleBreaking(selectedStory.id, isBreaking);
+}
+
+async function toggleBreaking(storyId, isBreaking) {
+  if (!db) return;
+  // Optimistic UI update
+  const story = stories.find(s => s.id === storyId);
+  if (story) story.is_breaking = isBreaking;
+  if (selectedStory && selectedStory.id === storyId) selectedStory.is_breaking = isBreaking;
+  try {
+    const { error } = await db.from('stories')
+      .update({ is_breaking: isBreaking })
+      .eq('id', storyId);
+    if (error) throw error;
+    showToast(isBreaking ? 'Flagged as Breaking \u25CF' : 'Removed from Breaking');
+  } catch (e) {
+    // Roll back on error
+    if (story) story.is_breaking = !isBreaking;
+    const cb = document.getElementById('d-breaking');
+    if (cb) cb.checked = !isBreaking;
+    showToast('Failed to update — is_breaking column may not exist (run SQL migration)', 'red');
+    console.error('toggleBreaking error:', e);
+  }
+}
+
+// ── SOCIAL / MOST-WATCHED — feed the homepage Most-watched strip ───────
+async function onSocialChange(v){ if(!selectedStory) return; await toggleField('posted_to_social', selectedStory.id, v, 'd-social', v?'Marked as posted to social':'Unmarked from social'); }
+async function onMostWatchedChange(v){ if(!selectedStory) return; await toggleField('is_most_watched', selectedStory.id, v, 'd-mostwatched', v?'Added to Most-watched \u25B6':'Removed from Most-watched'); }
+
+// Generic boolean column toggle (clone of toggleBreaking)
+async function toggleField(col, storyId, val, checkboxId, okMsg){
+  if(!db) return;
+  const story = stories.find(s => s.id === storyId);
+  if (story) story[col] = val;
+  if (selectedStory && selectedStory.id === storyId) selectedStory[col] = val;
+  try {
+    const upd = {}; upd[col] = val;
+    const { error } = await db.from('stories').update(upd).eq('id', storyId);
+    if (error) throw error;
+    showToast(okMsg);
+  } catch(e){
+    if (story) story[col] = !val;
+    const cb = document.getElementById(checkboxId);
+    if (cb) cb.checked = !val;
+    showToast('Failed to update — ' + col + ' column may not exist (run SQL migration)', 'red');
+    console.error('toggleField ' + col + ' error:', e);
+  }
+}
+
+async function onViewsChange(val){
+  if(!selectedStory || !db) return;
+  let n = parseInt(String(val).replace(/[^0-9]/g, ''), 10);
+  if (isNaN(n)) n = null;
+  const storyId = selectedStory.id;
+  const story = stories.find(s => s.id === storyId);
+  if (story) story.social_views = n;
+  selectedStory.social_views = n;
+  try {
+    const { error } = await db.from('stories').update({ social_views: n }).eq('id', storyId);
+    if (error) throw error;
+    showToast('Views saved');
+  } catch(e){
+    showToast('Failed to save views — social_views column may not exist (run SQL migration)', 'red');
+    console.error('onViewsChange error:', e);
+  }
+}
+
+function renderCategorySelector() {
+  if (!selectedStory) return;
+  const catGrid = document.getElementById('d-categories');
+  const cats = selectedStory._categories || [];
+  // Show selected pills
+  const display = document.getElementById('selected-cats-display');
+  if (display) {
+    display.innerHTML = cats.length === 0
+      ? '<span style="font-size:10px;color:var(--muted);font-style:italic">No categories selected yet</span>'
+      : cats.map(c => {
+          const info = CATEGORIES.find(x => x.id === c);
+          return `<div class="sel-cat-pill">${info?.icon || ''} ${c}<span class="sel-cat-remove" onclick="removeCategory('${c}')">✕</span></div>`;
+        }).join('');
+  }
+  // Render grid
+  catGrid.innerHTML = CATEGORIES.map(c => {
+    const isSelected = cats.includes(c.id);
+    return `<div class="cat-option${isSelected ? ' selected' : ''}" onclick="toggleCategory('${c.id}')">${c.icon} ${c.id}</div>`;
+  }).join('');
+}
+
+function toggleCategory(cat) {
+  if (!selectedStory) return;
+  if (!selectedStory._categories) selectedStory._categories = [];
+  const idx = selectedStory._categories.indexOf(cat);
+  if (idx === -1) {
+    selectedStory._categories.push(cat);
+  } else {
+    selectedStory._categories.splice(idx, 1);
+  }
+  renderCategorySelector();
+}
+
+function removeCategory(cat) {
+  if (!selectedStory || !selectedStory._categories) return;
+  selectedStory._categories = selectedStory._categories.filter(c => c !== cat);
+  renderCategorySelector();
+}
+
+function selectCategory(cat, el) {
+  toggleCategory(cat);
+}
+
+// ── TIMESTAMP HELPERS ─────────────────────────────────────────
+// Parse "mm:ss" or "h:mm:ss" or plain seconds to integer seconds.
+// Returns null for blank/invalid input.
+function parseMMSSToSeconds(input) {
+  if (!input) return null;
+  const s = String(input).trim();
+  if (!s) return null;
+  // Plain integer (raw seconds)
+  if (/^\d+$/.test(s)) return parseInt(s, 10);
+  // h:mm:ss
+  const hms = s.match(/^(\d+):(\d{1,2}):(\d{1,2})$/);
+  if (hms) {
+    return parseInt(hms[1], 10) * 3600 + parseInt(hms[2], 10) * 60 + parseInt(hms[3], 10);
+  }
+  // mm:ss
+  const ms = s.match(/^(\d+):(\d{1,2})$/);
+  if (ms) {
+    return parseInt(ms[1], 10) * 60 + parseInt(ms[2], 10);
+  }
+  return null; // invalid format — caller should reject
+}
+
+function secondsToMMSS(seconds) {
+  if (seconds === null || seconds === undefined || seconds === '') return '';
+  const n = parseInt(seconds, 10);
+  if (isNaN(n) || n < 0) return '';
+  const m = Math.floor(n / 60);
+  const s = n % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+// ── COLLECT EDITED FIELDS FROM DETAIL VIEW ────────────────────
+// Returns either { ok: true, data } where data is the update object,
+// or { ok: false, error: 'message' } when validation fails.
+function collectDetailFormData() {
+  if (!selectedStory) return { ok: false, error: 'No story selected' };
+
+  const headline = (document.getElementById('d-headline')?.textContent || '').trim();
+  const quote = (document.getElementById('d-quote')?.textContent || '').trim();
+  const summary = (document.getElementById('d-summary')?.textContent || '').trim();
+  const source = (document.getElementById('d-source')?.value || '').trim();
+  const clipStartRaw = (document.getElementById('d-clip-start')?.value || '').trim();
+  const clipEndRaw = (document.getElementById('d-clip-end')?.value || '').trim();
+  const scoreRaw = (document.getElementById('d-score-input')?.value || '').trim();
+  const episodeSummary = (document.getElementById('d-episode-summary')?.value || '').trim();
+  const episodeKeypointsRaw = (document.getElementById('d-episode-keypoints')?.value || '').trim();
+  const showName = (document.getElementById('d-show-name')?.value || '').trim();
+  const episodeName = (document.getElementById('d-episode-name')?.value || '').trim();
+  const statusVal = (document.getElementById('d-status')?.value || 'pending');
+
+  // Validate clip timestamps
+  const clipStart = clipStartRaw ? parseMMSSToSeconds(clipStartRaw) : null;
+  const clipEnd = clipEndRaw ? parseMMSSToSeconds(clipEndRaw) : null;
+  if (clipStartRaw && clipStart === null) return { ok: false, error: 'Invalid clip start — use mm:ss' };
+  if (clipEndRaw && clipEnd === null) return { ok: false, error: 'Invalid clip end — use mm:ss' };
+  if (clipStart !== null && clipEnd !== null && clipEnd <= clipStart) {
+    return { ok: false, error: 'Clip end must be after clip start' };
+  }
+
+  // Validate score
+  const score = scoreRaw === '' ? null : parseFloat(scoreRaw);
+  if (score !== null && (isNaN(score) || score < 0 || score > 100)) {
+    return { ok: false, error: 'Score must be between 0 and 100' };
+  }
+
+  // Parse episode key points back to array
+  let episodeKeyPointsArr = null;
+  if (episodeKeypointsRaw) {
+    episodeKeyPointsArr = episodeKeypointsRaw
+      .split('\n')
+      .map(l => l.replace(/^[\s•·\-\*]+/, '').trim())
+      .filter(Boolean);
+    if (episodeKeyPointsArr.length === 0) episodeKeyPointsArr = null;
+  }
+
+  // Categories
+  const cats = selectedStory._categories || [];
+  const primaryTopic = cats.length > 0 ? cats[0] : (selectedStory.topic || null);
+
+  // Created at — only include if user actually changed it
+  const createdAtEl = document.getElementById('d-created-at');
+  let createdAtIso = undefined; // undefined = don't include in update
+  if (createdAtEl) {
+    const newLocalVal = createdAtEl.value;
+    const originalIso = createdAtEl.dataset.originalIso || '';
+    if (newLocalVal) {
+      // Convert local datetime input back to ISO
+      const newIso = new Date(newLocalVal).toISOString();
+      // Compare to a normalized version of the original
+      let originalNormalized = '';
+      try { originalNormalized = originalIso ? new Date(originalIso).toISOString() : ''; } catch(e) {}
+      if (newIso !== originalNormalized) {
+        createdAtIso = newIso;
+      }
+    }
+  }
+
+  // Build update payload
+  const data = {
+    headline,
+    quote,
+    summary,
+    topic: primaryTopic,
+    source_url: source,
+    clip_start_seconds: clipStart,
+    clip_end_seconds: clipEnd,
+    score: score,
+    episode_summary: episodeSummary || null,
+    show_name: showName || selectedStory.show_name,
+    episode: episodeName || selectedStory.episode,
+    status: statusVal,
+    updated_at: new Date().toISOString()
+  };
+
+  // Only include array fields if they have values (avoid Postgres array issues)
+  if (cats.length > 0) data.categories = cats;
+  if (episodeKeyPointsArr) data.episode_key_points = episodeKeyPointsArr;
+
+  // Only include created_at if user explicitly changed it
+  if (createdAtIso !== undefined) data.created_at = createdAtIso;
+
+  return { ok: true, data };
+}
+
+// ── UNIFIED SAVE — used by Save / Approve / Reject ─────────────
+// statusOverride: optionally force a particular status (used by approve/reject)
+async function saveStory(statusOverride) {
+  if (!selectedStory) return false;
+  const result = collectDetailFormData();
+  if (!result.ok) {
+    showToast(result.error, 'red');
+    return false;
+  }
+  const data = result.data;
+  if (statusOverride) data.status = statusOverride;
+
+  // Track audit: who approved (or rejected), and when
+  const currentUserId = (window.egDashboardAuth && window.egDashboardAuth.user && window.egDashboardAuth.user.id) || null;
+  if (data.status === 'approved' && currentUserId) {
+    data.approved_by = currentUserId;
+    data.approved_at = new Date().toISOString();
+  }
+  if (data.status === 'rejected' && currentUserId) {
+    data.rejected_by = currentUserId;
+    data.rejected_at = new Date().toISOString();
+  }
+
+  try {
+    const { error } = await db.from('stories').update(data).eq('id', selectedStory.id);
+    if (error) throw error;
+
+    // Update local cache
+    Object.assign(selectedStory, data);
+    stories = stories.map(s => s.id === selectedStory.id ? selectedStory : s);
+
+    renderQueueFiltered();
+    markSaveDirty(false);
+    if (typeof refreshStatusCounts === 'function') refreshStatusCounts();
+    return true;
+  } catch (e) {
+    console.error('saveStory error:', e);
+    const msg = (e && e.message) ? e.message : 'Save failed';
+    // Common case: column doesn't exist
+    if (msg.toLowerCase().includes('column') || msg.toLowerCase().includes('schema')) {
+      showToast('Save failed — schema mismatch: ' + msg, 'red');
+    } else {
+      showToast('Save failed: ' + msg, 'red');
+    }
+    return false;
+  }
+}
+
+async function saveSelected() {
+  const ok = await saveStory();
+  if (ok) showToast('Changes saved ✓');
+}
+
+// IndexNow: tell Bing/Yandex about a new approved story immediately.
+// Fire-and-forget — doesn't block UI, errors logged only.
+const INDEXNOW_KEY = '16e68308a6204a49b198ab9957a8c2a6';
+function pingIndexNow(story) {
+  try {
+    if (!story || !story.id || !story.headline) return;
+    const slug = String(story.id) + '-' + String(story.headline).toLowerCase()
+      .replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-+|-+$/g,'');
+    const url = 'https://egleze.com/story/' + slug;
+    const endpoint = 'https://api.indexnow.org/IndexNow?url=' + encodeURIComponent(url)
+      + '&key=' + INDEXNOW_KEY;
+    // GET request, fire-and-forget. no-cors so we don't block on response.
+    fetch(endpoint, { method: 'GET', mode: 'no-cors' })
+      .then(() => console.log('[IndexNow] pinged for story', story.id))
+      .catch(err => console.warn('[IndexNow] ping failed:', err));
+  } catch (e) {
+    console.warn('[IndexNow] error:', e);
+  }
+}
+
+async function approveSelected() {
+  const ok = await saveStory('approved');
+  if (ok) {
+    pingIndexNow(selectedStory);
+    showToast('Story approved & published ✓');
+  }
+}
+
+async function rejectSelected() {
+  if (!selectedStory) return;
+  // Reject is a status-only change — don't validate other fields
+  try {
+    const currentUserId = (window.egDashboardAuth && window.egDashboardAuth.user && window.egDashboardAuth.user.id) || null;
+    const rejectData = { status: 'rejected', updated_at: new Date().toISOString() };
+    if (currentUserId) {
+      rejectData.rejected_by = currentUserId;
+      rejectData.rejected_at = new Date().toISOString();
+    }
+    await db.from('stories').update(rejectData).eq('id', selectedStory.id);
+    selectedStory.status = 'rejected';
+    if (currentUserId) {
+      selectedStory.rejected_by = currentUserId;
+      selectedStory.rejected_at = rejectData.rejected_at;
+    }
+    stories = stories.map(s => s.id === selectedStory.id ? selectedStory : s);
+    renderQueueFiltered();
+    showToast('Story rejected');
+    document.getElementById('detail-empty').style.display = 'flex';
+    document.getElementById('detail-content').style.display = 'none';
+    selectedStory = null;
+    markSaveDirty(false);
+    if (typeof refreshStatusCounts === 'function') refreshStatusCounts();
+  } catch(e) { showToast('Error', 'red'); console.error(e); }
+}
+
+async function featureSelected() {
+  if (!selectedStory) return;
+  heroStoryId = selectedStory.id;
+  try {
+    await db.from('stories').update({ featured: false }).neq('id', selectedStory.id);
+    await db.from('stories').update({ featured: true, status: 'approved' }).eq('id', selectedStory.id);
+    pingIndexNow(selectedStory);
+    stories = stories.map(s => ({...s, featured: s.id === selectedStory.id}));
+    renderQueueFiltered();
+    if (typeof loadHomepagePanel === 'function') loadHomepagePanel();
+    if (typeof refreshStatusCounts === 'function') refreshStatusCounts();
+    showToast('Story set as hero — now featured on homepage ⭐');
+  } catch(e) { showToast('Error', 'red'); }
+}
+
+// ── LINEUP ────────────────────────────────────────────────────
+function updateLineup() {
+  const approved = stories.filter(s => s.status === 'approved').slice(0, 20);
+  const list = document.getElementById('lineup-list');
+  let html = '';
+  for (let i = 0; i < 20; i++) {
+    const s = approved[i];
+    html += `<div class="lineup-item">
+      <div class="li-num">${String(i+1).padStart(2,"0")}</div>
+      <div class="li-content">
+        ${s ? `<div class="li-show">${s.show_name}</div><div class="li-title">${s.headline}</div>` : '<div class="li-empty">Empty slot</div>'}
+      </div>
+    </div>`;
+  }
+  list.innerHTML = html;
+  const count = approved.length;
+  document.getElementById('lineup-count').textContent = `${count} approved today`;
+  document.getElementById('newscast-btn').disabled = count < 3;
+}
+
+function updateStats() {
+  // Local fallback — used during transitions before count queries return
+  const pending = stories.filter(s => s.status === 'pending').length;
+  const approved = stories.filter(s => s.status === 'approved').length;
+  document.getElementById('stat-queue').textContent = _statusCounts.pending || pending;
+  document.getElementById('stat-approved').textContent = _statusCounts.approved || approved;
+  document.getElementById('queue-badge').textContent = (_statusCounts[currentFilter] != null) ? _statusCounts[currentFilter] : stories.length;
+}
+
+// Fetches accurate per-status counts from the DB. Used for top-bar stats
+// and per-tab count badges. Independent of what's loaded into `stories`.
+async function refreshStatusCounts() {
+  if (!db) return;
+  try {
+    // If a user filter is active, scope ALL counts to that user's approvals/rejections
+    const userFilter = (document.getElementById('queue-user-filter')?.value) || '';
+    const baseQuery = () => {
+      let q = db.from('stories').select('id', { count: 'exact', head: true });
+      if (userFilter) q = q.or(`approved_by.eq.${userFilter},rejected_by.eq.${userFilter}`);
+      return q;
+    };
+    const [allRes, pendingRes, approvedRes, rejectedRes, editorialRes] = await Promise.all([
+      baseQuery(),
+      baseQuery().eq('status', 'pending'),
+      baseQuery().eq('status', 'approved'),
+      baseQuery().eq('status', 'rejected'),
+      baseQuery().eq('is_editorial_pick', true),
+    ]);
+    _statusCounts = {
+      total: allRes.count || 0,
+      pending: pendingRes.count || 0,
+      approved: approvedRes.count || 0,
+      rejected: rejectedRes.count || 0,
+      editorial: editorialRes.count || 0
+    };
+    // Top-bar stats
+    const sq = document.getElementById('stat-queue');
+    const sa = document.getElementById('stat-approved');
+    if (sq) sq.textContent = _statusCounts.pending;
+    if (sa) sa.textContent = _statusCounts.approved;
+    // Per-tab count badges
+    const setBadge = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n != null ? '(' + n + ')' : ''; };
+    setBadge('ftab-count-all', _statusCounts.total);
+    setBadge('ftab-count-pending', _statusCounts.pending);
+    setBadge('ftab-count-approved', _statusCounts.approved);
+    setBadge('ftab-count-rejected', _statusCounts.rejected);
+    setBadge('ftab-count-editorial', _statusCounts.editorial);
+    // Queue badge (top-of-queue counter)
+    const qb = document.getElementById('queue-badge');
+    if (qb) qb.textContent = (_statusCounts[currentFilter] != null) ? _statusCounts[currentFilter] : _statusCounts.total;
+  } catch (e) {
+    console.log('[stats] refresh failed:', e);
+  }
+}
+
+// ── STATS FROM DB ─────────────────────────────────────────────
+async function loadStats() {
+  if (!db) return;
+  try {
+    const { count: subCount } = await db.from('subscribers').select('*', { count: 'exact', head: true });
+    document.getElementById('stat-subs').textContent = subCount || 0;
+  } catch(e) {}
+}
+
+// ── SHOWS PANEL ───────────────────────────────────────────────
+async function loadShows() {
+  if (!db) return;
+  try {
+    const { data } = await db.from('shows').select('*').order('name');
+    const grid = document.getElementById('shows-grid');
+    grid.innerHTML = (data || []).map(s => `
+      <div class="show-card">
+        <div class="show-card-top">
+          <div class="show-avatar">${s.name.charAt(0)}</div>
+          <div>
+            <div class="show-name">${s.name}</div>
+            <div class="show-host">${s.host || ''}</div>
+          </div>
+        </div>
+        <div class="show-card-meta">
+          <span class="show-category">${s.category || 'General'}</span>
+          <div class="show-status" style="margin-left:auto">
+            <div class="status-dot ${s.active ? 'active' : 'paused'}"></div>
+            <span style="font-size:10px;color:var(--muted)">${s.active ? 'Active' : 'Paused'}</span>
+          </div>
+        </div>
+        ${s.rss_url ? `<div class="show-rss">${s.rss_url}</div>` : '<div style="font-size:10px;color:var(--red)">⚠ No RSS URL</div>'}
+        <button class="show-toggle" onclick="toggleShow(${s.id},${s.active})">${s.active ? 'Pause' : 'Activate'}</button>
+      </div>`).join('');
+  } catch(e) { console.log(e); }
+}
+
+async function toggleShow(id, active) {
+  if (!db) return;
+  try {
+    await db.from('shows').update({ active: !active }).eq('id', id);
+    showToast(`Show ${active ? 'paused' : 'activated'} ✓`);
+    loadShows();
+  } catch(e) { showToast('Error', 'red'); }
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODAL INFRASTRUCTURE — Add Story + Add Show
+// ══════════════════════════════════════════════════════════════
+
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (!m) return;
+  m.classList.add('open');
+  // Trap Escape to close
+  document.addEventListener('keydown', _modalEscapeHandler);
+  // Click overlay to close
+  m.addEventListener('click', _modalOverlayClickHandler);
+}
+
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (!m) return;
+  m.classList.remove('open');
+  document.removeEventListener('keydown', _modalEscapeHandler);
+  m.removeEventListener('click', _modalOverlayClickHandler);
+}
+
+function _modalEscapeHandler(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+  }
+}
+
+function _modalOverlayClickHandler(e) {
+  // Only close if click is on overlay itself, not inside the box
+  if (e.target.classList.contains('modal-overlay')) {
+    closeModal(e.target.id);
+  }
+}
+
+// ── ADD STORY MODAL ─────────────────────────────────────────────
+let _newStoryCategories = []; // selected categories during Add Story
+let _showsCache = []; // cached list of shows from DB for the picker
+let _showComboHighlightIdx = -1; // currently highlighted item in combobox
+
+async function ensureShowsCacheLoaded() {
+  if (_showsCache.length > 0) return _showsCache;
+  if (!db) return [];
+  try {
+    const { data, error } = await db.from('shows')
+      .select('id, name, host, category, active')
+      .order('name', { ascending: true });
+    if (error) throw error;
+    _showsCache = data || [];
+  } catch(e) {
+    console.error('Failed to load shows for picker:', e);
+    _showsCache = [];
+  }
+  return _showsCache;
+}
+
+async function openAddStoryModal() {
+  // Reset all fields
+  ['ns-episode','ns-headline','ns-quote','ns-summary',
+   'ns-source','ns-clip-start','ns-clip-end','ns-episode-summary',
+   'ns-episode-keypoints'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('ns-score').value = 80;
+  document.getElementById('ns-status').value = 'pending';
+  _newStoryCategories = [];
+  renderNewStoryCategoryGrid();
+
+  // Reset show combobox
+  const showInput = document.getElementById('ns-show-name');
+  const showIdInput = document.getElementById('ns-show-id');
+  if (showInput) {
+    showInput.value = '';
+    showInput.classList.remove('invalid');
+  }
+  if (showIdInput) showIdInput.value = '';
+  document.getElementById('ns-show-combobox')?.classList.remove('show-list');
+
+  // Load shows for the picker (may take a moment first time)
+  await ensureShowsCacheLoaded();
+
+  openModal('modal-add-story');
+  setTimeout(() => document.getElementById('ns-show-name')?.focus(), 100);
+}
+
+// ── SHOW COMBOBOX HANDLERS ─────────────────────────────────────
+function onShowComboFocus() {
+  renderShowComboList(document.getElementById('ns-show-name').value);
+  showShowComboList();
+}
+
+function onShowComboInput() {
+  const input = document.getElementById('ns-show-name');
+  const idHidden = document.getElementById('ns-show-id');
+  // Clear the selected ID — user is editing freely now
+  if (idHidden) idHidden.value = '';
+  if (input) input.classList.remove('invalid');
+  _showComboHighlightIdx = -1;
+  renderShowComboList(input.value);
+  showShowComboList();
+}
+
+function onShowComboKey(e) {
+  const list = document.getElementById('ns-show-list');
+  if (!list) return;
+  const items = list.querySelectorAll('.mf-combobox-item');
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (items.length === 0) return;
+    _showComboHighlightIdx = Math.min(_showComboHighlightIdx + 1, items.length - 1);
+    updateShowComboHighlight();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (items.length === 0) return;
+    _showComboHighlightIdx = Math.max(_showComboHighlightIdx - 1, 0);
+    updateShowComboHighlight();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (_showComboHighlightIdx >= 0 && items[_showComboHighlightIdx]) {
+      items[_showComboHighlightIdx].click();
+    } else if (items.length === 1) {
+      items[0].click();
+    }
+  } else if (e.key === 'Escape') {
+    hideShowComboList();
+  }
+}
+
+function updateShowComboHighlight() {
+  const list = document.getElementById('ns-show-list');
+  if (!list) return;
+  const items = list.querySelectorAll('.mf-combobox-item');
+  items.forEach((it, i) => it.classList.toggle('highlighted', i === _showComboHighlightIdx));
+  if (_showComboHighlightIdx >= 0 && items[_showComboHighlightIdx]) {
+    items[_showComboHighlightIdx].scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderShowComboList(query) {
+  const list = document.getElementById('ns-show-list');
+  if (!list) return;
+  const q = (query || '').trim().toLowerCase();
+  let matches = _showsCache;
+  if (q) {
+    matches = _showsCache.filter(s =>
+      (s.name || '').toLowerCase().includes(q) ||
+      (s.host || '').toLowerCase().includes(q)
+    );
+  }
+  if (_showsCache.length === 0) {
+    list.innerHTML = '<div class="mf-combobox-empty">No shows in database yet.<br><a onclick="closeModal(\'modal-add-story\');setTimeout(openAddShowModal,200)">+ Add a show first</a></div>';
+    return;
+  }
+  if (matches.length === 0) {
+    list.innerHTML = `<div class="mf-combobox-empty">No shows match "${escapeHtml(q)}".<br><a onclick="closeModal('modal-add-story');setTimeout(openAddShowModal,200)">+ Add a new show</a></div>`;
+    return;
+  }
+  list.innerHTML = matches.slice(0, 30).map((s) => {
+    const meta = [s.host, s.category].filter(Boolean).join(' · ');
+    const inactive = s.active === false ? ' · paused' : '';
+    return `<div class="mf-combobox-item" data-show-id="${s.id}" data-show-name="${escapeAttr(s.name)}" onclick="pickShow(${s.id}, this)">
+      <span class="mfc-name">${escapeHtml(s.name)}</span>
+      ${meta || inactive ? `<span class="mfc-meta">${escapeHtml(meta)}${inactive}</span>` : ''}
+    </div>`;
+  }).join('');
+  _showComboHighlightIdx = -1;
+}
+
+function showShowComboList() {
+  document.getElementById('ns-show-combobox')?.classList.add('show-list');
+  // Add document click handler to close when clicking outside
+  setTimeout(() => document.addEventListener('click', _showComboOutsideHandler), 0);
+}
+
+function hideShowComboList() {
+  document.getElementById('ns-show-combobox')?.classList.remove('show-list');
+  document.removeEventListener('click', _showComboOutsideHandler);
+}
+
+function _showComboOutsideHandler(e) {
+  const combo = document.getElementById('ns-show-combobox');
+  if (combo && !combo.contains(e.target)) {
+    hideShowComboList();
+  }
+}
+
+function pickShow(showId, el) {
+  const show = _showsCache.find(s => s.id === showId);
+  if (!show) return;
+  document.getElementById('ns-show-name').value = show.name;
+  document.getElementById('ns-show-id').value = show.id;
+  document.getElementById('ns-show-name').classList.remove('invalid');
+  hideShowComboList();
+  // Move focus forward
+  document.getElementById('ns-episode')?.focus();
+}
+
+function renderNewStoryCategoryGrid() {
+  const grid = document.getElementById('ns-cat-grid');
+  if (!grid) return;
+  grid.innerHTML = CATEGORIES.map(c => {
+    const sel = _newStoryCategories.includes(c.id);
+    return `<div class="mf-cat-opt${sel ? ' selected' : ''}" onclick="toggleNewStoryCategory('${c.id.replace(/'/g, "\\'")}')">
+      <span class="mf-cat-icon">${c.icon}</span><span>${escapeHtml(c.id)}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleNewStoryCategory(cat) {
+  const idx = _newStoryCategories.indexOf(cat);
+  if (idx === -1) _newStoryCategories.push(cat);
+  else _newStoryCategories.splice(idx, 1);
+  renderNewStoryCategoryGrid();
+}
+
+async function submitAddStory() {
+  const showInput = document.getElementById('ns-show-name');
+  const showIdHidden = document.getElementById('ns-show-id');
+  const typedShowName = showInput.value.trim();
+  const selectedShowId = showIdHidden.value;
+
+  // Strict validation: must have selected a real show from the picker.
+  // If the user typed but didn't pick, refuse.
+  let selectedShow = null;
+  if (selectedShowId) {
+    selectedShow = _showsCache.find(s => String(s.id) === String(selectedShowId));
+  }
+  // Even if no ID is set, if the typed text exactly matches an existing show, accept it
+  if (!selectedShow && typedShowName) {
+    selectedShow = _showsCache.find(s => s.name && s.name.toLowerCase() === typedShowName.toLowerCase());
+    if (selectedShow) showIdHidden.value = selectedShow.id;
+  }
+  if (!selectedShow) {
+    showInput.classList.add('invalid');
+    showInput.focus();
+    showToast('Pick a show from the dropdown — Add Show first if it does not exist', 'red');
+    return;
+  }
+
+  const episode = document.getElementById('ns-episode').value.trim();
+  const headline = document.getElementById('ns-headline').value.trim();
+  const quote = document.getElementById('ns-quote').value.trim();
+  const summary = document.getElementById('ns-summary').value.trim();
+  const source = document.getElementById('ns-source').value.trim();
+  const clipStartRaw = document.getElementById('ns-clip-start').value.trim();
+  const clipEndRaw = document.getElementById('ns-clip-end').value.trim();
+  const scoreRaw = document.getElementById('ns-score').value.trim();
+  const status = document.getElementById('ns-status').value;
+  const episodeSummary = document.getElementById('ns-episode-summary').value.trim();
+  const episodeKeypointsRaw = document.getElementById('ns-episode-keypoints').value.trim();
+
+  // Validation
+  if (!headline) return showToast('Headline is required', 'red');
+  if (!quote) return showToast('Quote is required', 'red');
+  if (!summary) return showToast('Summary is required', 'red');
+  if (_newStoryCategories.length === 0) return showToast('Pick at least one category', 'red');
+
+  const clipStart = clipStartRaw ? parseMMSSToSeconds(clipStartRaw) : null;
+  const clipEnd = clipEndRaw ? parseMMSSToSeconds(clipEndRaw) : null;
+  if (clipStartRaw && clipStart === null) return showToast('Invalid clip start — use mm:ss', 'red');
+  if (clipEndRaw && clipEnd === null) return showToast('Invalid clip end — use mm:ss', 'red');
+  if (clipStart !== null && clipEnd !== null && clipEnd <= clipStart) {
+    return showToast('Clip end must be after clip start', 'red');
+  }
+
+  const score = scoreRaw === '' ? 80 : parseFloat(scoreRaw);
+  if (isNaN(score) || score < 0 || score > 100) return showToast('Score must be 0–100', 'red');
+
+  // Parse key points to array
+  let keyPointsArr = null;
+  if (episodeKeypointsRaw) {
+    keyPointsArr = episodeKeypointsRaw
+      .split('\n')
+      .map(l => l.replace(/^[\s•·\-\*]+/, '').trim())
+      .filter(Boolean);
+    if (keyPointsArr.length === 0) keyPointsArr = null;
+  }
+
+  const data = {
+    show_name: selectedShow.name,
+    episode: episode || null,
+    headline,
+    quote,
+    summary,
+    topic: _newStoryCategories[0],
+    categories: _newStoryCategories,
+    score,
+    status,
+    source_url: source || null,
+    clip_start_seconds: clipStart,
+    clip_end_seconds: clipEnd,
+    episode_summary: episodeSummary || null,
+    is_editorial_pick: false
+  };
+  if (keyPointsArr) data.episode_key_points = keyPointsArr;
+
+  try {
+    const { data: inserted, error } = await db.from('stories').insert(data).select();
+    if (error) throw error;
+    closeModal('modal-add-story');
+    showToast('Story added ✓');
+    await loadStoriesFromDB();
+  } catch (e) {
+    console.error('Add story error:', e);
+    showToast('Failed to add story: ' + (e.message || 'unknown error'), 'red');
+  }
+}
+
+// ── ADD SHOW MODAL ─────────────────────────────────────────────
+function openAddShowModal() {
+  // Reset fields
+  ['ash-name','ash-host','ash-rss','ash-youtube','ash-description'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('ash-active').value = 'true';
+
+  // Populate category dropdown
+  const catSel = document.getElementById('ash-category');
+  if (catSel) {
+    catSel.innerHTML = '<option value="">— Select a category —</option>' +
+      CATEGORIES.map(c => `<option value="${escapeAttr(c.id)}">${c.icon} ${escapeHtml(c.id)}</option>`).join('');
+    catSel.value = '';
+  }
+
+  openModal('modal-add-show');
+  setTimeout(() => document.getElementById('ash-name')?.focus(), 100);
+}
+
+async function submitAddShow() {
+  const name = document.getElementById('ash-name').value.trim();
+  const host = document.getElementById('ash-host').value.trim();
+  const rss = document.getElementById('ash-rss').value.trim();
+  const youtube = document.getElementById('ash-youtube').value.trim();
+  const category = document.getElementById('ash-category').value;
+  const active = document.getElementById('ash-active').value === 'true';
+  const description = document.getElementById('ash-description').value.trim();
+
+  if (!name) return showToast('Show name is required', 'red');
+  if (!rss) return showToast('RSS feed URL is required', 'red');
+  if (!category) return showToast('Pick a primary category', 'red');
+
+  // Light URL validation
+  if (!/^https?:\/\//i.test(rss)) return showToast('RSS URL must start with http:// or https://', 'red');
+  if (youtube && !/^https?:\/\//i.test(youtube)) return showToast('YouTube URL must start with http:// or https://', 'red');
+
+  const data = {
+    name,
+    host: host || null,
+    rss_url: rss,
+    youtube_url: youtube || null,
+    category,
+    active,
+    description: description || null
+  };
+
+  try {
+    const { error } = await db.from('shows').insert(data);
+    if (error) throw error;
+    closeModal('modal-add-show');
+    showToast(`Show "${name}" added ✓`);
+    // Invalidate the picker cache so the new show appears in Add Story dropdown
+    _showsCache = [];
+    if (typeof loadShows === 'function') loadShows();
+  } catch (e) {
+    console.error('Add show error:', e);
+    let msg = e.message || 'unknown error';
+    // Helpful note about likely column issues
+    if (msg.toLowerCase().includes('column') || msg.toLowerCase().includes('schema')) {
+      msg = 'Schema mismatch — likely missing columns (youtube_url or description). Check Supabase shows table.';
+    }
+    showToast('Failed to add show: ' + msg, 'red');
+  }
+}
+
+// Legacy compatibility — old code paths may still call addShowPrompt
+function addShowPrompt() {
+  openAddShowModal();
+}
+
+// ── ANALYTICS ─────────────────────────────────────────────────
+async function loadAnalytics() {
+  if (!db) return;
+  try {
+    const { data: allStories } = await db.from('stories').select('*');
+    const { count: subCount } = await db.from('subscribers').select('*', { count:'exact', head:true });
+    const total = allStories?.length || 0;
+    const approved = allStories?.filter(s => s.status === 'approved').length || 0;
+    document.getElementById('m-stories').textContent = total;
+    document.getElementById('m-approved').textContent = approved;
+    document.getElementById('m-subs').textContent = subCount || 0;
+    // Category chart
+    const cats = {};
+    CATEGORIES.forEach(c => cats[c.id] = 0);
+    allStories?.forEach(s => { if (s.topic && cats[s.topic] !== undefined) cats[s.topic]++; });
+    const max = Math.max(...Object.values(cats), 1);
+    const topCats = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    document.getElementById('category-chart').innerHTML = topCats.map(([cat, count]) => `
+      <div class="bar-wrap">
+        <div class="bar" style="height:${(count/max)*70}px" title="${cat}: ${count}"></div>
+        <div class="bar-label">${cat.substring(0,5)}</div>
+      </div>`).join('');
+    // Top stories
+    const top = allStories?.filter(s => s.status === 'approved').sort((a,b) => (b.score||0)-(a.score||0)).slice(0,5) || [];
+    document.getElementById('top-stories').innerHTML = top.map((s,i) => `
+      <div class="ts-item">
+        <div class="ts-rank">0${i+1}</div>
+        <div class="ts-title">${s.headline || 'Untitled'}</div>
+        <div class="ts-views">${s.score}/10</div>
+      </div>`).join('');
+  } catch(e) { console.log(e); }
+}
+
+
+// ── LEADS PANEL ──────────────────────────────────────────────
+function _leadEsc(t){ return (t==null?'':String(t)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _leadDate(ts){ try { return new Date(ts).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch(e){ return ts||''; } }
+
+function switchLeadsTab(which){
+  document.querySelectorAll('.ltab').forEach(function(t){
+    var on = t.getAttribute('data-ltab')===which;
+    t.classList.toggle('active', on);
+    t.style.color = on ? 'var(--red)' : 'var(--muted)';
+    t.style.borderBottomColor = on ? 'var(--red)' : 'transparent';
+  });
+  document.getElementById('leads-partners-wrap').style.display = which==='partners' ? 'block' : 'none';
+  document.getElementById('leads-api-wrap').style.display = which==='api' ? 'block' : 'none';
+}
+
+async function _setLeadStatus(table, id, status){
+  if(!db) return;
+  try {
+    var res = await db.from(table).update({ status: status }).eq('id', id);
+    if(res.error){ console.error('status update failed', res.error); alert('Could not update status.'); return; }
+    loadLeads();
+  } catch(e){ console.error(e); }
+}
+
+function _partnerRow(r){
+  var link = r.show_url ? '<a href="'+_leadEsc(r.show_url)+'" target="_blank" rel="noopener" style="color:var(--red)">link ↗</a>' : '—';
+  var topics = r.topics ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">Topics: '+_leadEsc(r.topics)+'</div>' : '';
+  var note = r.note ? '<div style="font-size:12px;color:var(--dark);margin-top:6px;background:var(--light);padding:6px 8px;border-radius:4px">'+_leadEsc(r.note)+'</div>' : '';
+  return '<div style="border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:10px;background:#fff">'
+    + '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">'
+    +   '<div>'
+    +     '<div style="font-weight:700;font-size:14px">'+_leadEsc(r.show_name)+'</div>'
+    +     '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+_leadEsc(r.host||'—')+' · <a href="mailto:'+_leadEsc(r.email)+'" style="color:var(--dark)">'+_leadEsc(r.email)+'</a> · '+link+'</div>'
+    +     topics + note
+    +   '</div>'
+    +   '<div style="text-align:right;white-space:nowrap">'
+    +     '<span style="display:inline-block;font-family:\'Roboto Condensed\',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:100px;background:var(--light);color:var(--muted)">'+_leadEsc(r.status||'new')+'</span>'
+    +     '<div style="font-size:10px;color:var(--muted);margin-top:4px">'+_leadDate(r.created_at)+'</div>'
+    +   '</div>'
+    + '</div>'
+    + '<div style="margin-top:8px;display:flex;gap:6px">'
+    +   '<button class="tb-btn outline" style="font-size:10px;padding:3px 8px" onclick="_setLeadStatus(\'partner_requests\','+r.id+',\'reviewing\')">Reviewing</button>'
+    +   '<button class="tb-btn outline" style="font-size:10px;padding:3px 8px" onclick="_setLeadStatus(\'partner_requests\','+r.id+',\'accepted\')">Accepted</button>'
+    +   '<button class="tb-btn outline" style="font-size:10px;padding:3px 8px" onclick="_setLeadStatus(\'partner_requests\','+r.id+',\'declined\')">Declined</button>'
+    + '</div>'
+    + '</div>';
+}
+
+function _apiRow(r){
+  return '<div style="border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:8px;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px">'
+    + '<div><a href="mailto:'+_leadEsc(r.email)+'" style="color:var(--dark);font-weight:500;font-size:13px">'+_leadEsc(r.email)+'</a>'
+    +   '<span style="font-size:10px;color:var(--muted);margin-left:8px">'+_leadDate(r.created_at)+'</span></div>'
+    + '<div style="white-space:nowrap">'
+    +   '<span style="display:inline-block;font-family:\'Roboto Condensed\',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:100px;background:var(--light);color:var(--muted);margin-right:6px">'+_leadEsc(r.status||'new')+'</span>'
+    +   '<button class="tb-btn outline" style="font-size:10px;padding:3px 8px" onclick="_setLeadStatus(\'api_leads\','+r.id+',\'contacted\')">Contacted</button>'
+    + '</div>'
+    + '</div>';
+}
+
+async function loadLeads(){
+  if(!db) return;
+  var pList = document.getElementById('leads-partners-list');
+  var aList = document.getElementById('leads-api-list');
+  try {
+    var pRes = await db.from('partner_requests').select('*').order('created_at',{ascending:false});
+    var partners = pRes.data || [];
+    if(pRes.error){ console.error('partner_requests read', pRes.error); pList.innerHTML='<div style="color:var(--red)">Could not load podcaster requests. Did you run the leads SQL?</div>'; }
+    else {
+      document.getElementById('m-partners-total').textContent = partners.length;
+      document.getElementById('m-partners-new').textContent = partners.filter(function(r){return (r.status||'new')==='new';}).length;
+      pList.innerHTML = partners.length ? partners.map(_partnerRow).join('') : '<div style="color:var(--muted)">No podcaster submissions yet.</div>';
+    }
+  } catch(e){ console.error(e); pList.innerHTML='<div style="color:var(--red)">Error loading.</div>'; }
+
+  try {
+    var aRes = await db.from('api_leads').select('*').order('created_at',{ascending:false});
+    var leads = aRes.data || [];
+    if(aRes.error){ console.error('api_leads read', aRes.error); aList.innerHTML='<div style="color:var(--red)">Could not load API leads. Did you run the leads SQL?</div>'; }
+    else {
+      document.getElementById('m-api-total').textContent = leads.length;
+      document.getElementById('m-api-new').textContent = leads.filter(function(r){return (r.status||'new')==='new';}).length;
+      aList.innerHTML = leads.length ? leads.map(_apiRow).join('') : '<div style="color:var(--muted)">No API waitlist signups yet.</div>';
+    }
+  } catch(e){ console.error(e); aList.innerHTML='<div style="color:var(--red)">Error loading.</div>'; }
+}
+
+
+// ── HOMEPAGE CONTROL ──────────────────────────────────────────
+function loadHomepagePanel() {
+  const approved = stories.filter(s => s.status === 'approved');
+  const featured = approved.find(s => s.featured) || approved[0];
+  
+  // Update ticker preview
+  const tickerEl = document.getElementById('ticker-stories');
+  if (tickerEl) {
+    if (approved.length === 0) {
+      tickerEl.textContent = 'No approved stories yet';
+    } else {
+      tickerEl.innerHTML = approved.slice(0,5).map(s => 
+        `<div style="padding:3px 0;border-bottom:1px solid var(--border);font-size:10px;color:var(--dark)">▶ ${s.show_name} — ${s.headline}</div>`
+      ).join('');
+    }
+  }
+  if (featured) {
+    document.getElementById('hero-title').textContent = featured.headline;
+    document.getElementById('hero-topic').textContent = `${featured.topic || 'Breaking'} · ${featured.show_name}`;
+    document.getElementById('hero-meta').textContent = `${featured.show_name} · ${timeAgo(featured.created_at)}`;
+    heroStoryId = featured.id;
+  }
+  if (approved[1]) {
+    document.getElementById('sec1-title').textContent = approved[1].headline;
+    document.getElementById('sec1-topic').textContent = approved[1].topic || '';
+  }
+  if (approved[2]) {
+    document.getElementById('sec2-title').textContent = approved[2].headline;
+    document.getElementById('sec2-topic').textContent = approved[2].topic || '';
+  }
+  // Hero picker list
+  const list = document.getElementById('hero-story-list');
+  if (list) {
+    list.innerHTML = approved.length === 0 
+      ? '<div style="padding:16px;font-size:11px;color:var(--muted)">No approved stories yet. Approve stories from the Story Queue first.</div>'
+      : approved.slice(0, 30).map(s => `
+      <div class="control-story-item${s.id === heroStoryId ? ' selected-hero' : ''}" onclick="setHero(${s.id})" style="cursor:pointer">
+        <div class="csi-show">${s.show_name} · ${s.topic || ''}</div>
+        <div class="csi-title">${s.headline}</div>
+      </div>`).join('');
+  }
+}
+
+async function setHero(id) {
+  heroStoryId = id;
+  try {
+    await db.from('stories').update({ featured: false }).neq('id', id);
+    await db.from('stories').update({ featured: true }).eq('id', id);
+    stories = stories.map(s => ({...s, featured: s.id === id}));
+    loadHomepagePanel();
+    showToast('Hero story updated on egleze.com ✓');
+  } catch(e) { showToast('Error', 'red'); }
+}
+
+function saveHomepageSettings() {
+  showToast('Homepage settings saved ✓');
+}
+
+// ── CATEGORIES PANEL ──────────────────────────────────────────
+function renderCategories() {
+  const grid = document.getElementById('categories-grid');
+  grid.innerHTML = CATEGORIES.map(c => {
+    const catStories = stories.filter(s => 
+      (s.topic === c.id || (s.categories && s.categories.includes(c.id))) && s.status === 'approved');
+    const featured = catStories[0];
+    return `
+    <div class="category-card">
+      <div class="cat-card-header">
+        <span class="cat-icon">${c.icon}</span>
+        <span class="cat-name">${c.id}</span>
+        <span class="cat-count">${catStories.length} stories</span>
+      </div>
+      <div class="detail-label" style="margin-bottom:4px">Featured Story</div>
+      <div class="cat-featured-slot">
+        ${featured
+          ? `<div class="cat-slot-story">${featured.headline}</div>`
+          : `<div class="cat-slot-label">No approved stories in this category yet</div>`}
+      </div>
+      <button class="cat-btn" onclick="filterByCategory('${c.id}')">View ${c.id} Stories →</button>
+    </div>`;
+  }).join('');
+}
+
+// ── NEWSCAST ──────────────────────────────────────────────────
+let currentScript = '';
+function generateNewscast() {
+  const approved = stories.filter(s => s.status === 'approved').slice(0, 6);
+  if (approved.length < 5) { showToast('Need at least 5 approved stories', 'red'); return; }
+  const today = new Date().toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  currentScript = `Good morning. I'm [Your Name] and this is Egleze — your daily podcast intelligence briefing. Today is ${today}.\n\n`;
+  let html = `<div class="script-block"><div class="script-block-label">Opening</div><div class="script-text">Good morning. I'm [Your Name] and this is Egleze — your daily podcast intelligence briefing. Today is ${today}. In the next five minutes — the ${approved.length} most important things said on podcasts.</div></div>`;
+  const intros = ['First —','Next —','Also today —','Meanwhile —','And —','Finally —'];
+  approved.forEach((s, i) => {
+    const line = `${intros[i]} ${s.show_name}. ${s.headline.replace(/"/g,'').replace(/^[^:]+:\s/,'')}. ${(s.summary||'').split('.')[0]}.`;
+    currentScript += line + '\n\n';
+    html += `<div class="script-block"><div class="script-block-label">Story ${i+1} — ${s.show_name}</div><div class="script-text">${line}</div></div>`;
+  });
+  const closing = `That's your Egleze briefing for ${today}. All clips and full episode links are live now at egleze.com. Subscribe to get tomorrow's briefing in your inbox at 8AM. Where podcasts become news.`;
+  currentScript += closing;
+  html += `<div class="script-block"><div class="script-block-label">Closing</div><div class="script-text">${closing}</div></div>`;
+  document.getElementById('script-body').innerHTML = html;
+  document.getElementById('script-modal').classList.add('open');
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(currentScript).then(() => showToast('Script copied to clipboard ✓'));
+}
+
+async function saveNewscast() {
+  if (!db || !currentScript) return;
+  try {
+    const approved = stories.filter(s => s.status === 'approved').slice(0, 6);
+    await db.from('newscasts').upsert({
+      date: new Date().toISOString().split('T')[0],
+      script: currentScript,
+      status: 'script_ready',
+      story_ids: approved.map(s => s.id),
+      created_at: new Date().toISOString()
+    }, { onConflict: 'date' });
+    document.getElementById('script-modal').classList.remove('open');
+    showToast('Newscast saved to database ✓');
+  } catch(e) { showToast('Error saving', 'red'); }
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function scoreClass(score) {
+  const s = parseFloat(score) || 0;
+  if (s >= 8) return 'score-high';
+  if (s >= 6) return 'score-mid';
+  return 'score-low';
+}
+function statusColor(status) {
+  if (status === 'approved') return 'var(--green)';
+  if (status === 'rejected') return 'var(--red)';
+  return 'var(--muted)';
+}
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((new Date() - new Date(dateStr)) / 60000);
+  if (diff < 60) return `${diff}m ago`;
+  if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
+  return `${Math.floor(diff/1440)}d ago`;
+}
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type === 'red' ? ' red' : '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- INVITE USER MODAL (admin-only) -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-invite-user">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Invite User</div>
+        <div class="modal-sub">Sends a sign-in link by email. They get dashboard access immediately after signing in.</div>
+      </div>
+      <button class="modal-close" onclick="closeInviteUserModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf-row">
+        <label class="mf-label">Email <span class="mf-req">*</span></label>
+        <input type="email" class="mf-input" id="iu-email" placeholder="someone@example.com" autocomplete="email">
+      </div>
+      <div class="mf-row">
+        <label class="mf-label">Role <span class="mf-req">*</span></label>
+        <div style="display:flex;gap:14px;margin-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+            <input type="radio" name="iu-role" value="approver" checked> Approver
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+            <input type="radio" name="iu-role" value="admin"> Admin
+          </label>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.5">
+          <strong>Approver</strong> · can approve, reject, edit topic/source URL/clip times only<br>
+          <strong>Admin</strong> · full access including managing users
+        </div>
+      </div>
+      <div class="mf-row">
+        <label class="mf-label">Note (optional)</label>
+        <input type="text" class="mf-input" id="iu-note" placeholder="e.g. Maria — story approver">
+      </div>
+      <div id="iu-error" style="display:none;color:var(--red);font-size:11px;padding:8px 10px;background:#fce4e4;border-radius:2px;margin-top:6px"></div>
+      <div id="iu-success" style="display:none;color:#1d6e2d;font-size:11px;padding:8px 10px;background:#e7f5ea;border-radius:2px;margin-top:6px"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="tb-btn outline" onclick="closeInviteUserModal()">Cancel</button>
+      <button class="tb-btn" id="iu-send-btn" onclick="submitInviteUser()">Send Invite</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── INVITE USER MODAL handlers ─────────────────────────────────
+function openInviteUserModal() {
+  document.getElementById('iu-email').value = '';
+  document.getElementById('iu-note').value = '';
+  document.querySelector('input[name="iu-role"][value="approver"]').checked = true;
+  document.getElementById('iu-error').style.display = 'none';
+  document.getElementById('iu-success').style.display = 'none';
+  document.getElementById('iu-send-btn').disabled = false;
+  document.getElementById('iu-send-btn').textContent = 'Send Invite';
+  document.getElementById('modal-invite-user').classList.add('open');
+  setTimeout(() => document.getElementById('iu-email').focus(), 100);
+}
+function closeInviteUserModal() {
+  document.getElementById('modal-invite-user').classList.remove('open');
+}
+async function submitInviteUser() {
+  const email = (document.getElementById('iu-email').value || '').trim();
+  const role = (document.querySelector('input[name="iu-role"]:checked') || {}).value;
+  const note = (document.getElementById('iu-note').value || '').trim();
+  const errEl = document.getElementById('iu-error');
+  const okEl = document.getElementById('iu-success');
+  const btn = document.getElementById('iu-send-btn');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    errEl.textContent = 'Enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (role !== 'admin' && role !== 'approver') {
+    errEl.textContent = 'Select a role.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    // Get current session for the bearer token
+    const { data: sess } = await window.egDashboardAuth.sb.auth.getSession();
+    const token = sess && sess.session && sess.session.access_token;
+    if (!token) throw new Error('Not signed in');
+
+    const resp = await fetch('/api/invite-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ email, role, note })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+
+    okEl.textContent = data.message || 'Invite sent.';
+    okEl.style.display = 'block';
+    btn.textContent = 'Sent ✓';
+    setTimeout(closeInviteUserModal, 2000);
+  } catch (e) {
+    console.warn('[invite] failed', e);
+    errEl.textContent = 'Failed: ' + (e.message || 'unknown error');
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Send Invite';
+  }
+}
+</script>
+</body>
+</html>
