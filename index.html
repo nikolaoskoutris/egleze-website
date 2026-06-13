@@ -2923,12 +2923,17 @@ document.querySelector('.modal-btn').addEventListener('click', async function() 
     alert('Please enter a valid email address.'); return;
   }
   try {
-    const { error } = await db.from('subscribers').insert([{ name, email, created_at: new Date().toISOString() }]);
-    if (error) throw error;
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'homepage_modal' })
+    });
+    const data = await res.json().catch(function(){ return {}; });
+    if (!res.ok || !data.ok) throw new Error('subscribe failed');
     document.querySelector('.modal').innerHTML = `
       <div style="text-align:center;padding:40px 20px">
-        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);margin-bottom:10px">You're in. ✓</div>
-        <div style="font-size:13px;color:var(--muted)">Your first Egleze Daily is on its way.</div>
+        <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);margin-bottom:10px">Almost there. ✓</div>
+        <div style="font-size:13px;color:var(--muted)">Check your inbox to confirm your subscription.</div>
       </div>`;
   } catch(e) {
     alert('Something went wrong. Please try again.'); console.log(e);
@@ -4355,19 +4360,13 @@ async function bannerSubscribe() {
   if (!email || !email.includes('@')) return;
   try {
     // Use direct fetch to Supabase REST API — works without login
-    const res = await fetch('https://kerijdhiasrvaxssjqqg.supabase.co/rest/v1/subscribers', {
+    const res = await fetch('/api/subscribe', {
       method: 'POST',
-      headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates',
-        'Accept-Profile': 'public',
-        'Content-Profile': 'public'
-      },
-      body: JSON.stringify({email, source:'launch_banner', status:'active', created_at: new Date().toISOString()})
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'launch_banner' })
     });
-    if (res.ok || res.status === 409 || res.status === 201) {
+    const data = await res.json().catch(function(){ return {}; });
+    if (res.ok && data.ok) {
       const emailInput = document.getElementById('lb-email');
       const notifyBtn = document.querySelector('[onclick="bannerSubscribe()"]');
       if (emailInput) emailInput.value = '';
@@ -4393,22 +4392,16 @@ async function digestSubscribe() {
   }
   if (btn) { btn.disabled = true; btn.textContent = 'Subscribing…'; }
   try {
-    var res = await fetch('https://kerijdhiasrvaxssjqqg.supabase.co/rest/v1/subscribers', {
+    var res = await fetch('/api/subscribe', {
       method: 'POST',
-      headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg',
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates',
-        'Accept-Profile': 'public',
-        'Content-Profile': 'public'
-      },
-      body: JSON.stringify({ email: email, source: 'homepage_digest', status: 'active', created_at: new Date().toISOString() })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'homepage_digest' })
     });
-    if (res.ok || res.status === 201 || res.status === 409) {
+    var data = await res.json().catch(function(){ return {}; });
+    if (res.ok && data.ok) {
       input.value = '';
       if (btn) { btn.textContent = "✓ You're in"; btn.style.background = '#1a7a2a'; }
-      if (note) note.textContent = 'Check your inbox — your first Egleze Daily is on its way.';
+      if (note) note.textContent = 'Almost there — check your inbox to confirm your subscription.';
     } else {
       var t = await res.text(); console.log('[digest] subscribe error', res.status, t);
       if (btn) { btn.disabled = false; btn.textContent = 'Subscribe'; }
