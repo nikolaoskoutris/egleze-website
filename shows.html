@@ -29,10 +29,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:wght@300;400;500;600&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--red:#bb1919;--dark:#111;--mid:#444;--muted:#888;--light:#f5f5f0;--border:#e0e0da;--white:#fff}
+:root{--red:#bb1919;--dark:#141210;--ink:#141210;--mid:#444;--muted:#7a756e;--light:#f5f1e8;--border:#e3ddd0;--white:#fff}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);min-height:100vh}
-.site-header{background:#fff;border-bottom:1px solid var(--border);border-top:3px solid var(--red);position:sticky;top:0;z-index:100}
+.site-header{background:var(--light);border-bottom:1px solid var(--border);border-top:3px solid var(--red);position:sticky;top:0;z-index:100}
 .header-inner{max-width:1400px;margin:0 auto;padding:0 32px;height:52px;display:flex;align-items:center;gap:16px}
 .logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:-0.4px;color:var(--dark);text-decoration:none}
 .logo span{color:var(--red)}
@@ -94,14 +94,52 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
 .show-link{font-size:10px;color:var(--muted);text-decoration:none;position:relative;z-index:2}
 .show-link:hover{color:var(--dark)}
 .no-results{text-align:center;padding:60px 20px;color:var(--muted);display:none}
-.site-footer{background:var(--dark);padding:40px 32px}
-.footer-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
-.footer-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:-0.5px;color:#fff}
-.footer-logo span{color:var(--red)}
-.footer-links{display:flex;gap:16px;flex-wrap:wrap}
-.footer-links a{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);text-decoration:none}
-.footer-links a:hover{color:#fff}
-.footer-copy{font-size:11px;color:rgba(255,255,255,.3);width:100%}
+/* ── Newsletter digest box ── */
+.sub-band{background:#100e0c;padding:0}
+.sub-inner{max-width:1284px;margin:0 auto;padding:34px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.sub-copy{flex:1;min-width:240px}
+.sub-copy h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:800;color:#fff;margin:0 0 4px}
+.sub-copy p{font-size:13px;color:rgba(245,241,232,.6);margin:0}
+.sub-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sub-form input[type=email]{width:280px;max-width:100%;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;background:#fff;color:var(--ink);border:1px solid var(--border);outline:none}
+.sub-form input[type=email]:focus{border-color:var(--red)}
+.sub-form button{background:var(--red);color:#fff;border:none;padding:12px 24px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;cursor:pointer;white-space:nowrap}
+.sub-form button:disabled{opacity:.6;cursor:not-allowed}
+.sub-msg{flex-basis:100%;font-size:12px;color:rgba(245,241,232,.7);margin-top:4px;min-height:0}
+.sub-msg.ok{color:#9ee37d}
+.sub-msg.err{color:#ff8b8b}
+@media(max-width:680px){.sub-inner{flex-direction:column;align-items:flex-start;gap:16px}}
+
+.eg-footer{background:#0e0a07;color:#bcb09a;padding:48px 0 0;margin-top:60px;border-top:3px solid var(--red, #bb1919)}
+.eg-footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;max-width:1284px;margin:0 auto;padding:0 28px 36px;border-bottom:1px solid #2a2018}
+.eg-footer .eg-brand{display:flex;flex-direction:column;gap:14px}
+.eg-footer .eg-brand-mark{display:flex;align-items:center;gap:10px}
+.eg-footer .eg-brand-e{width:38px;height:38px;background:var(--red, #bb1919);color:#fff;font-family:'Playfair Display',serif;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.eg-footer .eg-brand-name{font-family:'Playfair Display',serif;font-size:26px;color:#fff;letter-spacing:-.5px;font-weight:700}
+.eg-footer .eg-brand-tag{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#d6c79e;line-height:1.45}
+.eg-footer .eg-brand-blurb{font-size:12px;line-height:1.6;color:#9a8e7a;max-width:340px}
+.eg-footer .eg-col h4{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:#fff;text-transform:uppercase;margin-bottom:14px;font-weight:700}
+.eg-footer .eg-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.eg-footer .eg-col a{color:#bcb09a;text-decoration:none;font-size:12px;font-family:'DM Sans',sans-serif;transition:color .15s}
+.eg-footer .eg-col a:hover{color:#fff}
+.eg-footer .eg-social{display:flex;gap:10px;margin-top:16px}
+.eg-footer .eg-social a{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#1f1814;color:#d6c79e;border-radius:50%;font-size:13px;transition:all .15s}
+.eg-footer .eg-social a:hover{background:var(--red, #bb1919);color:#fff}
+.eg-footer .eg-fineprint{max-width:1284px;margin:0 auto;padding:24px 28px 32px;font-size:11px;color:#7a6f5d;line-height:1.7}
+.eg-footer .eg-fineprint .eg-disclaimer{margin-bottom:14px;font-style:italic;color:#9a8e7a}
+.eg-footer .eg-bottombar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding-top:14px;border-top:1px solid #2a2018}
+.eg-footer .eg-bottombar .eg-copy{color:#9a8e7a}
+.eg-footer .eg-bottombar nav{display:flex;gap:18px;flex-wrap:wrap}
+.eg-footer .eg-bottombar nav a{color:#7a6f5d;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;font-family:'Roboto Condensed',sans-serif;text-decoration:none}
+.eg-footer .eg-bottombar nav a:hover{color:#fff}
+@media (max-width:920px){
+  .eg-footer-grid{grid-template-columns:1fr 1fr;gap:24px}
+  .eg-footer .eg-brand{grid-column:1/-1}
+  .eg-footer .eg-bottombar{justify-content:flex-start}
+}
+@media (max-width:520px){
+  .eg-footer-grid{grid-template-columns:1fr}
+}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .show-card{animation:fadeUp .35s ease both}
 @media(max-width:768px){
@@ -120,7 +158,6 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
     <nav class="header-nav">
       <a href="https://egleze.com">Home</a>
       <a href="/shows.html" class="active">Shows</a>
-      <a href="https://egleze.beehiiv.com/subscribe" class="header-cta">Subscribe Free</a>
     </nav>
   </div>
 </header>
@@ -160,17 +197,105 @@ body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--light);
   <div class="no-results" id="no-results">No shows found</div>
 </div>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <div class="footer-logo"><span>E</span>gleze</div>
-    <div class="footer-links">
-      <a href="https://egleze.com">Home</a>
-      <a href="/shows.html">Shows</a>
-      <a href="/legal.html#editorial">Editorial Notice</a>
-      <a href="/legal.html#privacy">Privacy Policy</a>
-      <a href="#" onclick="event.preventDefault();openContactModal()">Contact</a>
+<section class="sub-band">
+  <div class="sub-inner">
+    <div class="sub-copy">
+      <h3>The Egleze Daily</h3>
+      <p>The most important moments from independent podcasts — in your inbox every morning.</p>
     </div>
-    <div class="footer-copy">© 2026 Egleze Limited · Registered in Ireland · The most important moments from independent podcasts, surfaced daily</div>
+    <div class="sub-form">
+      <input type="email" id="digest-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address">
+      <button type="button" id="digest-btn">Subscribe</button>
+      <div class="sub-msg" id="digest-msg"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="eg-footer">
+  <div class="eg-footer-grid">
+    <div class="eg-brand">
+      <a href="/" class="eg-brand-mark" style="text-decoration:none;color:inherit">
+        <div class="eg-brand-e">E</div>
+        <div class="eg-brand-name">Egleze</div>
+      </a>
+      <div class="eg-brand-tag">The most important moments from independent shows and podcasts, surfaced daily.</div>
+      <div class="eg-brand-blurb">
+        Egleze (from the Greek <em>Ekklisia</em>) is an international news institution dedicated to the curation and reporting of long-form digital media — extracting the world's most important spoken-word revelations into a permanent, searchable record.
+      </div>
+      <div class="eg-social" aria-label="Egleze on social platforms">
+        <a href="https://x.com/egleze_news" target="_blank" rel="noopener" title="X" aria-label="Egleze on X">𝕏</a>
+        <a href="https://www.youtube.com/@Egleze" target="_blank" rel="noopener" title="YouTube" aria-label="Egleze on YouTube">▶</a>
+        <a href="https://www.instagram.com/eglezemedia/" target="_blank" rel="noopener" title="Instagram" aria-label="Egleze on Instagram">◉</a>
+        <a href="https://www.tiktok.com/@egleze.media" target="_blank" rel="noopener" title="TikTok" aria-label="Egleze on TikTok">♪</a>
+        <a href="https://www.linkedin.com/company/egleze-the-podcast-intelligence-network/" target="_blank" rel="noopener" title="LinkedIn" aria-label="Egleze on LinkedIn">in</a>
+        <a href="#" title="Substack" aria-label="Egleze on Substack (coming soon)">✍</a>
+      </div>
+    </div>
+
+    <div class="eg-col">
+      <h4>The Newsroom</h4>
+      <ul>
+        <li><a href="/about">About Egleze</a></li>
+        <li><a href="/legal.html#editorial">Editorial Standards</a></li>
+        <li><a href="/legal.html#editorial">Corrections Policy</a></li>
+        <li><a href="/shows.html">Shows We Cover</a></li>
+        <li><a href="mailto:editorial@egleze.com">Editorial Desk</a></li>
+        <li><a href="#" href="mailto:hello@egleze.com">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="eg-col">
+      <h4>Sections</h4>
+      <ul>
+        <li><a href="/topic/ai-tech">AI &amp; Tech</a></li>
+        <li><a href="/topic/health-longevity-biohacking">Health, Longevity &amp; Biohacking</a></li>
+        <li><a href="/topic/politics">Politics</a></li>
+        <li><a href="/topic/geopolitics">Geopolitics</a></li>
+        <li><a href="/topic/money">Money</a></li>
+        <li><a href="/topic/military">Military</a></li>
+        <li><a href="/topic/history">History</a></li>
+        <li><a href="https://egleze.com">All Topics →</a></li>
+      </ul>
+    </div>
+
+    <div class="eg-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/legal.html#privacy">Privacy Policy</a></li>
+        <li><a href="/legal.html#cookie">Cookie Policy</a></li>
+        <li><a href="/legal.html#terms">Terms of Service</a></li>
+        <li><a href="/legal.html#copyright">Copyright Policy</a></li>
+        <li><a href="/legal.html#takedown">Takedown Requests</a></li>
+        <li><a href="/legal.html#gdpr">GDPR Notice</a></li>
+        <li><a href="mailto:press@egleze.com">Press Inquiries</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── INSTALL APP — QR → /install.html (static, no rewrite needed) ──────── -->
+  <div class="eg-install" style="max-width:1284px;margin:0 auto;padding:26px 28px;display:flex;align-items:center;gap:22px;border-bottom:1px solid #2a2018;flex-wrap:wrap">
+    <a href="/install.html" aria-label="Open the Egleze install guide" style="background:#fff;padding:8px;border-radius:6px;width:104px;height:104px;flex-shrink:0;display:block">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" shape-rendering="crispEdges" style="width:100%;height:100%;display:block"><path fill="#ffffff" d="M0 0h29v29H0z"/><path stroke="#0e0a07" d="M0 0.5h7m2 0h1m5 0h2m2 0h2m1 0h7M0 1.5h1m5 0h1m2 0h1m10 0h1m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h2m1 0h1m2 0h1m1 0h1m1 0h2m2 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h1m3 0h1m3 0h2m2 0h1m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h3m2 0h3m1 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h1m1 0h2m1 0h4m1 0h1m3 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m2 0h3m1 0h1m3 0h2M0 8.5h1m1 0h5m2 0h1m2 0h1m1 0h2m1 0h1m1 0h1m2 0h5M1 9.5h1m1 0h2m2 0h3m5 0h6m1 0h3m3 0h1M0 10.5h4m1 0h3m1 0h1m2 0h1m7 0h5M2 11.5h1m2 0h1m3 0h4m1 0h1m1 0h1m1 0h1m2 0h5m1 0h1M2 12.5h3m1 0h3m3 0h1m3 0h2m1 0h1m5 0h2M3 13.5h1m4 0h4m1 0h3m1 0h8m3 0h1M3 14.5h1m1 0h5m3 0h4m3 0h1m3 0h3M1 15.5h1m1 0h2m8 0h1m1 0h1m2 0h3m2 0h1m3 0h1M1 16.5h3m2 0h2m1 0h1m1 0h1m2 0h2m1 0h3m1 0h1m3 0h2M0 17.5h4m1 0h1m1 0h2m1 0h2m3 0h5m1 0h4m1 0h1m1 0h1M0 18.5h1m1 0h5m2 0h1m2 0h1m4 0h1m2 0h1m1 0h2m2 0h1M0 19.5h1m1 0h1m1 0h2m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h5m2 0h1M0 20.5h1m2 0h1m1 0h2m1 0h1m2 0h2m4 0h1m1 0h6m1 0h3M8 21.5h1m1 0h2m1 0h3m1 0h2m1 0h1m3 0h5M0 22.5h7m2 0h1m1 0h5m2 0h3m1 0h1m1 0h3M0 23.5h1m5 0h1m1 0h2m1 0h3m1 0h2m1 0h3m3 0h1m3 0h1M0 24.5h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h5m1 0h1m1 0h1M0 25.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h2m2 0h1m2 0h2m4 0h2M0 26.5h1m1 0h3m1 0h1m1 0h1m3 0h1m1 0h3m2 0h9M0 27.5h1m5 0h1m2 0h1m4 0h3m1 0h1m1 0h2m1 0h3m1 0h1M0 28.5h7m1 0h1m2 0h1m1 0h2m2 0h1m1 0h1m2 0h3m1 0h1"/></svg>
+    </a>
+    <div style="flex:1;min-width:220px">
+      <div style="font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:#fff;text-transform:uppercase;margin-bottom:8px;font-weight:700">Read Egleze on your phone</div>
+      <div style="font-size:13px;line-height:1.6;color:#bcb09a;max-width:520px">Scan with your phone camera to add Egleze to your home screen — a fast, full-screen reading app, no app-store download needed. <a href="/install.html" style="color:#d6c79e;text-decoration:underline">Open the install guide →</a></div>
+    </div>
+  </div>
+
+  <div class="eg-fineprint">
+    <div class="eg-disclaimer">
+      The views expressed by podcast guests summarised on this platform are their own and do not represent the editorial stance of Egleze Limited. Short excerpts used for news reporting under fair use (17 U.S.C. § 107) and GDPR Article 85. Egleze maintains a 24-hour response policy for takedown and correction requests.
+    </div>
+    <div class="eg-bottombar">
+      <div class="eg-copy">© 2026 <strong style="color:#d6c79e">Egleze Limited</strong> · Registered in Ireland · All rights reserved</div>
+      <nav aria-label="Footer secondary navigation">
+        <a href="/about">About</a>
+        <a href="/legal.html">Legal</a>
+        <a href="#" href="mailto:hello@egleze.com">Contact</a>
+        <a href="/shows.html">Shows</a>
+      </nav>
+    </div>
   </div>
 </footer>
 
@@ -615,6 +740,26 @@ async function init(){
   }
 }
 init();
+
+// ── Newsletter digest box → /api/subscribe ──
+async function onDigestSubmit(){
+  var input=document.getElementById('digest-email');
+  var btn=document.getElementById('digest-btn');
+  var msg=document.getElementById('digest-msg');
+  var email=(input.value||'').trim().toLowerCase();
+  msg.className='sub-msg'; msg.textContent='';
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ msg.classList.add('err'); msg.textContent='Please enter a valid email.'; return; }
+  btn.disabled=true; var orig=btn.textContent; btn.textContent='Subscribing…';
+  try{
+    var resp=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'shows_page'})});
+    var data=await resp.json().catch(function(){return {};});
+    if(resp.ok&&data.ok){ msg.classList.add('ok'); msg.textContent='Almost there — check your inbox to confirm your subscription.'; input.value=''; if(typeof gtag==='function')gtag('event','newsletter_subscribe',{source:'shows_page'}); }
+    else{ msg.classList.add('err'); msg.textContent='Something went wrong — please try again.'; }
+  }catch(e){ msg.classList.add('err'); msg.textContent='Network error — please try again.'; }
+  finally{ btn.disabled=false; btn.textContent=orig; }
+}
+(function(){function wd(){var b=document.getElementById('digest-btn');if(b&&!b._w){b._w=1;b.addEventListener('click',onDigestSubmit);}var i=document.getElementById('digest-email');if(i&&!i._w){i._w=1;i.addEventListener('keydown',function(e){if(e.key==='Enter')onDigestSubmit();});}}if(document.readyState!=='loading')wd();else document.addEventListener('DOMContentLoaded',wd);})();
+
 </script>
 </body>
 </html>
