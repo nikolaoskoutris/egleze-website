@@ -211,7 +211,7 @@ a{color:inherit}
 .not-found a{display:inline-block;background:var(--red);color:#fff;padding:10px 20px;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-decoration:none}
 
 /* ── Clip player modal (ported from index) ── */
-.cp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9999;display:none;align-items:center;justify-content:center;transition:background .25s ease}
+.cp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9000;display:none;align-items:center;justify-content:center;transition:background .25s ease}
 .cp-overlay.open{display:flex;background:rgba(0,0,0,.7)}
 .cp-modal{background:var(--white);width:min(720px,92vw);max-height:90vh;overflow-y:auto;position:relative;transform:translateY(20px);opacity:0;transition:transform .3s ease,opacity .25s ease;border:1px solid var(--border)}
 .cp-overlay.open .cp-modal{transform:translateY(0);opacity:1}
@@ -1179,6 +1179,7 @@ function closeClipPlayer(event) {
 
 // Escape closes clip player
 document.addEventListener("keydown", function(e){ var ov=document.getElementById("cp-overlay"); if(e.key==="Escape"&&ov&&ov.classList.contains("open")) closeClipPlayer({type:"key"}); });
+(function(){ var cb=document.getElementById("cp-close-btn"); if(cb) cb.addEventListener("click", function(){ closeClipPlayer(); }); })();
 
 async function onDigestSubmit(){
   const emailInput = document.getElementById('digest-email');
