@@ -34,13 +34,22 @@ try {
   // keep INDEXABLE_TOPICS = TOPICS (current behavior) — never break sitemap
 }
 
+// MUST stay byte-for-byte identical to slugify() in api/story.js (full form)
+// and the homepage/shorts link builders. If these diverge, the sitemap emits
+// a story URL whose canonical points elsewhere → "not indexed" in Search
+// Console. The previous version stripped hyphens (Bankman-Fried -> bankmanfried)
+// while story.js kept them (bankman-fried), so hyphenated headlines never
+// matched their canonical. Keep \w (letters, digits, underscore) and hyphens.
 function slugify(s) {
-  return String(s || '')
+  if (!s) return '';
+  return String(s)
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/[\u2018\u2019]/g, "'")  // smart single quotes
+    .replace(/[\u201C\u201D]/g, '"')  // smart double quotes
+    .replace(/[^\w\s-]/g, '')         // strip non-word characters (keeps - and _)
+    .replace(/\s+/g, '-')             // spaces to hyphens
+    .replace(/-+/g, '-')              // collapse multiple hyphens
+    .replace(/^-|-$/g, '');           // trim leading/trailing hyphens
 }
 
 function xmlEscape(s) {

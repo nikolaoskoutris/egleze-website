@@ -14,17 +14,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Derive a URL-safe slug from a headline. Same algorithm used by shorts.html
 // and the homepage so slugs are consistent across the site.
-function slugify(text) {
+function slugify(text, opts) {
   if (!text) return '';
-  return String(text)
+  const base = String(text)
     .toLowerCase()
     .replace(/[\u2018\u2019]/g, "'")  // smart single quotes
     .replace(/[\u201C\u201D]/g, '"')  // smart double quotes
     .replace(/[^\w\s-]/g, '')         // strip non-word characters
     .replace(/\s+/g, '-')             // spaces to hyphens
     .replace(/-+/g, '-')              // collapse multiple hyphens
-    .replace(/^-|-$/g, '')            // trim leading/trailing hyphens
-    .substring(0, 80);                // cap at 80 chars
+    .replace(/^-|-$/g, '');           // trim leading/trailing hyphens
+  // Canonical story slugs must match the FULL slug used in internal links and
+  // the sitemap; truncating here produced a canonical that pointed at a
+  // different URL than the one Google crawled → "not indexed". Pass {full:true}
+  // for story permalinks. Short slugs (topic/show) keep the 80-char cap.
+  return (opts && opts.full) ? base : base.substring(0, 80);
 }
 
 // Escape HTML special chars to prevent XSS via story content.
@@ -95,7 +99,7 @@ async function fetchShowArtwork(showName) {
 function renderStoryHtml(story, artworkUrl) {
   const title = story.headline || 'Egleze Story';
   const description = story.summary || story.headline || '';
-  const slug = slugify(title);
+  const slug = slugify(title, { full: true });
   const canonicalUrl = `https://egleze.com/story/${story.id}-${slug}`;
   const ogImage = artworkUrl || 'https://egleze.com/og-default.png';
   const datePublished = story.created_at || new Date().toISOString();
