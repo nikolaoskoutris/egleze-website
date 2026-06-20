@@ -96,14 +96,12 @@
       if (del.error) {
         set.add(value); syncAll(); emit();
         console.error('[egleze follows] unfollow failed:', del.error);
-        try { alert('UNFOLLOW DEBUG\ncode: ' + (del.error.code || '(none)') + '\nmessage: ' + (del.error.message || JSON.stringify(del.error))); } catch(_) {}
       }
     } else {
       var ins = await db.from('user_follows').insert({ user_id: user.id, follow_type: type, follow_value: value });
       if (ins.error && ins.error.code !== '23505') { // 23505 = already following (race)
         set.delete(value); syncAll(); emit();
         console.error('[egleze follows] follow failed:', ins.error);
-        try { alert('FOLLOW DEBUG\ncode: ' + (ins.error.code || '(none)') + '\nmessage: ' + (ins.error.message || JSON.stringify(ins.error)) + '\ndetails: ' + (ins.error.details || '') + '\nhint: ' + (ins.error.hint || '')); } catch(_) {}
       }
     }
   }
