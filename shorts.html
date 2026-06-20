@@ -1,1260 +1,392 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-18MJKYD86Y"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-18MJKYD86Y');
-</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#0a0a0a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Egleze Shorts">
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-18MJKYD86Y');</script>
 <title>Egleze Shorts — Swipe through what experts are saying</title>
+<meta name="description" content="Swipe through the moments shaping the world — short clips from the best independent podcasts, with the full story and source episode one tap away.">
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@400;700;900&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--red:#bb1919;--red-deep:#8a1414;--gold:#d6c79e;--cream:#f5ede0;--ink:#1a1a1a;--bg:#0a0a0a;--panel:#161310}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{
-  height:100%;height:100dvh;background:var(--bg);color:#fff;
-  font-family:'DM Sans',system-ui,-apple-system,sans-serif;
-  overflow:hidden;position:fixed;inset:0;width:100%;
-}
-
-/* ─── FEED: vertical scroll-snap container ───────────────────────── */
-.feed{
-  position:absolute;inset:0;z-index:1;
-  overflow-y:scroll;scroll-snap-type:y mandatory;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;
-}
-.feed::-webkit-scrollbar{display:none}
-
-/* Each story is a full-screen snap slide */
-.story{
-  position:relative;width:100%;height:100dvh;
-  scroll-snap-align:start;scroll-snap-stop:always;
-  display:flex;flex-direction:column;
-  background:var(--bg);overflow:hidden;
-}
-/* a shell is an un-hydrated slide — full height for scroll-snap, but empty.
-   A subtle pulsing E keeps it from looking broken if the user lands on one
-   mid-hydration. */
-.story.shell{display:block}
-.story.shell::after{
-  content:"E";position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
-  width:48px;height:48px;border-radius:50%;background:var(--red);color:#fff;
-  font-family:'Playfair Display',serif;font-weight:900;font-size:28px;
-  display:flex;align-items:center;justify-content:center;opacity:.5;
-  animation:pulse 1.4s infinite;
-}
-
-/* ─── TOP CHROME: back + menu ────────────────────────────────────── */
-.top-chrome{
-  position:absolute;top:0;left:0;right:0;z-index:20;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:max(env(safe-area-inset-top),12px) 12px 8px;
-  pointer-events:none;
-}
-.top-chrome > *{pointer-events:auto}
-.chrome-btn{
-  width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.5);
-  display:flex;align-items:center;justify-content:center;color:#fff;
-  border:none;cursor:pointer;backdrop-filter:blur(10px);font-size:18px;
-  transition:transform .15s ease;
-}
-.chrome-btn:active{transform:scale(0.9)}
-
-/* ─── VIDEO ZONE (top, clean, no overlay) ────────────────────────── */
-.video-zone{
-  position:relative;width:100%;
-  height:58%;flex-shrink:0;
-  background:#000;
-  display:flex;align-items:center;justify-content:center;
-}
-.story-video{
-  width:100%;height:100%;object-fit:contain;background:#000;display:block;
-}
-.story-video::-webkit-media-controls{display:none!important}
-.story-video::-webkit-media-controls-enclosure{display:none!important}
-/* Show artwork poster while video loads / for audio-only fallback */
-.video-poster{
-  position:absolute;inset:0;background-size:cover;background-position:center;
-  opacity:1;transition:opacity .3s ease;pointer-events:none;
-}
-.story.video-ready .video-poster{opacity:0}
-.video-poster.fallback{
-  background:linear-gradient(135deg,#241a10,#0f0d0a);
-  display:flex;align-items:center;justify-content:center;
-}
-/* clip duration badge */
-.clip-dur{
-  position:absolute;bottom:10px;left:12px;z-index:4;
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(0,0,0,0.6);color:#fff;
-  font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.5px;
-  padding:4px 9px;border-radius:3px;backdrop-filter:blur(10px);
-}
-/* center pause/play hint */
-.play-hint{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  z-index:5;width:64px;height:64px;border-radius:50%;
-  background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);
-  display:flex;align-items:center;justify-content:center;
-  font-size:30px;color:#fff;opacity:0;transition:opacity .2s ease;
-  pointer-events:none;
-}
-.story.paused .play-hint{opacity:1}
-/* video progress bar at bottom of video zone */
-.v-progress{
-  position:absolute;bottom:0;left:0;right:0;height:3px;
-  background:rgba(255,255,255,0.18);z-index:4;
-}
-.v-progress-fill{height:100%;background:var(--red);width:0%;transition:width .15s linear}
-
-/* tap zone covers just the video so taps = pause/play */
-.tap-zone{
-  position:absolute;inset:0;z-index:3;cursor:pointer;background:transparent;
-}
-
-/* ─── EDITORIAL ZONE (middle, HTML text) ─────────────────────────── */
-.edit-zone{
-  flex:1;min-height:0;
-  padding:14px 16px 0;
-  display:flex;flex-direction:column;gap:0;
-  overflow:hidden;
-}
-.byline{
-  display:flex;align-items:flex-start;gap:9px;align-self:flex-start;
-  margin-bottom:12px;max-width:100%;
-}
-.byline .art{
-  width:32px;height:32px;border-radius:6px;flex-shrink:0;
-  background-size:cover;background-position:center;background-color:#2a2018;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Playfair Display',serif;font-weight:800;font-size:13px;color:#d8c9a8;
-}
-.byline .bl-txt{min-width:0}
-.byline .bl-show{
-  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.2px;
-  color:#e3dac9;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.byline .bl-ep{
-  font-family:'DM Sans',sans-serif;font-size:11px;color:#8f877a;line-height:1.3;margin-top:2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.cat-line{
-  display:flex;align-items:center;gap:6px;margin-bottom:9px;
-}
-.cat-line .bar{width:3px;height:13px;background:var(--red)}
-.cat-line .cat{
-  font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--red);font-weight:700;
-}
-.headline{
-  font-family:'Playfair Display',serif;font-weight:700;font-size:22px;line-height:1.18;
-  letter-spacing:-.3px;margin-bottom:12px;color:#fff;
-}
-.quote{
-  display:flex;gap:9px;align-items:flex-start;
-}
-.quote .bar{width:3px;align-self:stretch;background:var(--red);flex-shrink:0;border-radius:0}
-.quote .txt{
-  font-family:'Playfair Display',serif;font-style:italic;font-size:15px;line-height:1.35;
-  color:var(--cream);
-}
-
-/* ─── ACTION ROW (bottom strip, horizontal) ──────────────────────── */
-.action-row{
-  flex-shrink:0;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;
-  border-top:0.5px solid rgba(255,255,255,0.1);
-}
-.action-left{display:flex;align-items:center;gap:22px}
-.act-btn{
-  background:none;border:none;color:#fff;cursor:pointer;padding:0;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .15s ease,color .15s ease;
-  -webkit-appearance:none;appearance:none;text-decoration:none;
-}
-.act-btn:active{transform:scale(0.85)}
-.act-btn svg{width:24px;height:24px;display:block}
-.act-btn.eg-bookmark.is-saved{color:var(--red)}
-.act-btn.eg-bookmark.is-saved svg path{fill:var(--red);stroke:var(--red)}
-/* permanent 'full story' cue (replaces the old invisible chevrons) */
-.full-story-cue{
-  display:flex;align-items:center;gap:5px;
-  color:#d8c9a8;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.4px;
-}
-.full-story-cue .chev{color:var(--red);font-size:17px;line-height:1;animation:nudge 1.6s ease-in-out infinite}
-@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(-4px)}}
-/* audio-only sound mode: keep the artwork poster visible over the playing (audible) video */
-.story.audio-only .video-poster{opacity:1}
-/* EGLEZE brand footer mark */
-.eg-mark{
-  flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:6px;
-  padding:8px 0 calc(max(env(safe-area-inset-bottom),10px) + 4px);
-  color:#6f685d;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:1px;
-}
-.eg-mark .eg-sq{
-  width:15px;height:15px;border-radius:3px;background:#000;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Playfair Display',serif;font-weight:800;font-size:10px;color:var(--red);
-}
-
-/* ─── EDITORIAL PANEL (slides in from right on swipe-left) ───────── */
-.edit-panel{
-  position:absolute;inset:0;z-index:30;background:var(--panel);
-  transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
-  display:flex;flex-direction:column;
-}
-.story.panel-open .edit-panel{transform:translateX(0)}
-.panel-head{
-  flex-shrink:0;display:flex;align-items:center;gap:7px;
-  padding:max(env(safe-area-inset-top),12px) 16px 12px;
-  border-bottom:0.5px solid rgba(255,255,255,0.08);
-}
-.panel-back{
-  display:flex;align-items:center;gap:6px;background:none;border:none;
-  color:#d8c9a8;font-family:'Roboto Condensed',sans-serif;font-size:13px;
-  letter-spacing:.5px;cursor:pointer;padding:0;
-}
-.panel-back svg{width:18px;height:18px}
-.panel-body{
-  flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:16px;
-}
-.panel-body::-webkit-scrollbar{display:none}
-.panel-headline{
-  font-family:'Playfair Display',serif;font-weight:700;font-size:21px;line-height:1.2;
-  margin-bottom:14px;color:#fff;
-}
-.panel-quote{
-  display:flex;gap:9px;align-items:flex-start;margin-bottom:18px;
-}
-.panel-quote .bar{width:3px;align-self:stretch;background:var(--red);flex-shrink:0}
-.panel-quote .txt{
-  font-family:'Playfair Display',serif;font-style:italic;font-size:16px;line-height:1.4;color:var(--cream);
-}
-.panel-label{
-  font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--red);margin-bottom:7px;
-}
-.panel-summary{
-  font-size:15px;line-height:1.6;color:#cdc6ba;margin-bottom:22px;
-}
-.panel-kp{list-style:none;margin:0 0 22px;padding:0}
-.panel-kp li{
-  display:flex;gap:9px;margin-bottom:11px;font-size:14px;line-height:1.45;color:#cdc6ba;
-}
-.panel-kp li::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--red);margin-top:7px}
-.panel-cta{
-  display:inline-flex;align-items:center;gap:7px;
-  background:var(--red);color:#fff;text-decoration:none;
-  font-family:'Roboto Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:700;
-  padding:12px 20px;border-radius:24px;margin-bottom:10px;
-}
-
-/* ─── LOADING + EMPTY ────────────────────────────────────────────── */
-.loading,.empty{
-  position:absolute;inset:0;z-index:50;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:24px;
-}
-.loading.hidden,.empty.hidden{display:none}
-.spinner-e{
-  width:54px;height:54px;border-radius:10px;background:#0e0a06;color:var(--red);
-  font-family:'Playfair Display',serif;font-weight:900;font-size:34px;
-  display:flex;align-items:center;justify-content:center;margin-bottom:18px;
-  animation:pulse 1.4s infinite;
-}
-@keyframes pulse{50%{opacity:0.55;transform:scale(0.94)}}
-.loading p{color:#8a8378;font-size:13px}
-.empty h2{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:10px}
-.empty p{color:#8a8378;font-size:14px;line-height:1.5;max-width:280px;margin-bottom:18px}
-.empty button{
-  background:var(--red);color:#fff;border:none;border-radius:24px;
-  font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:700;
-  padding:12px 24px;cursor:pointer;
-}
-
-/* ─── FILTER SHEET ───────────────────────────────────────────────── */
-.sheet-backdrop{
-  position:absolute;inset:0;z-index:60;background:rgba(0,0,0,0.6);
-  opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;
-}
-.sheet-backdrop.open{opacity:1;visibility:visible}
-.sheet{
-  position:absolute;bottom:0;left:0;right:0;z-index:61;
-  background:#0a0a0a;border-radius:20px 20px 0 0;
-  padding:14px 14px calc(max(env(safe-area-inset-bottom),12px) + 14px);
-  max-height:72vh;overflow-y:auto;
-  transform:translateY(100%);transition:transform .25s ease;
-  border-top:1px solid rgba(255,255,255,0.06);
-}
-.sheet.open{transform:translateY(0)}
-.sheet::-webkit-scrollbar{display:none}
-.sheet-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.25);margin:0 auto 14px}
-.sheet-title{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;padding:0 4px 10px}
-.sheet-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 12px;cursor:pointer;border-radius:6px;width:100%;
-  background:none;border:none;text-align:left;color:#fff;font:inherit;font-size:15px;
-}
-.sheet-item:active{background:rgba(255,255,255,0.04)}
-.sheet-item.active{background:rgba(187,25,25,0.18);color:#e3dac9}
-.sheet-item.active::before{content:"✓";color:var(--red);margin-right:8px;font-weight:700}
-.sheet-item .count{font-family:'Roboto Condensed',sans-serif;font-size:11px;color:#888}
-.sheet-item.active .count{color:#bb1919}
-
-/* current category label next to filter btn */
-.filter-current{
-  display:inline-flex;align-items:center;height:38px;padding:0 14px;
-  font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
-  color:#fff;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);
-  border-radius:19px;backdrop-filter:blur(10px);margin-left:8px;
-  max-width:48vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  pointer-events:none;
-}
-.top-left-group{display:flex;align-items:center}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:#0c0b09;color:#fff;font-family:"DM Sans",-apple-system,sans-serif;overscroll-behavior:none}
+  /* ── category bar (global, top) ───────────────────────────────────── */
+  #cats{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;gap:8px;overflow-x:auto;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;background:linear-gradient(180deg,rgba(8,7,6,.85),rgba(8,7,6,0));-webkit-overflow-scrolling:touch}
+  #cats::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;font-family:"Roboto Condensed",sans-serif;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#cfc8bb;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.16);padding:7px 13px;border-radius:30px;cursor:pointer;white-space:nowrap}
+  .chip.on{background:#bb1919;border-color:#bb1919;color:#fff}
+  /* ── vertical feed ────────────────────────────────────────────────── */
+  #feed{height:100dvh;overflow-y:scroll;scroll-snap-type:y mandatory;overscroll-behavior-y:contain}
+  #feed::-webkit-scrollbar{display:none}
+  .slide{height:100dvh;scroll-snap-align:start;position:relative;overflow:hidden}
+  .htrack{height:100%;display:flex;overflow-x:scroll;scroll-snap-type:x mandatory;overscroll-behavior-x:contain}
+  .htrack::-webkit-scrollbar{display:none}
+  .pane{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:center;position:relative;overflow:hidden}
+  /* ── VIDEO pane (home): clean clip in a band, text BELOW (no overlay) ── */
+  .vpane{background:#0c0b09}
+  .vzone{position:absolute;top:0;left:0;right:0;height:56%;background:#000;display:flex;align-items:center;justify-content:center}
+  .v-vid{width:100%;height:100%;object-fit:contain;background:#000;display:block}
+  .v-poster{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .2s}
+  .slide.audio-only .v-poster{opacity:1}
+  .v-poster.fallback{background:linear-gradient(180deg,#241f18,#0c0b09);opacity:1}
+  .v-tap{position:absolute;inset:0;z-index:2}
+  .play-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:62px;height:62px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;z-index:3;opacity:0;transition:opacity .2s;pointer-events:none}
+  .slide.paused .play-badge{opacity:1}
+  .play-badge svg{width:25px;height:25px;color:#fff;margin-left:3px}
+  .dur{position:absolute;top:calc(env(safe-area-inset-top) + 58px);left:14px;z-index:4;font-family:"Roboto Condensed",sans-serif;font-size:11px;color:#e7ddcd;background:rgba(0,0,0,.4);padding:3px 8px;border-radius:20px}
+  .sound{position:absolute;top:calc(env(safe-area-inset-top) + 54px);right:14px;z-index:5;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.42);border:none;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+  .sound svg{width:19px;height:19px}
+  .veditorial{position:absolute;top:56%;left:0;right:0;bottom:92px;padding:16px 18px 0;overflow:hidden}
+  .v-cat{font-family:"Roboto Condensed",sans-serif;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:#bb6a19;margin-bottom:9px}
+  .v-cat .bar{display:inline-block;width:14px;height:2px;background:#bb1919;vertical-align:3px;margin-right:7px}
+  .v-show{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .v-art{width:30px;height:30px;border-radius:6px;background:#2a241c;background-size:cover;background-position:center;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:"Roboto Condensed",sans-serif;font-size:12px;color:#cfc6b6}
+  .v-show .nm{font-family:"Roboto Condensed",sans-serif;font-size:12px;letter-spacing:.4px;color:#e7ddcd;line-height:1.2}
+  .v-show .ep{font-family:"DM Sans";font-size:11px;color:#9a9286;line-height:1.2;margin-top:1px}
+  .v-head{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:21px;line-height:1.24;color:#fff}
+  .v-quote{display:flex;gap:8px;margin-top:11px}
+  .v-quote .bar{width:2px;background:#bb1919;flex:0 0 auto;border-radius:2px}
+  .v-quote .txt{font-family:"DM Sans";font-style:italic;font-size:13px;line-height:1.45;color:#cbc3b5}
+  .vfoot{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 18px);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:4}
+  .v-actions{display:flex;align-items:center;gap:8px}
+  .act-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(255,255,255,.08);border:none;border-radius:50%;cursor:pointer}
+  .act-btn svg{width:21px;height:21px}
+  .act-btn.eg-bookmark.is-saved{color:#bb1919}
+  .act-btn.eg-bookmark.is-saved svg path{fill:#bb1919;stroke:#bb1919}
+  .v-cues{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#b7ae9f}
+  .v-cues span{display:flex;align-items:center;gap:4px}.v-cues svg{width:13px;height:13px}
+  /* ── SUMMARY pane ─────────────────────────────────────────────────── */
+  .sum{background:#13110d;height:100%;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 62px) 20px calc(env(safe-area-inset-bottom) + 28px)}
+  .sum::-webkit-scrollbar{display:none}
+  .sum-kick{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:#bb6a19;margin-bottom:6px}
+  .sum-head{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:21px;line-height:1.3;color:#fff;margin-bottom:4px}
+  .sum-q{display:flex;gap:9px;margin:14px 0}.sum-q .bar{width:2px;background:#bb1919;flex:0 0 auto;border-radius:2px}
+  .sum-q .txt{font-family:"DM Sans";font-style:italic;font-size:14px;line-height:1.5;color:#ded6c8}
+  .sum-label{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#8c8579;margin:20px 0 7px}
+  .sum-body{font-family:"DM Sans";font-size:14px;line-height:1.62;color:#cfc8ba}
+  .sum-kp{list-style:none;margin-top:6px}
+  .sum-kp li{font-family:"DM Sans";font-size:13.5px;line-height:1.5;color:#cfc8ba;padding:7px 0 7px 18px;position:relative;border-top:.5px solid rgba(255,255,255,.06)}
+  .sum-kp li:before{content:"";position:absolute;left:2px;top:14px;width:6px;height:6px;border-radius:50%;background:#bb6a19}
+  .sum-cta{display:inline-block;margin:12px 0 6px;font-family:"Roboto Condensed",sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#fff;background:#bb1919;border:.5px solid #bb1919;padding:9px 16px;border-radius:30px;text-decoration:none}
+  /* ── REACTIONS pane ───────────────────────────────────────────────── */
+  .react{background:#100f0d;height:100%;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 62px) 18px calc(env(safe-area-inset-bottom) + 24px);display:flex;flex-direction:column}
+  .react::-webkit-scrollbar{display:none}
+  .react-h{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:22px;color:#fff;margin-bottom:3px}
+  .react-sub{font-family:"DM Sans";font-size:11.5px;line-height:1.45;color:#8c8579;margin-bottom:16px}
+  .rrow{padding:12px 0;border-top:.5px solid rgba(255,255,255,.08)}
+  .rrow .lab{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .rrow .d{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .rrow .nm{font-family:"DM Sans";font-size:14px;font-weight:500;color:#ece6dc}
+  .rrow .lv{margin-left:auto;font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:.5px;color:#8c8579;text-align:right}
+  .rrow .cnt{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:.5px;color:#6f6a60;margin-top:6px}
+  .segs{display:flex;gap:6px}
+  .seg{flex:1;height:40px;border:.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#d8d2c6;border-radius:9px;font-family:"Roboto Condensed",sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:transform .08s}
+  .seg:active{transform:scale(.94)}
+  .react-foot{font-family:"DM Sans";font-size:10.5px;line-height:1.45;color:#6f6a60;margin-top:18px;padding-top:14px;border-top:.5px solid rgba(255,255,255,.08)}
+  #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#8c8579;font-family:"Roboto Condensed",sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:12px;z-index:50;background:#0c0b09}
+  #boot.gone{display:none}
+  .spin{width:26px;height:26px;border:2px solid rgba(255,255,255,.15);border-top-color:#bb1919;border-radius:50%;animation:sp 1s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+  <div id="boot"><div class="spin"></div><div id="boot-msg">Loading Egleze</div></div>
+  <div id="cats" aria-label="Categories"></div>
+  <div id="feed" aria-label="Egleze stories"></div>
 
-<div class="feed" id="feed"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/signin-modal.js"></script>
+  <script src="/js/reactions.js"></script>
+  <script src="/js/bookmarks.js"></script>
+  <script src="/js/share.js"></script>
 
-<!-- top chrome lives outside the feed so it stays fixed -->
-<div class="top-chrome">
-  <div class="top-left-group">
-    <button class="chrome-btn" id="filter-btn" aria-label="Filter by category">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
-    </button>
-    <span class="filter-current" id="filter-current">For You</span>
-  </div>
-  <button class="chrome-btn" id="sound-btn" aria-label="Sound mode" title="Sound mode">📺</button>
-</div>
+  <script>
+  (function(){
+    "use strict";
+    var SUPABASE_URL='https://kerijdhiasrvaxssjqqg.supabase.co';
+    var SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+    var R2_PUBLIC='https://pub-29a35954b8244d9db19a07ed7e4f58ce.r2.dev';
+    function cleanClipUrl(id){ return R2_PUBLIC+'/clips/'+id+'.mp4'; } // skinless clip, same as shorts.html
 
-<!-- filter sheet -->
-<div class="sheet-backdrop" id="sheet-backdrop"></div>
-<div class="sheet" id="sheet" role="dialog" aria-label="Filter categories">
-  <div class="sheet-handle"></div>
-  <div class="sheet-title">Filter by category</div>
-  <div id="sheet-list"></div>
-</div>
+    var REACTIONS=[
+      {k:'inspires', l:'Inspires me',          c:'#1d9e75'},
+      {k:'concerns', l:'Concerns me',          c:'#e24b4a'},
+      {k:'curious',  l:'Made me curious',      c:'#ba7517'},
+      {k:'changed',  l:'Changed how I think',  c:'#7f77dd'},
+      {k:'validates',l:'Validates what I knew',c:'#378add'}
+    ];
+    var LV=['','Slightly','Somewhat','Moderately','Strongly','Intensely'];
 
-<!-- loading -->
-<div class="loading" id="loading">
-  <div class="spinner-e">E</div>
-  <p>Loading shorts…</p>
-</div>
+    // sound: 0 = video+sound, 1 = audio-only (cover art), 2 = mute. Like shorts.html.
+    var soundMode=0, soundUnlocked=false;
+    var ICONS={
+      0:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a8 8 0 0 1 0 12"/></svg>',
+      1:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="14" width="5" height="7" rx="2"/><rect x="16.5" y="14" width="5" height="7" rx="2"/></svg>',
+      2:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>'
+    };
 
-<!-- empty -->
-<div class="empty hidden" id="empty">
-  <h2>Nothing here yet</h2>
-  <p>Try a different category, or come back later — new conversations land throughout the day.</p>
-  <button id="empty-all">View all</button>
-</div>
+    function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+    function initials(n){return String(n||'').split(/\s+/).slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();}
+    function firstSentence(t,max){if(!t)return '';t=String(t).trim();var m=t.match(/^.*?[.!?](\s|$)/);var out=m?m[0].trim():t;if(out.length>max)out=out.slice(0,max).replace(/\s+\S*$/,'')+'…';return out;}
+    function durStr(s){var len=(s.clip_end_seconds&&s.clip_start_seconds)?(s.clip_end_seconds-s.clip_start_seconds):60;var mm=Math.floor(len/60),ss=len%60;return mm>0?(mm+':'+String(ss).padStart(2,'0')):('0:'+String(ss).padStart(2,'0'));}
 
-<script>
-// ════════════════════════════════════════════════════════════════════
-// EGLEZE SHORTS — clean rebuild (X.com architecture)
-//   • Video zone (top, clean clip from clips/{id}.mp4)
-//   • Editorial zone (middle, HTML text)
-//   • Action row (bottom, horizontal)
-//   • Swipe-left → editorial panel (full story + key moments)
-// Phase 1a: feed + video + text + actions + filter
-// Phase 1b: editorial panel (swipe-left / hint)
-// ════════════════════════════════════════════════════════════════════
+    async function sb(path){
+      var res=await fetch(SUPABASE_URL+'/rest/v1/'+path,{headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Accept-Profile':'public'}});
+      if(!res.ok) throw new Error('Supabase '+res.status);
+      return res.json();
+    }
 
-const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+    var shows={}, allStories=[], renderMap={}, io=null, currentFilter='all', feedToken=0;
+    var PAGE=20, feedOffset=0, feedLoading=false, feedExhausted=false;
+    var CLIP_FILTER='status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null';
 
-// R2 public base — clean clips live at clips/{id}.mp4 (confirmed public)
-const R2_PUBLIC = 'https://pub-29a35954b8244d9db19a07ed7e4f58ce.r2.dev';
-function cleanClipUrl(storyId) { return `${R2_PUBLIC}/clips/${storyId}.mp4`; }
-
-const CATEGORIES = [
-  { id: 'all', label: 'For You' },
-  { id: 'AI & Tech', label: 'AI & Tech' },
-  { id: 'Combat & UFC', label: 'Combat & UFC' },
-  { id: 'Comedy', label: 'Comedy' },
-  { id: 'Consciousness & Medicine', label: 'Consciousness & Medicine' },
-  { id: 'Controversial', label: 'Controversial' },
-  { id: 'Crime & Justice', label: 'Crime & Justice' },
-  { id: 'Debates', label: 'Debates' },
-  { id: 'Education & Learning', label: 'Education & Learning' },
-  { id: 'Energy & Climate', label: 'Energy & Climate' },
-  { id: 'Entertainment', label: 'Entertainment' },
-  { id: 'Espionage', label: 'Espionage' },
-  { id: 'Faith & Spirituality', label: 'Faith & Spirituality' },
-  { id: 'Geopolitics', label: 'Geopolitics' },
-  { id: 'Health, Longevity & Biohacking', label: 'Health & Longevity' },
-  { id: 'History', label: 'History' },
-  { id: 'Media & Journalism', label: 'Media & Journalism' },
-  { id: 'Military', label: 'Military' },
-  { id: 'Money', label: 'Money' },
-  { id: 'Monologues', label: 'Monologues' },
-  { id: 'Politics', label: 'Politics' },
-  { id: 'Psychology', label: 'Psychology' },
-  { id: 'Relationships & Family', label: 'Relationships & Family' },
-  { id: 'Science', label: 'Science' },
-  { id: 'Society', label: 'Society' },
-  { id: 'Sports', label: 'Sports' },
-  { id: 'UFO & Paranormal', label: 'UFO & Paranormal' }
-];
-
-const state = {
-  allStories: [],
-  shows: {},
-  filtered: [],
-  category: 'all',
-  currentIndex: 0,
-  soundUnlocked: false,
-  soundMode: 0,
-  swipeHintDismissed: false,
-  players: new Map(),   // story.id -> <video>
-};
-
-// ─── helpers ───────────────────────────────────────────────────────
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function truncate(s,n){ return s && s.length>n ? s.slice(0,n)+'…' : (s||''); }
-function initials(name){ return (String(name||'E').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('')||'E').toUpperCase(); }
-
-function slugifyHeadline(text){
-  if(!text) return '';
-  return String(text).toLowerCase()
-    .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
-    .replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-')
-    .replace(/^-|-$/g,'').substring(0,80);
-}
-function buildStoryUrl(id, headline){
-  const base = slugifyHeadline(headline);
-  return '/story/' + id + (base ? '-'+base : '');
-}
-
-// pull first sentence of the quote for the compact quote line
-function firstSentence(q, max){
-  if(!q) return '';
-  const s = String(q).trim();
-  const m = s.match(/^[^.!?]*[.!?]/);
-  let out = m ? m[0] : s;
-  if(out.length > max) out = out.slice(0, max).replace(/\s+\S*$/,'') + '…';
-  return out;
-}
-
-// Minimum-gap interleaving: enforce a gap of at least DESIRED_GAP between
-// stories from the same show. If the show pool is too small to honor that
-// gap, we automatically relax to the largest gap that IS possible. This
-// guarantees max variety without dead-ending the feed.
-function interleaveByShow(stories){
-  if(!Array.isArray(stories) || stories.length < 3) return stories || [];
-  const DESIRED_GAP = 10;
-
-  // Group remaining stories by show. Preserve incoming order WITHIN each
-  // group (the caller already shuffled, so this is a shuffled-stable order).
-  const groups = new Map();
-  stories.forEach(s=>{
-    const k = (s && s.show_name) || '__u__';
-    if(!groups.has(k)) groups.set(k, []);
-    groups.get(k).push(s);
-  });
-  if(groups.size === 1) return stories.slice();
-
-  // Effective gap can't exceed (numShows - 1) — beyond that we'd have nothing
-  // legal to pick. We also clamp to DESIRED_GAP.
-  const effectiveGap = Math.min(DESIRED_GAP, groups.size - 1);
-
-  const result = [];
-  // Track the last positions where each show was placed.
-  const lastPos = new Map();
-
-  while(result.length < stories.length){
-    let bestK = null;
-    let bestC = -1;       // pick the show with the most remaining (drains big shows first)
-    let bestKAny = null;  // fallback if NO show satisfies the gap
-    let bestCAny = -1;
-
-    groups.forEach((arr, k)=>{
-      if(arr.length === 0) return;
-      if(arr.length > bestCAny){ bestCAny = arr.length; bestKAny = k; }
-      const lp = lastPos.has(k) ? lastPos.get(k) : -Infinity;
-      // gap to current slot = result.length - lp
-      if((result.length - lp) > effectiveGap){
-        if(arr.length > bestC){ bestC = arr.length; bestK = k; }
+    // ── reactions pane (full screen, wired to window.egleze.reactions) ──
+    function reactionPaneHTML(s){
+      var rows=REACTIONS.map(function(r){
+        var segs='';
+        for(var i=1;i<=5;i++) segs+='<button class="seg" data-k="'+r.k+'" data-l="'+i+'" aria-label="'+LV[i]+' '+esc(r.l)+'">'+i+'</button>';
+        return '<div class="rrow"><div class="lab"><span class="d" style="background:'+r.c+'"></span><span class="nm">'+esc(r.l)+'</span>'
+          +'<span class="lv" data-lv="'+r.k+'"></span></div><div class="segs">'+segs+'</div>'
+          +'<div class="cnt" data-cnt="'+r.k+'">&middot;</div></div>';
+      }).join('');
+      return '<div class="react" data-reactions-pane-for="'+s.id+'">'
+        +'<div class="react-h">How did this land?</div>'
+        +'<div class="react-sub">Tap a strength 1\u20135. Tap it again to clear. Private \u2014 everyone sees totals, no one sees it was you.</div>'
+        +rows+'<div class="react-foot">Swipe right to go back to the video.</div></div>';
+    }
+    function wireReactionPane(paneEl,s){
+      var id=String(s.id);
+      function paint(){
+        var mine=window.egleze.reactions.getMine(id)||{};
+        var totals=window.egleze.reactions.getTotals(id)||[];
+        var tBy={}; totals.forEach(function(t){tBy[t.reaction]=t;});
+        REACTIONS.forEach(function(r){
+          var lvl=mine[r.k]||0;
+          var lvEl=paneEl.querySelector('[data-lv="'+r.k+'"]');
+          var cntEl=paneEl.querySelector('[data-cnt="'+r.k+'"]');
+          if(lvEl) lvEl.textContent=lvl>0?(lvl+' \u00b7 '+LV[lvl]):'';
+          if(cntEl){var t=tBy[r.k];cntEl.textContent=(t&&t.display)?t.display:'\u00b7';}
+          paneEl.querySelectorAll('.seg[data-k="'+r.k+'"]').forEach(function(b){
+            var on=parseInt(b.getAttribute('data-l'),10)===lvl;
+            b.style.background=on?r.c:'rgba(255,255,255,.07)';
+            b.style.borderColor=on?r.c:'rgba(255,255,255,.2)';
+            b.style.color=on?'#fff':'#d8d2c6';
+          });
+        });
       }
-    });
-
-    // If no show satisfied the gap (shouldn't happen given effectiveGap clamp,
-    // but safety), fall back to any.
-    const pickK = bestK !== null ? bestK : bestKAny;
-    if(pickK === null) break;
-    result.push(groups.get(pickK).shift());
-    lastPos.set(pickK, result.length - 1);
-  }
-  return result;
-}
-
-// ─── data ──────────────────────────────────────────────────────────
-async function fetchSupabase(path){
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{
-    headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'Accept-Profile':'public' }
-  });
-  if(!res.ok) throw new Error('Supabase '+res.status);
-  return res.json();
-}
-async function loadShows(){
-  try{
-    const shows = await fetchSupabase('shows?select=name,artwork_url,website_url&active=eq.true');
-    shows.forEach(s=> state.shows[s.name]=s);
-  }catch(e){ console.warn('[shorts] shows failed', e); }
-}
-async function loadStories(){
-  try{
-    // Only stories with a rendered clip. We use the clean clips/ file for
-    // playback, but clip_vertical_url being set is our proof the render
-    // pipeline finished for this story (so the clip exists).
-    const path = 'stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=300';
-    state.allStories = await fetchSupabase(path);
-  }catch(e){ console.error('[shorts] stories failed', e); state.allStories=[]; }
-}
-
-// ─── categories (sheet) ────────────────────────────────────────────
-function renderCategories(){
-  const list = document.getElementById('sheet-list');
-  const counts = {};
-  state.allStories.forEach(s=>{ if(s.topic) counts[s.topic]=(counts[s.topic]||0)+1; });
-  const populated = CATEGORIES.filter(c=>c.id!=='all' && counts[c.id]>0).sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0));
-  const all = CATEGORIES.find(c=>c.id==='all');
-  const visible = [all, ...populated];
-  list.innerHTML = visible.map(c=>{
-    const n = c.id==='all' ? state.allStories.length : (counts[c.id]||0);
-    const active = c.id===state.category ? ' active' : '';
-    return `<button class="sheet-item${active}" data-cat="${esc(c.id)}"><span>${esc(c.label)}</span><span class="count">${n}</span></button>`;
-  }).join('');
-  list.onclick = e=>{
-    const it = e.target.closest('.sheet-item');
-    if(!it) return;
-    state.category = it.dataset.cat;
-    const meta = CATEGORIES.find(c=>c.id===state.category);
-    document.getElementById('filter-current').textContent = meta ? meta.label : 'For You';
-    closeSheet();
-    applyFilter();
-  };
-}
-function openSheet(){ document.getElementById('sheet').classList.add('open'); document.getElementById('sheet-backdrop').classList.add('open'); }
-function closeSheet(){ document.getElementById('sheet').classList.remove('open'); document.getElementById('sheet-backdrop').classList.remove('open'); }
-
-// ─── render feed ───────────────────────────────────────────────────
-function applyFilter(){
-  const base = state.category==='all' ? [...state.allStories] : state.allStories.filter(s=>s.topic===state.category);
-  // Shuffle base array (Fisher-Yates) so each session sees a different order —
-  // without this the feed always opens to the same top-ranked stories.
-  // interleaveByShow then ensures no two consecutive shorts share a podcast.
-  for(let i=base.length-1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [base[i],base[j]] = [base[j],base[i]];
-  }
-  state.filtered = interleaveByShow(base);
-  state.currentIndex = 0;
-  // tear down players
-  state.players.forEach(v=>{ try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(_){} });
-  state.players.clear();
-  renderFeed();
-  document.getElementById('feed').scrollTo({top:0});
-  setTimeout(()=> activateStory(0), 60);
-}
-
-function slideInner(s, idx){
-  const show = state.shows[s.show_name] || {};
-  const artwork = show.artwork_url || '';
-  const ini = initials(s.show_name);
-  const len = (s.clip_end_seconds && s.clip_start_seconds) ? (s.clip_end_seconds - s.clip_start_seconds) : 60;
-  const mm = Math.floor(len/60), ssx = len%60;
-  const dur = mm>0 ? `${mm}:${String(ssx).padStart(2,'0')}` : `0:${String(ssx).padStart(2,'0')}`;
-  const headline = esc(s.headline||'');
-  const quoteLine = firstSentence(s.quote, 110);
-  const showLabel = esc(s.show_name||'') + (s.episode ? ' · ' + esc(truncate(s.episode,28)) : '');
-  const artStyle = artwork ? `background-image:url('${esc(artwork)}')` : '';
-
-  // editorial panel content
-  const fullSummary = esc(s.summary||'');
-  const epSummary = (typeof s.episode_summary==='string' && s.episode_summary.trim()) ? esc(s.episode_summary.trim()) : '';
-  const keyPoints = Array.isArray(s.episode_key_points) ? s.episode_key_points.filter(k=>typeof k==='string'&&k.trim()) : [];
-  const kpHtml = keyPoints.length ? `<div class="panel-label">Key moments</div><ul class="panel-kp">${keyPoints.map(k=>`<li>${esc(k)}</li>`).join('')}</ul>` : '';
-  const fullQuote = s.quote ? esc(s.quote) : '';
-
-  return `
-    <div class="video-zone" id="vzone-${idx}">
-      <div class="video-poster ${artwork?'':'fallback'}" style="${artStyle}"></div>
-      <div class="tap-zone" data-tap="${idx}"></div>
-      <div class="play-hint">▶</div>
-      <div class="clip-dur">▸ ${dur}</div>
-      <div class="v-progress"><div class="v-progress-fill" id="vprog-${idx}"></div></div>
-    </div>
-
-    <div class="edit-zone">
-      <div class="cat-line"><div class="bar"></div><div class="cat">${esc(s.topic||'Story')}</div></div>
-      <div class="byline">
-        <div class="art" style="${artStyle}">${artwork?'':ini}</div>
-        <div class="bl-txt">
-          <div class="bl-show">${esc(s.show_name||'')}</div>
-          ${s.episode ? `<div class="bl-ep">${esc(s.episode)}</div>` : ''}
-        </div>
-      </div>
-      <div class="headline">${headline}</div>
-      ${quoteLine ? `<div class="quote"><div class="bar"></div><div class="txt">"${esc(quoteLine)}"</div></div>` : ''}
-    </div>
-
-    <div class="action-row">
-      <div class="action-left">
-        <button class="act-btn eg-bookmark" data-story-id="${s.id}" aria-label="Save story">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 H18 V20 L12 16 L6 20 Z"/></svg>
-        </button>
-        <button class="act-btn" data-share="${s.id}" data-headline="${esc((s.headline||'').replace(/"/g,'&quot;'))}" aria-label="Share story">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        </button>
-        <a class="act-btn" href="${buildStoryUrl(s.id, s.headline)}#react" aria-label="React on Egleze">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V4a1.4 1.4 0 0 1 2.8 0v4.5"/><path d="M10.8 8.8V2.6a1.4 1.4 0 0 1 2.8 0v6"/><path d="M13.6 3.4a1.4 1.4 0 0 1 2.8 0v9.8c0 3.8-2.3 6.6-5.8 6.6-2.6 0-4.3-1.3-5.5-3.6l-2-3.6a1.35 1.35 0 0 1 2.3-1.4l1.8 2.8"/><path d="M9.5 22h3"/></svg>
-        </a>
-        ${s.source_url ? `<a class="act-btn" href="${esc(s.source_url)}" target="_blank" rel="noopener" aria-label="Watch source on YouTube">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg>
-        </a>` : ''}
-      </div>
-      <div class="full-story-cue"><span class="chev">‹</span>full story</div>
-    </div>
-
-    <div class="eg-mark"><span class="eg-sq">E</span>EGLEZE</div>
-
-    <!-- editorial panel (Phase 1b) -->
-    <div class="edit-panel">
-      <div class="panel-head">
-        <button class="panel-back" data-back="${idx}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          back to video
-        </button>
-      </div>
-      <div class="panel-body">
-        <div class="panel-headline">${headline}</div>
-        ${fullQuote ? `<div class="panel-quote"><div class="bar"></div><div class="txt">"${fullQuote}"</div></div>` : ''}
-        ${fullSummary ? `<div class="panel-label">The story</div><div class="panel-summary">${fullSummary}</div>` : ''}
-        ${epSummary ? `<div class="panel-label">From this episode</div><div class="panel-summary">${epSummary}</div>` : ''}
-        ${kpHtml}
-        <a class="panel-cta" href="${buildStoryUrl(s.id, s.headline)}" target="_blank" rel="noopener">Read on Egleze →</a>
-      </div>
-    </div>`;
-}
-
-function renderFeed(){
-  const feed = document.getElementById('feed');
-  const empty = document.getElementById('empty');
-  if(state.filtered.length === 0){
-    feed.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
-  }
-  empty.classList.add('hidden');
-  // SLIDE VIRTUALIZATION: render an empty full-height shell for EVERY story
-  // (cheap — one div each, scroll-snap works across all of them), then
-  // hydrate only the slides near the viewport with real content + video.
-  feed.innerHTML = state.filtered.map((s,i)=>
-    `<div class="story shell" data-idx="${i}" data-id="${s.id}"></div>`
-  ).join('');
-  attachObserver();
-  hydrateWindow(0);
-}
-
-// Fill a shell with the real story content (text zone + action row + panel).
-function hydrateSlide(idx){
-  const el = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(!el || !el.classList.contains('shell')) return;  // already hydrated or gone
-  const s = state.filtered[idx];
-  if(!s) return;
-  el.classList.remove('shell');
-  el.innerHTML = slideInner(s, idx);
-  wireSlideEvents(el, idx);
-  // Newly-created bookmark icon needs to reflect saved-or-not state.
-  // The bookmarks module (loaded after this script) syncs all visible
-  // .eg-bookmark icons against the user's saved set.
-  if(window.egleze && window.egleze.syncBookmarks) window.egleze.syncBookmarks();
-}
-
-// Empty a slide back to a shell (frees DOM + video).
-function dehydrateSlide(idx){
-  const el = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(!el || el.classList.contains('shell')) return;
-  destroyVideo(idx);
-  el.classList.add('shell');
-  el.classList.remove('video-ready','paused','panel-open');
-  el.innerHTML = '';
-}
-
-// Hydrate slides within a window of `center`, dehydrate the rest.
-const SLIDE_WINDOW = 3;  // hydrate current ±3 slides
-function hydrateWindow(center){
-  const lo = Math.max(0, center - SLIDE_WINDOW);
-  const hi = Math.min(state.filtered.length - 1, center + SLIDE_WINDOW);
-  state.filtered.forEach((s,i)=>{
-    const el = document.querySelector(`.story[data-idx="${i}"]`);
-    if(!el) return;
-    const isShell = el.classList.contains('shell');
-    if(i >= lo && i <= hi){
-      if(isShell) hydrateSlide(i);
-    } else {
-      if(!isShell) dehydrateSlide(i);
+      renderMap[id]=paint;
+      paneEl.querySelectorAll('.seg').forEach(function(b){
+        b.addEventListener('click',function(e){
+          e.stopPropagation();
+          var k=b.getAttribute('data-k'), lvl=parseInt(b.getAttribute('data-l'),10);
+          var cur=(window.egleze.reactions.getMine(id)||{})[k]||0;
+          window.egleze.reactions.setForStory(id,k,cur===lvl?0:lvl);
+        });
+      });
+      paint();
     }
-  });
-}
 
-// ─── VIRTUALIZED VIDEO WINDOW ──────────────────────────────────────
-// Only a handful of <video> elements exist at once. As the current index
-// changes, we create videos for slides within WINDOW of current, and
-// destroy any outside it. This keeps memory flat whether the feed has
-// 50 stories or 50,000.
-const WINDOW_AHEAD = 2;   // how many slides ahead to preload
-const WINDOW_BEHIND = 1;  // how many behind to keep
+    function buildSlide(s){
+      var show=shows[s.show_name]||{};
+      var art=show.artwork_url||'';
+      var artStyle=art?('background-image:url(\''+esc(art)+'\')'):'';
+      var quote=firstSentence(s.quote,118);
+      var summary=esc(s.summary||'');
+      var epSummary=(typeof s.episode_summary==='string'&&s.episode_summary.trim())?esc(s.episode_summary.trim()):'';
+      var kps=Array.isArray(s.episode_key_points)?s.episode_key_points.filter(function(k){return typeof k==='string'&&k.trim();}):[];
+      var kpHtml=kps.length?('<div class="sum-label">Key moments</div><ul class="sum-kp">'+kps.map(function(k){return '<li>'+esc(k)+'</li>';}).join('')+'</ul>'):'';
 
-function ensureVideo(idx){
-  const story = state.filtered[idx];
-  if(!story) return null;
-  const zone = document.getElementById(`vzone-${idx}`);
-  if(!zone) return null;
-  let video = zone.querySelector('video');
-  if(video) return video;  // already exists
+      // VIDEO pane — clean clip (contain) on top, editorial BELOW, no overlay
+      var video='<div class="pane vpane">'
+        +'<div class="vzone">'
+          +'<video class="v-vid" muted loop playsinline preload="none" data-src="'+esc(cleanClipUrl(s.id))+'"></video>'
+          +'<div class="v-poster '+(art?'':'fallback')+'" style="'+artStyle+'"></div>'
+          +'<div class="play-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>'
+          +'<div class="v-tap" data-tap></div>'
+          +'<div class="dur">\u25b8 '+durStr(s)+'</div>'
+          +'<button class="sound" data-sound aria-label="Sound">'+ICONS[0]+'</button>'
+        +'</div>'
+        +'<div class="veditorial">'
+          +'<div class="v-cat"><span class="bar"></span>'+esc(s.topic||'Story')+'</div>'
+          +'<div class="v-show"><div class="v-art" style="'+artStyle+'">'+(art?'':esc(initials(s.show_name)))+'</div>'
+          +'<div><div class="nm">'+esc(s.show_name||'')+'</div>'+(s.episode?'<div class="ep">'+esc(s.episode)+'</div>':'')+'</div></div>'
+          +'<div class="v-head">'+esc(s.headline||'')+'</div>'
+          +(quote?'<div class="v-quote"><div class="bar"></div><div class="txt">\u201c'+esc(quote)+'\u201d</div></div>':'')
+        +'</div>'
+        +'<div class="vfoot"><div class="v-actions">'
+          +'<button class="act-btn eg-bookmark" data-story-id="'+s.id+'" aria-label="Save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 H18 V20 L12 16 L6 20 Z"/></svg></button>'
+          +'<button class="act-btn eg-share" data-story-id="'+s.id+'" data-share-url="https://egleze.com/story/'+s.id+'" data-share-title="'+esc((s.headline||'').replace(/"/g,'&quot;'))+'" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>'
+          +'<a class="act-btn" href="https://egleze.com/story/'+s.id+'" target="_blank" rel="noopener" aria-label="Read the full story on Egleze"><img src="/favicon-96x96.png" alt="" style="width:23px;height:23px;border-radius:5px"></a>'
+          +(s.source_url?'<a class="act-btn" href="'+esc(s.source_url)+'" target="_blank" rel="noopener" aria-label="Watch the full episode on YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4.5"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none"/></svg></a>':'')
+        +'</div><div class="v-cues">'
+          +'<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> react</span>'
+          +'<span>summary <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>'
+        +'</div></div>'
+      +'</div>';
 
-  video = document.createElement('video');
-  video.id = `video-${idx}`;
-  video.className = 'story-video';
-  video.src = cleanClipUrl(story.id);
-  video.playsInline = true;
-  video.setAttribute('playsinline','');
-  video.setAttribute('webkit-playsinline','');
-  video.muted = true;
-  video.preload = 'auto';  // changed from 'metadata' to 'auto' — start buffering
-                           // the data NOW so the next slide is ready to play
-                           // the moment we activate it (fixes the "tap to start"
-                           // bug on every 3rd-4th video during fast swiping).
-  // insert as the FIRST child so poster/tap-zone overlay it
-  zone.insertBefore(video, zone.firstChild);
-  state.players.set(story.id, video);
-  wireVideoEvents(idx, video);
-  // explicitly kick off loading (some browsers wait for play())
-  try{ video.load(); }catch(_){}
-  return video;
-}
+      var summaryPane='<div class="pane"><div class="sum">'
+        +'<div class="sum-kick">'+esc(s.show_name||'Egleze')+(s.episode?(' \u00b7 '+esc(s.episode)):'')+'</div>'
+        +'<div class="sum-head">'+esc(s.headline||'')+'</div>'
+        +(s.quote?'<div class="sum-q"><div class="bar"></div><div class="txt">\u201c'+esc(s.quote)+'\u201d</div></div>':'')
+        +'<a class="sum-cta" href="https://egleze.com/story/'+s.id+'" target="_blank" rel="noopener">Read the full story on Egleze \u2192</a>'
+        +(summary?'<div class="sum-label">The story</div><div class="sum-body">'+summary+'</div>':'')
+        +(epSummary?'<div class="sum-label">From this episode</div><div class="sum-body">'+epSummary+'</div>':'')
+        +kpHtml
+      +'</div></div>';
 
-function destroyVideo(idx){
-  const story = state.filtered[idx];
-  if(!story) return;
-  const zone = document.getElementById(`vzone-${idx}`);
-  if(!zone) return;
-  const video = zone.querySelector('video');
-  if(video){
-    try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(_){}
-    video.remove();
-  }
-  state.players.delete(story.id);
-  const el = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(el) el.classList.remove('video-ready');
-}
+      var slide=document.createElement('div');
+      slide.className='slide paused';
+      slide.setAttribute('data-story-id',s.id);
+      slide.innerHTML='<div class="htrack"><div class="pane">'+reactionPaneHTML(s)+'</div>'+video+summaryPane+'</div>';
 
-function updateWindow(center){
-  const lo = Math.max(0, center - WINDOW_BEHIND);
-  const hi = Math.min(state.filtered.length - 1, center + WINDOW_AHEAD);
-  // destroy anything outside [lo,hi]
-  state.filtered.forEach((s,i)=>{
-    if(i < lo || i > hi){
-      const zone = document.getElementById(`vzone-${i}`);
-      if(zone && zone.querySelector('video')) destroyVideo(i);
+      wireReactionPane(slide.querySelector('[data-reactions-pane-for]'),s);
+
+      var vid=slide.querySelector('.v-vid');
+      var tap=slide.querySelector('[data-tap]');
+      if(tap) tap.addEventListener('click',function(){
+        if(!soundUnlocked){ soundUnlocked=true; applySoundToActive(); return; } // first tap = turn sound on
+        if(!vid)return;
+        if(vid.paused){ var p=vid.play(); if(p&&p.catch)p.catch(function(){}); slide.classList.remove('paused'); }
+        else{ vid.pause(); slide.classList.add('paused'); }
+      });
+      var sndBtn=slide.querySelector('[data-sound]');
+      if(sndBtn) sndBtn.addEventListener('click',function(e){ e.stopPropagation(); cycleSound(); });
+      return slide;
     }
-  });
-  // create anything inside [lo,hi]
-  for(let i=lo; i<=hi; i++) ensureVideo(i);
-}
 
-// ─── playback ──────────────────────────────────────────────────────
-function activateStory(idx){
-  const story = state.filtered[idx];
-  if(!story) return;
-  // make sure this slide (and its neighbors) are hydrated before we touch video
-  hydrateWindow(idx);
-  const el = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(!el) return;
+    function activeSlide(){
+      var feed=document.getElementById('feed');
+      var slides=feed.querySelectorAll('.slide');
+      var best=null,bd=1e9;
+      slides.forEach(function(sl){var r=sl.getBoundingClientRect();var d=Math.abs(r.top);if(d<bd){bd=d;best=sl;}});
+      return best;
+    }
+    function applySoundToActive(){
+      var sl=activeSlide(); if(!sl)return;
+      var vid=sl.querySelector('.v-vid'); if(!vid)return;
+      var muteIt=(!soundUnlocked)||(soundMode===2);
+      vid.muted=muteIt;
+      sl.classList.toggle('audio-only', soundMode===1 && soundUnlocked);
+      if(!vid.paused){} else { var p=vid.play(); if(p&&p.catch)p.catch(function(){}); }
+    }
+    function cycleSound(){
+      soundUnlocked=true;
+      soundMode=(soundMode+1)%3;
+      document.querySelectorAll('[data-sound]').forEach(function(b){ b.innerHTML=ICONS[soundMode]; b.setAttribute('aria-label', soundMode===0?'Video and sound':(soundMode===1?'Audio only':'Muted')); });
+      applySoundToActive();
+    }
 
-  // Close ANY open editorial panel when we move to a new slide — prevents
-  // a stale panel from a previous slide bleeding through (Bug 2a).
-  document.querySelectorAll('.story.panel-open').forEach(p=>{
-    if(parseInt(p.dataset.idx,10) !== idx) p.classList.remove('panel-open');
-  });
+    function centerTrack(slide){ var tr=slide.querySelector('.htrack'); if(tr) tr.scrollLeft=tr.clientWidth; }
+    function activate(slide){
+      centerTrack(slide);
+      var id=slide.getAttribute('data-story-id');
+      var vid=slide.querySelector('.v-vid');
+      if(vid){ if(!vid.src&&vid.getAttribute('data-src')) vid.src=vid.getAttribute('data-src'); vid.muted=(!soundUnlocked)||(soundMode===2); var p=vid.play(); if(p&&p.catch)p.catch(function(){}); slide.classList.remove('paused'); slide.classList.toggle('audio-only', soundMode===1 && soundUnlocked); }
+      if(window.egleze&&window.egleze.reactions){
+        window.egleze.reactions.refreshTotals(id);
+        if(window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(id);
+      }
+    }
+    function deactivate(slide){ var vid=slide.querySelector('.v-vid'); if(vid){ try{vid.pause();}catch(_){} } slide.classList.add('paused'); }
 
-  state.currentIndex = idx;
+    function fetchPage(filter, offset){
+      var q='stories?select=*&'+CLIP_FILTER+(filter==='all'?'':('&topic=eq.'+encodeURIComponent(filter)))
+        +'&order=updated_at.desc.nullslast&limit='+PAGE+'&offset='+offset;
+      return sb(q);
+    }
+    function appendSlides(list, feed){
+      var slides=list.map(buildSlide);
+      var frag=document.createDocumentFragment();
+      slides.forEach(function(sl){ frag.appendChild(sl); });
+      feed.appendChild(frag);
+      if(io) slides.forEach(function(sl){ io.observe(sl); });
+    }
+    async function renderFeed(filter){
+      currentFilter=filter;
+      var my=++feedToken;
+      feedOffset=0; feedExhausted=false; feedLoading=true;
+      var feed=document.getElementById('feed');
+      if(io){ io.disconnect(); io=null; }
+      renderMap={};
+      feed.innerHTML='<div style="height:100dvh;display:flex;align-items:center;justify-content:center"><div class="spin"></div></div>';
+      var list;
+      try{ list=await fetchPage(filter,0); }
+      catch(e){ console.error('[app-shorts] feed fetch failed',e); if(my===feedToken) feed.innerHTML='<div style="height:100dvh;display:flex;align-items:center;justify-content:center;color:#8c8579;font-family:Roboto Condensed,sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase">Could not load</div>'; feedLoading=false; return; }
+      if(my!==feedToken) return; // a newer category tap superseded this fetch
+      feed.innerHTML='';
+      if(!list.length){ feed.innerHTML='<div style="height:100dvh;display:flex;align-items:center;justify-content:center;color:#8c8579;font-family:Roboto Condensed,sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:12px">No stories in this category</div>'; feedLoading=false; return; }
+      io=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting&&e.intersectionRatio>0.6) activate(e.target); else deactivate(e.target); });
+      },{root:feed,threshold:[0,0.6,1]});
+      appendSlides(list, feed);
+      feedOffset=list.length;
+      if(list.length<PAGE) feedExhausted=true;
+      feed.scrollTo({top:0});
+      var first=feed.querySelector('.slide');
+      if(first){ centerTrack(first); setTimeout(function(){ centerTrack(first); activate(first); },50); }
+      feedLoading=false;
+    }
+    async function loadMore(){
+      if(feedLoading||feedExhausted) return;
+      feedLoading=true;
+      var my=feedToken;
+      var list;
+      try{ list=await fetchPage(currentFilter,feedOffset); }
+      catch(e){ console.error('[app-shorts] loadMore failed',e); feedLoading=false; return; }
+      if(my!==feedToken){ feedLoading=false; return; } // category changed mid-fetch
+      appendSlides(list, document.getElementById('feed'));
+      feedOffset+=list.length;
+      if(list.length<PAGE) feedExhausted=true;
+      feedLoading=false;
+    }
 
-  // maintain the sliding window of live videos around this index
-  updateWindow(idx);
-
-  // pause every video except the active one
-  state.players.forEach((v,id)=>{ if(id!==story.id){ try{ v.pause(); v.currentTime=0; }catch(_){} } });
-
-  const video = ensureVideo(idx);
-  if(!video) return;
-  try{ video.currentTime=0; }catch(_){}
-  video._played = false;
-  el.classList.remove('paused');
-
-  // Robust play sequence. iOS sometimes rejects play() because:
-  //   (a) the video hasn't loaded enough data yet — fixed by retrying when
-  //       'loadeddata' fires, by which time the element is ready
-  //   (b) the user-gesture window expired during fast swipe — fixed by
-  //       falling back to muted (always allowed)
-  // We chain: try desired-sound → if it rejects, retry muted → if THAT
-  // rejects, set up a one-shot 'loadeddata' listener to try again later.
-  // The result: a video either plays right away (best case) or plays as soon
-  // as it's loaded (worst case), but NEVER ends up paused and waiting for tap.
-  function tryPlay(wantUnmuted){
-    if(wantUnmuted) video.muted = false; else video.muted = true;
-    const p = video.play();
-    if(p && p.catch){
-      p.catch(()=>{
-        if(wantUnmuted){
-          // unmuted denied — fall to muted (always allowed once page touched)
-          tryPlay(false);
-        } else {
-          // even muted failed — wait until the video is actually loaded
-          const onReady = ()=>{
-            video.removeEventListener('loadeddata', onReady);
-            if(idx !== state.currentIndex) return;  // user already scrolled away
-            try{
-              video.muted = (!state.soundUnlocked) || activeShouldMute();
-              const p2 = video.play();
-              if(p2 && p2.catch) p2.catch(()=>{ video.muted = true; const r = video.play(); if(r&&r.catch) r.catch(()=>{}); });
-            }catch(_){}
-          };
-          video.addEventListener('loadeddata', onReady, { once: true });
-        }
+    async function buildCats(){
+      var bar=document.getElementById('cats');
+      var rows;
+      try{ rows=await sb('stories?select=topic&'+CLIP_FILTER); }catch(e){ rows=[]; }
+      var counts={};
+      rows.forEach(function(r){ var t=r.topic; if(t) counts[t]=(counts[t]||0)+1; });
+      var topics=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }); // busiest topics first
+      var html='<button class="chip on" data-cat="all">All</button>';
+      topics.forEach(function(t){ html+='<button class="chip" data-cat="'+esc(t)+'">'+esc(t)+'</button>'; });
+      bar.innerHTML=html;
+      bar.addEventListener('click',function(e){
+        var c=e.target.closest&&e.target.closest('.chip'); if(!c)return;
+        bar.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});
+        c.classList.add('on');
+        renderFeed(c.getAttribute('data-cat'));
       });
     }
-  }
-  tryPlay(state.soundUnlocked && !activeShouldMute());
-  applyAudioOnlyVisual();
-}
 
-function wireVideoEvents(idx, video){
-  video.addEventListener('loadeddata', ()=>{
-    const el = document.querySelector(`.story[data-idx="${idx}"]`);
-    if(el) el.classList.add('video-ready');
-    // If sound is already unlocked and this is the active slide, ensure
-    // this freshly-loaded video is unmuted (fixes the "re-mutes on 4th/5th
-    // video" bug — new elements default to muted).
-    if(state.soundUnlocked && idx === state.currentIndex){
-      try{ video.muted = activeShouldMute(); }catch(_){}
-    }
-  });
-  video.addEventListener('timeupdate', ()=>{
-    const f = document.getElementById(`vprog-${idx}`);
-    if(!f || !video.duration) return;
-    f.style.width = Math.min(100,(video.currentTime/video.duration)*100)+'%';
-  });
-  video.addEventListener('playing', ()=>{
-    video._played = true;
-    // Re-assert unmuted on play start for the active slide once unlocked.
-    if(state.soundUnlocked && idx === state.currentIndex){
-      try{ video.muted = activeShouldMute(); }catch(_){}
-    }
-  });
-  video.addEventListener('ended', ()=>{
-    if(!video._played || video.currentTime < 1) return;
-    if(document.querySelector('.story.panel-open')) return;
-    advanceTo(idx+1);
-  });
-  video.addEventListener('error', ()=>{
-    if(!video._played){
-      const cur = document.querySelector('.story[data-idx="'+idx+'"]');
-      if(cur && parseInt(cur.dataset.idx,10)===state.currentIndex) setTimeout(()=>advanceTo(idx+1), 800);
-    }
-  });
-}
+    function boot(m){var b=document.getElementById('boot-msg');if(b)b.textContent=m;}
+    function bootDone(){var b=document.getElementById('boot');if(b)b.classList.add('gone');}
 
-function advanceTo(idx){
-  const next = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(next) next.scrollIntoView({behavior:'smooth'});
-}
-
-// ─── tap = pause/play; first tap unlocks sound ─────────────────────
-function onTap(idx){
-  const story = state.filtered[idx];
-  if(!story) return;
-  const video = state.players.get(story.id);
-  const el = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(!video) return;
-
-  if(!state.soundUnlocked){
-    state.soundUnlocked = true;
-    try{ video.muted=false; const p=video.play(); if(p&&p.catch)p.catch(()=>{}); }catch(_){}
-    if(el) el.classList.remove('paused');
-    return;
-  }
-  try{
-    if(video.paused || video.ended){
-      video.muted=activeShouldMute(); const p=video.play(); if(p&&p.catch)p.catch(()=>{});
-      if(el) el.classList.remove('paused');
-    } else {
-      video.pause();
-      if(el) el.classList.add('paused');
-    }
-  }catch(_){}
-}
-
-// ─── editorial panel open/close ────────────────────────────────────
-function openPanel(idx){
-  const el = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(!el) return;
-  el.classList.add('panel-open');
-  // Keep the video PLAYING underneath so audio continues while you read —
-  // swiping between the clip and the story should feel like one room, not two.
-  // The panel covers the video visually; the audio keeps going, and swiping
-  // back reveals the clip still playing in sync.
-  dismissSwipeHint();
-}
-function closePanel(idx){
-  const el = document.querySelector(`.story[data-idx="${idx}"]`);
-  if(!el) return;
-  el.classList.remove('panel-open');
-  // resume video
-  const story = state.filtered[idx];
-  const video = story && state.players.get(story.id);
-  if(video){ try{ video.muted=(!state.soundUnlocked)||activeShouldMute(); const p=video.play(); if(p&&p.catch)p.catch(()=>{}); el.classList.remove('paused'); }catch(_){} }
-}
-function dismissSwipeHint(){
-  if(state.swipeHintDismissed) return;
-  state.swipeHintDismissed = true;
-  document.querySelectorAll('.swipe-hint').forEach(h=> h.classList.add('gone'));
-}
-
-// ─── per-story event wiring (taps, swipe, buttons) ─────────────────
-// Wire events for a SINGLE hydrated slide (called from hydrateSlide).
-function wireSlideEvents(el, idx){
-  // tap zone (pause/play)
-  const tz = el.querySelector('.tap-zone');
-  if(tz) tz.addEventListener('click', ()=> onTap(idx));
-  // panel back button
-  const back = el.querySelector('[data-back]');
-  if(back) back.addEventListener('click', e=>{ e.stopPropagation(); closePanel(idx); });
-  // share button
-  const sh = el.querySelector('[data-share]');
-  if(sh) sh.addEventListener('click', e=>{ e.stopPropagation(); e.preventDefault(); shareStory(sh.dataset.share, sh.dataset.headline); });
-  // horizontal swipe (left = open panel, right = close)
-  let x0=null, y0=null, t0=0;
-  el.addEventListener('touchstart', e=>{
-    if(e.touches.length!==1) return;
-    x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now();
-  }, {passive:true});
-  el.addEventListener('touchend', e=>{
-    if(x0===null) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - x0, dy = t.clientY - y0;
-    x0=null;
-    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)*1.8 && (Date.now()-t0) < 600){
-      if(dx < 0) openPanel(idx);
-      else closePanel(idx);
-    }
-  }, {passive:true});
-}
-
-// ─── share ─────────────────────────────────────────────────────────
-async function shareStory(id, headline){
-  const url = 'https://egleze.com' + buildStoryUrl(id, headline);
-  if(navigator.share){
-    try{ await navigator.share({ title: headline||'Egleze', url }); }catch(_){}
-  } else {
-    try{ await navigator.clipboard.writeText(url); alert('Link copied'); }catch(_){}
-  }
-}
-
-// ─── scroll observer (activate the story in view) ──────────────────
-function attachObserver(){
-  const feed = document.getElementById('feed');
-  if(state._obs){ try{ state._obs.disconnect(); }catch(_){} }
-  const obs = new IntersectionObserver(entries=>{
-    entries.forEach(en=>{
-      if(en.isIntersecting && en.intersectionRatio > 0.6){
-        const idx = parseInt(en.target.dataset.idx,10);
-        // hydrate the window around this slide (creates content + videos),
-        // then activate it. hydrateWindow also dehydrates far slides.
-        hydrateWindow(idx);
-        if(idx !== state.currentIndex){
-          activateStory(idx);
+    async function start(){
+      try{
+        boot('Loading');
+        (await sb('shows?select=name,artwork_url,website_url&active=eq.true')).forEach(function(x){shows[x.name]=x;});
+        await Promise.all([ buildCats(), renderFeed('all') ]);
+        bootDone();
+        // infinite scroll: fetch the next page as the user nears the end
+        var feed=document.getElementById('feed');
+        feed.addEventListener('scroll',function(){
+          if(feed.scrollHeight - feed.scrollTop - feed.clientHeight < feed.clientHeight*1.5) loadMore();
+        },{passive:true});
+        if(window.egleze&&window.egleze.reactions&&window.egleze.reactions.onChange){
+          window.egleze.reactions.onChange(function(changedId){ var fn=renderMap[String(changedId)]; if(fn)fn(); });
         }
-      }
-    });
-  }, { root: feed, threshold:[0.6] });
-  // observe the shells (they persist across hydration — we only swap innerHTML
-  // and toggle the .shell class, never replace the .story element itself).
-  document.querySelectorAll('.story').forEach(st=> obs.observe(st));
-  state._obs = obs;
-}
-
-// ─── sound toggle (3-state: video+sound 📺 → audio-only 🎧 → mute 🔇) ──
-function activeShouldMute(){ return state.soundMode === 2; }
-function soundIcon(){ return state.soundMode===0 ? '📺' : (state.soundMode===1 ? '🎧' : '🔇'); }
-// Audio-only keeps the artwork poster visible over the still-audible video on
-// the active slide — like listening with cover art (e.g. in the car).
-function applyAudioOnlyVisual(){
-  document.querySelectorAll('.story').forEach(s=>{
-    const isActive = parseInt(s.dataset.idx,10) === state.currentIndex;
-    s.classList.toggle('audio-only', isActive && state.soundMode===1);
-  });
-}
-// Apply the current mode to the active slide's video + button icon + poster.
-function applySoundMode(){
-  const btn = document.getElementById('sound-btn');
-  if(btn){ btn.textContent = soundIcon(); btn.setAttribute('aria-label', state.soundMode===0?'Sound on':(state.soundMode===1?'Audio only':'Muted')); }
-  const story = state.filtered[state.currentIndex];
-  const v = story && state.players.get(story.id);
-  if(v){ try{ v.muted = activeShouldMute(); if(!v.muted){ const p=v.play(); if(p&&p.catch)p.catch(()=>{}); } }catch(_){} }
-  applyAudioOnlyVisual();
-}
-function setupSoundToggle(){
-  const btn = document.getElementById('sound-btn');
-  btn.addEventListener('click', ()=>{
-    state.soundUnlocked = true;
-    state.soundMode = (state.soundMode + 1) % 3;   // 📺 → 🎧 → 🔇 → 📺
-    applySoundMode();
-  });
-}
-
-// ─── init ──────────────────────────────────────────────────────────
-async function init(){
-  setupSoundToggle();
-  document.getElementById('filter-btn').addEventListener('click', openSheet);
-  document.getElementById('sheet-backdrop').addEventListener('click', closeSheet);
-  document.getElementById('empty-all').addEventListener('click', ()=>{
-    state.category='all';
-    document.getElementById('filter-current').textContent='For You';
-    applyFilter();
-  });
-
-  await Promise.all([loadShows(), loadStories()]);
-  renderCategories();
-  applyFilter();
-  document.getElementById('loading').classList.add('hidden');
-}
-
-init();
-
-// If the page is restored from the back/forward cache (e.g. user tapped a
-// link, then hit Back), re-sync: close any stale panels and re-activate the
-// current slide so playback + state are correct rather than frozen.
-window.addEventListener('pageshow', function(e){
-  if(e.persisted){
-    document.querySelectorAll('.story.panel-open').forEach(p=> p.classList.remove('panel-open'));
-    if(state.filtered.length){
-      try{ activateStory(state.currentIndex || 0); }catch(_){}
+      }catch(err){ console.error('[app-shorts] start failed',err); boot('Could not load — check connection'); }
     }
-  }
-});
-</script>
-
-<!-- ── AUTH + BOOKMARKS (folded back in after the clean shorts rebuild) ─
-     /js/auth.js exposes window.egleze.auth.* (Supabase wrapper, same one
-     used across the rest of the site). /js/reactions.js loads alongside.
-     Below: the sign-in modal HTML/handler, then a bookmarks click-delegation
-     module. Delegation listens on document, so it works with virtualized
-     slides — buttons can be created/destroyed freely, clicks bubble up. ── -->
-<style id="eg-modal-styles">
-#eg-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s}
-#eg-modal.is-shown{display:flex}
-#eg-modal.is-open{opacity:1}
-#eg-modal-backdrop{position:absolute;inset:0;background:rgba(14,10,6,0.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-#eg-modal-card{position:relative;background:#fff;border-radius:8px;padding:32px 30px 24px;width:100%;max-width:380px;box-shadow:0 12px 36px rgba(0,0,0,0.28);transform:translateY(8px);transition:transform .2s;font-family:'DM Sans',-apple-system,sans-serif}
-#eg-modal.is-open #eg-modal-card{transform:translateY(0)}
-#eg-modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;line-height:1;padding:4px 8px}
-#eg-modal-close:hover{color:#0e0a06}
-#eg-modal-logo{font-family:'Playfair Display',Georgia,serif;font-size:30px;font-weight:900;letter-spacing:-1.2px;line-height:1;text-align:center;color:#0e0a06}
-#eg-modal-logo .e-red{color:#bb1919}
-#eg-modal-headline{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;line-height:1.25;text-align:center;margin:16px 0 6px;color:#0e0a06}
-#eg-modal-sub{font-size:12px;color:#777;text-align:center;line-height:1.5;margin:0 0 22px}
-#eg-btn-google{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;width:100%;background:#fff;color:#0e0a06;border:1px solid #ddd;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
-#eg-btn-google:hover{border-color:#bb1919;background:#fff8f0}
-#eg-btn-google:disabled{opacity:.6;cursor:wait}
-#eg-modal-or{text-align:center;margin:14px 0;color:#aaa;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-family:'Roboto Condensed',sans-serif}
-#eg-modal-form{display:flex;flex-direction:column;gap:10px;margin:0}
-#eg-modal-email{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box;color:#0e0a06}
-#eg-modal-email:focus{border-color:#bb1919}
-#eg-btn-magic{width:100%;padding:12px 16px;background:#bb1919;color:#fff;border:none;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;transition:opacity .15s}
-#eg-btn-magic:hover{opacity:.9}
-#eg-btn-magic:disabled{opacity:.5;cursor:wait}
-#eg-modal-status{font-size:12px;text-align:center;min-height:18px;margin-top:12px;font-family:inherit}
-#eg-modal-status.is-success{color:#2e7d32}
-#eg-modal-status.is-error{color:#bb1919}
-#eg-modal-status.is-loading{color:#777}
-#eg-modal-foot{font-size:10px;color:#999;text-align:center;margin-top:16px;line-height:1.5;font-family:inherit}
-#eg-modal-foot a{color:inherit;text-decoration:underline}
-@media (max-width:480px){#eg-modal-card{padding:26px 22px 20px;max-width:100%}}
-</style>
-
-<div id="eg-modal" role="dialog" aria-modal="true" aria-labelledby="eg-modal-headline">
-  <div id="eg-modal-backdrop" data-eg-close></div>
-  <div id="eg-modal-card">
-    <button id="eg-modal-close" type="button" data-eg-close aria-label="Close">×</button>
-    <div id="eg-modal-logo"><span class="e-red">E</span>gleze</div>
-    <h2 id="eg-modal-headline">Sign in to save stories</h2>
-    <p id="eg-modal-sub">Bookmark stories, build a memory of what's shaping the world.</p>
-    <button id="eg-btn-google" type="button">
-      <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.27h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" fill="#4285f4"/><path d="M9 18c2.43 0 4.47-.81 5.96-2.18l-2.9-2.27c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.97v2.34A9 9 0 0 0 9 18z" fill="#34a853"/><path d="M3.95 10.69A5.4 5.4 0 0 1 3.66 9c0-.59.1-1.16.29-1.69V4.97H.97A9 9 0 0 0 0 9c0 1.45.35 2.82.97 4.03l2.98-2.34z" fill="#fbbc04"/><path d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .97 4.97l2.98 2.34C4.66 5.18 6.65 3.58 9 3.58z" fill="#ea4335"/></svg>
-      Continue with Google
-    </button>
-    <div id="eg-modal-or">or</div>
-    <form id="eg-modal-form" novalidate>
-      <input type="email" id="eg-modal-email" placeholder="your@email.com" required autocomplete="email" />
-      <button type="submit" id="eg-btn-magic">Send magic link</button>
-    </form>
-    <div id="eg-modal-status" role="status" aria-live="polite"></div>
-    <p id="eg-modal-foot">By continuing you agree to Egleze's<br><a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="/js/auth.js"></script>
-<script src="/js/reactions.js"></script>
-
-<script>
-// ─── SIGN-IN MODAL handler (exposes window.egleze.ui.openSignIn) ───
-(function(){
-  function setStatus(t,k){var s=document.getElementById('eg-modal-status');if(!s)return;s.textContent=t||'';s.className=k?('is-'+k):'';}
-  function openModal(){var m=document.getElementById('eg-modal');if(!m)return;m.classList.add('is-shown');document.body.style.overflow='hidden';requestAnimationFrame(function(){m.classList.add('is-open');});var e=document.getElementById('eg-modal-email');if(e)setTimeout(function(){try{e.focus();}catch(_){}},120);}
-  function closeModal(){var m=document.getElementById('eg-modal');if(!m)return;m.classList.remove('is-open');document.body.style.overflow='';setTimeout(function(){m.classList.remove('is-shown');setStatus('','');var b=document.getElementById('eg-btn-magic');var g=document.getElementById('eg-btn-google');if(b)b.disabled=false;if(g)g.disabled=false;},200);}
-  function isOpen(){var m=document.getElementById('eg-modal');return m && m.classList.contains('is-shown');}
-  function wire(){
-    if(!window.egleze || !window.egleze.auth){
-      if((wire._t=(wire._t||0)+1) < 50) return setTimeout(wire,100);
-      console.warn('[shorts] auth.js never loaded');
-      return;
-    }
-    document.querySelectorAll('#eg-modal [data-eg-close]').forEach(function(el){el.addEventListener('click',closeModal);});
-    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&isOpen())closeModal();});
-    var gb=document.getElementById('eg-btn-google');
-    if(gb)gb.addEventListener('click',async function(){gb.disabled=true;setStatus('Opening Google…','loading');try{var r=await window.egleze.auth.signInWithGoogle(window.location.href);if(r&&r.error)throw r.error;}catch(e){console.error('[shorts] google failed',e);gb.disabled=false;setStatus('Could not open Google sign-in.','error');}});
-    var f=document.getElementById('eg-modal-form');
-    if(f)f.addEventListener('submit',async function(e){e.preventDefault();var i=document.getElementById('eg-modal-email');var b=document.getElementById('eg-btn-magic');var em=((i&&i.value)||'').trim();if(!em||em.indexOf('@')===-1){setStatus('Please enter a valid email.','error');return;}if(b)b.disabled=true;setStatus('Sending magic link…','loading');try{var r=await window.egleze.auth.signInWithMagicLink(em,window.location.href);if(b)b.disabled=false;if(r&&r.error){var m=(r.error.message||'').toLowerCase();if(m.indexOf('rate')!==-1)setStatus('Too many attempts. Try again in a few minutes.','error');else setStatus(r.error.message||'Could not send link.','error');}else{setStatus('Check your inbox — we sent you a sign-in link.','success');}}catch(err){console.error('[shorts] magic failed',err);if(b)b.disabled=false;setStatus('Could not send link. Please try again.','error');}});
-    window.egleze.auth.onChange(function(p){if(p&&p.event==='SIGNED_IN'&&isOpen())closeModal();});
-    window.egleze=window.egleze||{};
-    window.egleze.ui={openSignIn:openModal,closeSignIn:closeModal};
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);
-  else wire();
-})();
-</script>
-
-<script>
-// ─── BOOKMARKS — click delegation + sync, works with virtualization.
-(function(){
-  window.egleze = window.egleze || {};
-  window.egleze.saved = new Set();
-  function getDB(){return (window.egleze.auth && window.egleze.auth.client) || null;}
-  function whenReady(cb){var t=0;(function check(){if(window.egleze&&window.egleze.auth&&window.egleze.auth.client)return cb();if(t++<50)setTimeout(check,100);else console.warn('[shorts bookmarks] auth client never ready');})();}
-
-  async function loadSavedIds(){
-    try{
-      var u = await window.egleze.auth.getUser();
-      var db = getDB();
-      if(!u || !db){ window.egleze.saved.clear(); syncBookmarks(); return; }
-      var res = await db.from('user_saved_stories').select('story_id').eq('user_id', u.id);
-      if(res.error){ console.error('[shorts bookmarks] loadSavedIds', res.error); return; }
-      window.egleze.saved = new Set((res.data||[]).map(function(r){return String(r.story_id);}));
-      syncBookmarks();
-    }catch(e){ console.error('[shorts bookmarks] loadSavedIds exception', e); }
-  }
-
-  function syncBookmarks(){
-    var set = window.egleze.saved;
-    document.querySelectorAll('.eg-bookmark[data-story-id]').forEach(function(b){
-      var id = b.getAttribute('data-story-id');
-      if(!id) return;
-      b.classList.toggle('is-saved', set.has(String(id)));
-    });
-  }
-  window.egleze.syncBookmarks = syncBookmarks;
-
-  async function toggleBookmark(id){
-    if(!id) return;
-    id = String(id);
-    if(!window.egleze.auth) return;
-    var u = await window.egleze.auth.getUser();
-    if(!u){
-      try{ localStorage.setItem('egleze_pending_save', id); }catch(_){}
-      if(window.egleze.ui && window.egleze.ui.openSignIn) window.egleze.ui.openSignIn();
-      return;
-    }
-    var db = getDB();
-    if(!db) return;
-    var set = window.egleze.saved;
-    var was = set.has(id);
-    document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.toggle('is-saved', !was); });
-    if(was){
-      set.delete(id);
-      var d = await db.from('user_saved_stories').delete().eq('user_id', u.id).eq('story_id', parseInt(id,10));
-      if(d.error){
-        set.add(id);
-        document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.add('is-saved'); });
-        console.error('[shorts bookmarks] unsave failed', d.error);
-      }
-    } else {
-      set.add(id);
-      var i = await db.from('user_saved_stories').insert({ user_id: u.id, story_id: parseInt(id,10) });
-      if(i.error && i.error.code !== '23505'){
-        set.delete(id);
-        document.querySelectorAll('.eg-bookmark[data-story-id="'+id+'"]').forEach(function(b){ b.classList.remove('is-saved'); });
-        console.error('[shorts bookmarks] save failed', i.error);
-      }
-    }
-  }
-
-  async function applyPendingSave(){
-    try{
-      var p = null; try{ p = localStorage.getItem('egleze_pending_save'); }catch(_){}
-      if(!p) return;
-      try{ localStorage.removeItem('egleze_pending_save'); }catch(_){}
-      var db = getDB();
-      if(!window.egleze.auth || !db) return;
-      var u = await window.egleze.auth.getUser();
-      if(!u) return;
-      var i = await db.from('user_saved_stories').insert({ user_id: u.id, story_id: parseInt(p,10) });
-      if(i.error && i.error.code !== '23505') return;
-      window.egleze.saved.add(String(p));
-      syncBookmarks();
-    }catch(e){ console.error('[shorts bookmarks] applyPendingSave', e); }
-  }
-
-  document.addEventListener('click', function(e){
-    try{
-      var btn = e.target.closest && e.target.closest('.eg-bookmark');
-      if(!btn) return;
-      e.preventDefault(); e.stopPropagation();
-      var id = btn.getAttribute('data-story-id');
-      if(id) toggleBookmark(id);
-    }catch(err){ console.error('[shorts bookmarks] click', err); }
-  }, true);
-
-  whenReady(function(){
-    loadSavedIds();
-    window.egleze.auth.onChange(function(p){
-      if(p && (p.event==='SIGNED_IN' || p.event==='SIGNED_OUT')){
-        loadSavedIds().then(applyPendingSave);
-      }
-    });
-  });
-})();
-</script>
-
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+  })();
+  </script>
 </body>
 </html>
