@@ -147,6 +147,15 @@
 
     function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
     function initials(n){return String(n||'').split(/\s+/).slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();}
+    // Slug + URL must match /api/story.js and show.html exactly: /story/{id}-{slug-from-headline}
+    function slugify(text){
+      if(!text) return '';
+      return String(text).toLowerCase()
+        .replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"')
+        .replace(/[^\w\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-')
+        .replace(/^-|-$/g,'').substring(0,80);
+    }
+    function storyURL(s){ var b=slugify(s.headline||''); return 'https://egleze.com/story/'+s.id+(b?'-'+b:''); }
     function firstSentence(t,max){if(!t)return '';t=String(t).trim();var m=t.match(/^.*?[.!?](\s|$)/);var out=m?m[0].trim():t;if(out.length>max)out=out.slice(0,max).replace(/\s+\S*$/,'')+'…';return out;}
     function durStr(s){var len=(s.clip_end_seconds&&s.clip_start_seconds)?(s.clip_end_seconds-s.clip_start_seconds):60;var mm=Math.floor(len/60),ss=len%60;return mm>0?(mm+':'+String(ss).padStart(2,'0')):('0:'+String(ss).padStart(2,'0'));}
 
@@ -237,8 +246,8 @@
         +'</div>'
         +'<div class="vfoot"><div class="v-actions">'
           +'<button class="act-btn eg-bookmark" data-story-id="'+s.id+'" aria-label="Save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 H18 V20 L12 16 L6 20 Z"/></svg></button>'
-          +'<button class="act-btn eg-share" data-story-id="'+s.id+'" data-share-url="https://egleze.com/story/'+s.id+'" data-share-title="'+esc((s.headline||'').replace(/"/g,'&quot;'))+'" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>'
-          +'<a class="act-btn" href="https://egleze.com/story/'+s.id+'" target="_blank" rel="noopener" aria-label="Read the full story on Egleze"><img src="/favicon-96x96.png" alt="" style="width:23px;height:23px;border-radius:5px"></a>'
+          +'<button class="act-btn eg-share" data-story-id="'+s.id+'" data-share-url="'+storyURL(s)+'" data-share-title="'+esc((s.headline||'').replace(/"/g,'&quot;'))+'" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>'
+          +'<a class="act-btn" href="'+storyURL(s)+'" target="_blank" rel="noopener" aria-label="Read the full story on Egleze"><img src="/favicon-96x96.png" alt="" style="width:23px;height:23px;border-radius:5px"></a>'
           +(s.source_url?'<a class="act-btn" href="'+esc(s.source_url)+'" target="_blank" rel="noopener" aria-label="Watch the full episode on YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4.5"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none"/></svg></a>':'')
         +'</div><div class="v-cues">'
           +'<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> react</span>'
@@ -250,7 +259,7 @@
         +'<div class="sum-kick">'+esc(s.show_name||'Egleze')+(s.episode?(' \u00b7 '+esc(s.episode)):'')+'</div>'
         +'<div class="sum-head">'+esc(s.headline||'')+'</div>'
         +(s.quote?'<div class="sum-q"><div class="bar"></div><div class="txt">\u201c'+esc(s.quote)+'\u201d</div></div>':'')
-        +'<a class="sum-cta" href="https://egleze.com/story/'+s.id+'" target="_blank" rel="noopener">Read the full story on Egleze \u2192</a>'
+        +'<a class="sum-cta" href="'+storyURL(s)+'" target="_blank" rel="noopener">Read the full story on Egleze \u2192</a>'
         +(summary?'<div class="sum-label">The story</div><div class="sum-body">'+summary+'</div>':'')
         +(epSummary?'<div class="sum-label">From this episode</div><div class="sum-body">'+epSummary+'</div>':'')
         +kpHtml
