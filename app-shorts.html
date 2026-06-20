@@ -67,7 +67,7 @@
   .sum-kp{list-style:none;margin-top:6px}
   .sum-kp li{font-family:"DM Sans";font-size:13.5px;line-height:1.5;color:#cfc8ba;padding:7px 0 7px 18px;position:relative;border-top:.5px solid rgba(255,255,255,.06)}
   .sum-kp li:before{content:"";position:absolute;left:2px;top:14px;width:6px;height:6px;border-radius:50%;background:#bb6a19}
-  .sum-cta{display:inline-block;margin-top:22px;font-family:"Roboto Condensed",sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#e7ddcd;border:.5px solid rgba(255,255,255,.2);padding:9px 16px;border-radius:30px;text-decoration:none}
+  .sum-cta{display:inline-block;margin:12px 0 6px;font-family:"Roboto Condensed",sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#fff;background:#bb1919;border:.5px solid #bb1919;padding:9px 16px;border-radius:30px;text-decoration:none}
   /* ── REACTIONS pane ───────────────────────────────────────────────── */
   .react{background:#100f0d;height:100%;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 62px) 18px calc(env(safe-area-inset-bottom) + 24px);display:flex;flex-direction:column}
   .react::-webkit-scrollbar{display:none}
@@ -137,7 +137,8 @@
       return res.json();
     }
 
-    var shows={}, allStories=[], renderMap={}, io=null, currentFilter='all';
+    var shows={}, allStories=[], renderMap={}, io=null, currentFilter='all', feedToken=0;
+    var CLIP_FILTER='status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null';
 
     // ── reactions pane (full screen, wired to window.egleze.reactions) ──
     function reactionPaneHTML(s){
@@ -215,6 +216,8 @@
         +'<div class="vfoot"><div class="v-actions">'
           +'<button class="act-btn eg-bookmark" data-story-id="'+s.id+'" aria-label="Save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 H18 V20 L12 16 L6 20 Z"/></svg></button>'
           +'<button class="act-btn eg-share" data-story-id="'+s.id+'" data-share-url="https://egleze.com/story/'+s.id+'" data-share-title="'+esc((s.headline||'').replace(/"/g,'&quot;'))+'" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>'
+          +'<a class="act-btn" href="https://egleze.com/story/'+s.id+'" target="_blank" rel="noopener" aria-label="Read the full story on Egleze"><img src="/favicon-96x96.png" alt="" style="width:23px;height:23px;border-radius:5px"></a>'
+          +(s.source_url?'<a class="act-btn" href="'+esc(s.source_url)+'" target="_blank" rel="noopener" aria-label="Watch the full episode on YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4.5"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none"/></svg></a>':'')
         +'</div><div class="v-cues">'
           +'<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> react</span>'
           +'<span>summary <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>'
@@ -225,10 +228,10 @@
         +'<div class="sum-kick">'+esc(s.show_name||'Egleze')+(s.episode?(' \u00b7 '+esc(s.episode)):'')+'</div>'
         +'<div class="sum-head">'+esc(s.headline||'')+'</div>'
         +(s.quote?'<div class="sum-q"><div class="bar"></div><div class="txt">\u201c'+esc(s.quote)+'\u201d</div></div>':'')
+        +'<a class="sum-cta" href="https://egleze.com/story/'+s.id+'" target="_blank" rel="noopener">Read the full story on Egleze \u2192</a>'
         +(summary?'<div class="sum-label">The story</div><div class="sum-body">'+summary+'</div>':'')
         +(epSummary?'<div class="sum-label">From this episode</div><div class="sum-body">'+epSummary+'</div>':'')
         +kpHtml
-        +'<a class="sum-cta" href="https://egleze.com/story/'+s.id+'" target="_blank" rel="noopener">Read on Egleze \u2192</a>'
       +'</div></div>';
 
       var slide=document.createElement('div');
@@ -286,13 +289,18 @@
     }
     function deactivate(slide){ var vid=slide.querySelector('.v-vid'); if(vid){ try{vid.pause();}catch(_){} } slide.classList.add('paused'); }
 
-    function renderFeed(filter){
+    async function renderFeed(filter){
       currentFilter=filter;
+      var my=++feedToken;
       var feed=document.getElementById('feed');
       if(io){ io.disconnect(); io=null; }
       renderMap={};
+      feed.innerHTML='<div style="height:100dvh;display:flex;align-items:center;justify-content:center"><div class="spin"></div></div>';
+      var q='stories?select=*&'+CLIP_FILTER+(filter==='all'?'':('&topic=eq.'+encodeURIComponent(filter)))+'&order=updated_at.desc.nullslast&limit=40';
+      var list;
+      try{ list=await sb(q); }catch(e){ console.error('[app-shorts] feed fetch failed',e); if(my===feedToken) feed.innerHTML='<div style="height:100dvh;display:flex;align-items:center;justify-content:center;color:#8c8579;font-family:Roboto Condensed,sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase">Could not load</div>'; return; }
+      if(my!==feedToken) return; // a newer category tap superseded this fetch
       feed.innerHTML='';
-      var list=(filter==='all')?allStories:allStories.filter(function(s){return (s.topic||'')===filter;});
       if(!list.length){ feed.innerHTML='<div style="height:100dvh;display:flex;align-items:center;justify-content:center;color:#8c8579;font-family:Roboto Condensed,sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:12px">No stories in this category</div>'; return; }
       var frag=document.createDocumentFragment();
       list.forEach(function(s){ frag.appendChild(buildSlide(s)); });
@@ -306,10 +314,13 @@
       if(first){ centerTrack(first); setTimeout(function(){ centerTrack(first); activate(first); },50); }
     }
 
-    function buildCats(){
-      var seen={}, topics=[];
-      allStories.forEach(function(s){ var t=s.topic; if(t&&!seen[t]){ seen[t]=1; topics.push(t); } });
+    async function buildCats(){
       var bar=document.getElementById('cats');
+      var rows;
+      try{ rows=await sb('stories?select=topic&'+CLIP_FILTER); }catch(e){ rows=[]; }
+      var counts={};
+      rows.forEach(function(r){ var t=r.topic; if(t) counts[t]=(counts[t]||0)+1; });
+      var topics=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }); // busiest topics first
       var html='<button class="chip on" data-cat="all">All</button>';
       topics.forEach(function(t){ html+='<button class="chip" data-cat="'+esc(t)+'">'+esc(t)+'</button>'; });
       bar.innerHTML=html;
@@ -326,13 +337,9 @@
 
     async function start(){
       try{
-        boot('Loading shows');
+        boot('Loading');
         (await sb('shows?select=name,artwork_url,website_url&active=eq.true')).forEach(function(x){shows[x.name]=x;});
-        boot('Loading stories');
-        allStories=await sb("stories?select=*&status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null&order=updated_at.desc.nullslast&limit=40");
-        if(!allStories.length){ boot('No stories yet'); return; }
-        buildCats();
-        renderFeed('all');
+        await Promise.all([ buildCats(), renderFeed('all') ]);
         bootDone();
         if(window.egleze&&window.egleze.reactions&&window.egleze.reactions.onChange){
           window.egleze.reactions.onChange(function(changedId){ var fn=renderMap[String(changedId)]; if(fn)fn(); });
