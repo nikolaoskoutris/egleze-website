@@ -100,6 +100,29 @@ async function supabaseFetch(path, label) {
   }
 }
 
+// Fetch ALL approved stories by paginating in 1000-row batches.
+// WHY: Supabase caps every API response at 1000 rows (project "Max rows"
+// setting), so the old single `limit=5000` query silently returned only the
+// first 1000 — and the rest of the archive never reached Google. Looping with
+// offset in 1000-row pages retrieves everything. Ordered by id.asc so the
+// pages are stable (new stories append at the end and don't shift the window).
+async function fetchAllApprovedStories() {
+  const PAGE = 1000;
+  let all = [];
+  let error = null;
+  for (let offset = 0; ; offset += PAGE) {
+    const r = await supabaseFetch(
+      `stories?select=id,headline,created_at&status=eq.approved&order=id.asc&limit=${PAGE}&offset=${offset}`,
+      'stories'
+    );
+    if (r.error) { error = r.error; break; }
+    all = all.concat(r.data);
+    if (r.data.length < PAGE) break;   // last page reached
+    if (offset > 500000) break;        // hard safety stop (never loop forever)
+  }
+  return { error, data: all };
+}
+
 module.exports = async function handler(req, res) {
   const today = formatDate();
   const urls = [];
@@ -131,10 +154,7 @@ module.exports = async function handler(req, res) {
     ));
   }
 
-  const storiesResult = await supabaseFetch(
-    'stories?select=id,headline,created_at&status=eq.approved&order=created_at.desc&limit=5000',
-    'stories'
-  );
+  const storiesResult = await fetchAllApprovedStories();
   if (storiesResult.error) errors.push({ source: 'stories', error: storiesResult.error });
   for (const story of storiesResult.data) {
     if (!story.id || !story.headline) continue;
