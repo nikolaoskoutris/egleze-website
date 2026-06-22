@@ -350,6 +350,12 @@
       var frag=document.createDocumentFragment();
       slides.forEach(function(sl){ frag.appendChild(sl); });
       feed.appendChild(frag);
+      // Pre-center every new slide on the video pane the moment it's in the DOM,
+      // so the reactions pane never flashes as the slide scrolls into view.
+      // (Reading clientWidth forces layout; the rAF pass covers any slide whose
+      // width wasn't ready on the first pass.)
+      slides.forEach(centerTrack);
+      requestAnimationFrame(function(){ slides.forEach(centerTrack); });
       if(io) slides.forEach(function(sl){ io.observe(sl); });
     }
     async function renderFeed(filter){
