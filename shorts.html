@@ -43,7 +43,8 @@
   /* ── VIDEO pane (home): clean clip in a band, text BELOW (no overlay) ── */
   .vpane{background:#0c0b09}
   .vzone{position:absolute;top:0;left:0;right:0;height:56%;background:#000;display:flex;align-items:center;justify-content:center}
-  .v-vid{width:100%;height:100%;object-fit:contain;background:transparent;display:block;position:relative;z-index:1}
+  .v-vid{width:100%;height:100%;object-fit:contain;background:transparent;display:block;position:relative;z-index:1;opacity:0;transition:opacity .25s}
+  .v-vid.ready{opacity:1}
   .v-poster{position:absolute;inset:0;background-size:cover;background-position:center;opacity:1;transition:opacity .2s;filter:blur(22px) brightness(.6);transform:scale(1.3);z-index:0}
   .slide.audio-only .v-poster{opacity:1}
   .v-poster.fallback{background:linear-gradient(180deg,#241f18,#0c0b09);opacity:1}
@@ -308,11 +309,24 @@
     }
 
     function centerTrack(slide){ var tr=slide.querySelector('.htrack'); if(tr) tr.scrollLeft=tr.clientWidth; }
+    function primeVideo(vid){
+      if(!vid) return;
+      if(!vid.src && vid.getAttribute('data-src')){
+        vid.preload='auto';
+        vid.src=vid.getAttribute('data-src');
+        var ready=function(){ vid.classList.add('ready'); };
+        vid.addEventListener('loadeddata', ready, {once:true});
+        vid.addEventListener('playing', ready, {once:true});
+      }
+    }
     function activate(slide){
       centerTrack(slide);
       var id=slide.getAttribute('data-story-id');
       var vid=slide.querySelector('.v-vid');
-      if(vid){ if(!vid.src&&vid.getAttribute('data-src')) vid.src=vid.getAttribute('data-src'); vid.muted=(!soundUnlocked)||(soundMode===2); var p=vid.play(); if(p&&p.catch)p.catch(function(){}); slide.classList.remove('paused'); slide.classList.toggle('audio-only', soundMode===1 && soundUnlocked); }
+      if(vid){ primeVideo(vid); vid.muted=(!soundUnlocked)||(soundMode===2); var p=vid.play(); if(p&&p.catch)p.catch(function(){}); slide.classList.remove('paused'); slide.classList.toggle('audio-only', soundMode===1 && soundUnlocked); }
+      // Preload the NEXT clip so the next swipe starts instantly instead of fetching from scratch.
+      var next=slide.nextElementSibling;
+      if(next&&next.classList&&next.classList.contains('slide')) primeVideo(next.querySelector('.v-vid'));
       if(window.egleze&&window.egleze.reactions){
         window.egleze.reactions.refreshTotals(id);
         if(window.egleze.reactions._loadMine) window.egleze.reactions._loadMine(id);
