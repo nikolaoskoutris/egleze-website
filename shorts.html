@@ -125,7 +125,7 @@
   #showgrid .sg-search input{flex:1;background:none;border:none;outline:none;color:#f3efe6;font-family:"DM Sans",sans-serif;font-size:13px}
   #showgrid .sg-search input::placeholder{color:#8c8579}
   #showgrid .sg-grid{flex:1;overflow-y:auto;padding:0 12px calc(env(safe-area-inset-bottom) + 16px);display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;align-content:start}
-  .sg-tile{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;background:#1c1a13;cursor:pointer;border:.5px solid rgba(255,255,255,.08)}
+  .sg-tile{position:relative;width:100%;height:0;padding-top:100%;border-radius:10px;overflow:hidden;background:#1c1a13;cursor:pointer;border:.5px solid rgba(255,255,255,.08)}
   .sg-tile .art{position:absolute;inset:0;background-size:cover;background-position:center}
   .sg-tile .art.fallback{display:flex;align-items:center;justify-content:center;padding:8px;text-align:center}
   .sg-tile .art.fallback span{font-family:"Playfair Display",Georgia,serif;font-size:12px;color:#cfc8bb;line-height:1.25}
@@ -137,6 +137,7 @@
 </style>
 </head>
 <body>
+  <!-- EGLEZE-BUILD: showgrid + 3col-square-fix (padding-top) -->
   <div id="boot"><div class="spin"></div><div id="boot-msg">Loading Egleze</div></div>
   <div id="cats" aria-label="Categories"></div>
   <div id="feed" aria-label="Egleze stories"></div>
