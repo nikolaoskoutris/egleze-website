@@ -134,10 +134,42 @@
   .sg-tile .cap .c{font-family:"Roboto Condensed",sans-serif;font-size:9px;color:#cdbfae;letter-spacing:.3px}
   .sg-empty{grid-column:1/-1;text-align:center;color:#8c8579;font-family:"Roboto Condensed",sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:40px 20px}
   .spill-divider{height:54px;display:flex;align-items:center;justify-content:center;color:#8c8579;font-family:"Roboto Condensed",sans-serif;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;border-top:.5px solid rgba(255,255,255,.1);border-bottom:.5px solid rgba(255,255,255,.1);background:#0c0b09}
+  .act-profile{color:#fff}
+  body.signed-in .act-profile{color:#bb1919}
+  #accountpanel{position:fixed;inset:0;z-index:42;background:#0c0b09;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s ease}
+  #accountpanel.open{transform:translateY(0)}
+  .ap-head{padding:calc(env(safe-area-inset-top) + 14px) 16px 10px;display:flex;align-items:center;gap:10px}
+  .ap-title{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:19px;color:#f3efe6;flex:1}
+  .ap-close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .ap-close svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2}
+  .ap-body{flex:1;overflow-y:auto;padding:4px 16px calc(env(safe-area-inset-bottom) + 12px)}
+  .ap-profile{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+  .ap-avatar{width:50px;height:50px;border-radius:50%;background:#bb1919;color:#fff;display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:20px;flex:0 0 auto}
+  .ap-id{flex:1;min-width:0}
+  .ap-name{font-family:"Playfair Display",Georgia,serif;font-size:16px;color:#f3efe6}
+  .ap-email{font-family:"DM Sans",sans-serif;font-size:11.5px;color:#8c8579;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ap-edit{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#e7ddcd;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.18);border-radius:20px;padding:6px 12px;text-decoration:none;flex:0 0 auto}
+  .ap-stats{display:flex;gap:9px;margin-bottom:18px}
+  .ap-stat{flex:1;background:#17150f;border:.5px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;text-align:left}
+  .ap-stat-btn{cursor:pointer}
+  .ap-stat-n{font-family:"Playfair Display",Georgia,serif;font-size:20px;color:#f3efe6}
+  .ap-stat-l{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#8c8579}
+  .ap-sec-label{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#bb6a19;margin:0 0 9px}
+  .ap-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+  .ap-chip{font-family:"Roboto Condensed",sans-serif;font-size:11px;color:#e7ddcd;background:rgba(255,255,255,.08);border:.5px solid rgba(255,255,255,.16);border-radius:20px;padding:5px 11px;cursor:pointer}
+  .ap-chip-topic{color:#fff;background:rgba(187,25,25,.85);border-color:rgba(187,25,25,.85)}
+  .ap-saved{display:flex;flex-direction:column;gap:11px}
+  .ap-saved-row{display:flex;gap:10px;align-items:center;background:none;border:none;padding:0;text-align:left;cursor:pointer;width:100%}
+  .ap-thumb{width:38px;height:38px;border-radius:7px;background:#2a241c;background-size:cover;background-position:center;flex:0 0 auto}
+  .ap-saved-head{font-family:"Playfair Display",Georgia,serif;font-size:12.5px;color:#f3efe6;line-height:1.25}
+  .ap-empty{color:#8c8579;font-family:"Roboto Condensed",sans-serif;font-size:11px;letter-spacing:.5px;padding:6px 0 14px}
+  .ap-foot{padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);border-top:.5px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:14px}
+  .ap-signout{flex:1;background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.2);color:#e7ddcd;font-family:"Roboto Condensed",sans-serif;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:11px;border-radius:9px;cursor:pointer}
+  .ap-delete{font-family:"Roboto Condensed",sans-serif;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#a33;text-decoration:none;flex:0 0 auto}
 </style>
 </head>
 <body>
-  <!-- EGLEZE-BUILD: showgrid + 3col-square-fix (padding-top) -->
+  <!-- EGLEZE-BUILD: account-panel + profile-btn + saved-feed -->
   <div id="boot"><div class="spin"></div><div id="boot-msg">Loading Egleze</div></div>
   <div id="cats" aria-label="Categories"></div>
   <div id="feed" aria-label="Egleze stories"></div>
@@ -146,6 +178,28 @@
     <div class="sg-head"><div class="sg-title">Shows</div><button class="sg-close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="sg-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="sg-input" type="text" placeholder="Search 100+ shows" autocomplete="off"></div>
     <div class="sg-grid" id="sg-grid"></div>
+  </div>
+  <div id="accountpanel" aria-hidden="true">
+    <div class="ap-head"><div class="ap-title">Account</div><button class="ap-close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="ap-body">
+      <div class="ap-profile">
+        <div class="ap-avatar" id="ap-initial">E</div>
+        <div class="ap-id"><div class="ap-name" id="ap-name"></div><div class="ap-email" id="ap-email"></div></div>
+        <a class="ap-edit" href="https://egleze.com/account.html" target="_blank" rel="noopener">Edit</a>
+      </div>
+      <div class="ap-stats">
+        <div class="ap-stat"><div class="ap-stat-n" id="ap-following-count">0</div><div class="ap-stat-l">Following</div></div>
+        <button class="ap-stat ap-stat-btn" data-saved-play="1"><div class="ap-stat-n" id="ap-saved-count">0</div><div class="ap-stat-l">Saved \u25b8 play</div></button>
+      </div>
+      <div class="ap-sec-label">Following</div>
+      <div class="ap-chips" id="ap-following"></div>
+      <div class="ap-sec-label">Saved</div>
+      <div class="ap-saved" id="ap-saved"></div>
+    </div>
+    <div class="ap-foot">
+      <button class="ap-signout" data-signout>Sign out</button>
+      <a class="ap-delete" href="https://egleze.com/account.html" target="_blank" rel="noopener">Delete account</a>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -201,7 +255,7 @@
       return res.json();
     }
 
-    var shows={}, allStories=[], renderMap={}, io=null, currentFilter='all', feedToken=0, showCounts=null;
+    var shows={}, allStories=[], renderMap={}, io=null, currentFilter='all', feedToken=0, showCounts=null, savedRows=null;
     var PAGE=20, feedOffset=0, feedLoading=false, feedExhausted=false;
     var CLIP_FILTER='status=eq.approved&clip_vertical_url=not.is.null&clip_start_seconds=not.is.null&clip_end_seconds=not.is.null';
 
@@ -285,6 +339,7 @@
           +'<button class="act-btn eg-share" data-story-id="'+s.id+'" data-share-url="'+storyURL(s)+'" data-share-title="'+esc((s.headline||'').replace(/"/g,'&quot;'))+'" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>'
           +'<a class="act-btn" href="'+storyURL(s)+'" target="_blank" rel="noopener" aria-label="Read the full story on Egleze"><img src="/favicon-96x96.png" alt="" style="width:23px;height:23px;border-radius:5px"></a>'
           +(s.source_url?'<a class="act-btn" href="'+esc(s.source_url)+'" target="_blank" rel="noopener" aria-label="Watch the full episode on YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4.5"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none"/></svg></a>':'')
+        +'<button class="act-btn act-profile" data-account aria-label="Account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>'
         +'</div><div class="v-cues">'
           +'<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> react</span>'
           +'<span>summary <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>'
@@ -389,6 +444,10 @@
           .order('updated_at',{ascending:false,nullsFirst:false})
           .range(offset, offset+PAGE-1)
           .then(function(res){ if(res.error){ console.error('[following] query error',res.error); return []; } return res.data||[]; });
+      }
+      if(filter==='__saved__'){
+        if(offset===0){ return loadSavedRows().then(function(rows){ savedRows=rows; return rows.slice(0, PAGE); }); }
+        return Promise.resolve((savedRows||[]).slice(offset, offset+PAGE));
       }
       if(filter&&filter.indexOf('__show__:')===0){
         var snm=filter.slice(9);
@@ -519,8 +578,102 @@
 
     function updateShowPill(filter){
       var pill=document.getElementById('showpill'); if(!pill) return;
-      if(filter&&filter.indexOf('__show__:')===0){ pill.querySelector('.nm').textContent=filter.slice(9); pill.classList.remove('hidden'); }
+      var nm=pill.querySelector('.nm'), sub=pill.querySelector('.sub');
+      if(filter&&filter.indexOf('__show__:')===0){ nm.textContent=filter.slice(9); if(sub)sub.textContent='\u00b7 auto-playing'; pill.classList.remove('hidden'); }
+      else if(filter==='__saved__'){ nm.textContent='Saved'; if(sub)sub.textContent='\u00b7 auto-playing'; pill.classList.remove('hidden'); }
       else { pill.classList.add('hidden'); }
+    }
+    async function updateAuthState(){
+      var auth=window.egleze&&window.egleze.auth; if(!auth){ document.body.classList.remove('signed-in'); return; }
+      var user=null; try{ user=await auth.getUser(); }catch(e){}
+      document.body.classList.toggle('signed-in', !!user);
+    }
+    function openSignIn(){
+      var e=window.egleze||{};
+      if(e.ui&&e.ui.openSignIn) return e.ui.openSignIn();
+      if(e.signin&&e.signin.open) return e.signin.open();
+      if(e.auth&&e.auth.openSignIn) return e.auth.openSignIn();
+      if(e.auth&&e.auth.signInWithGoogle) return e.auth.signInWithGoogle();
+    }
+    async function onProfileTap(){
+      var auth=window.egleze&&window.egleze.auth; var user=null;
+      if(auth){ try{ user=await auth.getUser(); }catch(e){} }
+      if(user) openAccountPanel(); else openSignIn();
+    }
+    async function loadSavedRows(){
+      var auth=window.egleze&&window.egleze.auth; if(!auth) return [];
+      var user=null; try{ user=await auth.getUser(); }catch(e){} if(!user) return [];
+      var db=auth.client; if(!db) return [];
+      var res; try{ res=await db.from('user_saved_stories').select('story_id').eq('user_id',user.id); }catch(e){ return []; }
+      var ids=(((res&&res.data)||[]).map(function(r){return r.story_id;})).filter(function(x){return x||x===0;});
+      if(!ids.length) return [];
+      var rows; try{ rows=await sb('stories?select=*&'+CLIP_FILTER+'&id=in.('+ids.join(',')+')&order=updated_at.desc.nullslast'); }catch(e){ rows=[]; }
+      return rows||[];
+    }
+    function openAccountPanel(){
+      var p=document.getElementById('accountpanel'); if(!p) return;
+      p.classList.add('open'); p.setAttribute('aria-hidden','false'); renderAccountPanel();
+    }
+    function closeAccountPanel(){
+      var p=document.getElementById('accountpanel'); if(!p) return;
+      p.classList.remove('open'); p.setAttribute('aria-hidden','true');
+    }
+    async function renderAccountPanel(){
+      var auth=window.egleze&&window.egleze.auth; if(!auth) return;
+      var user=null; try{ user=await auth.getUser(); }catch(e){}
+      if(!user){ closeAccountPanel(); openSignIn(); return; }
+      var meta=user.user_metadata||{};
+      var name=meta.name||meta.full_name||(user.email?user.email.split('@')[0]:'You');
+      document.getElementById('ap-initial').textContent=(name||'E').trim().charAt(0).toUpperCase();
+      document.getElementById('ap-name').textContent=name;
+      document.getElementById('ap-email').textContent=user.email||'';
+      var F=window.egleze&&window.egleze.follows;
+      var fshows=F?Array.from(F.shows||[]):[], ftopics=F?Array.from(F.topics||[]):[];
+      document.getElementById('ap-following-count').textContent=(fshows.length+ftopics.length);
+      var chips='';
+      fshows.forEach(function(n){ chips+='<button class="ap-chip" data-show="'+esc(n)+'">'+esc(n)+'</button>'; });
+      ftopics.forEach(function(t){ chips+='<button class="ap-chip ap-chip-topic" data-topic="'+esc(t)+'">'+esc(t)+'</button>'; });
+      document.getElementById('ap-following').innerHTML=chips||'<div class="ap-empty">Not following anything yet</div>';
+      var rows=await loadSavedRows(); savedRows=rows;
+      document.getElementById('ap-saved-count').textContent=rows.length;
+      var sv='';
+      rows.slice(0,8).forEach(function(s2){
+        var sh=shows[s2.show_name]||{}; var art=sh.artwork_url;
+        sv+='<button class="ap-saved-row" data-saved-play="1"><span class="ap-thumb" style="'+(art?('background-image:url(\''+esc(art)+'\')'):'')+'"></span><span class="ap-saved-head">'+esc(s2.headline||'')+'</span></button>';
+      });
+      document.getElementById('ap-saved').innerHTML=rows.length?sv:'<div class="ap-empty">No saved stories yet</div>';
+    }
+    function enterSavedFeed(){
+      closeAccountPanel();
+      var bar=document.getElementById('cats'); if(bar) bar.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});
+      renderFeed('__saved__');
+    }
+    function enterTopic(t){
+      closeAccountPanel();
+      var bar=document.getElementById('cats');
+      if(bar) bar.querySelectorAll('.chip').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-cat')===t); });
+      renderFeed(t);
+    }
+    async function doSignOut(){
+      var auth=window.egleze&&window.egleze.auth; if(auth){ try{ await auth.signOut(); }catch(e){} }
+      savedRows=null; updateAuthState(); closeAccountPanel();
+      var bar=document.getElementById('cats'); if(bar){ bar.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');}); var a=bar.querySelector('[data-cat="all"]'); if(a)a.classList.add('on'); }
+      renderFeed('all');
+    }
+    function wireAccountUI(){
+      var p=document.getElementById('accountpanel');
+      if(p){
+        p.addEventListener('click',function(e){
+          if(e.target.closest('.ap-close')){ closeAccountPanel(); return; }
+          if(e.target.closest('[data-signout]')){ doSignOut(); return; }
+          var sc=e.target.closest('[data-show]'); if(sc){ closeAccountPanel(); enterShow(sc.getAttribute('data-show')); return; }
+          var tc=e.target.closest('[data-topic]'); if(tc){ enterTopic(tc.getAttribute('data-topic')); return; }
+          if(e.target.closest('[data-saved-play]')){ enterSavedFeed(); return; }
+        });
+      }
+      var feed=document.getElementById('feed');
+      if(feed) feed.addEventListener('click',function(e){ var b=e.target.closest&&e.target.closest('[data-account]'); if(b){ e.preventDefault(); e.stopPropagation(); onProfileTap(); } });
+      if(window.egleze&&window.egleze.auth&&window.egleze.auth.onChange){ window.egleze.auth.onChange(function(){ updateAuthState(); }); }
     }
     function insertSpillDivider(feed){
       var d=document.createElement('div'); d.className='spill-divider'; d.textContent='More from everyone'; feed.appendChild(d);
@@ -548,8 +701,16 @@
     }
     async function ensureShowCounts(){
       if(showCounts) return showCounts;
-      var rows; try{ rows=await sb('stories?select=show_name&'+CLIP_FILTER); }catch(e){ rows=[]; }
-      var c={}; rows.forEach(function(r){ var n=r.show_name; if(n) c[n]=(c[n]||0)+1; });
+      var c={}, offset=0;
+      for(var guard=0; guard<50; guard++){
+        var rows;
+        try{ rows=await sb('stories?select=show_name&'+CLIP_FILTER+'&order=updated_at.desc.nullslast&limit=1000&offset='+offset); }
+        catch(e){ rows=[]; }
+        if(!rows||!rows.length) break;
+        rows.forEach(function(r){ var n=r.show_name; if(n) c[n]=(c[n]||0)+1; });
+        if(rows.length<1000) break;
+        offset+=rows.length;
+      }
       showCounts=c; return c;
     }
     async function buildShowGrid(q){
@@ -587,6 +748,8 @@
         await Promise.all([ buildCats(), renderFeed('all') ]);
         bootDone();
         wireShowUI();
+        wireAccountUI();
+        updateAuthState();
         // infinite scroll: fetch the next page as the user nears the end
         var feed=document.getElementById('feed');
         feed.addEventListener('scroll',function(){
