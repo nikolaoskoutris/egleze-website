@@ -1990,7 +1990,15 @@ function paintReveals() {
   var perPage = state.perPage || 3;
   var totalPages = Math.max(1, Math.ceil(state.allStories.length / perPage));
   var startIdx = state.page * perPage;
-  var pageStories = state.allStories.slice(startIdx, startIdx + perPage);
+  var _n = state.allStories.length;
+  var pageStories;
+  if (_n > perPage) {
+    // wrap a partial last page so it always shows a full set — never strand empty slots
+    pageStories = [];
+    for (var _w = 0; _w < perPage; _w++) { pageStories.push(state.allStories[(startIdx + _w) % _n]); }
+  } else {
+    pageStories = state.allStories.slice(startIdx, startIdx + perPage);
+  }
 
   if (pageStories.length === 0) { state.page = 0; return paintReveals(); }
 
@@ -2338,7 +2346,15 @@ function paintCarousel(state) {
 
   var totalPages = Math.max(1, Math.ceil(state.allStories.length / perPage));
   var startIdx = state.page * perPage;
-  var pageStories = state.allStories.slice(startIdx, startIdx + perPage);
+  var _n = state.allStories.length;
+  var pageStories;
+  if (_n > perPage) {
+    // wrap a partial last page so it always shows a full set — never strand empty slots
+    pageStories = [];
+    for (var _w = 0; _w < perPage; _w++) { pageStories.push(state.allStories[(startIdx + _w) % _n]); }
+  } else {
+    pageStories = state.allStories.slice(startIdx, startIdx + perPage);
+  }
   if (pageStories.length === 0) { state.page = 0; return paintCarousel(state); }
 
   // Cache stories
