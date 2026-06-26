@@ -779,6 +779,40 @@ header{position:relative}
 
 /* ── MOST WATCHED — social-proof strip (reuses 3-up reveal cards) ──── */
 .reveals-section.reveals-mw{background:#efe9db;border-top:0.5px solid #d8d1c2}
+
+  /* ── THE EGLEZE INDEX — corpus stats box ─────────────────────── */
+  .eg-index-band{padding:32px 22px 8px}
+  .eg-ix{max-width:920px;margin:0 auto;background:#100c08;border:.5px solid rgba(187,25,25,.4);border-radius:14px;padding:24px 26px}
+  .eg-ix-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:3px;gap:10px;flex-wrap:wrap}
+  .eg-ix-kicker{font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#bb1919}
+  .eg-ix-issue{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7a6f5d}
+  .eg-ix-h2{font-family:'Playfair Display',serif;font-weight:700;font-size:23px;color:#f5f1e8;line-height:1.2;margin:0 0 18px}
+  .eg-ix-rows{display:flex;flex-direction:column;gap:9px}
+  .eg-ix-row{display:flex;align-items:center;gap:12px}
+  .eg-ix-lbl{width:190px;flex:0 0 auto;font-family:'Roboto Condensed',sans-serif;font-size:12.5px;letter-spacing:.3px;color:#e7ddcd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .eg-ix-track{flex:1;height:6px;border-radius:4px;background:rgba(255,255,255,.07)}
+  .eg-ix-fill{display:block;height:6px;border-radius:4px;background:#bb1919}
+  .eg-ix-pct{width:40px;flex:0 0 auto;text-align:right;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;color:#f5f1e8}
+  .eg-ix-more{display:none;flex-direction:column;gap:9px;margin-top:9px}
+  .eg-ix.is-open .eg-ix-more{display:flex}
+  .eg-ix-toggle{margin-top:14px;background:none;border:none;cursor:pointer;font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#bb1919;padding:0;display:inline-flex;align-items:center;gap:6px}
+  .eg-ix-toggle .eg-ix-caret{transition:transform .2s}
+  .eg-ix.is-open .eg-ix-toggle .eg-ix-caret{transform:rotate(180deg)}
+  .eg-ix-method{margin-top:14px;padding-top:13px;border-top:.5px solid rgba(255,255,255,.08);font-family:'DM Sans',sans-serif;font-size:11px;color:#7a6f5d;line-height:1.5}
+  .eg-ix-cap{margin-top:18px;background:#16110b;border:.5px solid rgba(255,255,255,.08);border-radius:11px;padding:18px 20px}
+  .eg-ix-cap-kicker{font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#bb1919;margin-bottom:6px}
+  .eg-ix-cap-h{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:#f5f1e8;line-height:1.25;margin-bottom:5px}
+  .eg-ix-cap-sub{font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:#bcb09a;margin-bottom:14px}
+  .eg-ix-form{display:flex;gap:8px;flex-wrap:wrap}
+  .eg-ix-role{background:#0c0a07;border:.5px solid rgba(255,255,255,.18);border-radius:8px;padding:11px 10px;color:#d6c79e;font-family:'DM Sans',sans-serif;font-size:12.5px;outline:none}
+  .eg-ix-email{flex:1;min-width:160px;background:#0c0a07;border:.5px solid rgba(255,255,255,.18);border-radius:8px;padding:11px 12px;color:#f5f1e8;font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+  .eg-ix-email:focus,.eg-ix-role:focus{border-color:rgba(187,25,25,.6)}
+  .eg-ix-btn{background:#bb1919;color:#fff;border:none;border-radius:8px;padding:0 18px;font-family:'Roboto Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+  .eg-ix-btn:hover{background:#a01515}
+  .eg-ix-note{font-family:'DM Sans',sans-serif;font-size:10.5px;color:#6b6354;margin-top:9px}
+  .eg-ix-ok{font-family:'DM Sans',sans-serif;font-size:13px;color:#9fce9f;margin-top:4px}
+  @media(max-width:760px){.eg-ix-lbl{width:140px;font-size:11.5px}.eg-ix-h2{font-size:20px}.eg-ix{padding:20px 18px}}
+
 .reveals-mw .mw-views{position:absolute;bottom:10px;left:10px;background:rgba(14,10,7,.78);color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.5px;padding:3px 9px;border-radius:3px;z-index:4;display:inline-flex;align-items:center;gap:4px;line-height:1.4}
 
 /* ── THE EGLEZE DIGEST — inline newsletter capture ───────────── */
@@ -1174,6 +1208,44 @@ header{position:relative}
       <div style="grid-column:1/-1;padding:50px 20px;text-align:center;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">Loading…</div>
     </div>
     <div class="reveals-dots" id="breaking-dots" aria-hidden="true"></div>
+  </section>
+
+  <!-- ── THE EGLEZE INDEX — corpus stats teaser (below Breaking, above Most Watched) ── -->
+  <section class="eg-index-band" id="egleze-index">
+    <div class="eg-ix" id="eg-ix">
+      <div class="eg-ix-top">
+        <span class="eg-ix-kicker">The Egleze Index · State of the Conversation</span>
+        <span class="eg-ix-issue">May–Jun 2026 · No. 01</span>
+      </div>
+      <h2 class="eg-ix-h2">What the podcast world talked about</h2>
+      <div class="eg-ix-rows"><div class="eg-ix-row"><span class="eg-ix-lbl">Trump & MAGA</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:100%"></span></span><span class="eg-ix-pct">17%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Israel, Iran & Middle East</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:90%"></span></span><span class="eg-ix-pct">15%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">AI & machine learning</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:50%"></span></span><span class="eg-ix-pct">8.5%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Economy & markets</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:42%"></span></span><span class="eg-ix-pct">7%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Health, disease & longevity</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:36%"></span></span><span class="eg-ix-pct">6.2%</span></div>
+        <div class="eg-ix-more" id="eg-ix-more"><div class="eg-ix-row"><span class="eg-ix-lbl">Crime & justice</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:32%"></span></span><span class="eg-ix-pct">5.4%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Intelligence & surveillance</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:28%"></span></span><span class="eg-ix-pct">4.7%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Big Tech & social media</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:25%"></span></span><span class="eg-ix-pct">4.2%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">China</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:25%"></span></span><span class="eg-ix-pct">4.2%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Mental health & psychology</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:24%"></span></span><span class="eg-ix-pct">4.1%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">UFOs / UAP / aliens</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:24%"></span></span><span class="eg-ix-pct">4%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Russia & Ukraine</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:22%"></span></span><span class="eg-ix-pct">3.8%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Religion & spirituality</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:19%"></span></span><span class="eg-ix-pct">3.3%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Addiction & drugs</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:12%"></span></span><span class="eg-ix-pct">2%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Nutrition & supplements</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:11%"></span></span><span class="eg-ix-pct">1.9%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Space & SpaceX</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:11%"></span></span><span class="eg-ix-pct">1.8%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Vaccines & COVID</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:9%"></span></span><span class="eg-ix-pct">1.5%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Crypto</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:5%"></span></span><span class="eg-ix-pct">0.8%</span></div><div class="eg-ix-row"><span class="eg-ix-lbl">Hormones</span><span class="eg-ix-track"><span class="eg-ix-fill" style="width:4%"></span></span><span class="eg-ix-pct">0.7%</span></div></div>
+      </div>
+      <button class="eg-ix-toggle" type="button" onclick="toggleIndexThemes()" aria-expanded="false" id="eg-ix-toggle">
+        <span id="eg-ix-toggle-label">See all 19 themes</span>
+        <span class="eg-ix-caret">▾</span>
+      </button>
+      <div class="eg-ix-method">Across 6,000+ moments from 100+ shows we track · May–June 2026. A descriptive read of our own corpus.</div>
+      <div class="eg-ix-cap">
+        <div class="eg-ix-cap-kicker">Coming soon</div>
+        <div class="eg-ix-cap-h">The complete Egleze Index — for newsrooms &amp; agencies</div>
+        <div class="eg-ix-cap-sub">Monthly reports on the guests, named entities, and emerging themes moving the independent podcast world.</div>
+        <div class="eg-ix-form" id="eg-ix-form">
+          <select class="eg-ix-role" id="eg-ix-role" aria-label="Your role">
+            <option value="">I'm with…</option>
+            <option value="PR / comms">PR / comms agency</option>
+            <option value="Research / alt-data">Research / alt-data</option>
+            <option value="Media / newsroom">Media / newsroom</option>
+            <option value="Academic">Academic / researcher</option>
+            <option value="Show / podcast">A show / podcast</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="email" class="eg-ix-email" id="eg-ix-email" placeholder="you@company.com" autocomplete="email" aria-label="Email address" onkeydown="if(event.key==='Enter')submitIndexInterest()">
+          <button type="button" class="eg-ix-btn" id="eg-ix-btn" onclick="submitIndexInterest()">Register interest</button>
+        </div>
+        <div class="eg-ix-note" id="eg-ix-note">No spam. We'll email when the first report ships.</div>
+      </div>
+    </div>
   </section>
 
   <!-- ── MOST WATCHED THIS WEEK — social-proof strip (is_most_watched) ───── -->
@@ -5343,5 +5415,38 @@ async function digestSubscribe() {
 })();
 </script>
 
+<script>
+// ── THE EGLEZE INDEX — expand/collapse + interest capture ──
+function toggleIndexThemes(){
+  var box=document.getElementById('eg-ix'); if(!box) return;
+  var open=box.classList.toggle('is-open');
+  var lbl=document.getElementById('eg-ix-toggle-label');
+  var btn=document.getElementById('eg-ix-toggle');
+  if(lbl) lbl.textContent = open ? 'Show less' : 'See all 19 themes';
+  if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function submitIndexInterest(){
+  var emailEl=document.getElementById('eg-ix-email');
+  var roleEl=document.getElementById('eg-ix-role');
+  var note=document.getElementById('eg-ix-note');
+  var form=document.getElementById('eg-ix-form');
+  if(!emailEl) return;
+  var email=(emailEl.value||'').trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    if(note){ note.textContent='Please enter a valid email.'; note.style.color='#cf9a9a'; }
+    return;
+  }
+  var role=(roleEl&&roleEl.value)||'';
+  try{
+    fetch(SUPABASE_URL+'/rest/v1/api_leads',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Content-Profile':'public','Prefer':'return=minimal'},
+      body:JSON.stringify({email:email,source:'index_interest',status:'new',note:role||null})
+    }).catch(function(){});
+  }catch(e){}
+  if(form) form.style.display='none';
+  if(note){ note.textContent='Thanks — you are on the list. We will email you when the first report ships.'; note.className='eg-ix-ok'; }
+}
+</script>
 </body>
 </html>
