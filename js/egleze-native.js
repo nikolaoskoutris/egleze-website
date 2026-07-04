@@ -6,8 +6,8 @@
 //   1. Haptics — a tick on reactions, category chips, and action buttons.
 //   2. External links (YouTube, "Read on Egleze") open in the in-app system browser
 //      so the user returns to the app instead of leaving it.
-//   3. Google sign-in + magic link run through the system browser and return via the
-//      egleze:// deep link, because OAuth is blocked inside plain webviews.
+//   3. Google + Apple sign-in + magic link run through the system browser and return
+//      via the egleze:// deep link, because OAuth is blocked inside plain webviews.
 
 (function () {
   var Cap = window.Capacitor;
@@ -41,21 +41,31 @@
   // ── 3. Native auth (OAuth + magic link via system browser + deep-link return) ─
   function client() { return window.egleze && window.egleze.auth && window.egleze.auth.client; }
 
+  // One generic OAuth-through-system-browser helper, used by Google AND Apple.
+  // skipBrowserRedirect stops supabase-js redirecting the webview; we open the
+  // provider URL in the system browser instead, and the egleze://auth deep link
+  // brings the session back (handled by appUrlOpen below, provider-agnostic).
+  function nativeOAuth(provider) {
+    return async function () {
+      try {
+        var sb = client();
+        var res = await sb.auth.signInWithOAuth({
+          provider: provider,
+          options: { redirectTo: AUTH_REDIRECT, skipBrowserRedirect: true }
+        });
+        if (res && res.data && res.data.url && Browser) Browser.open({ url: res.data.url });
+        return res;
+      } catch (err) { console.error('[egleze-native] ' + provider + ' sign-in failed', err); return { error: err }; }
+    };
+  }
+
   function patchAuth() {
     if (!window.egleze || !window.egleze.auth) { return setTimeout(patchAuth, 150); }
     var sb = client();
     if (!sb) { return setTimeout(patchAuth, 150); }
 
-    window.egleze.auth.signInWithGoogle = async function () {
-      try {
-        var res = await sb.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: AUTH_REDIRECT, skipBrowserRedirect: true }
-        });
-        if (res && res.data && res.data.url && Browser) Browser.open({ url: res.data.url });
-        return res;
-      } catch (err) { console.error('[egleze-native] google sign-in failed', err); return { error: err }; }
-    };
+    window.egleze.auth.signInWithGoogle = nativeOAuth('google');
+    window.egleze.auth.signInWithApple = nativeOAuth('apple');
 
     window.egleze.auth.signInWithMagicLink = function (email) {
       return sb.auth.signInWithOtp({

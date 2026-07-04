@@ -45,6 +45,19 @@
     });
   }
 
+  // Sign in with Apple — same web-OAuth path as Google, so it works identically
+  // on the website, the shorts PWA, and (via the native bridge's system-browser
+  // + egleze://auth deep link) the iOS/Android apps. Requires the Apple provider
+  // to be enabled in Supabase (Services ID as Client ID + generated secret).
+  async function signInWithApple(redirectTo) {
+    return client.auth.signInWithOAuth({
+      provider: "apple",
+      options: {
+        redirectTo: redirectTo || window.location.origin,
+      },
+    });
+  }
+
   async function signInWithMagicLink(email, redirectTo) {
     return client.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
@@ -66,6 +79,7 @@
     getSession,
     onChange,
     signInWithGoogle,
+    signInWithApple,
     signInWithMagicLink,
     signOut,
   };

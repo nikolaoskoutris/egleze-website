@@ -3,11 +3,15 @@
 //
 // Injects the modal HTML + CSS into the page on load (one-time).
 // Exposes window.egleze.ui.openSignIn() / closeSignIn().
-// Wires Google OAuth and magic-link via window.egleze.auth.
+// Wires Apple + Google OAuth and magic-link via window.egleze.auth.
 //
 // Faithful reproduction of the proven homepage modal: same DOM ids, same CSS,
 // same user-facing copy, same flow. Self-contained so any page just loads
 // this one file and gets a working sign-in.
+//
+// Apple button note (App Store Guideline 4.8): placed ABOVE Google with equal
+// size/weight — Apple's HIG requires Sign in with Apple to be no less
+// prominent than other third-party logins. Do not shrink or demote it.
 
 (function () {
   if (document.getElementById('eg-modal')) {
@@ -29,6 +33,9 @@
     + '#eg-modal-logo .e-red{color:#bb1919}'
     + '#eg-modal-headline{font-family:"Playfair Display",serif;font-size:18px;font-weight:600;line-height:1.25;text-align:center;margin:16px 0 6px;color:#0e0a06}'
     + '#eg-modal-sub{font-size:12px;color:#777;text-align:center;line-height:1.5;margin:0 0 22px}'
+    + '#eg-btn-apple{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;width:100%;background:#000;color:#fff;border:1px solid #000;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity .15s;margin-bottom:10px}'
+    + '#eg-btn-apple:hover{opacity:.85}'
+    + '#eg-btn-apple:disabled{opacity:.6;cursor:wait}'
     + '#eg-btn-google{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 16px;width:100%;background:#fff;color:#0e0a06;border:1px solid #ddd;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}'
     + '#eg-btn-google:hover{border-color:#bb1919;background:#fff8f0}'
     + '#eg-btn-google:disabled{opacity:.6;cursor:wait}'
@@ -51,13 +58,19 @@
   st.textContent = css;
   document.head.appendChild(st);
 
-  // ---- HTML (identical structure to homepage modal) ----
+  // ---- HTML (identical structure to homepage modal, + Apple above Google) ----
   var html = '<div id="eg-modal-backdrop" data-eg-close></div>'
     + '<div id="eg-modal-card">'
     + '<button id="eg-modal-close" type="button" data-eg-close aria-label="Close">×</button>'
     + '<div id="eg-modal-logo"><span class="e-red">E</span>gleze</div>'
     + '<h2 id="eg-modal-headline">Sign in to Egleze</h2>'
     + '<p id="eg-modal-sub">Save stories, react, and build a memory of what\'s shaping the world.</p>'
+    + '<button id="eg-btn-apple" type="button">'
+    +   '<svg width="15" height="15" viewBox="0 0 384 512" aria-hidden="true">'
+    +     '<path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.7-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" fill="#fff"/>'
+    +   '</svg>'
+    +   'Continue with Apple'
+    + '</button>'
     + '<button id="eg-btn-google" type="button">'
     +   '<svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">'
     +     '<path d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.79 2.71v2.27h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" fill="#4285f4"/>'
@@ -126,8 +139,10 @@
       setStatus('', '');
       var magic = document.getElementById('eg-btn-magic');
       var google = document.getElementById('eg-btn-google');
+      var apple = document.getElementById('eg-btn-apple');
       if (magic) magic.disabled = false;
       if (google) google.disabled = false;
+      if (apple) apple.disabled = false;
     }, 200);
   }
 
@@ -136,6 +151,27 @@
     if (e.target && e.target.matches && e.target.matches('[data-eg-close]')) {
       e.preventDefault();
       closeModal();
+    }
+  });
+
+  // Apple
+  document.addEventListener('click', async function (e) {
+    var btn = e.target && e.target.closest && e.target.closest('#eg-btn-apple');
+    if (!btn) return;
+    e.preventDefault();
+    if (!window.egleze || !window.egleze.auth || !window.egleze.auth.signInWithApple) {
+      setStatus('Sign-in not available right now.', 'error');
+      return;
+    }
+    btn.disabled = true;
+    setStatus('Opening Apple…', 'loading');
+    console.log('[egleze signin-modal] apple redirecting to:', window.location.href);
+    try {
+      await window.egleze.auth.signInWithApple(window.location.href);
+    } catch (err) {
+      console.error('[egleze signin-modal] apple failed:', err);
+      setStatus('Could not open Apple sign-in. Please try again.', 'error');
+      btn.disabled = false;
     }
   });
 
