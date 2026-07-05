@@ -692,6 +692,9 @@ header{position:relative}
 .nw-list::-webkit-scrollbar-track{background:transparent}
 .nw-row{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #eee7d8;text-decoration:none;color:inherit}
 .nw-row:last-child{border-bottom:none}
+.nw-more{margin:10px 0 2px;padding:9px 12px;width:100%;background:none;border:1px solid #cfc8bb;color:#6f685d;font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;transition:border-color .15s,color .15s}
+.nw-more:hover{border-color:var(--red);color:var(--red)}
+.nw-more:disabled{opacity:.6;cursor:wait}
 .nw-row-art{width:44px;height:44px;object-fit:cover;flex:0 0 auto;background:#e8e1d2}
 .nw-row-h{font-family:'Playfair Display',serif;font-weight:700;font-size:13.5px;line-height:1.3;color:var(--dark)}
 .nw-row-meta{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1px;color:#8a8478;text-transform:uppercase;margin-top:3px}
@@ -2795,24 +2798,36 @@ async function loadNewsWire() {
   var sec = document.getElementById('news-wire');
   if (!sec || !window.NEWS_SHOWS || !window.NEWS_SHOWS.length) return;
   try {
-    var { data, error } = await db.from('stories')
-      .select('*')
-      .eq('status', 'approved')
-      .in('show_name', window.NEWS_SHOWS)
-      .order('created_at', { ascending: false })
-      .limit(40);
-    if (error || !data || data.length < 3) return; // stay hidden on thin data
-    // Cache for the story-modal click delegate, same as other sections
-    window._storyCache = window._storyCache || {};
-    data.forEach(function(s){ if (s && s.id) window._storyCache[s.id] = s; });
-    function esc(t){ var d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
-    // Lead = newest; list = everything after it, chronological (newest first),
-    // scrollable — a proper wire. Poller per-show caps keep repeat-flooding down.
-    var lead = data[0];
-    var rows = data.slice(1);
+    var PAGE = 40;
     var leadEl = document.getElementById('nw-lead');
     var listEl = document.getElementById('nw-list');
     if (!leadEl || !listEl) return;
+    window._storyCache = window._storyCache || {};
+    function esc(t){ var d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
+    function rowHTML(s){
+      var art = (typeof getShowArtwork === 'function' && getShowArtwork(s.show_name)) || '';
+      return '<a class="nw-row" href="/story/' + storySlug(s) + '">' +
+        (art ? '<img class="nw-row-art" src="' + esc(art) + '" alt="' + esc(s.show_name) + '" loading="lazy">' : '<div class="nw-row-art"></div>') +
+        '<span><span class="nw-row-h">' + esc(s.headline) + '</span>' +
+        '<span class="nw-row-meta" style="display:block">' + esc(timeAgo(s.created_at)) + ' · ' + esc(s.show_name) + '</span></span></a>';
+    }
+    // Paged fetch — .range() walks back through the whole approved news
+    // archive, 40 at a time. No date cap: the button below keeps loading
+    // older pages until the archive is exhausted.
+    async function fetchPage(offset){
+      var { data, error } = await db.from('stories')
+        .select('*')
+        .eq('status', 'approved')
+        .in('show_name', window.NEWS_SHOWS)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PAGE - 1);
+      if (error) { console.log('[news-wire] page error:', error.message); return null; }
+      (data || []).forEach(function(s){ if (s && s.id) window._storyCache[s.id] = s; });
+      return data || [];
+    }
+    var first = await fetchPage(0);
+    if (!first || first.length < 3) return; // stay hidden on thin data
+    var lead = first[0];
     var leadArt = (typeof getShowArtwork === 'function' && getShowArtwork(lead.show_name)) || '';
     leadEl.href = '/story/' + storySlug(lead);
     leadEl.innerHTML =
@@ -2820,15 +2835,26 @@ async function loadNewsWire() {
       '<div class="nw-time">' + esc(timeAgo(lead.created_at)) + ' · ' + esc(lead.show_name) + '</div>' +
       '<div class="nw-lead-h">' + esc(lead.headline) + '</div>' +
       (lead.summary ? '<div class="nw-lead-sum">' + esc(String(lead.summary).slice(0, 170)) + (String(lead.summary).length > 170 ? '…' : '') + '</div>' : '');
-    listEl.innerHTML = rows.map(function(s){
-      var art = (typeof getShowArtwork === 'function' && getShowArtwork(s.show_name)) || '';
-      return '<a class="nw-row" href="/story/' + storySlug(s) + '">' +
-        (art ? '<img class="nw-row-art" src="' + esc(art) + '" alt="' + esc(s.show_name) + '" loading="lazy">' : '<div class="nw-row-art"></div>') +
-        '<span><span class="nw-row-h">' + esc(s.headline) + '</span>' +
-        '<span class="nw-row-meta" style="display:block">' + esc(timeAgo(s.created_at)) + ' · ' + esc(s.show_name) + '</span></span></a>';
-    }).join('');
+    listEl.innerHTML = first.slice(1).map(rowHTML).join('');
+    var offset = first.length;
+    // "Load older news" — lives at the bottom of the scrollable column
+    var moreBtn = document.createElement('button');
+    moreBtn.type = 'button';
+    moreBtn.className = 'nw-more';
+    moreBtn.textContent = 'Load older news ↓';
+    moreBtn.addEventListener('click', async function(){
+      if (moreBtn.disabled) return;
+      moreBtn.disabled = true; moreBtn.textContent = 'Loading…';
+      var page = await fetchPage(offset);
+      moreBtn.disabled = false; moreBtn.textContent = 'Load older news ↓';
+      if (!page || !page.length) { moreBtn.remove(); return; } // archive exhausted
+      offset += page.length;
+      moreBtn.insertAdjacentHTML('beforebegin', page.map(rowHTML).join(''));
+      if (page.length < PAGE) moreBtn.remove();
+    });
+    if (first.length >= PAGE) listEl.appendChild(moreBtn);
     sec.style.display = 'block';
-    console.log('[news-wire] painted 1 lead + ' + rows.length + ' rows');
+    console.log('[news-wire] painted 1 lead + ' + (first.length - 1) + ' rows · pager ready at offset ' + offset);
   } catch(e) { console.log('[news-wire] exception:', e); }
 }
 
