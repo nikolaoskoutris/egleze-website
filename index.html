@@ -2806,7 +2806,7 @@ async function loadNewsWire() {
     function esc(t){ var d=document.createElement('div'); d.textContent=(t==null?'':String(t)); return d.innerHTML; }
     function rowHTML(s){
       var art = (typeof getShowArtwork === 'function' && getShowArtwork(s.show_name)) || '';
-      return '<a class="nw-row" href="/story/' + storySlug(s) + '">' +
+      return '<a class="nw-row" data-clip-trigger data-story-id="' + s.id + '" href="/story/' + storySlug(s) + '">' +
         (art ? '<img class="nw-row-art" src="' + esc(art) + '" alt="' + esc(s.show_name) + '" loading="lazy">' : '<div class="nw-row-art"></div>') +
         '<span><span class="nw-row-h">' + esc(s.headline) + '</span>' +
         '<span class="nw-row-meta" style="display:block">' + esc(timeAgo(s.created_at)) + ' · ' + esc(s.show_name) + '</span></span></a>';
@@ -2830,6 +2830,8 @@ async function loadNewsWire() {
     var lead = first[0];
     var leadArt = (typeof getShowArtwork === 'function' && getShowArtwork(lead.show_name)) || '';
     leadEl.href = '/story/' + storySlug(lead);
+    leadEl.setAttribute('data-clip-trigger', '');
+    leadEl.setAttribute('data-story-id', lead.id);
     leadEl.innerHTML =
       (leadArt ? '<img class="nw-lead-art" src="' + esc(leadArt) + '" alt="' + esc(lead.show_name) + '" loading="lazy">' : '<div class="nw-lead-art"></div>') +
       '<div class="nw-time">' + esc(timeAgo(lead.created_at)) + ' · ' + esc(lead.show_name) + '</div>' +
@@ -3882,6 +3884,10 @@ document.body.addEventListener('click', function(e) {
 
   var trigger = e.target.closest('[data-clip-trigger]');
   if (!trigger) return;
+  // News-wire lead/rows are real <a href> (SEO + open-in-new-tab). Let
+  // modified clicks (Cmd/Ctrl/Shift) through to the browser for new-tab.
+  var trigAnchor = trigger.tagName === 'A';
+  if (trigAnchor && (e.metaKey || e.ctrlKey || e.shiftKey)) return;
   var storyId = trigger.getAttribute('data-story-id');
   console.log('[click] story id:', storyId);
   if (!storyId || !window._storyCache) {
@@ -3893,6 +3899,9 @@ document.body.addEventListener('click', function(e) {
     console.log('[click] story not in cache:', storyId, 'cache size:', Object.keys(window._storyCache).length);
     return;
   }
+  // Story found: anchors open the modal instead of navigating. (If the cache
+  // had missed above, the href would have navigated normally — safe fallback.)
+  if (trigAnchor) e.preventDefault();
   // If the click came from inside the search dropdown, close it before opening the player
   if (e.target.closest('#search-dropdown')) {
     closeSearchDropdown();
