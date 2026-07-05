@@ -593,7 +593,8 @@ header{position:relative}
 
 /* ── CLIP PLAYER MODAL ───────────────────────────────────────── */
 .cp-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:9999;display:none;align-items:center;justify-content:center;transition:background .25s ease}
-.cp-overlay.open{display:flex;background:rgba(0,0,0,.7)}
+.cp-overlay.is-shown{display:flex}
+.cp-overlay.open{background:rgba(0,0,0,.7)}
 .cp-modal{background:var(--white);width:min(720px,92vw);max-height:90vh;overflow-y:auto;position:relative;transform:translateY(20px);opacity:0;transition:transform .3s ease,opacity .25s ease;border:1px solid var(--border)}
 .cp-overlay.open .cp-modal{transform:translateY(0);opacity:1}
 .cp-handle{display:none}
@@ -639,7 +640,7 @@ header{position:relative}
 
 /* Mobile: bottom sheet style */
 @media (max-width:640px){
-  .cp-overlay.open{align-items:flex-end}
+  .cp-overlay.is-shown{align-items:flex-end}
   .cp-modal{width:100%;max-width:100%;max-height:88vh;border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
   .cp-overlay.open .cp-modal{transform:translateY(0)}
   .cp-handle{display:block;width:40px;height:4px;background:rgba(0,0,0,.18);border-radius:2px;margin:8px auto 0;flex-shrink:0}
@@ -3690,7 +3691,11 @@ function openClipPlayer(story, pushUrl) {
 
   // Show modal + lock body scroll
   lastFocusBeforeOpen = document.activeElement;
-  overlay.classList.add('open');
+  if (overlay._closeTimer) { clearTimeout(overlay._closeTimer); overlay._closeTimer = null; }
+  overlay.classList.add('is-shown');
+  // Double rAF: guarantee the browser paints the pre-open state once, so the
+  // background fade + modal lift (already in the CSS) actually animate.
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ overlay.classList.add('open'); }); });
   document.body.style.overflow = 'hidden';
   // Focus close button for keyboard users
   setTimeout(function() {
@@ -3710,7 +3715,11 @@ function closeClipPlayer(event) {
   if (!skipUrlPop && history.state && history.state.storyModal) {
     try { history.back(); return; } catch(e) { /* fall through to manual close */ }
   }
-  overlay.classList.remove('open');
+  overlay.classList.remove('open'); // plays the fade / slide-down exit
+  overlay._closeTimer = setTimeout(function(){
+    overlay.classList.remove('is-shown'); // drop display only after the transition (mobile slide is .35s)
+    overlay._closeTimer = null;
+  }, 360);
   document.body.style.overflow = '';
   if (ytStopTimer) { clearInterval(ytStopTimer); ytStopTimer = null; }
   if (ytPlayer && ytPlayer.destroy) { try { ytPlayer.destroy(); } catch(e){} ytPlayer = null; }
