@@ -95,8 +95,48 @@ async function fetchShowArtwork(showName) {
   } catch (e) { return null; }
 }
 
+function formatDuration(totalSeconds) {
+  const seconds = Number(totalSeconds || 0);
+  if (!seconds) return '';
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return hours ? hours + 'h ' + minutes + 'm' : minutes + 'm';
+}
+
+async function fetchEpisodeBundle(episodeId, currentStoryId) {
+  if (!episodeId) return { episode: null, siblings: [] };
+  try {
+    const headers = {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Accept-Profile': 'public'
+    };
+    const episodeRes = await fetch(
+      SUPABASE_URL + '/rest/v1/episodes?id=eq.' + encodeURIComponent(episodeId) + '&status=eq.published&select=*&limit=1',
+      { headers }
+    );
+    if (!episodeRes.ok) return { episode: null, siblings: [] };
+    const episodeRows = await episodeRes.json();
+    const episode = episodeRows && episodeRows[0];
+    if (!episode) return { episode: null, siblings: [] };
+
+    const siblingRes = await fetch(
+      SUPABASE_URL + '/rest/v1/stories?episode_id=eq.' + encodeURIComponent(episodeId) + '&status=eq.approved&select=id,headline,topic,created_at&order=created_at.asc',
+      { headers }
+    );
+    const siblingRows = siblingRes.ok ? await siblingRes.json() : [];
+    const siblings = Array.isArray(siblingRows)
+      ? siblingRows.filter(function(row){ return Number(row.id) !== Number(currentStoryId); }).slice(0, 4)
+      : [];
+    return { episode, siblings };
+  } catch (e) {
+    console.log('[/api/story] episode bundle unavailable:', e.message || e);
+    return { episode: null, siblings: [] };
+  }
+}
+
 // Render the full HTML response for a found story.
-function renderStoryHtml(story, artworkUrl) {
+function renderStoryHtml(story, artworkUrl, episode, siblingMoments) {
   const title = story.headline || 'Egleze Story';
   const description = story.summary || story.headline || '';
   const slug = slugify(title, { full: true });
@@ -108,8 +148,9 @@ function renderStoryHtml(story, artworkUrl) {
   const topic = story.topic || '';
   const episodeName = story.episode || '';
   const quote = story.quote || '';
-  const episodeSummary = story.episode_summary || '';
-  const keyPoints = Array.isArray(story.episode_key_points) ? story.episode_key_points : [];
+  const episodeSummary = episode ? '' : (story.episode_summary || '');
+  const keyPoints = episode ? [] : (Array.isArray(story.episode_key_points) ? story.episode_key_points : []);
+  const episodeUrl = episode ? `https://egleze.com/episodes/${episode.id}-${slugify(episode.title, { full: true })}` : '';
 
   // JSON-LD structured data for Google News + rich results
   const schema = {
@@ -138,7 +179,12 @@ function renderStoryHtml(story, artworkUrl) {
       '@id': canonicalUrl
     },
     'articleSection': topic,
-    'isBasedOn': showName ? `Podcast: ${showName} — ${episodeName}` : undefined
+    'isBasedOn': story.source_url || (showName ? `Podcast: ${showName} — ${episodeName}` : undefined),
+    'isPartOf': episodeUrl ? {
+      '@type': 'PodcastEpisode',
+      '@id': episodeUrl,
+      'name': episode.title
+    } : undefined
   };
 
   const keyPointsHtml = keyPoints.length > 0
@@ -153,6 +199,29 @@ function renderStoryHtml(story, artworkUrl) {
          <h2>About this episode</h2>
          <p>${escapeHtml(episodeSummary).replace(/\n/g, '</p><p>')}</p>
        </section>`
+    : '';
+
+  const episodeCardHtml = episode ? `<section class="episode-card">
+      <div class="episode-card-label">From this episode</div>
+      <div class="episode-card-main">
+        ${episode.artwork_url || artworkUrl ? `<img src="${escapeHtml(episode.artwork_url || artworkUrl)}" alt="${escapeHtml(episode.show_name || showName)}" loading="lazy">` : ''}
+        <div class="episode-card-copy">
+          <div class="episode-card-show">${escapeHtml(episode.show_name || showName)}</div>
+          <h2>${escapeHtml(episode.title || episodeName)}</h2>
+          <div class="episode-card-meta">${[formatDate(episode.published_at || episode.updated_at), formatDuration(episode.duration_seconds), ((siblingMoments || []).length + 1) + ' Egleze moments'].filter(Boolean).join(' · ')}</div>
+        </div>
+      </div>
+      <a class="episode-card-link" href="${episodeUrl}">Read episode summary and key points →</a>
+    </section>` : '';
+
+  const siblingMomentsHtml = episode && Array.isArray(siblingMoments) && siblingMoments.length
+    ? `<section class="sibling-moments">
+        <h2>More moments from this episode</h2>
+        ${siblingMoments.map(function(item){
+          const url = '/story/' + item.id + '-' + slugify(item.headline, { full: true });
+          return '<a href="' + url + '"><span>' + escapeHtml(item.topic || 'Moment') + '</span>' + escapeHtml(item.headline) + '<b>→</b></a>';
+        }).join('')}
+      </section>`
     : '';
 
   const quoteHtml = quote
@@ -307,6 +376,12 @@ function renderStoryHtml(story, artworkUrl) {
     .story-agg-empty svg{width:11px;height:11px;flex-shrink:0}
     .summary{font-family:'DM Sans',sans-serif;font-size:18px;line-height:1.65;color:#222;margin:24px 0 32px;font-weight:400}
     .story-quote{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;line-height:1.4;color:var(--dark);border-left:4px solid var(--red);padding:8px 0 8px 24px;margin:32px 0}
+    .episode-card{margin-top:40px;border:1px solid var(--border);background:var(--light);padding:22px}
+    .episode-card-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:14px}
+    .episode-card-main{display:flex;gap:16px;align-items:center}.episode-card-main img{width:82px;height:82px;object-fit:cover;border:1px solid var(--border);flex-shrink:0}
+    .episode-card-show{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--red);font-weight:700}.episode-card h2{font-family:'Playfair Display',serif;font-size:20px;line-height:1.25;margin:4px 0 7px}.episode-card-meta{font-size:11px;color:var(--muted)}
+    .episode-card-link{display:block;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--red);font-weight:700;text-decoration:none}
+    .sibling-moments{margin-top:34px}.sibling-moments h2{font-family:'Playfair Display',serif;font-size:21px;margin-bottom:10px}.sibling-moments a{display:grid;grid-template-columns:120px 1fr 20px;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);color:var(--dark);text-decoration:none;font-size:14px}.sibling-moments a span{font-family:'Roboto Condensed',sans-serif;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--red);font-weight:700}.sibling-moments a b{color:var(--red)}
     .episode-summary, .key-points{margin-top:40px;padding-top:32px;border-top:0.5px solid var(--border)}
     .episode-summary h2, .key-points h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:16px;color:var(--dark)}
     .episode-summary p{margin-bottom:14px;font-size:16px;line-height:1.65}
@@ -389,6 +464,10 @@ function renderStoryHtml(story, artworkUrl) {
     ${quoteHtml}
 
     <div class="summary">${escapeHtml(description)}</div>
+
+    ${episodeCardHtml}
+
+    ${siblingMomentsHtml}
 
     ${episodeSummaryHtml}
 
@@ -543,10 +622,13 @@ module.exports = async (req, res) => {
       res.status(404).send(render404Html(slug));
       return;
     }
-    const artwork = await fetchShowArtwork(story.show_name);
+    const [artwork, episodeBundle] = await Promise.all([
+      fetchShowArtwork(story.show_name),
+      fetchEpisodeBundle(story.episode_id, story.id)
+    ]);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=3600');
-    res.status(200).send(renderStoryHtml(story, artwork));
+    res.status(200).send(renderStoryHtml(story, artwork, episodeBundle.episode, episodeBundle.siblings));
   } catch (err) {
     console.error('[/api/story] error:', err);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
