@@ -1122,12 +1122,12 @@ header{position:relative}
   </div>
 
   <!-- ── TODAY'S FILED REVEALS — 3-CARD CAROUSEL ─────────────── -->
-  <!-- TODAY'S NEWS — wire band: stories from editorial_type='news' shows, newest first.
+  <!-- REAL-TIME MOMENTS — wire band: stories from editorial_type='news' shows, newest first.
      Hidden until loadNewsWire() has ≥3 stories. Conversations shelves below exclude these shows. -->
-<section class="news-wire" id="news-wire" aria-label="Today's news">
+<section class="news-wire" id="news-wire" aria-label="Real-time moments">
   <div class="nw-header">
-    <h2 class="nw-title">Today's news<span class="nw-live">LIVE</span></h2>
-    <span class="nw-sub">From the news desks · scroll for more ↓</span>
+    <h2 class="nw-title">Real-Time Moments<span class="nw-live">LIVE</span></h2>
+    <span class="nw-sub">Latest approved moments from long-form conversations · newest first</span>
   </div>
   <div class="nw-grid">
     <a class="nw-lead" id="nw-lead" href="#"></a>
@@ -2774,7 +2774,7 @@ function startWeeklyAutoAdvance() {
   }, 8500);
 }
 
-// ── TODAY'S NEWS WIRE — shows tagged editorial_type='news' in Supabase ──
+// ── REAL-TIME MOMENTS WIRE — shows tagged editorial_type='news' in Supabase ──
 // One list, two uses: the wire band queries IN(list); the daily + weekly
 // shelves exclude via newsNotIn(). Editorial choice (hand-picked) and Most
 // watched (popularity chart) intentionally stay unfiltered.
@@ -2784,20 +2784,14 @@ async function loadNewsShows() {
   try {
     var { data, error } = await db.from('shows').select('name').eq('editorial_type', 'news');
     if (!error && data) window.NEWS_SHOWS = data.map(function(r){ return r.name; }).filter(Boolean);
-    console.log('[news-wire] news shows loaded: ' + window.NEWS_SHOWS.length);
-  } catch(e) { console.log('[news-wire] shows load failed:', e); }
+    console.log('[realtime-moments] news shows loaded: ' + window.NEWS_SHOWS.length);
+  } catch(e) { console.log('[realtime-moments] shows load failed:', e); }
 }
-function newsNotIn(q) {
-  if (window.NEWS_SHOWS && window.NEWS_SHOWS.length) {
-    var list = '(' + window.NEWS_SHOWS.map(function(n){ return '"' + String(n).replace(/"/g, '') + '"'; }).join(',') + ')';
-    return q.not('show_name', 'in', list);
-  }
-  return q;
-}
+function newsNotIn(q) { return q; }
 async function loadNewsWire() {
   if (!db && !initDB()) return;
   var sec = document.getElementById('news-wire');
-  if (!sec || !window.NEWS_SHOWS || !window.NEWS_SHOWS.length) return;
+  if (!sec) return;
   try {
     var PAGE = 40;
     var leadEl = document.getElementById('nw-lead');
@@ -2819,10 +2813,9 @@ async function loadNewsWire() {
       var { data, error } = await db.from('stories')
         .select('*')
         .eq('status', 'approved')
-        .in('show_name', window.NEWS_SHOWS)
         .order('created_at', { ascending: false })
         .range(offset, offset + PAGE - 1);
-      if (error) { console.log('[news-wire] page error:', error.message); return null; }
+      if (error) { console.log('[realtime-moments] page error:', error.message); return null; }
       (data || []).forEach(function(s){ if (s && s.id) window._storyCache[s.id] = s; });
       return data || [];
     }
@@ -2840,16 +2833,16 @@ async function loadNewsWire() {
       (lead.summary ? '<div class="nw-lead-sum">' + esc(String(lead.summary).slice(0, 170)) + (String(lead.summary).length > 170 ? '…' : '') + '</div>' : '');
     listEl.innerHTML = first.slice(1).map(rowHTML).join('');
     var offset = first.length;
-    // "Load older news" — lives at the bottom of the scrollable column
+    // "Load older moments" — lives at the bottom of the scrollable column
     var moreBtn = document.createElement('button');
     moreBtn.type = 'button';
     moreBtn.className = 'nw-more';
-    moreBtn.textContent = 'Load older news ↓';
+    moreBtn.textContent = 'Load older moments ↓';
     moreBtn.addEventListener('click', async function(){
       if (moreBtn.disabled) return;
       moreBtn.disabled = true; moreBtn.textContent = 'Loading…';
       var page = await fetchPage(offset);
-      moreBtn.disabled = false; moreBtn.textContent = 'Load older news ↓';
+      moreBtn.disabled = false; moreBtn.textContent = 'Load older moments ↓';
       if (!page || !page.length) { moreBtn.remove(); return; } // archive exhausted
       offset += page.length;
       moreBtn.insertAdjacentHTML('beforebegin', page.map(rowHTML).join(''));
@@ -2857,8 +2850,8 @@ async function loadNewsWire() {
     });
     if (first.length >= PAGE) listEl.appendChild(moreBtn);
     sec.style.display = 'block';
-    console.log('[news-wire] painted 1 lead + ' + (first.length - 1) + ' rows · pager ready at offset ' + offset);
-  } catch(e) { console.log('[news-wire] exception:', e); }
+    console.log('[realtime-moments] painted 1 lead + ' + (first.length - 1) + ' rows · pager ready at offset ' + offset);
+  } catch(e) { console.log('[realtime-moments] exception:', e); }
 }
 
 // Wire both carousels to load on page init
@@ -4553,7 +4546,6 @@ function bcWireControls() {
 // has hero/secondary/feed artwork without a flicker.
 (async function init() {
   await loadShowsArtwork();
-  await loadNewsShows();   // must precede loadStories so the daily shelf excludes news shows on first paint
   loadNewsWire();
   loadStories();
   loadSidebar();
