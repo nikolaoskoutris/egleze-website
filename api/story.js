@@ -104,7 +104,7 @@ function formatDuration(totalSeconds) {
 }
 
 async function fetchEpisodeBundle(episodeId, currentStoryId) {
-  if (!episodeId) return { episode: null, siblings: [] };
+  if (!episodeId) return { episode: null, siblings: [], momentCount: 0 };
   try {
     const headers = {
       'apikey': SUPABASE_ANON_KEY,
@@ -115,10 +115,10 @@ async function fetchEpisodeBundle(episodeId, currentStoryId) {
       SUPABASE_URL + '/rest/v1/episodes?id=eq.' + encodeURIComponent(episodeId) + '&status=eq.published&select=*&limit=1',
       { headers }
     );
-    if (!episodeRes.ok) return { episode: null, siblings: [] };
+    if (!episodeRes.ok) return { episode: null, siblings: [], momentCount: 0 };
     const episodeRows = await episodeRes.json();
     const episode = episodeRows && episodeRows[0];
-    if (!episode) return { episode: null, siblings: [] };
+    if (!episode) return { episode: null, siblings: [], momentCount: 0 };
 
     const siblingRes = await fetch(
       SUPABASE_URL + '/rest/v1/stories?episode_id=eq.' + encodeURIComponent(episodeId) + '&status=eq.approved&select=id,headline,topic,created_at&order=created_at.asc',
@@ -128,15 +128,15 @@ async function fetchEpisodeBundle(episodeId, currentStoryId) {
     const siblings = Array.isArray(siblingRows)
       ? siblingRows.filter(function(row){ return Number(row.id) !== Number(currentStoryId); }).slice(0, 4)
       : [];
-    return { episode, siblings };
+    return { episode, siblings, momentCount: Array.isArray(siblingRows) ? siblingRows.length : 0 };
   } catch (e) {
     console.log('[/api/story] episode bundle unavailable:', e.message || e);
-    return { episode: null, siblings: [] };
+    return { episode: null, siblings: [], momentCount: 0 };
   }
 }
 
 // Render the full HTML response for a found story.
-function renderStoryHtml(story, artworkUrl, episode, siblingMoments) {
+function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMomentCount) {
   const title = story.headline || 'Egleze Story';
   const description = story.summary || story.headline || '';
   const slug = slugify(title, { full: true });
@@ -208,7 +208,7 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments) {
         <div class="episode-card-copy">
           <div class="episode-card-show">${escapeHtml(episode.show_name || showName)}</div>
           <h2>${escapeHtml(episode.title || episodeName)}</h2>
-          <div class="episode-card-meta">${[formatDate(episode.published_at || episode.updated_at), formatDuration(episode.duration_seconds), ((siblingMoments || []).length + 1) + ' Egleze moments'].filter(Boolean).join(' · ')}</div>
+          <div class="episode-card-meta">${[formatDate(episode.published_at || episode.updated_at), formatDuration(episode.duration_seconds), (episodeMomentCount || ((siblingMoments || []).length + 1)) + ' Egleze moments'].filter(Boolean).join(' · ')}</div>
         </div>
       </div>
       <a class="episode-card-link" href="${episodeUrl}">Read episode summary and key points →</a>
@@ -628,7 +628,7 @@ module.exports = async (req, res) => {
     ]);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=3600');
-    res.status(200).send(renderStoryHtml(story, artwork, episodeBundle.episode, episodeBundle.siblings));
+    res.status(200).send(renderStoryHtml(story, artwork, episodeBundle.episode, episodeBundle.siblings, episodeBundle.momentCount));
   } catch (err) {
     console.error('[/api/story] error:', err);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
