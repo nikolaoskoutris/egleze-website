@@ -5,6 +5,8 @@
     { "source": "/topic/:slug/", "destination": "/topic/:slug.html" },
     { "source": "/story/:slug", "destination": "/api/story?slug=:slug" },
     { "source": "/story/:slug/", "destination": "/api/story?slug=:slug" },
+    { "source": "/episodes/:slug", "destination": "/api/episode?slug=:slug" },
+    { "source": "/episodes/:slug/", "destination": "/api/episode?slug=:slug" },
     { "source": "/shows/:slug", "destination": "/show.html?slug=:slug" },
     { "source": "/shows/:slug/", "destination": "/show.html?slug=:slug" },
     { "source": "/about", "destination": "/about.html" },
@@ -23,6 +25,7 @@
     { "source": "/topic/consciousness", "destination": "/topic/consciousness-medicine", "permanent": true }
   ],
   "headers": [
-    { "source": "/topic/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=300, s-maxage=600" } ] }
+    { "source": "/topic/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=300, s-maxage=600" } ] },
+    { "source": "/episodes/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=300, s-maxage=600" } ] }
   ]
 }
