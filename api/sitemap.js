@@ -1,10 +1,7 @@
-// Dynamic sitemap generator for Egleze
-// Lives at: api/sitemap.js
-// Vercel rewrite: /sitemap.xml -> /api/sitemap
-// Add ?debug=1 to URL for diagnostic JSON output instead of XML
+// Dynamic sitemap generator for Egleze.
 
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
 
 const TOPICS = [
   'ai-tech', 'combat-ufc', 'comedy', 'consciousness-medicine',
@@ -15,45 +12,28 @@ const TOPICS = [
   'relationships-family', 'science', 'society', 'sports', 'ufo-paranormal'
 ];
 
-// Only topics flagged hasStories=true in scripts/topic-data.json are
-// indexable; their pages carry index,follow. The other ~14 carry noindex,
-// so they must NOT appear in the sitemap (avoids 'Submitted URL marked
-// noindex' in Search Console). Sourced from the SAME file the build uses
-// so this can never drift from the deployed pages. Falls back to the full
-// list if the file can't be loaded — the sitemap never breaks.
 let INDEXABLE_TOPICS = TOPICS;
 try {
   const topicData = require('../scripts/topic-data.json');
-  if (topicData && Array.isArray(topicData.topics)) {
-    const idx = topicData.topics
-      .filter(t => t && t.hasStories && t.slug)
-      .map(t => t.slug);
-    if (idx.length > 0) INDEXABLE_TOPICS = idx;
-  }
-} catch (e) {
-  // keep INDEXABLE_TOPICS = TOPICS (current behavior) — never break sitemap
-}
+  const indexable = topicData && Array.isArray(topicData.topics)
+    ? topicData.topics.filter(t => t && t.hasStories && t.slug).map(t => t.slug)
+    : [];
+  if (indexable.length) INDEXABLE_TOPICS = indexable;
+} catch (_) {}
 
-// MUST stay byte-for-byte identical to slugify() in api/story.js (full form)
-// and the homepage/shorts link builders. If these diverge, the sitemap emits
-// a story URL whose canonical points elsewhere → "not indexed" in Search
-// Console. The previous version stripped hyphens (Bankman-Fried -> bankmanfried)
-// while story.js kept them (bankman-fried), so hyphenated headlines never
-// matched their canonical. Keep \w (letters, digits, underscore) and hyphens.
-function slugify(s) {
-  if (!s) return '';
-  return String(s)
+function slugify(value) {
+  return String(value || '')
     .toLowerCase()
-    .replace(/[\u2018\u2019]/g, "'")  // smart single quotes
-    .replace(/[\u201C\u201D]/g, '"')  // smart double quotes
-    .replace(/[^\w\s-]/g, '')         // strip non-word characters (keeps - and _)
-    .replace(/\s+/g, '-')             // spaces to hyphens
-    .replace(/-+/g, '-')              // collapse multiple hyphens
-    .replace(/^-|-$/g, '');           // trim leading/trailing hyphens
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
-function xmlEscape(s) {
-  return String(s)
+function xmlEscape(value) {
+  return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -61,9 +41,9 @@ function xmlEscape(s) {
     .replace(/'/g, '&apos;');
 }
 
-function formatDate(d) {
-  const dt = d ? new Date(d) : new Date();
-  return dt.toISOString().slice(0, 10);
+function formatDate(value) {
+  const parsed = value ? new Date(value) : new Date();
+  return parsed.toISOString().slice(0, 10);
 }
 
 function urlBlock(loc, lastmod, changefreq, priority) {
@@ -75,59 +55,47 @@ function urlBlock(loc, lastmod, changefreq, priority) {
   </url>`;
 }
 
-async function supabaseFetch(path, label) {
-  const url = `${SUPABASE_URL}/rest/v1/${path}`;
+async function supabaseFetch(path) {
   try {
-    const res = await fetch(url, {
-      method: 'GET',
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Accept-Profile': 'public',
-        'Content-Profile': 'public'
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Accept: 'application/json',
+        'Accept-Profile': 'public'
       }
     });
-    if (!res.ok) {
-      const text = await res.text();
-      return { error: `HTTP ${res.status}: ${text.slice(0, 200)}`, data: [] };
+    if (!response.ok) {
+      return { error: `HTTP ${response.status}: ${(await response.text()).slice(0, 160)}`, data: [] };
     }
-    const data = await res.json();
+    const data = await response.json();
     return { error: null, data: Array.isArray(data) ? data : [] };
-  } catch (e) {
-    return { error: e.message || String(e), data: [] };
+  } catch (error) {
+    return { error: error.message || String(error), data: [] };
   }
 }
 
-// Fetch ALL approved stories by paginating in 1000-row batches.
-// WHY: Supabase caps every API response at 1000 rows (project "Max rows"
-// setting), so the old single `limit=5000` query silently returned only the
-// first 1000 — and the rest of the archive never reached Google. Looping with
-// offset in 1000-row pages retrieves everything. Ordered by id.asc so the
-// pages are stable (new stories append at the end and don't shift the window).
-async function fetchAllApprovedStories() {
+async function fetchAll(pathWithoutPagination) {
   const PAGE = 1000;
-  let all = [];
-  let error = null;
+  const all = [];
   for (let offset = 0; ; offset += PAGE) {
-    const r = await supabaseFetch(
-      `stories?select=id,headline,created_at&status=eq.approved&order=id.asc&limit=${PAGE}&offset=${offset}`,
-      'stories'
+    const separator = pathWithoutPagination.includes('?') ? '&' : '?';
+    const result = await supabaseFetch(
+      `${pathWithoutPagination}${separator}limit=${PAGE}&offset=${offset}`
     );
-    if (r.error) { error = r.error; break; }
-    all = all.concat(r.data);
-    if (r.data.length < PAGE) break;   // last page reached
-    if (offset > 500000) break;        // hard safety stop (never loop forever)
+    if (result.error) return { error: result.error, data: all };
+    all.push(...result.data);
+    if (result.data.length < PAGE) break;
+    if (offset > 500000) break;
   }
-  return { error, data: all };
+  return { error: null, data: all };
 }
 
 module.exports = async function handler(req, res) {
   const today = formatDate();
   const urls = [];
-  const debug = req.query && req.query.debug === '1';
   const errors = [];
+  const debug = req.query && req.query.debug === '1';
 
   urls.push(urlBlock('https://egleze.com/', today, 'hourly', '1.0'));
   urls.push(urlBlock('https://egleze.com/shows.html', today, 'daily', '0.8'));
@@ -139,30 +107,42 @@ module.exports = async function handler(req, res) {
   }
 
   const showsResult = await supabaseFetch(
-    'shows?select=slug,created_at&active=eq.true&slug=not.is.null&order=name.asc',
-    'shows'
+    'shows?select=slug,created_at&active=eq.true&slug=not.is.null&order=name.asc'
   );
   if (showsResult.error) errors.push({ source: 'shows', error: showsResult.error });
   for (const show of showsResult.data) {
     if (!show.slug) continue;
-    const lastmod = formatDate(show.created_at);
     urls.push(urlBlock(
       `https://egleze.com/shows/${show.slug}`,
-      lastmod,
+      formatDate(show.created_at),
       'daily',
       '0.7'
     ));
   }
 
-  const storiesResult = await fetchAllApprovedStories();
+  const episodesResult = await fetchAll(
+    'episodes?select=id,title,updated_at,published_at&status=eq.published&order=id.asc'
+  );
+  if (episodesResult.error) errors.push({ source: 'episodes', error: episodesResult.error });
+  for (const episode of episodesResult.data) {
+    if (!episode.id || !episode.title) continue;
+    urls.push(urlBlock(
+      `https://egleze.com/episodes/${episode.id}-${slugify(episode.title)}`,
+      formatDate(episode.updated_at || episode.published_at),
+      'weekly',
+      '0.7'
+    ));
+  }
+
+  const storiesResult = await fetchAll(
+    'stories?select=id,headline,created_at&status=eq.approved&order=id.asc'
+  );
   if (storiesResult.error) errors.push({ source: 'stories', error: storiesResult.error });
   for (const story of storiesResult.data) {
     if (!story.id || !story.headline) continue;
-    const slug = `${story.id}-${slugify(story.headline)}`;
-    const lastmod = formatDate(story.created_at);
     urls.push(urlBlock(
-      `https://egleze.com/story/${slug}`,
-      lastmod,
+      `https://egleze.com/story/${story.id}-${slugify(story.headline)}`,
+      formatDate(story.created_at),
       'weekly',
       '0.6'
     ));
@@ -176,21 +156,20 @@ module.exports = async function handler(req, res) {
       indexable_topics: INDEXABLE_TOPICS.length,
       all_topics: TOPICS.length,
       shows_count: showsResult.data.length,
+      episodes_count: episodesResult.data.length,
       stories_count: storiesResult.data.length,
-      errors: errors,
-      first_show: showsResult.data[0] || null,
+      errors,
+      first_episode: episodesResult.data[0] || null,
       first_story: storiesResult.data[0] || null
     });
     return;
   }
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+  res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.join('\n')}
 </urlset>
-`;
-
-  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-  res.status(200).send(xml);
-}
+`);
+};
