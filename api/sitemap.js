@@ -1,7 +1,7 @@
 // Dynamic sitemap generator for Egleze.
 
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+const SUPABASE_KEY = 'sb_publishable_3I2jAyKsQyMLvxuQG47rBw_UW_QSZLs';
 
 const TOPICS = [
   'ai-tech', 'combat-ufc', 'comedy', 'consciousness-medicine',
@@ -60,7 +60,6 @@ async function supabaseFetch(path) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
       headers: {
         apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
         Accept: 'application/json',
         'Accept-Profile': 'public'
       }
