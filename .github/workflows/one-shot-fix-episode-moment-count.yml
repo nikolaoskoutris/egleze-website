@@ -1,0 +1,27 @@
+name: One-shot fix episode moment count
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/one-shot-fix-episode-moment-count.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-feature-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/episode-hubs
+          fetch-depth: 0
+      - run: node scripts/fix-episode-hub-moment-count.js
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add api/story.js
+          git commit -m "Use full episode moment count in story cards"
+          git push origin HEAD:feature/episode-hubs
