@@ -3,7 +3,7 @@
 
 (function () {
   const SUPABASE_URL = "https://kerijdhiasrvaxssjqqg.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJrZXJpamRoaWFzcnZheHNzanFxZyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc3NjIyMTk5LCJleHAiOjIwOTMxOTgxOTl9.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg";
 
   if (!window.supabase) {
     console.error("[egleze] supabase-js script missing — load CDN before auth.js");
@@ -83,4 +83,33 @@
     signInWithMagicLink,
     signOut,
   };
+})();
+
+// Use the official Egleze brand asset in the homepage broadcast station mark.
+// The broadcast markup historically rendered a generic text “E”, which did
+// not match the masthead/app icon. Keep this defensive because auth.js is
+// shared by public pages that do not contain the broadcast player.
+(function normalizeBroadcastBrandMark() {
+  function applyBrandMark() {
+    const mark = document.querySelector('.bc-e-mark');
+    if (!mark || mark.querySelector('img')) return;
+
+    const image = document.createElement('img');
+    image.src = '/favicon-96x96.png';
+    image.alt = '';
+    image.width = 30;
+    image.height = 30;
+    image.decoding = 'async';
+    image.style.cssText = 'display:block;width:30px;height:30px;border-radius:50%;object-fit:cover';
+
+    mark.textContent = '';
+    mark.style.background = 'transparent';
+    mark.appendChild(image);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyBrandMark, { once: true });
+  } else {
+    applyBrandMark();
+  }
 })();
