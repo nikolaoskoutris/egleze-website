@@ -84,3 +84,32 @@
     signOut,
   };
 })();
+
+// Use the official Egleze brand asset in the homepage broadcast station mark.
+// The broadcast markup historically rendered a generic text “E”, which did
+// not match the masthead/app icon. Keep this defensive because auth.js is
+// shared by public pages that do not contain the broadcast player.
+(function normalizeBroadcastBrandMark() {
+  function applyBrandMark() {
+    const mark = document.querySelector('.bc-e-mark');
+    if (!mark || mark.querySelector('img')) return;
+
+    const image = document.createElement('img');
+    image.src = '/favicon-96x96.png';
+    image.alt = '';
+    image.width = 30;
+    image.height = 30;
+    image.decoding = 'async';
+    image.style.cssText = 'display:block;width:30px;height:30px;border-radius:50%;object-fit:cover';
+
+    mark.textContent = '';
+    mark.style.background = 'transparent';
+    mark.appendChild(image);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyBrandMark, { once: true });
+  } else {
+    applyBrandMark();
+  }
+})();
