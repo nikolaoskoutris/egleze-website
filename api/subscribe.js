@@ -74,63 +74,59 @@ function clientIp(req) {
   return undefined;
 }
 
-function reportOpenAISubscription(req, email, adsContext) {
+async function reportOpenAISubscription(req, email, adsContext) {
   const apiKey = process.env.OPENAI_ADS_CAPI_KEY;
   if (!apiKey || !adsContext || adsContext.consent !== true) return;
 
-  // Fire-and-forget inside a complete catch boundary. Conversion reporting must
-  // never delay or fail a valid newsletter signup.
-  void (async () => {
+  try {
+    const event = {
+      id: validEventId(adsContext.eventId) ? adsContext.eventId : 'sub_' + crypto.randomUUID(),
+      type: 'subscription_created',
+      timestamp_ms: Date.now(),
+      source_url: trustedSourceUrl(req, adsContext.sourceUrl),
+      action_source: 'web',
+      user: {
+        email_sha256: sha256(email),
+      },
+      data: {
+        type: 'plan_enrollment',
+      },
+    };
+
+    const oppref = cookieValue(req, '__oppref');
+    if (oppref) event.oppref = oppref;
+
+    const obref = cookieValue(req, '__obref');
+    if (obref) event.user.obref = obref;
+
+    const ip = clientIp(req);
+    if (ip) event.user.ip_address = ip;
+
+    const ua = req.headers && req.headers['user-agent'];
+    if (typeof ua === 'string' && ua.trim()) event.user.user_agent = ua.trim();
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 800);
     try {
-      const event = {
-        id: validEventId(adsContext.eventId) ? adsContext.eventId : 'sub_' + crypto.randomUUID(),
-        type: 'subscription_created',
-        timestamp_ms: Date.now(),
-        source_url: trustedSourceUrl(req, adsContext.sourceUrl),
-        action_source: 'web',
-        user: {
-          email_sha256: sha256(email),
+      const response = await fetch('https://bzr.openai.com/v1/events?pid=' + encodeURIComponent(OPENAI_ADS_PIXEL_ID), {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + apiKey,
+          'Content-Type': 'application/json',
         },
-        data: {
-          type: 'plan_enrollment',
-        },
-      };
-
-      const oppref = cookieValue(req, '__oppref');
-      if (oppref) event.oppref = oppref;
-
-      const obref = cookieValue(req, '__obref');
-      if (obref) event.user.obref = obref;
-
-      const ip = clientIp(req);
-      if (ip) event.user.ip_address = ip;
-
-      const ua = req.headers && req.headers['user-agent'];
-      if (typeof ua === 'string' && ua.trim()) event.user.user_agent = ua.trim();
-
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 1200);
-      try {
-        const response = await fetch('https://bzr.openai.com/v1/events?pid=' + encodeURIComponent(OPENAI_ADS_PIXEL_ID), {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + apiKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            validate_only: process.env.OPENAI_ADS_VALIDATE_ONLY === 'true',
-            events: [event],
-          }),
-          signal: controller.signal,
-        });
-        if (!response.ok) console.error('[subscribe] OpenAI Ads CAPI failed', response.status);
-      } finally {
-        clearTimeout(timeout);
-      }
-    } catch (err) {
-      console.error('[subscribe] OpenAI Ads CAPI exception', err && err.name ? err.name : 'error');
+        body: JSON.stringify({
+          validate_only: process.env.OPENAI_ADS_VALIDATE_ONLY === 'true',
+          events: [event],
+        }),
+        signal: controller.signal,
+      });
+      if (!response.ok) console.error('[subscribe] OpenAI Ads CAPI failed', response.status);
+    } finally {
+      clearTimeout(timeout);
     }
-  })();
+  } catch (err) {
+    console.error('[subscribe] OpenAI Ads CAPI exception', err && err.name ? err.name : 'error');
+  }
 }
 
 module.exports = async (req, res) => {
@@ -213,7 +209,7 @@ module.exports = async (req, res) => {
       console.error('[subscribe] BEEHIIV env vars missing — captured to Supabase only');
     }
 
-    reportOpenAISubscription(req, email, adsContext);
+    await reportOpenAISubscription(req, email, adsContext);
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('[subscribe] error:', err);
