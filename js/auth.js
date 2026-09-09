@@ -76,10 +76,11 @@
   };
 })();
 
-// OpenAI Ads conversion measurement.
-// This is intentionally consent-gated to the site's existing egleze_cookie
-// choice. The CAPI secret never appears in browser code. The browser and
-// server use the same event_id for subscription_created deduplication.
+// OpenAI Ads conversion measurement for the Egleze Digest newsletter.
+// The public Pixel ID may live in browser code; the CAPI key must not.
+// Existing site consent is respected. A confirmed /api/subscribe success
+// emits subscription_created with plan_enrollment and shares event_id with
+// the server-side CAPI event so OpenAI Ads can deduplicate the pair.
 (function installOpenAIAdsMeasurement() {
   const PIXEL_ID = '7phwvegDeCKo3nKMavCkeL';
   const SDK_URL = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
