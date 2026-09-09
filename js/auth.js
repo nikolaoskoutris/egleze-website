@@ -3,7 +3,7 @@
 
 (function () {
   const SUPABASE_URL = "https://kerijdhiasrvaxssjqqg.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZXJpamRoaWFzcnZheHNzanFxZyIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg";
 
   if (!window.supabase) {
     console.error("[egleze] supabase-js script missing — load CDN before auth.js");
@@ -14,11 +14,10 @@
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true, // critical: handles the magic-link callback
+      detectSessionInUrl: true,
     },
   });
 
-  // ----- helpers -----
   async function getUser() {
     const { data, error } = await client.auth.getUser();
     if (error) return null;
@@ -39,22 +38,14 @@
   async function signInWithGoogle(redirectTo) {
     return client.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: redirectTo || window.location.origin,
-      },
+      options: { redirectTo: redirectTo || window.location.origin },
     });
   }
 
-  // Sign in with Apple — same web-OAuth path as Google, so it works identically
-  // on the website, the shorts PWA, and (via the native bridge's system-browser
-  // + egleze://auth deep link) the iOS/Android apps. Requires the Apple provider
-  // to be enabled in Supabase (Services ID as Client ID + generated secret).
   async function signInWithApple(redirectTo) {
     return client.auth.signInWithOAuth({
       provider: "apple",
-      options: {
-        redirectTo: redirectTo || window.location.origin,
-      },
+      options: { redirectTo: redirectTo || window.location.origin },
     });
   }
 
@@ -153,13 +144,13 @@
       if (!body || typeof body !== 'object' || Array.isArray(body)) return init;
       body._openaiAdsEventId = eventId;
       body._openaiAdsSourceUrl = window.location.origin + window.location.pathname;
+      body._openaiAdsConsent = hasMeasurementConsent();
       return Object.assign({}, init, { body: JSON.stringify(body) });
     } catch (_) {
       return init;
     }
   }
 
-  // Load early for consenting users so the SDK is ready before a fast signup.
   ensurePixel();
 
   window.fetch = async function (input, init) {
@@ -177,18 +168,12 @@
           { type: 'plan_enrollment' },
           { event_id: eventId }
         );
-      } catch (_) {
-        // Ads measurement must never alter the successful signup experience.
-      }
+      } catch (_) {}
     }
     return response;
   };
 })();
 
-// Use the official Egleze brand asset in the homepage broadcast station mark.
-// The broadcast markup historically rendered a generic text “E”, which did
-// not match the masthead/app icon. Keep this defensive because auth.js is
-// shared by public pages that do not contain the broadcast player.
 (function normalizeBroadcastBrandMark() {
   function applyBrandMark() {
     const mark = document.querySelector('.bc-e-mark');
