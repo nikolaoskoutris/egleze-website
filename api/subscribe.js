@@ -27,9 +27,14 @@ const CANONICAL_SITE_ORIGIN = 'https://egleze.com';
 
 // What a new signup is subscribed to (matches the beehiiv-sync defaults —
 // they asked for "the Digest", which is the daily + the weekly).
+// Flip these if the editorial decision changes.
 const DEFAULT_PREFS = { pref_daily: true, pref_weekly: true, pref_breaking: false };
 
 // Decision (June 2026): Option A — double opt-in ON, then welcome.
+// Flow: signup → Beehiiv confirmation email → click → welcome email.
+// Welcome is written + enabled in Beehiiv. (beehiiv-sync.js keeps both
+// off, so backfills/syncs never re-confirm or re-greet existing people —
+// only fresh organic signups go through this flow.)
 const DOUBLE_OPT = 'on';
 
 function validEmail(e) {
@@ -38,7 +43,7 @@ function validEmail(e) {
 
 function cleanSource(s) {
   if (typeof s === 'string' && /^[a-z0-9_-]{1,40}$/i.test(s)) return s;
-  return 'website';
+  return 'website'; // table default, used if the caller sends nothing usable
 }
 
 function validEventId(value) {
@@ -149,6 +154,7 @@ async function reportOpenAISubscription(req, email, adsContext) {
 }
 
 module.exports = async (req, res) => {
+  // Same-origin POSTs only; everything else is a 405.
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
@@ -221,6 +227,7 @@ module.exports = async (req, res) => {
         );
         if (!bh.ok && bh.status !== 409) {
           const t = await bh.text();
+          // Captured in Supabase regardless; the sync backfill will repair.
           console.error('[subscribe] beehiiv push failed', bh.status, t.slice(0, 200));
         }
       } catch (e) {
