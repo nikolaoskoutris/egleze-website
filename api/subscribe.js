@@ -60,8 +60,6 @@ function cookieValue(req, name) {
   for (const part of raw.split(';')) {
     const trimmed = part.trim();
     if (trimmed.startsWith(prefix)) {
-      // OpenAI attribution cookies are opaque. Return the raw cookie value
-      // unchanged: do not URL-decode, parse, transform, or log it.
       return trimmed.slice(prefix.length) || undefined;
     }
   }
@@ -82,9 +80,7 @@ function trustedSourceUrl(req, browserSourceUrl) {
 }
 
 function opprefFromRequest(req) {
-  const cookie = cookieValue(req, '__oppref');
-  if (cookie) return cookie;
-  return undefined;
+  return cookieValue(req, '__oppref');
 }
 
 function clientIp(req) {
@@ -141,20 +137,17 @@ async function reportOpenAISubscription(req, email, adsContext) {
       });
 
       if (!response.ok) {
-        // Never log request bodies, attribution cookies, hashes, or secrets.
         console.error('[subscribe] OpenAI Ads CAPI failed', response.status);
       }
     } finally {
       clearTimeout(timeout);
     }
   } catch (err) {
-    // Conversion reporting is strictly best-effort and must never fail signup.
     console.error('[subscribe] OpenAI Ads CAPI exception', err && err.name ? err.name : 'error');
   }
 }
 
 module.exports = async (req, res) => {
-  // Same-origin POSTs only; everything else is a 405.
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
@@ -227,7 +220,6 @@ module.exports = async (req, res) => {
         );
         if (!bh.ok && bh.status !== 409) {
           const t = await bh.text();
-          // Captured in Supabase regardless; the sync backfill will repair.
           console.error('[subscribe] beehiiv push failed', bh.status, t.slice(0, 200));
         }
       } catch (e) {
@@ -238,8 +230,7 @@ module.exports = async (req, res) => {
     }
 
     // ── 3. OpenAI Ads: server-side subscription conversion ───────
-    // A successful Supabase capture is the conversion boundary. Reporting is
-    // non-fatal and consent-gated. Pixel+CAPI use the same event ID to dedupe.
+    // Supabase capture is the success boundary. Pixel+CAPI share event_id.
     await reportOpenAISubscription(req, email, adsContext);
 
     return res.status(200).json({ ok: true });
