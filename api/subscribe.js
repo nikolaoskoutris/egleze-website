@@ -25,16 +25,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const OPENAI_ADS_PIXEL_ID = '7phwvegDeCKo3nKMavCkeL';
 const CANONICAL_SITE_ORIGIN = 'https://egleze.com';
 
-// What a new signup is subscribed to (matches the beehiiv-sync defaults —
-// they asked for "the Digest", which is the daily + the weekly).
-// Flip these if the editorial decision changes.
 const DEFAULT_PREFS = { pref_daily: true, pref_weekly: true, pref_breaking: false };
-
-// Decision (June 2026): Option A — double opt-in ON, then welcome.
-// Flow: signup → Beehiiv confirmation email → click → welcome email.
-// Welcome is written + enabled in Beehiiv. (beehiiv-sync.js keeps both
-// off, so backfills/syncs never re-confirm or re-greet existing people —
-// only fresh organic signups go through this flow.)
 const DOUBLE_OPT = 'on';
 
 function validEmail(e) {
@@ -43,7 +34,7 @@ function validEmail(e) {
 
 function cleanSource(s) {
   if (typeof s === 'string' && /^[a-z0-9_-]{1,40}$/i.test(s)) return s;
-  return 'website'; // table default, used if the caller sends nothing usable
+  return 'website';
 }
 
 function validEventId(value) {
@@ -59,9 +50,7 @@ function cookieValue(req, name) {
   const prefix = name + '=';
   for (const part of raw.split(';')) {
     const trimmed = part.trim();
-    if (trimmed.startsWith(prefix)) {
-      return trimmed.slice(prefix.length) || undefined;
-    }
+    if (trimmed.startsWith(prefix)) return trimmed.slice(prefix.length) || undefined;
   }
   return undefined;
 }
@@ -79,72 +68,69 @@ function trustedSourceUrl(req, browserSourceUrl) {
   return CANONICAL_SITE_ORIGIN + '/';
 }
 
-function opprefFromRequest(req) {
-  return cookieValue(req, '__oppref');
-}
-
 function clientIp(req) {
   const forwarded = req.headers && req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string' && forwarded.trim()) return forwarded.split(',')[0].trim();
   return undefined;
 }
 
-async function reportOpenAISubscription(req, email, adsContext) {
+function reportOpenAISubscription(req, email, adsContext) {
   const apiKey = process.env.OPENAI_ADS_CAPI_KEY;
   if (!apiKey || !adsContext || adsContext.consent !== true) return;
 
-  try {
-    const event = {
-      id: validEventId(adsContext.eventId) ? adsContext.eventId : 'sub_' + crypto.randomUUID(),
-      type: 'subscription_created',
-      timestamp_ms: Date.now(),
-      source_url: trustedSourceUrl(req, adsContext.sourceUrl),
-      action_source: 'web',
-      user: {
-        email_sha256: sha256(email),
-      },
-      data: {
-        type: 'plan_enrollment',
-      },
-    };
-
-    const oppref = opprefFromRequest(req);
-    if (oppref) event.oppref = oppref;
-
-    const obref = cookieValue(req, '__obref');
-    if (obref) event.user.obref = obref;
-
-    const ip = clientIp(req);
-    if (ip) event.user.ip_address = ip;
-
-    const ua = req.headers && req.headers['user-agent'];
-    if (typeof ua === 'string' && ua.trim()) event.user.user_agent = ua.trim();
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1200);
+  // Fire-and-forget inside a complete catch boundary. Conversion reporting must
+  // never delay or fail a valid newsletter signup.
+  void (async () => {
     try {
-      const response = await fetch('https://bzr.openai.com/v1/events?pid=' + encodeURIComponent(OPENAI_ADS_PIXEL_ID), {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + apiKey,
-          'Content-Type': 'application/json',
+      const event = {
+        id: validEventId(adsContext.eventId) ? adsContext.eventId : 'sub_' + crypto.randomUUID(),
+        type: 'subscription_created',
+        timestamp_ms: Date.now(),
+        source_url: trustedSourceUrl(req, adsContext.sourceUrl),
+        action_source: 'web',
+        user: {
+          email_sha256: sha256(email),
         },
-        body: JSON.stringify({
-          validate_only: process.env.OPENAI_ADS_VALIDATE_ONLY === 'true',
-          events: [event],
-        }),
-        signal: controller.signal,
-      });
+        data: {
+          type: 'plan_enrollment',
+        },
+      };
 
-      if (!response.ok) {
-        console.error('[subscribe] OpenAI Ads CAPI failed', response.status);
+      const oppref = cookieValue(req, '__oppref');
+      if (oppref) event.oppref = oppref;
+
+      const obref = cookieValue(req, '__obref');
+      if (obref) event.user.obref = obref;
+
+      const ip = clientIp(req);
+      if (ip) event.user.ip_address = ip;
+
+      const ua = req.headers && req.headers['user-agent'];
+      if (typeof ua === 'string' && ua.trim()) event.user.user_agent = ua.trim();
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 1200);
+      try {
+        const response = await fetch('https://bzr.openai.com/v1/events?pid=' + encodeURIComponent(OPENAI_ADS_PIXEL_ID), {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            validate_only: process.env.OPENAI_ADS_VALIDATE_ONLY === 'true',
+            events: [event],
+          }),
+          signal: controller.signal,
+        });
+        if (!response.ok) console.error('[subscribe] OpenAI Ads CAPI failed', response.status);
+      } finally {
+        clearTimeout(timeout);
       }
-    } finally {
-      clearTimeout(timeout);
+    } catch (err) {
+      console.error('[subscribe] OpenAI Ads CAPI exception', err && err.name ? err.name : 'error');
     }
-  } catch (err) {
-    console.error('[subscribe] OpenAI Ads CAPI exception', err && err.name ? err.name : 'error');
-  }
+  })();
 }
 
 module.exports = async (req, res) => {
@@ -167,7 +153,6 @@ module.exports = async (req, res) => {
       return res.status(400).json({ ok: false, error: 'invalid_email' });
     }
 
-    // ── 1. Supabase: our own record, never skipped ────────────────
     const sb = await fetch(SUPABASE_URL + '/rest/v1/subscribers', {
       method: 'POST',
       headers: {
@@ -191,7 +176,6 @@ module.exports = async (req, res) => {
       return res.status(500).json({ ok: false, error: 'capture_failed' });
     }
 
-    // ── 2. Beehiiv: instant delivery (best-effort) ────────────────
     const BEEHIIV_KEY = process.env.BEEHIIV_API_KEY;
     const BEEHIIV_PUB = process.env.BEEHIIV_PUBLICATION_ID;
     if (BEEHIIV_KEY && BEEHIIV_PUB) {
@@ -229,10 +213,7 @@ module.exports = async (req, res) => {
       console.error('[subscribe] BEEHIIV env vars missing — captured to Supabase only');
     }
 
-    // ── 3. OpenAI Ads: server-side subscription conversion ───────
-    // Supabase capture is the success boundary. Pixel+CAPI share event_id.
-    await reportOpenAISubscription(req, email, adsContext);
-
+    reportOpenAISubscription(req, email, adsContext);
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('[subscribe] error:', err);
