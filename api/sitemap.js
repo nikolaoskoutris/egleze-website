@@ -1,7 +1,8 @@
-// Dynamic sitemap generator for Egleze.
+// Segmented sitemap and Google News sitemap generator for Egleze.
 
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_3I2jAyKsQyMLvxuQG47rBw_UW_QSZLs';
+const SITE_URL = 'https://egleze.com';
 
 const TOPICS = [
   'ai-tech', 'combat-ufc', 'comedy', 'consciousness-medicine',
@@ -11,6 +12,8 @@ const TOPICS = [
   'military', 'money', 'monologues', 'politics', 'psychology',
   'relationships-family', 'science', 'society', 'sports', 'ufo-paranormal'
 ];
+
+const SITEMAP_TYPES = ['static', 'stories', 'episodes', 'shows', 'topics', 'news'];
 
 let INDEXABLE_TOPICS = TOPICS;
 try {
@@ -33,7 +36,7 @@ function slugify(value) {
 }
 
 function xmlEscape(value) {
-  return String(value)
+  return String(value == null ? '' : value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -42,16 +45,38 @@ function xmlEscape(value) {
 }
 
 function formatDate(value) {
-  const parsed = value ? new Date(value) : new Date();
-  return parsed.toISOString().slice(0, 10);
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
 }
 
-function urlBlock(loc, lastmod, changefreq, priority) {
+function formatTimestamp(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
+function urlBlock(loc, options = {}) {
+  const lines = ['  <url>', `    <loc>${xmlEscape(loc)}</loc>`];
+  if (options.lastmod) lines.push(`    <lastmod>${xmlEscape(options.lastmod)}</lastmod>`);
+  if (options.changefreq) lines.push(`    <changefreq>${xmlEscape(options.changefreq)}</changefreq>`);
+  if (options.priority) lines.push(`    <priority>${xmlEscape(options.priority)}</priority>`);
+  lines.push('  </url>');
+  return lines.join('\n');
+}
+
+function newsUrlBlock(story) {
+  const loc = `${SITE_URL}/story/${story.id}-${slugify(story.headline)}`;
   return `  <url>
     <loc>${xmlEscape(loc)}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
+    <news:news>
+      <news:publication>
+        <news:name>Egleze</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${xmlEscape(formatTimestamp(story.approved_at))}</news:publication_date>
+      <news:title>${xmlEscape(story.headline)}</news:title>
+    </news:news>
   </url>`;
 }
 
@@ -90,85 +115,167 @@ async function fetchAll(pathWithoutPagination) {
   return { error: null, data: all };
 }
 
-module.exports = async function handler(req, res) {
-  const today = formatDate();
+function sitemapIndex() {
+  const entries = SITEMAP_TYPES.map(type => `  <sitemap>
+    <loc>${SITE_URL}/${type === 'news' ? 'news-sitemap' : `sitemap-${type}`}.xml</loc>
+  </sitemap>`).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${entries}
+</sitemapindex>
+`;
+}
+
+function standardUrlset(urls) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
+</urlset>
+`;
+}
+
+function newsUrlset(urls) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+${urls.join('\n')}
+</urlset>
+`;
+}
+
+async function buildSitemap(type, now = new Date()) {
   const urls = [];
   const errors = [];
+
+  if (type === 'static') {
+    [
+      ['/', 'daily', '1.0'],
+      ['/shows.html', 'daily', '0.8'],
+      ['/shorts.html', 'daily', '0.7'],
+      ['/about', 'monthly', '0.5'],
+      ['/for-podcasters.html', 'monthly', '0.5'],
+      ['/subscribe', 'monthly', '0.5'],
+      ['/legal.html', 'monthly', '0.3']
+    ].forEach(([path, changefreq, priority]) => {
+      urls.push(urlBlock(`${SITE_URL}${path}`, { changefreq, priority }));
+    });
+  }
+
+  if (type === 'topics') {
+    INDEXABLE_TOPICS.forEach(topic => {
+      urls.push(urlBlock(`${SITE_URL}/topic/${topic}`, { changefreq: 'daily', priority: '0.6' }));
+    });
+  }
+
+  if (type === 'shows') {
+    const result = await supabaseFetch(
+      'shows?select=slug,created_at&active=eq.true&slug=not.is.null&order=name.asc'
+    );
+    if (result.error) errors.push({ source: 'shows', error: result.error });
+    result.data.forEach(show => {
+      if (!show.slug) return;
+      urls.push(urlBlock(`${SITE_URL}/shows/${show.slug}`, {
+        lastmod: formatDate(show.created_at),
+        changefreq: 'daily',
+        priority: '0.7'
+      }));
+    });
+  }
+
+  if (type === 'episodes') {
+    const result = await fetchAll(
+      'episodes?select=id,title,published_at&status=eq.published&order=id.asc'
+    );
+    if (result.error) errors.push({ source: 'episodes', error: result.error });
+    result.data.forEach(episode => {
+      if (!episode.id || !episode.title) return;
+      urls.push(urlBlock(`${SITE_URL}/episodes/${episode.id}-${slugify(episode.title)}`, {
+        // Unknown source publication dates are intentionally omitted, never replaced by import/update time.
+        lastmod: formatDate(episode.published_at),
+        changefreq: 'weekly',
+        priority: '0.7'
+      }));
+    });
+  }
+
+  if (type === 'stories') {
+    const result = await fetchAll(
+      'stories?select=id,headline,approved_at&status=eq.approved&order=id.asc'
+    );
+    if (result.error) errors.push({ source: 'stories', error: result.error });
+    result.data.forEach(story => {
+      if (!story.id || !story.headline) return;
+      urls.push(urlBlock(`${SITE_URL}/story/${story.id}-${slugify(story.headline)}`, {
+        // approved_at is the first known public-publish boundary; unknown legacy dates stay omitted.
+        lastmod: formatDate(story.approved_at),
+        changefreq: 'weekly',
+        priority: '0.6'
+      }));
+    });
+  }
+
+  if (type === 'news') {
+    const cutoff = new Date(now.getTime() - (48 * 60 * 60 * 1000)).toISOString();
+    const result = await fetchAll(
+      `stories?select=id,headline,approved_at&status=eq.approved&approved_at=gte.${encodeURIComponent(cutoff)}&approved_at=not.is.null&order=approved_at.desc`
+    );
+    if (result.error) errors.push({ source: 'news', error: result.error });
+    result.data.forEach(story => {
+      if (!story.id || !story.headline || !formatTimestamp(story.approved_at)) return;
+      urls.push(newsUrlBlock(story));
+    });
+  }
+
+  return { urls, errors };
+}
+
+module.exports = async function handler(req, res) {
+  const type = String((req.query && req.query.type) || 'index').toLowerCase();
   const debug = req.query && req.query.debug === '1';
 
-  urls.push(urlBlock('https://egleze.com/', today, 'hourly', '1.0'));
-  urls.push(urlBlock('https://egleze.com/shows.html', today, 'daily', '0.8'));
-  urls.push(urlBlock('https://egleze.com/shorts.html', today, 'hourly', '0.7'));
-  urls.push(urlBlock('https://egleze.com/legal.html', today, 'monthly', '0.3'));
-
-  for (const topic of INDEXABLE_TOPICS) {
-    urls.push(urlBlock(`https://egleze.com/topic/${topic}`, today, 'daily', '0.6'));
+  if (type === 'index') {
+    if (debug) {
+      res.status(200).json({ type, sitemaps: SITEMAP_TYPES });
+      return;
+    }
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+    res.status(200).send(sitemapIndex());
+    return;
   }
 
-  const showsResult = await supabaseFetch(
-    'shows?select=slug,created_at&active=eq.true&slug=not.is.null&order=name.asc'
-  );
-  if (showsResult.error) errors.push({ source: 'shows', error: showsResult.error });
-  for (const show of showsResult.data) {
-    if (!show.slug) continue;
-    urls.push(urlBlock(
-      `https://egleze.com/shows/${show.slug}`,
-      formatDate(show.created_at),
-      'daily',
-      '0.7'
-    ));
+  if (!SITEMAP_TYPES.includes(type)) {
+    res.status(404).json({ error: 'Unknown sitemap type' });
+    return;
   }
 
-  const episodesResult = await fetchAll(
-    'episodes?select=id,title,updated_at,published_at&status=eq.published&order=id.asc'
-  );
-  if (episodesResult.error) errors.push({ source: 'episodes', error: episodesResult.error });
-  for (const episode of episodesResult.data) {
-    if (!episode.id || !episode.title) continue;
-    urls.push(urlBlock(
-      `https://egleze.com/episodes/${episode.id}-${slugify(episode.title)}`,
-      formatDate(episode.updated_at || episode.published_at),
-      'weekly',
-      '0.7'
-    ));
-  }
-
-  const storiesResult = await fetchAll(
-    'stories?select=id,headline,created_at&status=eq.approved&order=id.asc'
-  );
-  if (storiesResult.error) errors.push({ source: 'stories', error: storiesResult.error });
-  for (const story of storiesResult.data) {
-    if (!story.id || !story.headline) continue;
-    urls.push(urlBlock(
-      `https://egleze.com/story/${story.id}-${slugify(story.headline)}`,
-      formatDate(story.created_at),
-      'weekly',
-      '0.6'
-    ));
-  }
-
+  const result = await buildSitemap(type);
   if (debug) {
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json({
-      total_urls: urls.length,
-      static_count: 4 + INDEXABLE_TOPICS.length,
-      indexable_topics: INDEXABLE_TOPICS.length,
-      all_topics: TOPICS.length,
-      shows_count: showsResult.data.length,
-      episodes_count: episodesResult.data.length,
-      stories_count: storiesResult.data.length,
-      errors,
-      first_episode: episodesResult.data[0] || null,
-      first_story: storiesResult.data[0] || null
+    res.status(result.errors.length ? 503 : 200).json({
+      type,
+      url_count: result.urls.length,
+      errors: result.errors
     });
+    return;
+  }
+
+  if (result.errors.length) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(503).send('Sitemap temporarily unavailable');
     return;
   }
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-  res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.join('\n')}
-</urlset>
-`);
+  res.status(200).send(type === 'news' ? newsUrlset(result.urls) : standardUrlset(result.urls));
+};
+
+module.exports._test = {
+  buildSitemap,
+  formatDate,
+  formatTimestamp,
+  newsUrlBlock,
+  sitemapIndex,
+  slugify,
+  standardUrlset
 };

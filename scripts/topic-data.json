@@ -14,14 +14,14 @@
       "displayName": "Combat & UFC",
       "seoTitle": "Combat & UFC — Fight World Reveals | Egleze",
       "seoDescription": "Breaking moments from MMA, boxing, and UFC — fighter interviews, training secrets, and post-fight analysis.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "comedy",
       "displayName": "Comedy",
       "seoTitle": "Comedy Podcasts — Best Stand-Up Reveals | Egleze",
       "seoDescription": "The funniest, most viral, and most discussed comedy podcast moments. From Theo Von to Tom Segura.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "consciousness-medicine",
@@ -42,49 +42,49 @@
       "displayName": "Crime & Justice",
       "seoTitle": "True Crime & Justice Podcast Reveals | Egleze",
       "seoDescription": "Major crime cases, wrongful convictions, and justice system commentary from leading investigative podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "debates",
       "displayName": "Debates",
       "seoTitle": "Top Debate Podcasts — Politics, Philosophy, Ideas | Egleze",
       "seoDescription": "The biggest moments from Destiny, Shapiro, Murray, Harris, and the rest of the debate world.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "education-learning",
       "displayName": "Education & Learning",
       "seoTitle": "Education & Learning Podcast Insights | Egleze",
       "seoDescription": "Teaching, schooling, learning science, and educational reform debates from top podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "energy-climate",
       "displayName": "Energy & Climate",
       "seoTitle": "Energy & Climate Podcast Coverage | Egleze",
       "seoDescription": "Energy policy, climate science, sustainability, and the future of power — from leading podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "entertainment",
       "displayName": "Entertainment",
       "seoTitle": "Entertainment Podcast Reveals | Egleze",
       "seoDescription": "Hollywood news, celebrity interviews, music industry, and pop culture from the world's biggest podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "espionage",
       "displayName": "Espionage",
       "seoTitle": "Espionage & Intelligence Podcast Reveals | Egleze",
       "seoDescription": "National security, spy operations, and intelligence community insights from former operatives.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "faith-spirituality",
       "displayName": "Faith & Spirituality",
       "seoTitle": "Faith & Spirituality Podcast Conversations | Egleze",
       "seoDescription": "Religion, spirituality, theology, and the search for meaning from the world's most thoughtful podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "geopolitics",
@@ -112,7 +112,7 @@
       "displayName": "Media & Journalism",
       "seoTitle": "Media & Journalism Podcast Insights | Egleze",
       "seoDescription": "Media criticism, press freedom, and the inside story of how news gets made — from working journalists.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "military",
@@ -147,7 +147,7 @@
       "displayName": "Psychology",
       "seoTitle": "Psychology Podcast Reveals — Mind & Behavior | Egleze",
       "seoDescription": "Cognitive science, behavioral economics, mental health, and human nature from the world's best psychology podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "relationships-family",
@@ -161,7 +161,7 @@
       "displayName": "Science",
       "seoTitle": "Science Podcast Reveals — Discoveries & Research | Egleze",
       "seoDescription": "Cutting-edge research, scientific breakthroughs, and big ideas from the world's leading science podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "society",
@@ -175,7 +175,7 @@
       "displayName": "Sports",
       "seoTitle": "Sports Podcast Reveals — Athletes, Analysis, Drama | Egleze",
       "seoDescription": "The biggest sports stories, athlete interviews, and locker-room insights from leading sports podcasts.",
-      "hasStories": false
+      "hasStories": true
     },
     {
       "slug": "ufo-paranormal",
