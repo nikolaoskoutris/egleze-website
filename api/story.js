@@ -142,8 +142,12 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   const slug = slugify(title, { full: true });
   const canonicalUrl = `https://egleze.com/story/${story.id}-${slug}`;
   const ogImage = artworkUrl || 'https://egleze.com/og-default.png';
-  const datePublished = story.created_at || new Date().toISOString();
+  // approved_at is the public publication boundary for current stories.
+  // created_at remains a legacy fallback; never fabricate a current timestamp.
+  const datePublished = story.approved_at || story.created_at || '';
   const dateModified = story.updated_at || datePublished;
+  const showUpdated = datePublished && dateModified &&
+    new Date(dateModified).getTime() > new Date(datePublished).getTime();
   const showName = story.show_name || '';
   const topic = story.topic || '';
   const episodeName = story.episode || '';
@@ -159,12 +163,12 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     'headline': title,
     'description': description,
     'image': ogImage ? [ogImage] : undefined,
-    'datePublished': datePublished,
-    'dateModified': dateModified,
+    'datePublished': datePublished || undefined,
+    'dateModified': dateModified || undefined,
     'author': {
       '@type': 'Organization',
-      'name': 'Egleze',
-      'url': 'https://egleze.com'
+      'name': 'Egleze Editorial Desk',
+      'url': 'https://egleze.com/legal.html#standards'
     },
     'publisher': {
       '@type': 'Organization',
@@ -208,7 +212,7 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
         <div class="episode-card-copy">
           <div class="episode-card-show">${escapeHtml(episode.show_name || showName)}</div>
           <h2>${escapeHtml(episode.title || episodeName)}</h2>
-          <div class="episode-card-meta">${[formatDate(episode.published_at || episode.updated_at), formatDuration(episode.duration_seconds), (episodeMomentCount || ((siblingMoments || []).length + 1)) + ' Egleze moments'].filter(Boolean).join(' · ')}</div>
+          <div class="episode-card-meta">${[formatDate(episode.published_at), formatDuration(episode.duration_seconds), (episodeMomentCount || ((siblingMoments || []).length + 1)) + ' Egleze moments'].filter(Boolean).join(' · ')}</div>
         </div>
       </div>
       <a class="episode-card-link" href="${episodeUrl}">Read episode summary and key points →</a>
@@ -244,15 +248,14 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   ].filter(Boolean).join('&');
   const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?${videoParams}` : null;
   const posterUrl = videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : null;
+  const sourceVideoName = episodeName || (showName ? `${showName} source video` : 'Podcast source video');
   const videoObjectLd = videoId ? `\n  <script type="application/ld+json">${JSON.stringify({
     "@context":"https://schema.org","@type":"VideoObject",
-    "name": title,
-    "description": description,
+    "name": sourceVideoName,
+    "description": `Original source video for the Egleze report: ${title}`,
     "thumbnailUrl": ["https://i.ytimg.com/vi/" + videoId + "/maxresdefault.jpg"],
-    "uploadDate": datePublished,
     "contentUrl": "https://www.youtube.com/watch?v=" + videoId,
-    "embedUrl": "https://www.youtube.com/embed/" + videoId,
-    "publisher": {"@type":"NewsMediaOrganization","name":"Egleze","url":"https://egleze.com"}
+    "embedUrl": "https://www.youtube.com/embed/" + videoId
   })}</script>` : '';
   const videoHtml = embedUrl
     ? `<div class="video-block">
@@ -293,6 +296,10 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   </script>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonicalUrl}">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <meta name="google-site-verification" content="rNxDHlJLJlcENKY5EyvvYSllFud6qDhckUJMbPfKDHo">
 
   <!-- Open Graph -->
@@ -303,6 +310,7 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:site_name" content="Egleze">
   <meta property="article:published_time" content="${datePublished}">
+  <meta property="article:modified_time" content="${dateModified}">
   <meta property="article:section" content="${escapeHtml(topic)}">
 
   <!-- Twitter Card -->
@@ -340,6 +348,7 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     h1.headline{font-family:'Playfair Display',serif;font-size:42px;font-weight:900;line-height:1.15;color:var(--dark);margin-bottom:16px;letter-spacing:-0.5px}
     .meta{font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:28px;border-bottom:0.5px solid var(--border);padding-bottom:18px}
     .meta strong{color:#222;font-weight:700}
+    .meta a{color:var(--red);font-weight:700;text-decoration:none}
     .artwork-block{margin:32px 0;display:flex;gap:18px;align-items:center;padding:18px;background:var(--light);border-left:3px solid var(--red)}
     .artwork-block img{width:80px;height:80px;object-fit:cover;flex-shrink:0;border:0.5px solid var(--border)}
     .artwork-block .show-info{flex:1}
@@ -421,11 +430,12 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     ${topic ? `<div class="topic-label">${escapeHtml(topic)}</div>` : ''}
     <h1 class="headline">${escapeHtml(title)}</h1>
     <div class="meta">
-      ${showName ? `<strong>${escapeHtml(showName)}</strong>` : ''}
+      <a href="/legal.html#standards">By Egleze Editorial Desk</a>
+      ${datePublished ? ` · Published ${formatDate(datePublished)}` : ''}
+      ${showUpdated ? ` · Updated ${formatDate(dateModified)}` : ''}
+      ${showName ? ` · <strong>${escapeHtml(showName)}</strong>` : ''}
       ${showName && episodeName ? ' · ' : ''}
       ${episodeName ? escapeHtml(episodeName) : ''}
-      ${(showName || episodeName) ? ' · ' : ''}
-      ${formatDate(datePublished)}
     </div>
 
     ${videoHtml}

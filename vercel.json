@@ -1,6 +1,13 @@
 {
   "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap?type=index" },
+    { "source": "/sitemap-static.xml", "destination": "/api/sitemap?type=static" },
+    { "source": "/sitemap-stories.xml", "destination": "/api/sitemap?type=stories" },
+    { "source": "/sitemap-episodes.xml", "destination": "/api/sitemap?type=episodes" },
+    { "source": "/sitemap-shows.xml", "destination": "/api/sitemap?type=shows" },
+    { "source": "/sitemap-topics.xml", "destination": "/api/sitemap?type=topics" },
+    { "source": "/news-sitemap.xml", "destination": "/api/sitemap?type=news" },
+    { "source": "/rss.xml", "destination": "/api/rss" },
     { "source": "/topic/:slug", "destination": "/topic/:slug.html" },
     { "source": "/topic/:slug/", "destination": "/topic/:slug.html" },
     { "source": "/story/:slug", "destination": "/api/story?slug=:slug" },
