@@ -89,7 +89,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const result = await writeAnalyticsRow(row);
+    const result = await writeAnalyticsRow(row, { rateKey: clientKey(req) });
     log('info', 'analytics_stored', {
       requestId,
       event: row.event_name,
