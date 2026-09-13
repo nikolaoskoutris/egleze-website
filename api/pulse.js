@@ -90,11 +90,6 @@ module.exports = async function handler(req, res) {
 
   try {
     const result = await writeAnalyticsRow(row);
-    if (!result.stored && result.reason === 'missing_service_key') {
-      log('error', 'analytics_disabled', { requestId, ms: Date.now() - startedAt });
-      res.status(503).json({ ok: false, error: 'analytics_not_configured' });
-      return;
-    }
     log('info', 'analytics_stored', {
       requestId,
       event: row.event_name,
