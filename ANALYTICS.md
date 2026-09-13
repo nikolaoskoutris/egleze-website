@@ -13,21 +13,22 @@ The Situation Room must never label page loads, consented sessions or anonymous 
 ### Website project
 
 - Apply `supabase/migrations/20260913_001_analytics_foundation.sql`.
-- Set `SUPABASE_SERVICE_ROLE_KEY` as a server-only Vercel environment variable for Production and Preview. Never expose it in HTML or browser JavaScript.
+- Deploy `supabase/functions/egleze-pulse/index.ts` as the public `egleze-pulse` Edge Function with JWT verification disabled. The function applies its own method, origin, payload, event and rate-limit checks before using Supabase's managed server credential.
+- No Supabase service-role secret is stored in Vercel. `ANALYTICS_INGEST_URL` is optional and defaults to the Egleze production Edge Function.
 - Enable Web Analytics in the Vercel project. The shared client loads `/_vercel/insights/script.js`; if Vercel supplies a project-specific resilient script route, set it before `/js/pulse.js` as `window.EGLEZE_VERCEL_ANALYTICS_SCRIPT`.
 
 ### Dashboard project
 
-- Keep the existing Supabase server variables.
+- Apply `supabase/migrations/20260913_002_analytics_admin_read.sql`. The analytics API uses the signed-in admin's Supabase JWT and RLS rather than a service-role secret.
 - Add a read-only `VERCEL_ACCESS_TOKEN` so `/api/analytics` can query the website project's production Web Analytics counts.
 - `VERCEL_ANALYTICS_PROJECT_ID` and `VERCEL_ANALYTICS_TEAM_ID` are optional overrides; the current website IDs are the defaults in the route.
 
 ## Privacy and retention
 
 - The browser posts to the same-origin `/api/pulse` boundary.
-- The server validates the origin, drops known bots and prefetches, rate-limits with an ephemeral salted hash (never the raw IP) and applies field/property allowlists.
+- The Vercel boundary validates the origin, drops known bots and prefetches, rate-limits with an ephemeral salted hash (never the raw IP) and applies field/property allowlists. The Supabase Edge Function validates the event again before storage.
 - A random per-tab session UUID is accepted only after explicit analytics consent.
-- Browser roles have no direct table access; only the server service role can insert/read.
+- Browser roles cannot insert analytics rows. Only active admins can read the table through RLS; the Edge Function performs inserts with Supabase's managed server credential.
 - First-party events are deleted automatically after 180 days by `pg_cron`.
 
 ## Verification
