@@ -1,3 +1,5 @@
+import { createClient } from 'npm:@supabase/supabase-js@2.95.0';
+
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
@@ -137,15 +139,21 @@ Deno.serve(async (req: Request) => {
   if (!row) return json(400, { ok: false, error: 'invalid_event' });
   if (!SUPABASE_URL || !SERVICE_KEY) return json(503, { ok: false, error: 'storage_not_configured' });
 
-  const stored = await fetch(SUPABASE_URL + '/rest/v1/analytics_events', {
-    method: 'POST',
-    headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-    body: JSON.stringify(row),
+  const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
   });
-  if (!stored.ok && stored.status !== 409) {
-    console.error(JSON.stringify({ level: 'error', msg: 'pulse_insert_failed', status: stored.status, ms: Date.now() - startedAt }));
+  const { error } = await admin.from('analytics_events').insert(row);
+  const duplicate = error?.code === '23505';
+  if (error && !duplicate) {
+    console.error(JSON.stringify({
+      level: 'error',
+      msg: 'pulse_insert_failed',
+      code: String(error.code || 'unknown').slice(0, 32),
+      detail: String(error.message || 'insert_failed').replace(/[\r\n]+/g, ' ').slice(0, 180),
+      ms: Date.now() - startedAt,
+    }));
     return json(500, { ok: false, error: 'storage_failed' });
   }
-  console.log(JSON.stringify({ level: 'info', msg: 'pulse_stored', event: row.event_name, duplicate: stored.status === 409, ms: Date.now() - startedAt }));
+  console.log(JSON.stringify({ level: 'info', msg: 'pulse_stored', event: row.event_name, duplicate, ms: Date.now() - startedAt }));
   return json(202, { ok: true });
 });
