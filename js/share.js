@@ -57,6 +57,14 @@
     }, 1800);
   }
 
+  function trackCompleted(method) {
+    try {
+      if (window.egleze && window.egleze.analytics) {
+        window.egleze.analytics.track('share_completed', { method: method });
+      }
+    } catch (_) {}
+  }
+
   function closeSharePopover() {
     var existing = document.getElementById('eg-share-popover');
     if (existing) try { existing.remove(); } catch (_) {}
@@ -99,6 +107,7 @@
     copyBtn.onclick = async function () {
       try {
         var ok = await copyToClipboard(data.url);
+        if (ok) trackCompleted('copy_link');
         showToast(ok ? 'Link copied to clipboard' : 'Could not copy link');
       } catch (err) {
         console.error('[egleze share] copy failed:', err);
@@ -122,11 +131,15 @@
         closeSharePopover();
         try {
           await navigator.share({ title: data.title, text: data.text, url: data.url });
+          trackCompleted('native_share');
         } catch (e) {
           if (e && (e.name === 'AbortError' || /abort|cancel/i.test(e.message || ''))) return;
           // fallback to clipboard if native share errored
           var ok = await copyToClipboard(data.url);
-          if (ok) showToast('Link copied to clipboard');
+          if (ok) {
+            trackCompleted('copy_fallback');
+            showToast('Link copied to clipboard');
+          }
         }
       };
       pop.appendChild(shareBtn);

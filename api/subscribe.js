@@ -16,6 +16,7 @@
 
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+const { recordAnalyticsEvent } = require('../lib/analytics.js');
 
 // What a new signup is subscribed to (matches the beehiiv-sync defaults —
 // they asked for "the Digest", which is the daily + the weekly).
@@ -36,6 +37,11 @@ function validEmail(e) {
 function cleanSource(s) {
   if (typeof s === 'string' && /^[a-z0-9_-]{1,40}$/i.test(s)) return s;
   return 'website'; // table default, used if the caller sends nothing usable
+}
+
+function requestPath(req) {
+  try { return new URL(req.headers.referer || '').pathname || '/subscribe'; }
+  catch (_) { return '/subscribe'; }
 }
 
 module.exports = async (req, res) => {
@@ -116,6 +122,16 @@ module.exports = async (req, res) => {
     } else {
       console.error('[subscribe] BEEHIIV env vars missing — captured to Supabase only');
     }
+
+    // Best-effort aggregate conversion event. Never store or forward the
+    // subscriber's email as analytics data, and never fail signup on telemetry.
+    recordAnalyticsEvent(req, {
+      event_name: 'signup_completed',
+      path: requestPath(req),
+      content_kind: 'page',
+      consent_state: 'unknown',
+      properties: { source },
+    }).catch((error) => console.error('[subscribe] analytics failed', error.message));
 
     return res.status(200).json({ ok: true });
   } catch (err) {

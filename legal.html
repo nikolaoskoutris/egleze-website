@@ -67,6 +67,7 @@
   *:focus-visible{outline:2px solid var(--red);outline-offset:2px}
   @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
+  <script defer src="/js/pulse.js"></script>
 </head>
 <body>
   <div class="topbar"><div class="wrap">
@@ -219,8 +220,8 @@
   <section class="panel" id="privacy">
     <div class="eyebrow">Legal Framework</div>
     <h1>Global Privacy Policy</h1>
-    <div class="meta">GDPR &amp; CCPA Compliant · Egleze Limited · Effective 26 June 2026</div>
-    <div class="summary"><strong>Plain English Summary:</strong> We collect your email address if you subscribe to our newsletter. We do not sell your data. We do not use advertising trackers. We store your data securely in Europe and the US using encrypted services. You can unsubscribe or delete your data at any time.</div>
+    <div class="meta">GDPR &amp; CCPA · Egleze Limited · Effective 13 September 2026</div>
+    <div class="summary"><strong>Plain English Summary:</strong> We collect your email address if you subscribe to our newsletter. We also count aggregate website activity without cookies so we can operate and improve Egleze. Optional Google Analytics runs only if you accept it. We do not sell your data or fingerprint your device.</div>
 
     <h2 id="privacy-controller">1. Data Controller</h2>
     <div class="contact-block"><strong>Egleze Limited</strong><br>Registered in Ireland under the Companies Act 2014<br>Registered Office: Venture Hub, 136 Capel Street, Dublin 1, Ireland<br>Contact: <a href="mailto:hello@egleze.com">hello@egleze.com</a></div>
@@ -229,19 +230,21 @@
     <h3>Data you provide directly</h3>
     <ul><li><strong>Email address</strong> — when you subscribe to the Egleze Digest newsletter</li><li><strong>Name</strong> — optional, if provided during newsletter signup</li></ul>
     <h3>Data collected automatically</h3>
-    <ul><li><strong>Analytics data</strong> — page views, session duration, referral source (anonymised, no personal identifiers)</li><li><strong>Technical data</strong> — browser type, device type, approximate location (country level only)</li></ul>
+    <ul><li><strong>Aggregate analytics data</strong> — page path, time, referral hostname, campaign tags and product actions such as opening a source or starting a video</li><li><strong>Coarse technical data</strong> — desktop/mobile/tablet classification and approximate country</li><li><strong>Consented analytics data</strong> — if you accept optional analytics, Google Analytics may measure sessions and Egleze creates a random per-tab session identifier</li></ul>
     <h3>Cookies and device storage</h3>
-    <p>Egleze and its third-party service providers store, access and collect information on or from your device — including by placing, reading or recognising cookies, local storage and similar technologies — in order to operate the site, remember your preferences and measure usage. For full details of the cookies we use and how to control them, see our <button class="linklike" type="button" onclick="showTab('cookie')" style="color:var(--red);background:none;border:0;cursor:pointer;font:inherit;padding:0;text-decoration:underline">Cookie Policy</button>.</p>
+    <p>Egleze uses local storage to remember your analytics preference. Cookie-free aggregate measurement remains active because it does not place an analytics identifier on your device. Optional Google Analytics and a random per-tab analytics session identifier are activated only after you accept. For details and controls, see our <button class="linklike" type="button" onclick="showTab('cookie')" style="color:var(--red);background:none;border:0;cursor:pointer;font:inherit;padding:0;text-decoration:underline">Cookie Policy</button>.</p>
     <h3>Data we do NOT collect</h3>
-    <ul><li>We do not collect payment information</li><li>We do not collect social media profiles</li><li>We do not use advertising tracking pixels</li><li>We do not fingerprint your device</li></ul>
+    <ul><li>We do not collect payment information</li><li>We do not collect social media profiles</li><li>We do not store raw IP addresses or full browser user-agent strings in our first-party analytics table</li><li>We do not use cross-site identifiers or fingerprint your device</li></ul>
 
     <h2 id="privacy-basis">3. Legal Basis for Processing</h2>
     <h3>Newsletter subscribers (GDPR Article 6(1)(a))</h3>
     <p>We process your email address on the basis of your explicit consent, given when you subscribe to the Egleze Digest. You may withdraw this consent at any time by clicking "Unsubscribe" in any email we send you.</p>
     <h3>News aggregation (GDPR Article 6(1)(f) + Section 43 DPA 2018)</h3>
     <p>For our core news service — analysing publicly available podcast transcripts — we rely on Legitimate Interest and the Journalistic Exemption under the Irish Data Protection Act 2018 (Section 43). We process publicly available audio and visual data to inform the public on matters of politics, health, finance, science and general interest.</p>
-    <h3>Analytics (GDPR Article 6(1)(f))</h3>
-    <p>We use anonymised analytics to understand how our platform is used and to improve our service. This processing is based on our legitimate interest in operating and improving egleze.com.</p>
+    <h3>Cookie-free aggregate analytics (GDPR Article 6(1)(f))</h3>
+    <p>We use data-minimised aggregate analytics to count page loads, understand acquisition and operate and improve egleze.com. This processing is based on our legitimate interest. The collector validates same-origin requests, filters known automated traffic, removes query strings from page paths, records referral hostnames rather than full referral URLs, and does not store raw IP addresses, full user-agent strings, email addresses or cross-site identifiers.</p>
+    <h3>Optional Google Analytics (GDPR Article 6(1)(a))</h3>
+    <p>Google Analytics runs only after you select “Accept analytics”. You can reject it without losing access to the site and can change your choice at any time below.</p>
 
     <h2 id="privacy-use">4. How We Use Your Data</h2>
     <ul><li>To send you the Egleze Digest newsletter (if subscribed)</li><li>To improve our platform based on anonymised usage data</li><li>To comply with legal obligations</li></ul>
@@ -250,7 +253,7 @@
     <p>We may aggregate analytics and engagement data into anonymised statistical reports that contain no personally identifiable information — for example, "55% of readers in the AI &amp; Tech category clicked through to the original source." Such aggregated and anonymised data may be shared with research partners or used in editorial reporting. By definition, aggregated and anonymised data cannot identify any individual. If you object to your activity being included in such aggregate calculations, contact <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
 
     <h2 id="privacy-storage">5. Data Storage &amp; Security</h2>
-    <ul><li><strong>Supabase</strong> — database hosted on AWS (encrypted at rest and in transit)</li><li><strong>Beehiiv</strong> — newsletter platform (SOC 2 compliant)</li><li><strong>Cloudflare R2</strong> — media storage (encrypted at rest)</li></ul>
+    <ul><li><strong>Supabase</strong> — database hosted on AWS (encrypted at rest and in transit)</li><li><strong>Vercel</strong> — website hosting and cookie-free web measurement</li><li><strong>Google Analytics</strong> — optional analytics, only after consent</li><li><strong>Beehiiv</strong> — newsletter platform</li><li><strong>Cloudflare R2</strong> — media storage (encrypted at rest)</li></ul>
     <p>Data may be stored in the European Union and/or the United States. Where data is transferred outside the EU, we ensure appropriate safeguards are in place including Standard Contractual Clauses.</p>
 
         <h2 id="privacy-youtube">6. Third-Party Services &amp; the YouTube API</h2>
@@ -267,7 +270,7 @@
     <p>Egleze does not sell personal information to third parties. To exercise your CCPA rights, contact <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
 
     <h2 id="privacy-retention">9. Data Retention</h2>
-    <ul><li><strong>Newsletter subscribers</strong> — retained until you unsubscribe or request deletion</li><li><strong>Analytics data</strong> — retained for 12 months in anonymised form</li><li><strong>Legal records</strong> — retained for 7 years as required by Irish law</li></ul>
+    <ul><li><strong>Newsletter subscribers</strong> — retained until you unsubscribe or request deletion</li><li><strong>First-party aggregate analytics events</strong> — automatically deleted after 180 days</li><li><strong>Google Analytics data</strong> — retained according to the retention setting in Egleze's Google Analytics property</li><li><strong>Legal records</strong> — retained for 7 years where required by Irish law</li></ul>
 
     <h2 id="privacy-children">10. Children's Privacy</h2>
     <p>Egleze is not directed at children under the age of 16. We do not knowingly collect personal data from children. If you believe we have inadvertently collected data from a child, please contact us immediately at <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
@@ -280,22 +283,26 @@
   <section class="panel" id="cookie">
     <div class="eyebrow">Legal Framework</div>
     <h1>Cookie Policy</h1>
-    <div class="meta">Egleze Limited · Effective 4 June 2026 · Irish DPC Compliant</div>
-    <div class="summary"><strong>Plain English:</strong> We use only essential cookies required to operate this website. We do not use advertising cookies, tracking cookies or social media cookies. You can reject all non-essential cookies and the site will still work perfectly.</div>
+    <div class="meta">Egleze Limited · Effective 13 September 2026</div>
+    <div class="summary"><strong>Plain English:</strong> We always use cookie-free aggregate measurement to count page loads. Optional Google Analytics runs only if you accept it. Rejecting optional analytics does not affect access to Egleze.</div>
 
     <h2 id="cookie-what">1. What Are Cookies</h2>
     <p>Cookies are small text files stored on your device when you visit a website. They help websites remember your preferences and understand how you use the site.</p>
 
     <h2 id="cookie-use">2. Cookies We Use</h2>
-    <h3>Essential Cookies (Always Active)</h3>
-    <table><tr><th>Cookie</th><th>Purpose</th><th>Duration</th></tr>
-      <tr><td>egleze_cookie</td><td>Stores your cookie preference</td><td>1 year</td></tr>
-      <tr><td>egleze_session</td><td>Maintains your session</td><td>Session</td></tr></table>
+    <h3>Always-active, cookie-free measurement</h3>
+    <p>Egleze and Vercel count aggregate page activity without placing an analytics cookie or persistent analytics identifier on your device. Egleze records the page path without its query string, referral hostname, campaign tags, coarse device category, approximate country and selected product events. We do not store raw IP addresses or full user-agent strings in the first-party analytics table.</p>
+    <h3>Device storage and optional cookies</h3>
+    <table><tr><th>Name</th><th>Purpose</th><th>When active</th><th>Duration</th></tr>
+      <tr><td>egleze_cookie</td><td>Local-storage value that remembers accepted or rejected</td><td>After you choose</td><td>Until cleared</td></tr>
+      <tr><td>egleze_analytics_session</td><td>Random per-tab session value; not a cross-site identifier</td><td>Only after acceptance</td><td>Browser tab session</td></tr>
+      <tr><td>_ga and related Google Analytics cookies</td><td>Optional Google Analytics measurement</td><td>Only after acceptance</td><td>Set by Google according to its service settings</td></tr></table>
     <h3>What We Do NOT Use</h3>
-    <ul><li>Advertising or targeting cookies</li><li>Social media tracking cookies (Facebook Pixel, X Pixel, etc.)</li><li>Third-party marketing cookies</li><li>Cross-site tracking</li></ul>
+    <ul><li>Cross-site fingerprinting</li><li>Social-media tracking cookies</li><li>Third-party marketing cookies by default</li><li>Sale of analytics data</li></ul>
 
     <h2 id="cookie-choices">3. Your Cookie Choices</h2>
-    <p>Under Irish Data Protection Commission guidelines, you have the right to reject all non-essential cookies. You can change your preference at any time using the cookie banner.</p>
+    <p>You can accept or reject optional Google Analytics. Cookie-free aggregate page measurement remains active in both cases. Change your choice here:</p>
+    <p><button type="button" onclick="window.eglezeSetAnalyticsConsent&&window.eglezeSetAnalyticsConsent('rejected')" style="padding:9px 14px;margin-right:8px;border:1px solid #777;background:#fff;cursor:pointer">Reject optional analytics</button><button type="button" onclick="window.eglezeSetAnalyticsConsent&&window.eglezeSetAnalyticsConsent('accepted')" style="padding:9px 14px;border:0;background:#bb1919;color:#fff;cursor:pointer">Accept analytics</button></p>
 
     <h2 id="cookie-browser">4. Managing Cookies in Your Browser</h2>
     <ul>
