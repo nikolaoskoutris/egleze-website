@@ -14,11 +14,10 @@
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true, // critical: handles the magic-link callback
+      detectSessionInUrl: true,
     },
   });
 
-  // ----- helpers -----
   async function getUser() {
     const { data, error } = await client.auth.getUser();
     if (error) return null;
@@ -39,22 +38,14 @@
   async function signInWithGoogle(redirectTo) {
     return client.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: redirectTo || window.location.origin,
-      },
+      options: { redirectTo: redirectTo || window.location.origin },
     });
   }
 
-  // Sign in with Apple — same web-OAuth path as Google, so it works identically
-  // on the website, the shorts PWA, and (via the native bridge's system-browser
-  // + egleze://auth deep link) the iOS/Android apps. Requires the Apple provider
-  // to be enabled in Supabase (Services ID as Client ID + generated secret).
   async function signInWithApple(redirectTo) {
     return client.auth.signInWithOAuth({
       provider: "apple",
-      options: {
-        redirectTo: redirectTo || window.location.origin,
-      },
+      options: { redirectTo: redirectTo || window.location.origin },
     });
   }
 
@@ -85,10 +76,105 @@
   };
 })();
 
-// Use the official Egleze brand asset in the homepage broadcast station mark.
-// The broadcast markup historically rendered a generic text “E”, which did
-// not match the masthead/app icon. Keep this defensive because auth.js is
-// shared by public pages that do not contain the broadcast player.
+// OpenAI Ads conversion measurement for the Egleze Digest newsletter.
+// The public Pixel ID may live in browser code; the CAPI key must not.
+// Existing site consent is respected. A confirmed /api/subscribe success
+// emits subscription_created with plan_enrollment and shares event_id with
+// the server-side CAPI event so OpenAI Ads can deduplicate the pair.
+(function installOpenAIAdsMeasurement() {
+  const PIXEL_ID = '7phwvegDeCKo3nKMavCkeL';
+  const SDK_URL = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+  const nativeFetch = window.fetch && window.fetch.bind(window);
+  if (!nativeFetch) return;
+
+  function hasMeasurementConsent() {
+    try {
+      return localStorage.getItem('egleze_cookie') === 'accepted';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function ensurePixel() {
+    if (!hasMeasurementConsent()) return false;
+    if (!window.oaiq) {
+      var q = function () { q.q.push(arguments); };
+      q.q = [];
+      window.oaiq = q;
+      var js = document.createElement('script');
+      js.async = true;
+      js.src = SDK_URL;
+      var first = document.getElementsByTagName('script')[0];
+      if (first && first.parentNode) first.parentNode.insertBefore(js, first);
+      else document.head.appendChild(js);
+      window.oaiq('init', { pixelId: PIXEL_ID });
+    }
+    return true;
+  }
+
+  function newEventId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return 'sub_' + window.crypto.randomUUID();
+    }
+    return 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2, 14);
+  }
+
+  function isSubscribeRequest(input, init) {
+    var method = (init && init.method) || (input && input.method) || 'GET';
+    if (String(method).toUpperCase() !== 'POST') return false;
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    try {
+      var parsed = new URL(url, window.location.href);
+      return parsed.origin === window.location.origin && parsed.pathname === '/api/subscribe';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function addAdsContext(init, eventId) {
+    if (!init || typeof init.body !== 'string') return init;
+    var contentType = '';
+    try {
+      var headers = new Headers(init.headers || {});
+      contentType = headers.get('content-type') || '';
+    } catch (_) {}
+    if (contentType && !/application\/json/i.test(contentType)) return init;
+
+    try {
+      var body = JSON.parse(init.body);
+      if (!body || typeof body !== 'object' || Array.isArray(body)) return init;
+      body._openaiAdsEventId = eventId;
+      body._openaiAdsSourceUrl = window.location.origin + window.location.pathname;
+      body._openaiAdsConsent = hasMeasurementConsent();
+      return Object.assign({}, init, { body: JSON.stringify(body) });
+    } catch (_) {
+      return init;
+    }
+  }
+
+  ensurePixel();
+
+  window.fetch = async function (input, init) {
+    if (!isSubscribeRequest(input, init)) return nativeFetch(input, init);
+
+    var eventId = newEventId();
+    var requestInit = addAdsContext(init || {}, eventId);
+    var response = await nativeFetch(input, requestInit);
+
+    if (response && response.ok && ensurePixel()) {
+      try {
+        window.oaiq(
+          'measure',
+          'subscription_created',
+          { type: 'plan_enrollment' },
+          { event_id: eventId }
+        );
+      } catch (_) {}
+    }
+    return response;
+  };
+})();
+
 (function normalizeBroadcastBrandMark() {
   function applyBrandMark() {
     const mark = document.querySelector('.bc-e-mark');
