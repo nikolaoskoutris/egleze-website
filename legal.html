@@ -231,6 +231,8 @@
     <ul><li><strong>Email address</strong> — when you subscribe to the Egleze Digest newsletter</li><li><strong>Name</strong> — optional, if provided during newsletter signup</li></ul>
     <h3>Data collected automatically</h3>
     <ul><li><strong>Aggregate analytics data</strong> — page path, time, referral hostname, campaign tags and product actions such as opening a source or starting a video</li><li><strong>Coarse technical data</strong> — desktop/mobile/tablet classification and approximate country</li><li><strong>Consented analytics data</strong> — if you accept optional analytics, Google Analytics may measure sessions and Egleze creates a random per-tab session identifier</li></ul>
+    <h3>AI connectors and MCP access</h3>
+    <p>When an AI client calls Egleze's public Model Context Protocol (MCP) server, Egleze records data-minimised operational metadata: time, a random request identifier, the client label or user-agent supplied by the client, requested route or tool, response status, latency, result count, and the Egleze story or episode identifiers and canonical URLs returned. We do not record the user's prompt or search terms, authorization headers, API keys, account identity, or full conversation transcripts in these logs. We use this information to operate, secure, measure and improve the public connector.</p>
     <h3>Cookies and device storage</h3>
     <p>Egleze uses local storage to remember your analytics preference. Cookie-free aggregate measurement remains active because it does not place an analytics identifier on your device. Optional Google Analytics and a random per-tab analytics session identifier are activated only after you accept. For details and controls, see our <button class="linklike" type="button" onclick="showTab('cookie')" style="color:var(--red);background:none;border:0;cursor:pointer;font:inherit;padding:0;text-decoration:underline">Cookie Policy</button>.</p>
     <h3>Data we do NOT collect</h3>
@@ -243,6 +245,8 @@
     <p>For our core news service — analysing publicly available podcast transcripts — we rely on Legitimate Interest and the Journalistic Exemption under the Irish Data Protection Act 2018 (Section 43). We process publicly available audio and visual data to inform the public on matters of politics, health, finance, science and general interest.</p>
     <h3>Cookie-free aggregate analytics (GDPR Article 6(1)(f))</h3>
     <p>We use data-minimised aggregate analytics to count page loads, understand acquisition and operate and improve egleze.com. This processing is based on our legitimate interest. The collector validates same-origin requests, filters known automated traffic, removes query strings from page paths, records referral hostnames rather than full referral URLs, and does not store raw IP addresses, full user-agent strings, email addresses or cross-site identifiers.</p>
+    <h3>Public MCP connector operations (GDPR Article 6(1)(f))</h3>
+    <p>We use data-minimised service logs to operate, secure, troubleshoot and measure adoption of the public Egleze MCP connector. These logs exclude prompt and search text, authentication secrets and account identities.</p>
     <h3>Optional Google Analytics (GDPR Article 6(1)(a))</h3>
     <p>Google Analytics runs only after you select “Accept analytics”. You can reject it without losing access to the site and can change your choice at any time below.</p>
 
@@ -253,7 +257,7 @@
     <p>We may aggregate analytics and engagement data into anonymised statistical reports that contain no personally identifiable information — for example, "55% of readers in the AI &amp; Tech category clicked through to the original source." Such aggregated and anonymised data may be shared with research partners or used in editorial reporting. By definition, aggregated and anonymised data cannot identify any individual. If you object to your activity being included in such aggregate calculations, contact <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
 
     <h2 id="privacy-storage">5. Data Storage &amp; Security</h2>
-    <ul><li><strong>Supabase</strong> — database hosted on AWS (encrypted at rest and in transit)</li><li><strong>Vercel</strong> — website hosting and cookie-free web measurement</li><li><strong>Google Analytics</strong> — optional analytics, only after consent</li><li><strong>Beehiiv</strong> — newsletter platform</li><li><strong>Cloudflare R2</strong> — media storage (encrypted at rest)</li></ul>
+    <ul><li><strong>Supabase</strong> — database hosted on AWS (encrypted at rest and in transit)</li><li><strong>Vercel</strong> — website hosting and cookie-free web measurement</li><li><strong>Render</strong> — public MCP hosting and operational connector logs</li><li><strong>Google Analytics</strong> — optional analytics, only after consent</li><li><strong>Beehiiv</strong> — newsletter platform</li><li><strong>Cloudflare R2</strong> — media storage (encrypted at rest)</li></ul>
     <p>Data may be stored in the European Union and/or the United States. Where data is transferred outside the EU, we ensure appropriate safeguards are in place including Standard Contractual Clauses.</p>
 
         <h2 id="privacy-youtube">6. Third-Party Services &amp; the YouTube API</h2>
@@ -270,7 +274,7 @@
     <p>Egleze does not sell personal information to third parties. To exercise your CCPA rights, contact <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
 
     <h2 id="privacy-retention">9. Data Retention</h2>
-    <ul><li><strong>Newsletter subscribers</strong> — retained until you unsubscribe or request deletion</li><li><strong>First-party aggregate analytics events</strong> — automatically deleted after 180 days</li><li><strong>Google Analytics data</strong> — retained according to the retention setting in Egleze's Google Analytics property</li><li><strong>Legal records</strong> — retained for 7 years where required by Irish law</li></ul>
+    <ul><li><strong>Newsletter subscribers</strong> — retained until you unsubscribe or request deletion</li><li><strong>First-party aggregate analytics events</strong> — automatically deleted after 180 days</li><li><strong>MCP operational logs</strong> — retained only within the ordinary service-log retention window provided by our hosting provider; Egleze does not copy them into long-term analytics storage</li><li><strong>Google Analytics data</strong> — retained according to the retention setting in Egleze's Google Analytics property</li><li><strong>Legal records</strong> — retained for 7 years where required by Irish law</li></ul>
 
     <h2 id="privacy-children">10. Children's Privacy</h2>
     <p>Egleze is not directed at children under the age of 16. We do not knowingly collect personal data from children. If you believe we have inadvertently collected data from a child, please contact us immediately at <a href="mailto:hello@egleze.com">hello@egleze.com</a>.</p>
