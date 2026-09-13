@@ -211,6 +211,8 @@ h1{font-family:'Playfair Display',serif;font-size:46px;line-height:1.1;margin:0 
 footer{text-align:center;padding:38px 20px;border-top:1px solid var(--line);font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
 @media(max-width:700px){main{padding:30px 18px 64px}.hero{grid-template-columns:82px 1fr;gap:16px}.artwork{width:82px;height:82px}h1{font-size:31px}.source-video .play{width:64px;height:64px;font-size:22px}.section{padding:24px 20px}.summary{font-size:17px}.moment-card{grid-template-columns:46px 1fr;padding:20px 16px}.moment-card h2{font-size:19px}.moments-head{display:block}.moments-head span{display:block;margin-top:6px}}
 </style>
+<script>window.EGLEZE_ANALYTICS_CONTEXT={content_kind:'episode',content_id:${Number(episode.id)}};</script>
+<script defer src="/js/pulse.js"></script>
 </head>
 <body>
 <header class="site-header">

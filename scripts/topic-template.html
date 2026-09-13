@@ -13,24 +13,6 @@
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-  <!-- Consent-gated analytics (shared egleze_cookie) -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
-    gtag('js', new Date());
-    window.EGLEZE_GA_ID='G-18MJKYD86Y';
-    window.eglezeLoadAnalytics=function(){
-      if(window.__eglezeGALoaded)return; window.__eglezeGALoaded=true;
-      gtag('consent','update',{'analytics_storage':'granted'});
-      var s=document.createElement('script');s.async=true;
-      s.src='https://www.googletagmanager.com/gtag/js?id='+window.EGLEZE_GA_ID;
-      document.head.appendChild(s);
-      gtag('config', window.EGLEZE_GA_ID, { 'anonymize_ip': true });
-    };
-    try{ if(localStorage.getItem('egleze_cookie')==='accepted') window.eglezeLoadAnalytics(); }catch(e){}
-  </script>
-
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="{{TOPIC_SEO_TITLE}}">
@@ -166,6 +148,7 @@
     .feat-body,.card-body{display:block;color:inherit}
     .featured .card-media{max-width:440px}
   </style>
+  <script defer src="/js/pulse.js"></script>
 </head>
 <body>
   <header class="site-header">

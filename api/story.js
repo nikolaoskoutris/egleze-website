@@ -277,23 +277,6 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} — Egleze</title>
-  <!-- Consent-gated analytics: no GA network call until consent (shared egleze_cookie) -->
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
-    gtag('js', new Date());
-    window.EGLEZE_GA_ID='G-18MJKYD86Y';
-    window.eglezeLoadAnalytics=function(){
-      if(window.__eglezeGALoaded)return; window.__eglezeGALoaded=true;
-      gtag('consent','update',{'analytics_storage':'granted'});
-      var s=document.createElement('script');s.async=true;
-      s.src='https://www.googletagmanager.com/gtag/js?id='+window.EGLEZE_GA_ID;
-      document.head.appendChild(s);
-      gtag('config',window.EGLEZE_GA_ID,{'anonymize_ip':true});
-    };
-    try{ if(localStorage.getItem('egleze_cookie')==='accepted') window.eglezeLoadAnalytics(); }catch(e){}
-  </script>
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonicalUrl}">
   <link rel="icon" href="/favicon.ico" sizes="any">
@@ -416,6 +399,8 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
       .artwork-block .show-name{font-size:15px}
     }
   </style>
+  <script>window.EGLEZE_ANALYTICS_CONTEXT={content_kind:'story',content_id:${Number(story.id)}};</script>
+  <script defer src="/js/pulse.js"></script>
 </head>
 <body>
   <header class="header">
