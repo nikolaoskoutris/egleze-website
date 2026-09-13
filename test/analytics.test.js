@@ -61,3 +61,8 @@ test('same-origin validation and bot filtering reject noise', () => {
   assert.equal(isAutomatedRequest(request({ 'user-agent': 'Mozilla/5.0' })), false);
 });
 
+test('ingestion uses the managed Edge Function rather than a Vercel service-role secret', () => {
+  const source = require('node:fs').readFileSync(require.resolve('../lib/analytics.js'), 'utf8');
+  assert.match(source, /functions\/v1\/egleze-pulse/);
+  assert.doesNotMatch(source, /SUPABASE_SERVICE_ROLE_KEY/);
+});
