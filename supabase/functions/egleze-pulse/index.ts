@@ -34,6 +34,8 @@ function automated(req: Request): boolean {
 }
 
 async function rateKey(req: Request): Promise<string> {
+  const forwarded = req.headers.get('x-egleze-rate-key') || '';
+  if (/^[a-f0-9]{64}$/i.test(forwarded)) return forwarded.toLowerCase();
   const address = (req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || 'unknown').split(',')[0].trim();
   const day = new Date().toISOString().slice(0, 10);
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(day + ':' + address));
