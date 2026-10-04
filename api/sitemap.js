@@ -151,6 +151,7 @@ async function buildSitemap(type, now = new Date()) {
     [
       ['/', 'daily', '1.0'],
       ['/shows.html', 'daily', '0.8'],
+      ['/archive', 'daily', '0.8'],
       ['/shorts.html', 'daily', '0.7'],
       ['/about', 'monthly', '0.5'],
       ['/for-podcasters.html', 'monthly', '0.5'],
