@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+const SUPABASE_KEY = 'sb_publishable_3I2jAyKsQyMLvxuQG47rBw_UW_QSZLs';
 const PAGE_SIZE = 100;
 
 function escapeHtml(value) {
@@ -38,12 +38,16 @@ async function fetchPage(page) {
     + '&offset=' + offset;
   const response = await fetch(SUPABASE_URL + '/rest/v1/' + query, {
     headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      apikey: SUPABASE_KEY,
+      Accept: 'application/json',
+      'Accept-Profile': 'public',
       Prefer: 'count=exact'
     }
   });
-  if (!response.ok) throw new Error('Archive lookup failed with HTTP ' + response.status);
+  if (!response.ok) {
+    const detail = (await response.text()).slice(0, 240);
+    throw new Error('Archive lookup failed with HTTP ' + response.status + ': ' + detail);
+  }
   const rows = await response.json();
   const range = response.headers.get('content-range') || '';
   const totalMatch = range.match(/\/(\d+)$/);
