@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Egleze API | Coming Soon</title>
-  <meta name="description" content="A direct line between independent podcasters and the Egleze newsroom. Bring your show's moments to new audiences — fully attributed, editor-reviewed, linked back to the source. Coming soon.">
+  <title>Connect Egleze to AI tools | Live MCP</title>
+  <meta name="description" content="Connect AI assistants and research tools to Egleze’s verified podcast moments and episode summaries through the live, read-only MCP server.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://egleze.com/api">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="The Egleze API | Coming Soon">
-  <meta property="og:description" content="A direct line between your show and the newsroom. Coming soon.">
+  <meta property="og:title" content="Connect Egleze to AI tools | Live MCP">
+  <meta property="og:description" content="Search verified podcast moments and episode summaries through the live Egleze MCP connection.">
   <meta property="og:url" content="https://egleze.com/api">
   <meta property="og:site_name" content="Egleze">
   <meta property="og:image" content="https://egleze.com/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="The Egleze API | Coming Soon">
-  <meta name="twitter:description" content="A direct line between your show and the newsroom.">
+  <meta name="twitter:title" content="Connect Egleze to AI tools | Live MCP">
+  <meta name="twitter:description" content="Search verified podcast moments and episode summaries through the live Egleze MCP connection.">
   <meta name="twitter:image" content="https://egleze.com/og-image.jpg">
   <meta name="theme-color" content="#bb1919">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,7 +54,7 @@
     .door .who{font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:2px;font-size:11px;text-transform:uppercase;color:var(--red)}
     .door.secondary .who{color:var(--ink-55)}
     .door .soon{font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:10px;text-transform:uppercase;color:#fff;background:var(--red);border-radius:40px;padding:3px 9px}
-    .door.secondary .soon{background:var(--ink-40)}
+    .door.secondary .soon{background:#287a44}
     .door h3{font-family:'Playfair Display',serif;font-weight:700;font-size:25px;margin-bottom:10px;line-height:1.15}
     .door p{font-size:15px;color:var(--ink-72);margin-bottom:16px}
     .door .go{font-family:'Roboto Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:13px;text-transform:uppercase;color:var(--red)}
@@ -137,9 +137,9 @@
   <div class="wrap">
 
     <div class="hero">
-      <span class="badge">API · Coming Soon</span>
-      <h1>A direct line between <em>your show</em> and the newsroom.</h1>
-      <p class="lede">We are building a two-way connection to Egleze. The main door, opening soon, is for <strong>podcasters and rights holders</strong> to bring their own moments to new audiences — your clips, your titles, fully credited, reviewed by our editors. A second door, later, will let developers and researchers pull the structured record out.</p>
+      <span class="badge">MCP · Live</span>
+      <h1>Bring Egleze into <em>your AI tools.</em></h1>
+      <p class="lede">The read-only Egleze MCP connection is live. AI assistants, developers and researchers can search <strong>verified podcast moments and episode summaries</strong> with canonical links back to Egleze. Podcaster and rights-holder submissions remain in development.</p>
     </div>
 
     <div class="fork">
@@ -150,10 +150,10 @@
         <span class="go">See how it works ↓</span>
       </a>
       <a class="door secondary" href="#developers">
-        <div class="tagrow"><span class="who">For developers &amp; researchers</span><span class="soon">Later</span></div>
-        <h3>Pull the signal out</h3>
-        <p>A structured, attributed record of what is being said across independent media — for newsrooms, research and apps.</p>
-        <span class="go" style="color:var(--ink-55)">Read more ↓</span>
+        <div class="tagrow"><span class="who">For AI tools, developers &amp; researchers</span><span class="soon">Live</span></div>
+        <h3>Connect to Egleze</h3>
+        <p>Use the public ChatGPT app or connect a compatible MCP client to Egleze’s verified, source-linked record.</p>
+        <span class="go" style="color:var(--ink-55)">Connection details ↓</span>
       </a>
     </div>
 
@@ -212,33 +212,23 @@
     </div>
 
     <div class="sec" id="developers">
-      <div class="eyebrow">For developers &amp; researchers · later</div>
-      <h2>Pull the signal out.</h2>
-      <p class="intro">A second phase, further out: a structured, attributed record of the moments our editors surface — for newsrooms, research tools and apps to build on.</p>
+      <div class="eyebrow">For AI tools, developers &amp; researchers · live</div>
+      <h2>Pull the verified signal into your tools.</h2>
+      <p class="intro">Egleze’s read-only MCP server exposes structured, attributed podcast reporting to compatible AI assistants. Every result points back to a canonical Egleze record so the source trail remains visible.</p>
 
       <div class="devwrap">
-        <div class="soonline">Illustrative — the data API is not live yet</div>
-        <div class="codecap">A glimpse of what a moment might look like as data:</div>
-        <div class="codeblock"><pre><span class="c-com"># A newsroom reads across 100+ shows; an editor decides what matters.</span>
-<span class="c-com"># GET https://api.egleze.com/v1/moments?topic=ai-tech&amp;since=24h</span>
-{
-  <span class="c-key">"moment_id"</span>:   <span class="c-str">"mo_8f21c…"</span>,
-  <span class="c-key">"headline"</span>:    <span class="c-str">"Researcher warns the timeline may be shorter"</span>,
-  <span class="c-key">"speaker"</span>:     <span class="c-str">"Dr Helen Park"</span>,
-  <span class="c-key">"show"</span>:        <span class="c-str">"The Cognitive Revolution"</span>,
-  <span class="c-key">"topic"</span>:       <span class="c-str">"AI &amp; Tech"</span>,
-  <span class="c-key">"provenance"</span>: {
-    <span class="c-key">"source_url"</span>: <span class="c-str">"https://youtube.com/watch?v=…"</span>,
-    <span class="c-key">"clip"</span>:       { <span class="c-key">"start"</span>: 1820, <span class="c-key">"end"</span>: 1925 },
-    <span class="c-key">"vouched_for"</span>:<span class="c-str">"attribution"</span>
-  },
-  <span class="c-key">"surfaced_by"</span>:  <span class="c-str">"Egleze editorial desk"</span>,
-  <span class="c-key">"published_at"</span>:<span class="c-str">"2026-06-13T09:14:00Z"</span>
-}</pre></div>
+        <div class="soonline" style="color:#287a44">Live · Official MCP Registry · version 1.1.0</div>
+        <div class="codecap">Connect a compatible MCP client with this Streamable HTTP endpoint:</div>
+        <div class="codeblock"><pre><span class="c-key">Server</span>    <span class="c-str">io.github.nikolaoskoutris/egleze</span>
+<span class="c-key">Endpoint</span>  <span class="c-str">https://egleze-mcp-server.onrender.com/mcp</span>
+<span class="c-key">Access</span>    <span class="c-str">Read-only</span></pre></div>
         <div class="devgrid">
-          <div class="cap"><h3>Topic feeds</h3><p>The latest moments across 26 topics, newest first, every one attributed.</p></div>
-          <div class="cap"><h3>Provenance, built in</h3><p>Speaker, show, episode link and exact timestamps on every record.</p></div>
-          <div class="cap"><h3>Made for builders</h3><p>Clean JSON and updates for new moments, for newsrooms, research and apps.</p></div>
+          <div class="cap"><h3>Search moments</h3><p>Search verified podcast moments or browse the latest Egleze stories.</p></div>
+          <div class="cap"><h3>Explore the record</h3><p>List Egleze’s categories and shows, then retrieve episode summaries.</p></div>
+          <div class="cap"><h3>Keep provenance intact</h3><p>Results include source-aware wording and canonical links back to Egleze.</p></div>
+        </div>
+        <div class="approve-note" style="margin-top:28px">
+          <p><strong>Available now.</strong> Install the public <a href="https://chatgpt.com/plugins/plugin_asdk_app_6aa6768b9d008191aa319c83de25acb1" style="color:var(--red);text-decoration:underline">Egleze app in ChatGPT</a>, or use the endpoint above with a compatible MCP client. The connection has been tested with ChatGPT, Claude, Grok and Mistral; availability and approval prompts are controlled by each client.</p>
         </div>
       </div>
     </div>
@@ -251,9 +241,9 @@
 
     <div class="signup">
       <div id="api-live">
-        <div class="eyebrow">Early Access</div>
-        <h2>Want in early?</h2>
-        <p>Podcaster, rights holder or developer — leave your email and we will reach out before this opens, with early access and the details. Tell us which you are and we will point you the right way.</p>
+        <div class="eyebrow">Podcaster Early Access</div>
+        <h2>Want to bring your show in?</h2>
+        <p>The MCP connection for AI tools is already live. Podcasters and rights holders can join this list for the separate submission workflow that is still in development.</p>
         <div class="signup-row">
           <input type="email" id="api-email" autocomplete="email" placeholder="you@yourshow.com">
           <button id="api-submit" type="button">Request access</button>
@@ -271,7 +261,7 @@
     <div class="faq">
       <div class="eyebrow">Honest answers</div>
       <h2>Before you ask.</h2>
-      <div class="item"><h4>Is this live today?</h4><p>No. It is in active development. This page exists so you can see where we are headed and join the early-access list — we would rather be straight about that than imply something exists that does not.</p></div>
+      <div class="item"><h4>Is this live today?</h4><p>Yes — the read-only Egleze MCP connection is live, listed in the Official MCP Registry and publicly available as an Egleze app in ChatGPT. The separate podcaster submission dashboard is still in development.</p></div>
       <div class="item"><h4>If I send you clips, will you show all of them?</h4><p>No. Every moment you send is a suggestion. Our editors review each one and decide what runs, the same way we judge everything on Egleze. We are the ones who choose what publishes — your clips put your best moments in front of us.</p></div>
       <div class="item"><h4>Do I have to choose the moments myself?</h4><p>No — that part is optional. All we really need is your episode, a title and a description, and a transcript if you have one. You are welcome to flag the moments you would love surfaced, and our editors may also find others in your show worth sharing.</p></div>
       <div class="item"><h4>Can a moment run longer than a short excerpt?</h4><p>Yes, when you choose. Because you grant the rights to your own material, moments from your show can run longer than the brief excerpts we use elsewhere. The length is yours to set.</p></div>
