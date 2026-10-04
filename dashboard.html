@@ -2548,31 +2548,36 @@ async function saveSelected() {
   if (ok) showToast('Changes saved ✓');
 }
 
-// IndexNow: tell Bing/Yandex about a new approved story immediately.
-// Fire-and-forget — doesn't block UI, errors logged only.
-const INDEXNOW_KEY = '16e68308a6204a49b198ab9957a8c2a6';
-function pingIndexNow(story) {
+// Submit approved stories through the server so the IndexNow response is
+// verified and transient upstream failures receive bounded retries.
+async function pingIndexNow(story) {
+  if (!story || !story.id) return { ok: false, error: 'Missing story ID' };
   try {
-    if (!story || !story.id || !story.headline) return;
-    const slug = String(story.id) + '-' + String(story.headline).toLowerCase()
-      .replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-+|-+$/g,'');
-    const url = 'https://egleze.com/story/' + slug;
-    const endpoint = 'https://api.indexnow.org/IndexNow?url=' + encodeURIComponent(url)
-      + '&key=' + INDEXNOW_KEY;
-    // GET request, fire-and-forget. no-cors so we don't block on response.
-    fetch(endpoint, { method: 'GET', mode: 'no-cors' })
-      .then(() => console.log('[IndexNow] pinged for story', story.id))
-      .catch(err => console.warn('[IndexNow] ping failed:', err));
-  } catch (e) {
-    console.warn('[IndexNow] error:', e);
+    const response = await fetch('/api/indexnow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ storyId: story.id })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) {
+      console.warn('[IndexNow] submission failed for story', story.id, result);
+      return { ok: false, error: result.error || ('HTTP ' + response.status) };
+    }
+    console.log('[IndexNow] verified submission for story', story.id, result);
+    return result;
+  } catch (error) {
+    console.warn('[IndexNow] request failed for story', story.id, error);
+    return { ok: false, error: error && error.message ? error.message : 'Request failed' };
   }
 }
 
 async function approveSelected() {
   const ok = await saveStory('approved');
   if (ok) {
-    pingIndexNow(selectedStory);
-    showToast('Story approved & published ✓');
+    const indexResult = await pingIndexNow(selectedStory);
+    showToast(indexResult.ok
+      ? 'Story approved, published & submitted to IndexNow ✓'
+      : 'Story published; IndexNow submission needs retry', indexResult.ok ? '' : 'red');
   }
 }
 
