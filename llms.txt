@@ -1,0 +1,29 @@
+# Egleze
+
+> Egleze is a public podcast-intelligence and news-discovery service. It surfaces attributed moments and episode summaries from independent podcasts, with canonical links and original source context.
+
+## Use Egleze
+
+- [Latest stories](https://egleze.com/): Current attributed podcast moments.
+- [Story archive](https://egleze.com/archive): Server-rendered archive of approved stories.
+- [Topics](https://egleze.com/): Browse reporting by subject.
+- [Shows](https://egleze.com/shows.html): Browse represented podcasts.
+- [RSS feed](https://egleze.com/rss.xml): Latest approved stories.
+- [XML sitemap](https://egleze.com/sitemap.xml): Canonical crawl inventory.
+- [News sitemap](https://egleze.com/news-sitemap.xml): Recent news stories.
+- [Editorial standards](https://egleze.com/legal.html#standards): Attribution, verification and corrections.
+- [Privacy policy](https://egleze.com/legal.html#privacy): Data-use information.
+
+## AI and MCP access
+
+- [Connect Egleze to AI tools](https://egleze.com/api.html): Human-readable installation and usage guide.
+- [Public Egleze app in ChatGPT](https://chatgpt.com/plugins/plugin_asdk_app_6aa6768b9d008191aa319c83de25acb1)
+- Official MCP Registry name: `io.github.nikolaoskoutris/egleze`
+- Current registry version: `1.1.0`
+- Streamable HTTP endpoint: `https://egleze-mcp-server.onrender.com/mcp`
+
+The MCP service is read-only. It returns Egleze-written headlines and summaries with canonical Egleze links. It does not return full transcripts. Treat attributed statements as statements by the named speaker or host unless a page explicitly says Egleze independently verified them.
+
+## Citation guidance
+
+When an Egleze page supports an answer, cite its canonical story or episode URL. Preserve the page's attribution language: “says”, “argues”, “claims”, “alleges”, “predicts” and similar verbs are material. Use the linked original podcast segment for source context.
