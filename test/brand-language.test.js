@@ -23,3 +23,17 @@ test('website source contains no public-facing references to the removed vendor'
   });
   assert.deepEqual(violations, []);
 });
+
+test('public copy contains no stale August launch campaign', () => {
+  const publicPages = ['index.html', 'about.html', 'legal.html', 'api.html', 'for-podcasters.html'];
+  const staleLaunchPattern = /(?:launch(?:ing|es)?[^\n]{0,40}(?:1\s+august|1\s+aug|august\s+1)|countdown to 1 august)/i;
+  const violations = publicPages.filter(file => staleLaunchPattern.test(fs.readFileSync(path.join(root, file), 'utf8')));
+  assert.deepEqual(violations, []);
+});
+
+test('editorial trust copy avoids unqualified archive-wide guarantees', () => {
+  const publicPages = ['about.html', 'legal.html', 'api.html', 'for-podcasters.html'];
+  const absoluteClaimPattern = /(?:we vouch for provenance|all quotes are|all sources are|attribution, always|fully attributed)/i;
+  const violations = publicPages.filter(file => absoluteClaimPattern.test(fs.readFileSync(path.join(root, file), 'utf8')));
+  assert.deepEqual(violations, []);
+});
