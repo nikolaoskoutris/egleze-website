@@ -800,7 +800,7 @@ textarea.eg-locked:focus{
             </div>
 
             <div class="detail-section">
-              <div class="detail-label">AI Topic Tag <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(suggested by Claude — pick from below)</span></div>
+              <div class="detail-label">AI Topic Tag <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(automatically suggested — pick from below)</span></div>
               <div id="d-topic-display" style="font-size:11px;color:var(--mid);background:var(--light);padding:5px 8px;margin-bottom:8px;font-style:italic"></div>
               <div class="detail-label" style="margin-top:8px">Categories <span style="font-weight:300;text-transform:none;letter-spacing:0">(select all that apply — first one becomes primary topic)</span></div>
               <div class="selected-cats-display" id="selected-cats-display"></div>
@@ -824,6 +824,28 @@ textarea.eg-locked:focus{
             <div class="detail-section">
               <div class="detail-label">Episode Key Points <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(one per line, 5–7 bullets)</span></div>
               <textarea id="d-episode-keypoints" class="d-textarea" rows="6" placeholder="• Key revelation 1&#10;• Key revelation 2&#10;• Key revelation 3"></textarea>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Claim Verification</div>
+              <select id="d-claim-status" style="width:100%;border:1px solid var(--border);padding:7px 8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;background:#fff">
+                <option value="speaker_claim">Attributed speaker claim</option>
+                <option value="independently_verified">Independently verified</option>
+                <option value="disputed">Disputed claim</option>
+                <option value="unresolved">Unresolved claim</option>
+              </select>
+              <div style="font-size:9px;color:var(--muted);margin-top:5px;font-family:'Roboto Condensed',sans-serif;letter-spacing:.5px">Attribution verification confirms who said it. Choose “independently verified” only when evidence beyond the source episode has been reviewed.</div>
+              <textarea id="d-verification-notes" class="d-textarea" rows="4" style="margin-top:9px" placeholder="Evidence reviewed, dispute context, or why the claim remains unresolved…"></textarea>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Supporting Sources <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(one per line: Label | URL)</span></div>
+              <textarea id="d-supporting-sources" class="d-textarea" rows="4" placeholder="Official report | https://example.org/report&#10;Independent analysis | https://example.org/analysis"></textarea>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-label">Correction Note <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--muted)">(public when present)</span></div>
+              <textarea id="d-correction-note" class="d-textarea" rows="3" placeholder="Describe what was corrected and why…"></textarea>
             </div>
 
             <div class="detail-section">
@@ -2064,6 +2086,7 @@ const APPROVER_LOCKED_IDS = [
   'd-headline', 'd-quote', 'd-summary',
   'd-score-input',
   'd-episode-summary', 'd-episode-keypoints',
+  'd-claim-status', 'd-verification-notes', 'd-supporting-sources', 'd-correction-note',
   'd-status', 'd-created-at', 'd-show-name', 'd-episode-name',
   'd-editorial-pick'
 ];
@@ -2138,6 +2161,23 @@ function selectStory(id) {
       epKpEl.value = '';
     }
   }
+
+  const claimStatusEl = document.getElementById('d-claim-status');
+  if (claimStatusEl) claimStatusEl.value = selectedStory.claim_status || 'speaker_claim';
+  const verificationNotesEl = document.getElementById('d-verification-notes');
+  if (verificationNotesEl) verificationNotesEl.value = selectedStory.verification_notes || '';
+  const supportingSourcesEl = document.getElementById('d-supporting-sources');
+  if (supportingSourcesEl) {
+    supportingSourcesEl.value = Array.isArray(selectedStory.supporting_sources)
+      ? selectedStory.supporting_sources.map(item => {
+          if (typeof item === 'string') return item;
+          if (!item || !item.url) return '';
+          return item.label && item.label !== item.url ? item.label + ' | ' + item.url : item.url;
+        }).filter(Boolean).join('\n')
+      : '';
+  }
+  const correctionNoteEl = document.getElementById('d-correction-note');
+  if (correctionNoteEl) correctionNoteEl.value = selectedStory.correction_note || '';
 
   // Status dropdown
   const statusEl = document.getElementById('d-status');
@@ -2228,6 +2268,7 @@ function wireDetailDirtyListeners() {
 
   const ids = ['d-headline','d-quote','d-summary','d-source','d-clip-start','d-clip-end',
                'd-score-input','d-episode-summary','d-episode-keypoints',
+               'd-claim-status','d-verification-notes','d-supporting-sources','d-correction-note',
                'd-status','d-created-at','d-show-name','d-episode-name'];
   ids.forEach(id => {
     const el = document.getElementById(id);
@@ -2417,6 +2458,10 @@ function collectDetailFormData() {
   const scoreRaw = (document.getElementById('d-score-input')?.value || '').trim();
   const episodeSummary = (document.getElementById('d-episode-summary')?.value || '').trim();
   const episodeKeypointsRaw = (document.getElementById('d-episode-keypoints')?.value || '').trim();
+  const claimStatus = (document.getElementById('d-claim-status')?.value || 'speaker_claim').trim();
+  const verificationNotes = (document.getElementById('d-verification-notes')?.value || '').trim();
+  const supportingSourcesRaw = (document.getElementById('d-supporting-sources')?.value || '').trim();
+  const correctionNote = (document.getElementById('d-correction-note')?.value || '').trim();
   const showName = (document.getElementById('d-show-name')?.value || '').trim();
   const episodeName = (document.getElementById('d-episode-name')?.value || '').trim();
   const statusVal = (document.getElementById('d-status')?.value || 'pending');
@@ -2444,6 +2489,32 @@ function collectDetailFormData() {
       .map(l => l.replace(/^[\s•·\-\*]+/, '').trim())
       .filter(Boolean);
     if (episodeKeyPointsArr.length === 0) episodeKeyPointsArr = null;
+  }
+
+  const allowedClaimStatuses = ['speaker_claim', 'independently_verified', 'disputed', 'unresolved'];
+  if (!allowedClaimStatuses.includes(claimStatus)) {
+    return { ok: false, error: 'Choose a valid claim-verification status' };
+  }
+  if (claimStatus !== 'speaker_claim' && !verificationNotes) {
+    return { ok: false, error: 'Add a verification note for verified, disputed or unresolved claims' };
+  }
+
+  const supportingSources = [];
+  if (supportingSourcesRaw) {
+    const lines = supportingSourcesRaw.split('\n').map(line => line.trim()).filter(Boolean);
+    if (lines.length > 12) return { ok: false, error: 'Use no more than 12 supporting sources' };
+    for (const line of lines) {
+      const divider = line.lastIndexOf('|');
+      const label = divider >= 0 ? line.slice(0, divider).trim() : '';
+      const url = (divider >= 0 ? line.slice(divider + 1) : line).trim();
+      try {
+        const parsed = new URL(url);
+        if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('unsupported protocol');
+      } catch (_) {
+        return { ok: false, error: 'Supporting-source URLs must start with http:// or https://' };
+      }
+      supportingSources.push({ url, label: label || url });
+    }
   }
 
   // Categories
@@ -2479,11 +2550,23 @@ function collectDetailFormData() {
     clip_end_seconds: clipEnd,
     score: score,
     episode_summary: episodeSummary || null,
+    claim_status: claimStatus,
+    verification_notes: verificationNotes || null,
+    supporting_sources: supportingSources,
+    correction_note: correctionNote || null,
     show_name: showName || selectedStory.show_name,
     episode: episodeName || selectedStory.episode,
     status: statusVal,
     updated_at: new Date().toISOString()
   };
+
+  const provenanceChanged = claimStatus !== (selectedStory.claim_status || 'speaker_claim') ||
+    verificationNotes !== (selectedStory.verification_notes || '') ||
+    JSON.stringify(supportingSources) !== JSON.stringify(Array.isArray(selectedStory.supporting_sources) ? selectedStory.supporting_sources : []);
+  if (provenanceChanged) data.claim_reviewed_at = new Date().toISOString();
+  if (correctionNote !== (selectedStory.correction_note || '')) {
+    data.corrected_at = correctionNote ? new Date().toISOString() : null;
+  }
 
   // Only include array fields if they have values (avoid Postgres array issues)
   if (cats.length > 0) data.categories = cats;

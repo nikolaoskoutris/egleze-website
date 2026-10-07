@@ -71,6 +71,18 @@ function cleanHost(value: unknown): string | null {
   catch { return null; }
 }
 
+function classifyReferrerKind(value: unknown, utmSource: unknown): string {
+  const host = cleanHost(value);
+  const source = String(utmSource || '').trim().toLowerCase();
+  if (!host && !source) return 'direct';
+  if (host === 'egleze.com' || host === 'www.egleze.com') return 'internal';
+  if (/(^|\.)(chatgpt\.com|openai\.com|perplexity\.ai|grok\.com|mistral\.ai)$/.test(host || '') ||
+      /^(chatgpt|openai|perplexity|grok|mistral|ai-assistant)$/.test(source)) return 'ai_assistant';
+  if (/(^|\.)(google\.[a-z.]+|bing\.com|duckduckgo\.com|search\.brave\.com|yahoo\.com)$/.test(host || '')) return 'search';
+  if (/(^|\.)(linkedin\.com|facebook\.com|instagram\.com|tiktok\.com|x\.com|twitter\.com|threads\.net|youtube\.com)$/.test(host || '')) return 'social';
+  return 'external';
+}
+
 function cleanProperties(event: string, value: unknown): Record<string, string> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   const allow: Record<string, string[]> = {
@@ -97,6 +109,7 @@ function normalize(value: unknown): Record<string, unknown> | null {
   const id = Number(input.content_id);
   const country = String(input.country_code || '').toUpperCase();
   const device = String(input.device_type || 'desktop');
+  const referrerHost = cleanHost(input.referrer_host);
   return {
     event_id: UUID_RE.test(suppliedEvent) ? suppliedEvent : crypto.randomUUID(),
     event_name: event,
@@ -104,7 +117,8 @@ function normalize(value: unknown): Record<string, unknown> | null {
     path: cleanPath(input.path),
     content_kind: KINDS.has(String(input.content_kind)) ? String(input.content_kind) : 'page',
     content_id: Number.isSafeInteger(id) && id > 0 ? id : null,
-    referrer_host: cleanHost(input.referrer_host),
+    referrer_host: referrerHost,
+    referrer_kind: classifyReferrerKind(referrerHost, input.utm_source),
     utm_source: cleanText(input.utm_source, 120),
     utm_medium: cleanText(input.utm_medium, 120),
     utm_campaign: cleanText(input.utm_campaign, 160),

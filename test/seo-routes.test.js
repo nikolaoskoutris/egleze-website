@@ -19,7 +19,7 @@ test('sitemap index exposes every segmented public endpoint', () => {
 test('static sitemap never invents a regeneration-date lastmod', async () => {
   const result = await sitemap.buildSitemap('static');
   assert.equal(result.errors.length, 0);
-  assert.equal(result.urls.length, 7);
+  assert.equal(result.urls.length, 8);
   assert.ok(result.urls.every(url => !url.includes('<lastmod>')));
 });
 
