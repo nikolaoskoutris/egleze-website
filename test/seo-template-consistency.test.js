@@ -29,3 +29,16 @@ test('dynamic templates do not reuse import timestamps as source publication dat
   assert.doesNotMatch(story, /"publisher": \{"@type":"NewsMediaOrganization","name":"Egleze"/);
   assert.match(episode, /const publishedLabel = formatDate\(episode\.published_at\)/);
 });
+
+
+test('story pages expose citation-oriented content and unrestricted snippets', () => {
+  const story = fs.readFileSync(path.join(root, 'api/story.js'), 'utf8');
+
+  assert.match(story, /<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">/);
+  assert.match(story, /'articleBody': description/);
+  assert.match(story, /'SpeakableSpecification'/);
+  assert.match(story, /What was said/);
+  assert.match(story, /Source and context/);
+  assert.match(story, /Watch the source segment/);
+  assert.match(story, /It does not turn the speaker's claim into an independently established fact/);
+});

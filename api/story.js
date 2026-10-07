@@ -103,6 +103,33 @@ function formatDuration(totalSeconds) {
   return hours ? hours + 'h ' + minutes + 'm' : minutes + 'm';
 }
 
+function formatTimestamp(totalSeconds) {
+  const seconds = Number(totalSeconds);
+  if (!Number.isFinite(seconds) || seconds < 0) return '';
+  const whole = Math.floor(seconds);
+  const hours = Math.floor(whole / 3600);
+  const minutes = Math.floor((whole % 3600) / 60);
+  const remainder = whole % 60;
+  return hours
+    ? [hours, String(minutes).padStart(2, '0'), String(remainder).padStart(2, '0')].join(':')
+    : [minutes, String(remainder).padStart(2, '0')].join(':');
+}
+
+function addSourceTimestamp(url, totalSeconds) {
+  if (!url) return '';
+  const seconds = Number(totalSeconds);
+  if (!Number.isFinite(seconds) || seconds < 0) return String(url);
+  try {
+    const parsed = new URL(String(url));
+    const host = parsed.hostname.replace(/^www\./, '');
+    if (host === 'youtube.com' || host === 'youtu.be') {
+      parsed.searchParams.set('t', Math.floor(seconds) + 's');
+      return parsed.toString();
+    }
+  } catch (e) {}
+  return String(url);
+}
+
 async function fetchEpisodeBundle(episodeId, currentStoryId) {
   if (!episodeId) return { episode: null, siblings: [], momentCount: 0 };
   try {
@@ -162,6 +189,13 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     '@type': 'NewsArticle',
     'headline': title,
     'description': description,
+    'articleBody': description,
+    'keywords': [topic, showName, episodeName].filter(Boolean),
+    'about': topic ? { '@type': 'Thing', 'name': topic } : undefined,
+    'speakable': {
+      '@type': 'SpeakableSpecification',
+      'cssSelector': ['h1.headline', '.citation-answer']
+    },
     'image': ogImage ? [ogImage] : undefined,
     'datePublished': datePublished || undefined,
     'dateModified': dateModified || undefined,
@@ -271,6 +305,27 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
        </div>`
     : '';
 
+  const sourceUrl = story.source_url || '';
+  const sourceTimestamp = formatTimestamp(startSec);
+  const sourceLinkUrl = addSourceTimestamp(sourceUrl, startSec);
+  const citationSummaryHtml = `<section class="citation-summary" aria-labelledby="what-was-said">
+      <h2 id="what-was-said">What was said</h2>
+      ${quoteHtml}
+      <p class="citation-answer">${escapeHtml(description)}</p>
+    </section>`;
+  const sourceContextHtml = (sourceUrl || showName || episodeName)
+    ? `<section class="source-context" aria-labelledby="source-and-context">
+        <h2 id="source-and-context">Source and context</h2>
+        <p>This Egleze report covers an attributed moment from the original podcast episode. It does not turn the speaker's claim into an independently established fact.</p>
+        <dl>
+          ${showName ? `<dt>Programme</dt><dd>${escapeHtml(showName)}</dd>` : ''}
+          ${episodeName ? `<dt>Episode</dt><dd>${escapeHtml(episodeName)}</dd>` : ''}
+          ${sourceTimestamp ? `<dt>Clip time</dt><dd>${escapeHtml(sourceTimestamp)}</dd>` : ''}
+          ${sourceUrl ? `<dt>Original source</dt><dd><a href="${escapeHtml(sourceLinkUrl)}" target="_blank" rel="noopener noreferrer">Watch the source segment →</a></dd>` : ''}
+        </dl>
+      </section>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -278,6 +333,7 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(title)} — Egleze</title>
   <meta name="description" content="${escapeHtml(description)}">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical" href="${canonicalUrl}">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
@@ -367,7 +423,16 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     .story-agg-empty{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#F1EFE8;border-radius:100px;font-size:11px;font-weight:500;color:#5F5E5A;line-height:1}
     .story-agg-empty svg{width:11px;height:11px;flex-shrink:0}
     .summary{font-family:'DM Sans',sans-serif;font-size:18px;line-height:1.65;color:#222;margin:24px 0 32px;font-weight:400}
-    .story-quote{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;line-height:1.4;color:var(--dark);border-left:4px solid var(--red);padding:8px 0 8px 24px;margin:32px 0}
+    .story-quote{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;line-height:1.4;color:var(--dark);border-left:4px solid var(--red);padding:8px 0 8px 24px;margin:24px 0}
+    .citation-summary,.source-context{margin-top:36px;padding-top:30px;border-top:0.5px solid var(--border)}
+    .citation-summary h2,.source-context h2{font-family:'Playfair Display',serif;font-size:24px;line-height:1.25;margin-bottom:16px;color:var(--dark)}
+    .citation-answer{font-size:18px;line-height:1.65;color:#222}
+    .source-context>p{font-size:14px;line-height:1.6;color:#555;margin-bottom:18px}
+    .source-context dl{display:grid;grid-template-columns:110px 1fr;gap:8px 16px;font-size:14px}
+    .source-context dt{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+    .source-context dd{color:#222}
+    .source-context a{color:var(--red);font-weight:700;text-decoration:none}
+    .source-context a:hover{text-decoration:underline}
     .episode-card{margin-top:40px;border:1px solid var(--border);background:var(--light);padding:22px}
     .episode-card-label{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:14px}
     .episode-card-main{display:flex;gap:16px;align-items:center}.episode-card-main img{width:82px;height:82px;object-fit:cover;border:1px solid var(--border);flex-shrink:0}
@@ -456,9 +521,9 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
       </div>
     </div>` : ''}
 
-    ${quoteHtml}
+    ${citationSummaryHtml}
 
-    <div class="summary">${escapeHtml(description)}</div>
+    ${sourceContextHtml}
 
     ${episodeCardHtml}
 
