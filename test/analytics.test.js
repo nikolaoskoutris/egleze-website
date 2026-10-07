@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const {
   buildAnalyticsRow,
+  classifyReferrerKind,
   classifyDevice,
   cleanHostname,
   cleanPath,
@@ -24,6 +25,15 @@ test('only coarse device categories are produced', () => {
   assert.equal(classifyDevice('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0)'), 'mobile');
   assert.equal(classifyDevice('Mozilla/5.0 (iPad; CPU OS 18_0)'), 'tablet');
   assert.equal(classifyDevice('Mozilla/5.0 (Macintosh; Intel Mac OS X)'), 'desktop');
+});
+
+test('referrers are classified for AI, search, social and direct reporting', () => {
+  assert.equal(classifyReferrerKind('https://chatgpt.com/c/abc'), 'ai_assistant');
+  assert.equal(classifyReferrerKind('https://www.google.ie/search?q=egleze'), 'search');
+  assert.equal(classifyReferrerKind('https://www.linkedin.com/feed/'), 'social');
+  assert.equal(classifyReferrerKind('https://egleze.com/story/42'), 'internal');
+  assert.equal(classifyReferrerKind(null), 'direct');
+  assert.equal(classifyReferrerKind('https://example.org/post'), 'external');
 });
 
 test('session identifiers are accepted only after consent', () => {

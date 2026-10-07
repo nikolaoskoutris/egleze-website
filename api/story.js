@@ -130,6 +130,41 @@ function addSourceTimestamp(url, totalSeconds) {
   return String(url);
 }
 
+function parseSupportingSources(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(function(item) {
+    if (typeof item === 'string') return { url: item, label: item };
+    if (!item || typeof item !== 'object') return null;
+    const url = typeof item.url === 'string' ? item.url.trim() : '';
+    const label = typeof item.label === 'string' ? item.label.trim() : url;
+    return url ? { url: url, label: label || url } : null;
+  }).filter(Boolean).slice(0, 12);
+}
+
+function claimStatusDetails(status) {
+  return {
+    independently_verified: {
+      label: 'Independently verified',
+      description: 'Egleze reviewed evidence beyond the original podcast source for this claim.'
+    },
+    disputed: {
+      label: 'Disputed claim',
+      description: 'This attributed claim is contested. Review the verification note and supporting sources below.'
+    },
+    unresolved: {
+      label: 'Unresolved claim',
+      description: 'Egleze verified the attribution, but the underlying claim remains unresolved.'
+    },
+    speaker_claim: {
+      label: 'Attributed speaker claim',
+      description: 'Egleze verified who said this and where. The underlying claim has not been independently established by Egleze.'
+    }
+  }[status] || {
+    label: 'Attributed speaker claim',
+    description: 'Egleze verified who said this and where. The underlying claim has not been independently established by Egleze.'
+  };
+}
+
 async function fetchEpisodeBundle(episodeId, currentStoryId) {
   if (!episodeId) return { episode: null, siblings: [], momentCount: 0 };
   try {
@@ -182,6 +217,10 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   const episodeSummary = episode ? '' : (story.episode_summary || '');
   const keyPoints = episode ? [] : (Array.isArray(story.episode_key_points) ? story.episode_key_points : []);
   const episodeUrl = episode ? `https://egleze.com/episodes/${episode.id}-${slugify(episode.title, { full: true })}` : '';
+  const speakerName = story.speaker_name || (story.speaker_role === 'host' ? 'Programme host' : story.speaker_role === 'guest' ? 'Episode guest' : '');
+  const claimStatus = claimStatusDetails(story.claim_status);
+  const supportingSources = parseSupportingSources(story.supporting_sources);
+  const citationUrls = [story.source_url].concat(supportingSources.map(function(item){ return item.url; })).filter(Boolean);
 
   // JSON-LD structured data for Google News + rich results
   const schema = {
@@ -190,8 +229,13 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     'headline': title,
     'description': description,
     'articleBody': description,
-    'keywords': [topic, showName, episodeName].filter(Boolean),
-    'about': topic ? { '@type': 'Thing', 'name': topic } : undefined,
+    'keywords': [topic, showName, episodeName, speakerName].filter(Boolean),
+    'about': [
+      topic ? { '@type': 'Thing', 'name': topic } : null,
+      speakerName ? { '@type': 'Person', 'name': speakerName } : null
+    ].filter(Boolean),
+    'mentions': speakerName ? { '@type': 'Person', 'name': speakerName } : undefined,
+    'citation': citationUrls.length ? citationUrls : undefined,
     'speakable': {
       '@type': 'SpeakableSpecification',
       'cssSelector': ['h1.headline', '.citation-answer']
@@ -308,6 +352,27 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   const sourceUrl = story.source_url || '';
   const sourceTimestamp = formatTimestamp(startSec);
   const sourceLinkUrl = addSourceTimestamp(sourceUrl, startSec);
+  const supportingSourcesHtml = supportingSources.length
+    ? `<div class="supporting-sources">
+        <h3>Supporting sources</h3>
+        <ul>${supportingSources.map(function(item){
+          return `<li><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.label)}</a></li>`;
+        }).join('')}</ul>
+      </div>`
+    : '';
+  const correctionHtml = story.correction_note
+    ? `<aside class="correction-note" aria-labelledby="correction-heading">
+        <h3 id="correction-heading">Correction${story.corrected_at ? ` · ${escapeHtml(formatDate(story.corrected_at))}` : ''}</h3>
+        <p>${escapeHtml(story.correction_note)}</p>
+      </aside>`
+    : '';
+  const verificationHtml = `<section class="verification-status" aria-labelledby="verification-heading">
+      <h2 id="verification-heading">Verification status</h2>
+      <div class="verification-badge" data-status="${escapeHtml(story.claim_status || 'speaker_claim')}">${escapeHtml(claimStatus.label)}</div>
+      <p>${escapeHtml(story.verification_notes || claimStatus.description)}</p>
+      ${supportingSourcesHtml}
+      ${correctionHtml}
+    </section>`;
   const citationSummaryHtml = `<section class="citation-summary" aria-labelledby="what-was-said">
       <h2 id="what-was-said">What was said</h2>
       ${quoteHtml}
@@ -316,8 +381,9 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   const sourceContextHtml = (sourceUrl || showName || episodeName)
     ? `<section class="source-context" aria-labelledby="source-and-context">
         <h2 id="source-and-context">Source and context</h2>
-        <p>This Egleze report covers an attributed moment from the original podcast episode. It does not turn the speaker's claim into an independently established fact.</p>
+        <p>${escapeHtml(claimStatus.description)}</p>
         <dl>
+          ${speakerName ? `<dt>Speaker</dt><dd>${escapeHtml(speakerName)}${story.speaker_role ? ` · ${escapeHtml(story.speaker_role)}` : ''}</dd>` : ''}
           ${showName ? `<dt>Programme</dt><dd>${escapeHtml(showName)}</dd>` : ''}
           ${episodeName ? `<dt>Episode</dt><dd>${escapeHtml(episodeName)}</dd>` : ''}
           ${sourceTimestamp ? `<dt>Clip time</dt><dd>${escapeHtml(sourceTimestamp)}</dd>` : ''}
@@ -424,9 +490,12 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     .story-agg-empty svg{width:11px;height:11px;flex-shrink:0}
     .summary{font-family:'DM Sans',sans-serif;font-size:18px;line-height:1.65;color:#222;margin:24px 0 32px;font-weight:400}
     .story-quote{font-family:'Playfair Display',serif;font-size:24px;font-style:italic;line-height:1.4;color:var(--dark);border-left:4px solid var(--red);padding:8px 0 8px 24px;margin:24px 0}
-    .citation-summary,.source-context{margin-top:36px;padding-top:30px;border-top:0.5px solid var(--border)}
-    .citation-summary h2,.source-context h2{font-family:'Playfair Display',serif;font-size:24px;line-height:1.25;margin-bottom:16px;color:var(--dark)}
+    .citation-summary,.verification-status,.source-context{margin-top:36px;padding-top:30px;border-top:0.5px solid var(--border)}
+    .citation-summary h2,.verification-status h2,.source-context h2{font-family:'Playfair Display',serif;font-size:24px;line-height:1.25;margin-bottom:16px;color:var(--dark)}
     .citation-answer{font-size:18px;line-height:1.65;color:#222}
+    .verification-badge{display:inline-flex;padding:5px 10px;background:#f1efe8;color:#4e4a43;font-family:'Roboto Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+    .verification-badge[data-status="independently_verified"]{background:#e1f5ee;color:#04342c}.verification-badge[data-status="disputed"]{background:#fce8e6;color:#7f1d1d}.verification-badge[data-status="unresolved"]{background:#faeeda;color:#563006}
+    .verification-status>p{font-size:14px;line-height:1.65;color:#555}.supporting-sources,.correction-note{margin-top:18px;padding:16px 18px;background:var(--light);border-left:3px solid var(--border)}.supporting-sources h3,.correction-note h3{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;margin:0 0 8px;color:var(--dark)}.supporting-sources ul{margin:0;padding-left:18px}.supporting-sources li{margin:5px 0;font-size:13px}.supporting-sources a{color:var(--red)}.correction-note{border-left-color:var(--red)}.correction-note p{font-size:14px;line-height:1.6;color:#333}
     .source-context>p{font-size:14px;line-height:1.6;color:#555;margin-bottom:18px}
     .source-context dl{display:grid;grid-template-columns:110px 1fr;gap:8px 16px;font-size:14px}
     .source-context dt{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700}
@@ -522,6 +591,8 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     </div>` : ''}
 
     ${citationSummaryHtml}
+
+    ${verificationHtml}
 
     ${sourceContextHtml}
 

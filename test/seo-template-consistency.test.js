@@ -40,5 +40,21 @@ test('story pages expose citation-oriented content and unrestricted snippets', (
   assert.match(story, /What was said/);
   assert.match(story, /Source and context/);
   assert.match(story, /Watch the source segment/);
-  assert.match(story, /It does not turn the speaker's claim into an independently established fact/);
+  assert.match(story, /underlying claim has not been independently established by Egleze/);
+  assert.match(story, /Verification status/);
+  assert.match(story, /Independently verified/);
+  assert.match(story, /Supporting sources/);
+  assert.match(story, /Correction/);
+});
+
+test('episode hubs expose question-led summaries, identities and timestamped sources', () => {
+  const episode = fs.readFileSync(path.join(root, 'api/episode.js'), 'utf8');
+
+  assert.match(episode, /What happened in this episode\?/);
+  assert.match(episode, /What are the key points\?/);
+  assert.match(episode, /Who is speaking\?/);
+  assert.match(episode, /How is this page sourced\?/);
+  assert.match(episode, /Check original/);
+  assert.match(episode, /speaker_name/);
+  assert.match(episode, /SpeakableSpecification/);
 });

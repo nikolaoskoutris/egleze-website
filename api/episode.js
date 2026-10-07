@@ -46,6 +46,60 @@ function formatDuration(totalSeconds) {
   return `${minutes}m`;
 }
 
+function formatTimestamp(totalSeconds) {
+  const seconds = Number(totalSeconds);
+  if (!Number.isFinite(seconds) || seconds < 0) return '';
+  const whole = Math.floor(seconds);
+  const hours = Math.floor(whole / 3600);
+  const minutes = Math.floor((whole % 3600) / 60);
+  const remainder = whole % 60;
+  return hours
+    ? [hours, String(minutes).padStart(2, '0'), String(remainder).padStart(2, '0')].join(':')
+    : [minutes, String(remainder).padStart(2, '0')].join(':');
+}
+
+function addSourceTimestamp(url, totalSeconds) {
+  if (!url) return '';
+  const seconds = Number(totalSeconds);
+  if (!Number.isFinite(seconds) || seconds < 0) return String(url);
+  try {
+    const parsed = new URL(String(url));
+    const host = parsed.hostname.replace(/^www\./, '');
+    if (host === 'youtube.com' || host === 'youtu.be') {
+      parsed.searchParams.set('t', Math.floor(seconds) + 's');
+      return parsed.toString();
+    }
+  } catch (_) {}
+  return String(url);
+}
+
+function uniqueText(values) {
+  const seen = new Set();
+  return values.filter(value => {
+    const text = String(value || '').trim();
+    const key = text.toLowerCase();
+    if (!text || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map(value => String(value).trim());
+}
+
+function speakerLabel(moment) {
+  if (moment.speaker_name) return String(moment.speaker_name).trim();
+  if (moment.speaker_role === 'host') return 'Programme host';
+  if (moment.speaker_role === 'guest') return 'Episode guest';
+  return '';
+}
+
+function claimStatusLabel(status) {
+  return {
+    independently_verified: 'Independently verified',
+    disputed: 'Disputed claim',
+    unresolved: 'Unresolved claim',
+    speaker_claim: 'Attributed speaker claim'
+  }[status] || 'Attributed speaker claim';
+}
+
 function isoDuration(totalSeconds) {
   const seconds = Number(totalSeconds || 0);
   if (!seconds) return undefined;
@@ -76,7 +130,7 @@ async function fetchEpisode(id) {
 
 async function fetchMoments(episodeId) {
   const rows = await supabaseFetch(
-    `stories?episode_id=eq.${encodeURIComponent(episodeId)}&status=eq.approved&select=id,headline,summary,quote,topic,show_name,created_at,clip_start_seconds,clip_end_seconds,source_url&order=created_at.asc`
+    `stories?episode_id=eq.${encodeURIComponent(episodeId)}&status=eq.approved&select=id,headline,summary,quote,topic,categories,show_name,created_at,clip_start_seconds,clip_end_seconds,source_url,speaker_name,speaker_role,attribution_form,attribution_status,claim_status,verification_notes,supporting_sources,correction_note,corrected_at&order=clip_start_seconds.asc.nullslast,created_at.asc`
   );
   return Array.isArray(rows) ? rows : [];
 }
@@ -100,16 +154,30 @@ function renderEpisode(episode, moments) {
   const keyPoints = Array.isArray(episode.key_points) ? episode.key_points.filter(Boolean) : [];
   const summary = episode.summary || '';
   const momentCount = moments.length;
+  const speakers = uniqueText(moments.map(speakerLabel));
+  const topics = uniqueText(moments.flatMap(moment => [
+    moment.topic,
+    ...(Array.isArray(moment.categories) ? moment.categories : [])
+  ]));
 
   const momentLinks = moments.map((moment, index) => {
     const momentUrl = `/story/${moment.id}-${slugify(moment.headline)}`;
+    const sourceTimestamp = formatTimestamp(moment.clip_start_seconds);
+    const sourceLinkUrl = addSourceTimestamp(moment.source_url || sourceUrl, moment.clip_start_seconds);
+    const speaker = speakerLabel(moment);
+    const provenanceBits = [speaker, sourceTimestamp ? `at ${sourceTimestamp}` : '', claimStatusLabel(moment.claim_status)].filter(Boolean);
     return `<article class="moment-card">
       <div class="moment-number">${String(index + 1).padStart(2, '0')}</div>
       <div class="moment-copy">
         <div class="moment-topic">${escapeHtml(moment.topic || 'Moment')}</div>
         <h2><a href="${momentUrl}">${escapeHtml(moment.headline)}</a></h2>
+        ${provenanceBits.length ? `<div class="moment-provenance">${provenanceBits.map(escapeHtml).join(' · ')}</div>` : ''}
+        ${moment.quote ? `<blockquote>${escapeHtml(moment.quote)}</blockquote>` : ''}
         ${moment.summary ? `<p>${escapeHtml(moment.summary)}</p>` : ''}
-        <a class="moment-link" href="${momentUrl}">Read this moment →</a>
+        <div class="moment-actions">
+          <a class="moment-link" href="${momentUrl}">Read this moment →</a>
+          ${sourceLinkUrl ? `<a class="moment-source" href="${escapeHtml(sourceLinkUrl)}" target="_blank" rel="noopener noreferrer">Check original${sourceTimestamp ? ` at ${escapeHtml(sourceTimestamp)}` : ''} ↗</a>` : ''}
+        </div>
       </div>
     </article>`;
   }).join('');
@@ -120,6 +188,14 @@ function renderEpisode(episode, moments) {
     name: title,
     description: summary || title,
     url: canonicalUrl,
+    keywords: topics,
+    about: topics.map(topic => ({ '@type': 'Thing', name: topic })),
+    mentions: speakers.map(name => ({ '@type': 'Person', name })),
+    citation: sourceUrl || undefined,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', '.episode-answer', '.key-points']
+    },
     datePublished: episode.published_at || undefined,
     duration: isoDuration(episode.duration_seconds),
     image: image ? [image] : undefined,
@@ -143,14 +219,32 @@ function renderEpisode(episode, moments) {
     hasPart: moments.map(moment => ({
       '@type': 'NewsArticle',
       headline: moment.headline,
-      url: `https://egleze.com/story/${moment.id}-${slugify(moment.headline)}`
+      url: `https://egleze.com/story/${moment.id}-${slugify(moment.headline)}`,
+      about: moment.topic ? { '@type': 'Thing', name: moment.topic } : undefined,
+      mentions: speakerLabel(moment) ? { '@type': 'Person', name: speakerLabel(moment) } : undefined,
+      isBasedOn: addSourceTimestamp(moment.source_url || sourceUrl, moment.clip_start_seconds) || undefined
     }))
   };
 
   const keyPointsHtml = keyPoints.length
-    ? `<section class="section">
-        <div class="eyebrow">Key points</div>
+    ? `<section class="section" aria-labelledby="episode-key-points">
+        <h2 class="question-heading" id="episode-key-points">What are the key points?</h2>
         <ul class="key-points">${keyPoints.map(point => `<li>${escapeHtml(point)}</li>`).join('')}</ul>
+      </section>`
+    : '';
+
+  const identitiesHtml = speakers.length
+    ? `<section class="section" aria-labelledby="episode-speakers">
+        <h2 class="question-heading" id="episode-speakers">Who is speaking?</h2>
+        <p class="section-intro">Named speakers identified in Egleze's source-linked moments from this episode.</p>
+        <ul class="entity-list">${speakers.map(name => `<li>${escapeHtml(name)}</li>`).join('')}</ul>
+      </section>`
+    : '';
+
+  const topicsHtml = topics.length
+    ? `<section class="section" aria-labelledby="episode-topics">
+        <h2 class="question-heading" id="episode-topics">Which topics are covered?</h2>
+        <div class="topic-list">${topics.map(topic => `<a href="/topic/${slugify(topic)}">${escapeHtml(topic)}</a>`).join('')}</div>
       </section>`
     : '';
 
@@ -203,13 +297,15 @@ h1{font-family:'Playfair Display',serif;font-size:46px;line-height:1.1;margin:0 
 .meta{font-family:'Roboto Condensed',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 .source-video{margin:36px 0 42px;background:#111;position:relative;aspect-ratio:16/9;overflow:hidden}.source-video img{width:100%;height:100%;object-fit:cover;opacity:.82}.source-video .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:84px;height:84px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;padding-left:5px}
 .section{background:#fff;border:1px solid var(--line);padding:30px 34px;margin-top:24px}
-.eyebrow{font-family:'Roboto Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:15px}
-.summary{font-size:18px;line-height:1.75;margin:0}.key-points{margin:0;padding-left:22px}.key-points li{margin:0 0 13px;font-size:16px}
+.question-heading{font-family:'Playfair Display',serif;font-size:28px;line-height:1.2;margin:0 0 15px;color:var(--ink)}
+.section-intro{margin:0 0 14px;color:#575149;font-size:14px}.summary{font-size:18px;line-height:1.75;margin:0}.key-points{margin:0;padding-left:22px}.key-points li{margin:0 0 13px;font-size:16px}
+.entity-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0}.entity-list li,.topic-list a{display:inline-flex;border:1px solid var(--line);background:var(--paper);padding:7px 11px;font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:.7px;text-transform:uppercase}.topic-list{display:flex;flex-wrap:wrap;gap:8px}.topic-list a{color:var(--ink);text-decoration:none}.topic-list a:hover{border-color:var(--red);color:var(--red)}
+.source-facts{display:grid;grid-template-columns:max-content 1fr;gap:8px 18px;margin:0}.source-facts dt{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}.source-facts dd{margin:0}.source-facts a{color:var(--red)}.editorial-note{margin:18px 0 0;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:#575149}
 .moments-head{display:flex;align-items:end;justify-content:space-between;border-bottom:3px solid var(--ink);padding-bottom:12px;margin:48px 0 18px}.moments-head h2{font-family:'Playfair Display',serif;font-size:30px;margin:0}.moments-head span{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-.moment-card{display:grid;grid-template-columns:62px 1fr;background:#fff;border-bottom:1px solid var(--line);padding:24px 26px}.moment-number{font-family:'Playfair Display',serif;font-size:28px;color:#cfc7b9;font-weight:700}.moment-topic{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--red);font-weight:700}.moment-card h2{font-family:'Playfair Display',serif;font-size:22px;line-height:1.25;margin:5px 0 8px}.moment-card h2 a{color:var(--ink);text-decoration:none}.moment-card h2 a:hover{color:var(--red)}.moment-card p{color:#575149;margin:0 0 10px;font-size:14px}.moment-link{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--red);font-weight:700;text-decoration:none}
+.moment-card{display:grid;grid-template-columns:62px 1fr;background:#fff;border-bottom:1px solid var(--line);padding:24px 26px}.moment-number{font-family:'Playfair Display',serif;font-size:28px;color:#cfc7b9;font-weight:700}.moment-topic{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--red);font-weight:700}.moment-card h2{font-family:'Playfair Display',serif;font-size:22px;line-height:1.25;margin:5px 0 8px}.moment-card h2 a{color:var(--ink);text-decoration:none}.moment-card h2 a:hover{color:var(--red)}.moment-provenance{font-family:'Roboto Condensed',sans-serif;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:0 0 10px}.moment-card blockquote{border-left:3px solid var(--red);margin:10px 0;padding:2px 0 2px 13px;color:#2d2924;font-family:'Playfair Display',serif;font-size:16px}.moment-card p{color:#575149;margin:0 0 10px;font-size:14px}.moment-actions{display:flex;gap:16px;flex-wrap:wrap}.moment-link,.moment-source{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--red);font-weight:700;text-decoration:none}.moment-source{color:var(--muted)}
 .source-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.btn{font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;text-decoration:none;padding:11px 18px;border:1px solid var(--ink);color:var(--ink);background:#fff}.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
 footer{text-align:center;padding:38px 20px;border-top:1px solid var(--line);font-family:'Roboto Condensed',sans-serif;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}
-@media(max-width:700px){main{padding:30px 18px 64px}.hero{grid-template-columns:82px 1fr;gap:16px}.artwork{width:82px;height:82px}h1{font-size:31px}.source-video .play{width:64px;height:64px;font-size:22px}.section{padding:24px 20px}.summary{font-size:17px}.moment-card{grid-template-columns:46px 1fr;padding:20px 16px}.moment-card h2{font-size:19px}.moments-head{display:block}.moments-head span{display:block;margin-top:6px}}
+@media(max-width:700px){main{padding:30px 18px 64px}.hero{grid-template-columns:82px 1fr;gap:16px}.artwork{width:82px;height:82px}h1{font-size:31px}.source-video .play{width:64px;height:64px;font-size:22px}.section{padding:24px 20px}.question-heading{font-size:24px}.summary{font-size:17px}.source-facts{grid-template-columns:1fr;gap:3px}.source-facts dd{margin-bottom:8px}.moment-card{grid-template-columns:46px 1fr;padding:20px 16px}.moment-card h2{font-size:19px}.moments-head{display:block}.moments-head span{display:block;margin-top:6px}}
 </style>
 <script>window.EGLEZE_ANALYTICS_CONTEXT={content_kind:'episode',content_id:${Number(episode.id)}};</script>
 <script defer src="/js/pulse.js"></script>
@@ -232,12 +328,25 @@ footer{text-align:center;padding:38px 20px;border-top:1px solid var(--line);font
 
   ${sourceEmbed}
 
-  <section class="section">
-    <div class="eyebrow">Episode summary</div>
-    <p class="summary">${escapeHtml(summary).replace(/\n+/g, '</p><p class="summary">')}</p>
+  <section class="section" aria-labelledby="episode-overview">
+    <h2 class="question-heading" id="episode-overview">What happened in this episode?</h2>
+    <p class="summary episode-answer">${escapeHtml(summary || `Egleze identified ${momentCount} source-linked ${momentCount === 1 ? 'moment' : 'moments'} from this conversation.`).replace(/\n+/g, '</p><p class="summary episode-answer">')}</p>
   </section>
 
   ${keyPointsHtml}
+  ${identitiesHtml}
+  ${topicsHtml}
+
+  <section class="section" aria-labelledby="episode-sourcing">
+    <h2 class="question-heading" id="episode-sourcing">How is this page sourced?</h2>
+    <dl class="source-facts">
+      <dt>Programme</dt><dd>${escapeHtml(episode.show_name || 'Source podcast')}</dd>
+      ${publishedLabel ? `<dt>Published</dt><dd>${escapeHtml(publishedLabel)}</dd>` : ''}
+      ${durationLabel ? `<dt>Duration</dt><dd>${escapeHtml(durationLabel)}</dd>` : ''}
+      ${sourceUrl ? `<dt>Original episode</dt><dd><a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">Open the original source ↗</a></dd>` : ''}
+    </dl>
+    <p class="editorial-note">Egleze verifies the speaker, source and timestamp for each linked moment. Unless a moment is explicitly marked independently verified, statements remain attributed claims by the named speaker rather than established facts.</p>
+  </section>
 
   <div class="source-actions">
     ${sourceUrl ? `<a class="btn primary" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener">Watch original episode</a>` : ''}
