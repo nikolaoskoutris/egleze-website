@@ -1459,7 +1459,7 @@ _authSb.auth.onAuthStateChange((event, session) => {
 });
 window.addEventListener('load', () => {
   if (sessionStorage.getItem('egleze_auth') === 'true') initDashboard();
-  else document.getElementById('login-input').focus();
+  else document.getElementById('login-email')?.focus();
 });
 
 // ── INIT ──────────────────────────────────────────────────────
