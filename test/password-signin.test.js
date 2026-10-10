@@ -115,7 +115,7 @@ for (const kind of ['shared', 'account']) {
 
 test('auth password API normalizes only email and passes the unchanged password to Supabase', async () => {
   const calls = [];
-  const window = { supabase: { createClient: () => ({ auth: { signInWithPassword: async input => { calls.push(input); return { error: null }; } } }) } };
+  const window = { supabase: { createClient: () => ({ auth: { onAuthStateChange: () => {}, signInWithPassword: async input => { calls.push(input); return { error: null }; } } }) } };
   vm.runInNewContext(fs.readFileSync(path.join(root, 'js/auth.js'), 'utf8'), { window, console, document: { readyState: 'complete', querySelector: () => null } });
   await window.egleze.auth.signInWithPassword(' REVIEW@EXAMPLE.TEST ', ' leading-and-trailing ');
   assert.equal(calls[0].email, 'review@example.test');
