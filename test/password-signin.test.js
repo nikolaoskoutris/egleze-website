@@ -25,6 +25,8 @@ function harness(kind, passwordResult) {
     closest(selector) { return selector === '#' + this.id ? this : null; }
     matches() { return false; }
     focus() { this.focused = true; }
+    showModal() { this.open = true; }
+    close() { this.open = false; }
   }
   function parse(html) {
     for (const m of html.matchAll(/<([a-z]+)\b([^>]*\bid="([^"]+)"[^>]*)>/g)) {
@@ -43,6 +45,7 @@ function harness(kind, passwordResult) {
     signInWithMagicLink: async (...args) => { calls.push(['magic', ...args]); return { error: null }; },
   };
   const context = { document, window: { egleze: { auth }, location: { href: 'capacitor://localhost' } }, console: { log() {}, warn() {}, error() {} }, requestAnimationFrame: fn => fn(), setTimeout: fn => fn() };
+  vm.runInNewContext(fs.readFileSync(path.join(root, 'js/account-delete.js'), 'utf8'), context);
   if (kind === 'shared') {
     vm.runInNewContext(fs.readFileSync(path.join(root, 'js/signin-modal.js'), 'utf8'), context);
   } else {
@@ -58,10 +61,16 @@ function harness(kind, passwordResult) {
     for (const fn of documentEvents.get(type) || []) await fn(event);
   }
   nodes.get('eg-modal-email').value = 'review@example.test';
-  return { nodes, calls, emit };
+  return { nodes, calls, emit, ui: context.window.egleze.ui };
 }
 
 for (const kind of ['shared', 'account']) {
+  test(`${kind}: sign-in initialization preserves the account-deletion dialog`, () => {
+    const h = harness(kind);
+    h.ui.openDeleteAccount();
+    assert.equal(h.nodes.get('eg-delete-dialog').open, true);
+    assert.equal(h.nodes.get('eg-delete-confirm').disabled, true);
+  });
   test(`${kind}: password mode signs in directly, sends no email and clears the password`, async () => {
     const h = harness(kind);
     assert.equal(h.nodes.get('eg-modal-password').hidden, true);

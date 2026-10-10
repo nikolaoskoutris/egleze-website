@@ -799,7 +799,9 @@ initDB();
 
       // Public hook for future bookmark button (Round 7c) to open the modal
       window.egleze = window.egleze || {};
-      window.egleze.ui = { openSignIn: openModal, closeSignIn: closeModal };
+      window.egleze.ui = window.egleze.ui || {};
+      window.egleze.ui.openSignIn = openModal;
+      window.egleze.ui.closeSignIn = closeModal;
 
     } catch (e) {
       console.error('[egleze] auth-button init failed:', e);
@@ -1626,4 +1628,3 @@ initDB();
 </script>
 </body>
 </html>
-
