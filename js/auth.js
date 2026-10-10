@@ -72,6 +72,13 @@
     return client.auth.signOut();
   }
 
+  async function signInWithPassword(email, password) {
+    return client.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
+  }
+
   window.egleze = window.egleze || {};
   window.egleze.auth = {
     client,
@@ -81,6 +88,7 @@
     signInWithGoogle,
     signInWithApple,
     signInWithMagicLink,
+    signInWithPassword,
     signOut,
   };
 })();

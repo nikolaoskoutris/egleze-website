@@ -41,11 +41,12 @@
     + '#eg-btn-google:disabled{opacity:.6;cursor:wait}'
     + '#eg-modal-or{text-align:center;margin:14px 0;color:#aaa;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;font-family:"Roboto Condensed",sans-serif}'
     + '#eg-modal-form{display:flex;flex-direction:column;gap:10px;margin:0}'
-    + '#eg-modal-email{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box;color:#0e0a06}'
-    + '#eg-modal-email:focus{border-color:#bb1919}'
+    + '#eg-modal-email,#eg-modal-password{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box;color:#0e0a06}'
+    + '#eg-modal-email:focus,#eg-modal-password:focus{border-color:#bb1919}'
     + '#eg-btn-magic{width:100%;padding:12px 16px;background:#bb1919;color:#fff;border:none;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit;transition:opacity .15s}'
     + '#eg-btn-magic:hover{opacity:.9}'
     + '#eg-btn-magic:disabled{opacity:.5;cursor:wait}'
+    + '#eg-btn-password-mode{width:100%;min-height:44px;background:none;border:0;color:#555;text-decoration:underline;font:inherit;font-size:12px;cursor:pointer;margin-top:4px}'
     + '#eg-modal-status{font-size:12px;text-align:center;min-height:18px;margin-top:12px;font-family:inherit}'
     + '#eg-modal-status.is-success{color:#2e7d32}'
     + '#eg-modal-status.is-error{color:#bb1919}'
@@ -83,8 +84,10 @@
     + '<div id="eg-modal-or">or</div>'
     + '<form id="eg-modal-form" novalidate>'
     +   '<input type="email" id="eg-modal-email" placeholder="your@email.com" required autocomplete="email" />'
+    +   '<input type="password" id="eg-modal-password" aria-label="Password" placeholder="Password" autocomplete="current-password" hidden />'
     +   '<button type="submit" id="eg-btn-magic">Send magic link</button>'
     + '</form>'
+    + '<button type="button" id="eg-btn-password-mode" aria-controls="eg-modal-password" aria-expanded="false">Sign in with a password</button>'
     + '<div id="eg-modal-status" role="status" aria-live="polite"></div>'
     + '<p id="eg-modal-foot">By continuing you agree to Egleze\'s<br><a href="/legal">Terms</a> and <a href="/legal">Privacy Policy</a>.</p>'
     + '</div>';
@@ -108,6 +111,27 @@
     s.textContent = text || '';
     s.className = kind ? ('is-' + kind) : '';
   }
+
+  function setPasswordMode(enabled) {
+    var password = document.getElementById('eg-modal-password');
+    var toggle = document.getElementById('eg-btn-password-mode');
+    var submit = document.getElementById('eg-btn-magic');
+    if (!password || !toggle || !submit) return;
+    password.hidden = !enabled;
+    password.required = enabled;
+    password.value = '';
+    toggle.textContent = enabled ? 'Email me a sign-in link instead' : 'Sign in with a password';
+    toggle.setAttribute('aria-expanded', String(enabled));
+    submit.textContent = enabled ? 'Sign in' : 'Send magic link';
+    setStatus('', '');
+  }
+
+  document.addEventListener('click', function (event) {
+    if (!event.target.closest || !event.target.closest('#eg-btn-password-mode')) return;
+    var password = document.getElementById('eg-modal-password');
+    setPasswordMode(password.hidden);
+    if (!password.hidden) password.focus();
+  });
 
   function openModal() {
     var m = document.getElementById('eg-modal');
@@ -137,6 +161,7 @@
     setTimeout(function () {
       m.classList.remove('is-shown');
       setStatus('', '');
+      setPasswordMode(false);
       var magic = document.getElementById('eg-btn-magic');
       var google = document.getElementById('eg-btn-google');
       var apple = document.getElementById('eg-btn-apple');
@@ -210,6 +235,30 @@
     }
     if (!window.egleze || !window.egleze.auth) {
       setStatus('Sign-in not available right now.', 'error');
+      return;
+    }
+    var password = document.getElementById('eg-modal-password');
+    if (password && !password.hidden) {
+      if (!password.value) { setStatus('Enter your password.', 'error'); return; }
+      var toggle = document.getElementById('eg-btn-password-mode');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      toggle.disabled = true;
+      setStatus('Signing in…', 'loading');
+      try {
+        var result = await window.egleze.auth.signInWithPassword(email, password.value);
+        if (result && result.error) {
+          setStatus('Could not sign in. Check your email and password and try again.', 'error');
+        } else {
+          password.value = '';
+          closeModal();
+        }
+      } catch (_) {
+        setStatus('Could not sign in. Check your connection and try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        toggle.disabled = false;
+      }
       return;
     }
     if (btn) btn.disabled = true;
