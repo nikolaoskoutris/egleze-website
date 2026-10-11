@@ -150,15 +150,6 @@ main{max-width:760px;margin:0 auto;padding:28px 24px 60px}
 .ac-loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
 
 /* Delete confirmation modal */
-.ac-confirm-overlay{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(14,10,6,0.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;transition:opacity 0.2s}
-.ac-confirm-overlay.is-shown{display:flex}
-.ac-confirm-overlay.is-open{opacity:1}
-.ac-confirm-card{background:#fff;padding:30px 28px 24px;width:100%;max-width:420px;font-family:'DM Sans',sans-serif;box-shadow:0 12px 36px rgba(0,0,0,0.28)}
-.ac-confirm-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin:0 0 10px;color:var(--dark)}
-.ac-confirm-desc{font-size:13px;color:#555;line-height:1.5;margin:0 0 18px}
-.ac-confirm-input{width:100%;padding:10px 12px;border:1px solid var(--border);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:18px}
-.ac-confirm-input:focus{border-color:var(--red)}
-.ac-confirm-actions{display:flex;justify-content:flex-end;gap:10px}
 
 /* Mobile */
 @media (max-width:600px){
@@ -399,19 +390,6 @@ main{max-width:760px;margin:0 auto;padding:28px 24px 60px}
   </div>
 </main>
 
-<!-- DELETE CONFIRMATION MODAL -->
-<div class="ac-confirm-overlay" id="ac-confirm-overlay" role="dialog" aria-modal="true">
-  <div class="ac-confirm-card">
-    <h3 class="ac-confirm-title">Delete your account?</h3>
-    <p class="ac-confirm-desc">This permanently removes your profile, saved stories, and all activity from Egleze. Your data cannot be recovered. Type <strong>DELETE</strong> below to confirm.</p>
-    <input type="text" class="ac-confirm-input" id="ac-confirm-input" placeholder="Type DELETE to confirm" autocomplete="off">
-    <div class="ac-confirm-actions">
-      <button class="ac-btn-secondary" id="ac-confirm-cancel">Cancel</button>
-      <button class="ac-btn-danger" id="ac-confirm-delete" disabled>Delete forever</button>
-    </div>
-  </div>
-</div>
-
 <!-- ────── SUPABASE INIT ────── -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -439,6 +417,7 @@ initDB();
 </script>
 
 <script src="/js/auth.js"></script>
+<script src="/js/account-delete.js"></script>
 <script src="/js/follows.js"></script>
 
 <style id="eg-modal-styles">
@@ -820,7 +799,9 @@ initDB();
 
       // Public hook for future bookmark button (Round 7c) to open the modal
       window.egleze = window.egleze || {};
-      window.egleze.ui = { openSignIn: openModal, closeSignIn: closeModal };
+      window.egleze.ui = window.egleze.ui || {};
+      window.egleze.ui.openSignIn = openModal;
+      window.egleze.ui.closeSignIn = closeModal;
 
     } catch (e) {
       console.error('[egleze] auth-button init failed:', e);
@@ -1559,59 +1540,8 @@ initDB();
   // ─── DELETE ACCOUNT (GDPR Article 17) ─────────────────────
   function wireDelete() {
     var openBtn = document.getElementById('ac-btn-delete');
-    var overlay = document.getElementById('ac-confirm-overlay');
-    var input = document.getElementById('ac-confirm-input');
-    var cancelBtn = document.getElementById('ac-confirm-cancel');
-    var confirmBtn = document.getElementById('ac-confirm-delete');
-
-    function openModal() {
-      input.value = '';
-      confirmBtn.disabled = true;
-      overlay.classList.add('is-shown');
-      requestAnimationFrame(function(){ overlay.classList.add('is-open'); });
-      setTimeout(function(){ input.focus(); }, 80);
-    }
-    function closeModal() {
-      overlay.classList.remove('is-open');
-      setTimeout(function(){ overlay.classList.remove('is-shown'); }, 200);
-    }
-    function onTyping() {
-      var ok = input.value.trim().toUpperCase() === 'DELETE';
-      confirmBtn.disabled = !ok;
-    }
-    async function doDelete() {
-      if (!currentUser) return;
-      confirmBtn.disabled = true;
-      cancelBtn.disabled = true;
-      confirmBtn.textContent = 'Deleting…';
-      try {
-        var dbc = window.egleze.auth.client;
-        // Delete user-owned rows in dependency order
-        await dbc.from('user_saved_stories').delete().eq('user_id', currentUser.id);
-        await dbc.from('share_events').delete().eq('user_id', currentUser.id);
-        await dbc.from('profiles').delete().eq('id', currentUser.id);
-        // Sign out — auth.users row will be cleaned up server-side within 30 days per GDPR policy
-        await window.egleze.auth.signOut();
-        try { localStorage.removeItem('egleze_pending_save'); } catch(_){}
-        window.location.href = '/?account_deleted=1';
-      } catch (e) {
-        console.error('[account] delete exception:', e);
-        confirmBtn.textContent = 'Delete forever';
-        confirmBtn.disabled = false;
-        cancelBtn.disabled = false;
-        showToastSafe('Could not delete account — please try again');
-      }
-    }
-
-    if (openBtn) openBtn.addEventListener('click', openModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    if (input) input.addEventListener('input', onTyping);
-    if (confirmBtn) confirmBtn.addEventListener('click', doDelete);
-    if (overlay) overlay.addEventListener('click', function(e){
-      if (e.target === overlay) closeModal();
-    });
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeModal();
+    if (openBtn) openBtn.addEventListener('click', function () {
+      window.egleze.ui.openDeleteAccount();
     });
   }
 
@@ -1698,4 +1628,3 @@ initDB();
 </script>
 </body>
 </html>
-

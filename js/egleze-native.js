@@ -18,6 +18,24 @@
   var P = Cap.Plugins || {};
   var Haptics = P.Haptics, Browser = P.Browser, App = P.App;
   var AUTH_REDIRECT = 'egleze://auth';
+  var deletionScript;
+  function openDeleteAccount() {
+    if (window.egleze && window.egleze.ui && window.egleze.ui.openDeleteAccount) {
+      window.egleze.ui.openDeleteAccount(); return;
+    }
+    if (!deletionScript) {
+      deletionScript = new Promise(function (resolve, reject) {
+        var script = document.createElement('script');
+        script.src = 'https://egleze.com/js/account-delete.js';
+        script.onload = resolve;
+        script.onerror = function () { script.remove(); deletionScript = null; reject(new Error('unavailable')); };
+        document.head.appendChild(script);
+      });
+    }
+    deletionScript.then(function () { window.egleze.ui.openDeleteAccount(); }).catch(function () {
+      window.alert('The account screen could not load. Please check your connection and try again.');
+    });
+  }
   document.documentElement.classList.add('eg-native');
 
   // ── 1. Haptics ────────────────────────────────────────────────────────────
@@ -29,6 +47,9 @@
 
   // ── 2. External links → in-app browser ─────────────────────────────────────
   document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('[data-delete-account]')) {
+      e.preventDefault(); e.stopImmediatePropagation(); openDeleteAccount(); return;
+    }
     var a = e.target.closest && e.target.closest('a[href^="http"]');
     if (!a) return;
     var href = a.getAttribute('href') || '';
@@ -49,6 +70,7 @@
     return async function () {
       try {
         var sb = client();
+        window.egleze.auth.markOAuthProvider(provider);
         var res = await sb.auth.signInWithOAuth({
           provider: provider,
           options: { redirectTo: AUTH_REDIRECT, skipBrowserRedirect: true }
@@ -82,16 +104,20 @@
         var url = data && data.url;
         if (!url || url.indexOf(AUTH_REDIRECT) !== 0) return;
         var sb = client(); if (!sb) return;
-        var qs = url.split('?')[1] || '';
-        var hs = url.split('#')[1] || '';
-        var params = new URLSearchParams(qs || hs);
+        var parsed = new URL(url);
+        if (parsed.protocol !== 'egleze:' || parsed.hostname !== 'auth') return;
+        var params = new URLSearchParams(parsed.search || parsed.hash.slice(1));
+        var result;
         if (params.get('code')) {
-          await sb.auth.exchangeCodeForSession(params.get('code'));
+          result = await sb.auth.exchangeCodeForSession(params.get('code'));
         } else if (params.get('access_token')) {
-          await sb.auth.setSession({
+          result = await sb.auth.setSession({
             access_token: params.get('access_token'),
             refresh_token: params.get('refresh_token')
           });
+        }
+        if (result && !result.error && result.data && result.data.session) {
+          try { await window.egleze.auth.storeAppleCredential(result.data.session, params.get('provider_refresh_token')); } catch (_) {}
         }
         try { if (Browser) Browser.close(); } catch (_) {}
       } catch (err) { console.error('[egleze-native] auth callback failed', err); }
