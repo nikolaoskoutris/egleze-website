@@ -10,11 +10,29 @@ test('sitemap index exposes every segmented public endpoint', () => {
   [
     '/sitemap-static.xml',
     '/sitemap-stories.xml',
+    '/sitemap-current-stories.xml',
     '/sitemap-episodes.xml',
     '/sitemap-shows.xml',
     '/sitemap-topics.xml',
     '/news-sitemap.xml'
   ].forEach(path => assert.match(xml, new RegExp(path.replace('.', '\\.'))));
+});
+
+test('current-story sitemap requests only dated, source-linked attribution-checked stories', async t => {
+  const originalFetch = global.fetch;
+  t.after(() => { global.fetch = originalFetch; });
+  let requestedUrl = '';
+  global.fetch = async url => {
+    requestedUrl = decodeURIComponent(String(url));
+    return { ok: true, json: async () => [] };
+  };
+
+  const result = await sitemap.buildSitemap('current-stories');
+  assert.equal(result.errors.length, 0);
+  assert.match(requestedUrl, /status=eq\.approved/);
+  assert.match(requestedUrl, /approved_at=not\.is\.null/);
+  assert.match(requestedUrl, /source_url=not\.is\.null/);
+  assert.match(requestedUrl, /attribution_status=in\.\(verified,corrected\)/);
 });
 
 test('static sitemap never invents a regeneration-date lastmod', async () => {

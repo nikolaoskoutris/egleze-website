@@ -31,6 +31,10 @@ function slugify(text, opts) {
   return (opts && opts.full) ? base : base.substring(0, 80);
 }
 
+function canonicalStorySlug(story) {
+  return `${story.id}-${slugify(story.headline, { full: true })}`;
+}
+
 // Escape HTML special chars to prevent XSS via story content.
 function escapeHtml(s) {
   if (s == null) return '';
@@ -788,6 +792,13 @@ module.exports = async (req, res) => {
       res.status(404).send(render404Html(slug));
       return;
     }
+    const canonicalSlug = canonicalStorySlug(story);
+    if (slug !== canonicalSlug) {
+      res.setHeader('Location', `/story/${canonicalSlug}`);
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+      res.status(308).send('Permanent Redirect');
+      return;
+    }
     const [artwork, episodeBundle] = await Promise.all([
       fetchShowArtwork(story.show_name),
       fetchEpisodeBundle(story.episode_id, story.id)
@@ -801,3 +812,5 @@ module.exports = async (req, res) => {
     res.status(500).send(render404Html(''));
   }
 };
+
+module.exports._test = { canonicalStorySlug };

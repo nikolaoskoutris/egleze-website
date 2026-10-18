@@ -24,6 +24,10 @@ function slugify(value) {
     .replace(/^-|-$/g, '');
 }
 
+function canonicalEpisodeSlug(episode) {
+  return `${episode.id}-${slugify(episode.title)}`;
+}
+
 function formatDate(iso) {
   if (!iso) return '';
   try {
@@ -409,6 +413,13 @@ module.exports = async function handler(req, res) {
       res.status(404).setHeader('Content-Type', 'text/html; charset=utf-8').send(renderNotFound());
       return;
     }
+    const canonicalSlug = canonicalEpisodeSlug(episode);
+    if (rawSlug !== canonicalSlug) {
+      res.setHeader('Location', `/episodes/${canonicalSlug}`);
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+      res.status(308).send('Permanent Redirect');
+      return;
+    }
     const moments = await fetchMoments(episode.id);
     if (!moments.length) {
       res.status(404).setHeader('Content-Type', 'text/html; charset=utf-8').send(renderNotFound());
@@ -423,3 +434,5 @@ module.exports = async function handler(req, res) {
       .send('<h1>Episode temporarily unavailable</h1>');
   }
 };
+
+module.exports._test = { canonicalEpisodeSlug };
