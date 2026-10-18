@@ -250,7 +250,9 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
     },
     'publisher': {
       '@type': 'Organization',
+      '@id': 'https://egleze.com/#organization',
       'name': 'Egleze',
+      'url': 'https://egleze.com/',
       'logo': {
         '@type': 'ImageObject',
         'url': 'https://egleze.com/logo.png'
@@ -267,6 +269,36 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
       '@id': episodeUrl,
       'name': episode.title
     } : undefined
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Egleze',
+        item: 'https://egleze.com/'
+      },
+      showName ? {
+        '@type': 'ListItem',
+        position: 2,
+        name: showName,
+        item: `https://egleze.com/shows/${slugify(showName)}`
+      } : {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Archive',
+        item: 'https://egleze.com/archive'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: title,
+        item: canonicalUrl
+      }
+    ]
   };
 
   const keyPointsHtml = keyPoints.length > 0
@@ -401,6 +433,8 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   <meta name="description" content="${escapeHtml(description)}">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <link rel="canonical" href="${canonicalUrl}">
+  <link rel="alternate" type="application/rss+xml" title="Egleze — Latest Podcast Intelligence" href="https://egleze.com/rss.xml">
+  <link rel="alternate" type="application/feed+json" title="Egleze — Latest Podcast Intelligence" href="https://egleze.com/feed.json">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
@@ -426,7 +460,8 @@ function renderStoryHtml(story, artworkUrl, episode, siblingMoments, episodeMome
   <meta name="twitter:image" content="${escapeHtml(ogImage)}">
 
   <!-- JSON-LD -->
-  <script type="application/ld+json">${JSON.stringify(schema)}</script>${videoObjectLd}
+  <script type="application/ld+json">${JSON.stringify(schema)}</script>
+  <script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>${videoObjectLd}
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

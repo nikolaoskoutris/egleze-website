@@ -45,6 +45,8 @@ test('story pages expose citation-oriented content and unrestricted snippets', (
   assert.match(story, /Independently verified/);
   assert.match(story, /Supporting sources/);
   assert.match(story, /Correction/);
+  assert.match(story, /BreadcrumbList/);
+  assert.match(story, /application\/feed\+json/);
 });
 
 test('episode hubs expose question-led summaries, identities and timestamped sources', () => {
@@ -57,4 +59,6 @@ test('episode hubs expose question-led summaries, identities and timestamped sou
   assert.match(episode, /Check original/);
   assert.match(episode, /speaker_name/);
   assert.match(episode, /SpeakableSpecification/);
+  assert.match(episode, /BreadcrumbList/);
+  assert.match(episode, /application\/feed\+json/);
 });

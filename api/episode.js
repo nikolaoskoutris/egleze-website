@@ -201,7 +201,8 @@ function renderEpisode(episode, moments) {
     image: image ? [image] : undefined,
     partOfSeries: {
       '@type': 'PodcastSeries',
-      name: episode.show_name || 'Egleze source show'
+      name: episode.show_name || 'Egleze source show',
+      url: episode.show_name ? `https://egleze.com/shows/${slugify(episode.show_name)}` : undefined
     },
     associatedMedia: sourceUrl ? {
       '@type': 'VideoObject',
@@ -224,6 +225,33 @@ function renderEpisode(episode, moments) {
       mentions: speakerLabel(moment) ? { '@type': 'Person', name: speakerLabel(moment) } : undefined,
       isBasedOn: addSourceTimestamp(moment.source_url || sourceUrl, moment.clip_start_seconds) || undefined
     }))
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Egleze',
+        item: 'https://egleze.com/'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: episode.show_name || 'Shows',
+        item: episode.show_name
+          ? `https://egleze.com/shows/${slugify(episode.show_name)}`
+          : 'https://egleze.com/shows.html'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: title,
+        item: canonicalUrl
+      }
+    ]
   };
 
   const keyPointsHtml = keyPoints.length
@@ -267,6 +295,8 @@ function renderEpisode(episode, moments) {
 <meta name="description" content="${escapeHtml(summary || `Episode overview and ${momentCount} source-linked moments from ${episode.show_name || 'this conversation'}.`)}">
 <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 <link rel="canonical" href="${canonicalUrl}">
+<link rel="alternate" type="application/rss+xml" title="Egleze — Latest Podcast Intelligence" href="https://egleze.com/rss.xml">
+<link rel="alternate" type="application/feed+json" title="Egleze — Latest Podcast Intelligence" href="https://egleze.com/feed.json">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
@@ -279,6 +309,7 @@ function renderEpisode(episode, moments) {
 <meta property="og:url" content="${canonicalUrl}">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">${JSON.stringify(schema)}</script>
+<script type="application/ld+json">${JSON.stringify(breadcrumbSchema)}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700;900&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">

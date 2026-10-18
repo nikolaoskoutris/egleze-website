@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://kerijdhiasrvaxssjqqg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcmlqZGhpYXNydmF4c3NqcXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjIxOTksImV4cCI6MjA5MzE5ODE5OX0.tyTa3XkkGh8bGWPIyGKNABf0n04rPiEnyTbaxjNFzLg';
+const SUPABASE_ANON_KEY = 'sb_publishable_3I2jAyKsQyMLvxuQG47rBw_UW_QSZLs';
 const INDEXNOW_KEY = '16e68308a6204a49b198ab9957a8c2a6';
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow';
 
@@ -28,7 +28,9 @@ async function fetchApprovedStory(storyId) {
   const response = await fetch(url, {
     headers: {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: 'Bearer ' + SUPABASE_ANON_KEY
+      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      Accept: 'application/json',
+      'Accept-Profile': 'public'
     }
   });
   if (!response.ok) throw new Error('Story lookup failed with HTTP ' + response.status);
