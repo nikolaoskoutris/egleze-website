@@ -34,6 +34,8 @@ test('IndexNow verifies an approved story before submitting its canonical URL', 
 
   assert.equal(result.ok, true);
   assert.match(decodeURIComponent(calls[0].url), /status=eq\.approved/);
+  assert.equal(calls[0].options.headers['Accept-Profile'], 'public');
+  assert.equal(calls[0].options.headers.Accept, 'application/json');
   const submitted = JSON.parse(calls[1].options.body);
   assert.deepEqual(submitted.urlList, ['https://egleze.com/story/42-signal-context']);
   assert.equal(submitted.host, 'egleze.com');

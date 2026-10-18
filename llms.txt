@@ -9,6 +9,7 @@
 - [Topics](https://egleze.com/): Browse reporting by subject.
 - [Shows](https://egleze.com/shows.html): Browse represented podcasts.
 - [RSS feed](https://egleze.com/rss.xml): Latest approved stories.
+- [JSON feed](https://egleze.com/feed.json): Machine-readable latest approved stories with canonical and source links.
 - [XML sitemap](https://egleze.com/sitemap.xml): Canonical crawl inventory.
 - [News sitemap](https://egleze.com/news-sitemap.xml): Recent news stories.
 - [Editorial standards](https://egleze.com/legal.html#standards): Attribution, verification and corrections.
@@ -18,7 +19,7 @@
 
 - [Connect Egleze to AI tools](https://egleze.com/api.html): Human-readable installation and usage guide.
 - [Public Egleze app in ChatGPT](https://chatgpt.com/plugins/plugin_asdk_app_6aa6768b9d008191aa319c83de25acb1)
-- Official MCP Registry name: `io.github.nikolaoskoutris/egleze`
+- Official MCP Registry name: `com.egleze/mcp`
 - Current registry version: `1.1.0`
 - Streamable HTTP endpoint: `https://egleze-mcp-server.onrender.com/mcp`
 

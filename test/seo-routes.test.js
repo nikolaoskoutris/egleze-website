@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const sitemap = require('../api/sitemap')._test;
 const rss = require('../api/rss')._test;
+const jsonFeed = require('../api/feed')._test;
 
 test('sitemap index exposes every segmented public endpoint', () => {
   const xml = sitemap.sitemapIndex();
@@ -83,4 +84,28 @@ test('RSS uses approval time, canonical URLs and truthful source metadata', () =
   assert.match(feed, /<dc:creator>Egleze Editorial Desk<\/dc:creator>/);
   assert.match(feed, /<dc:source>Source Show — https:\/\/example\.com\/watch\?a=1&amp;b=2<\/dc:source>/);
   assert.doesNotMatch(feed, /No public date/);
+});
+
+test('JSON Feed exposes only dated, source-linked stories with canonical URLs', () => {
+  const feed = jsonFeed.renderFeed([
+    {
+      id: 7,
+      headline: 'Signal & context',
+      summary: 'A concise summary.',
+      show_name: 'Source Show',
+      topic: 'AI & Tech',
+      approved_at: '2026-09-12T08:00:00Z',
+      updated_at: '2026-09-12T08:30:00Z',
+      source_url: 'https://example.com/watch',
+      attribution_status: 'verified'
+    },
+    { id: 8, headline: 'No source', approved_at: '2026-09-12T08:00:00Z' }
+  ]);
+
+  assert.equal(feed.version, 'https://jsonfeed.org/version/1.1');
+  assert.equal(feed.feed_url, 'https://egleze.com/feed.json');
+  assert.equal(feed.items.length, 1);
+  assert.equal(feed.items[0].url, 'https://egleze.com/story/7-signal-context');
+  assert.equal(feed.items[0].external_url, 'https://example.com/watch');
+  assert.deepEqual(feed.items[0].tags, ['AI & Tech', 'Source Show']);
 });
