@@ -13,7 +13,7 @@ const TOPICS = [
   'relationships-family', 'science', 'society', 'sports', 'ufo-paranormal'
 ];
 
-const SITEMAP_TYPES = ['static', 'stories', 'episodes', 'shows', 'topics', 'news'];
+const SITEMAP_TYPES = ['static', 'stories', 'current-stories', 'episodes', 'shows', 'topics', 'news'];
 
 let INDEXABLE_TOPICS = TOPICS;
 try {
@@ -199,11 +199,14 @@ async function buildSitemap(type, now = new Date()) {
     });
   }
 
-  if (type === 'stories') {
+  if (type === 'stories' || type === 'current-stories') {
+    const qualityFilter = type === 'current-stories'
+      ? '&approved_at=not.is.null&source_url=not.is.null&attribution_status=in.(verified,corrected)'
+      : '';
     const result = await fetchAll(
-      'stories?select=id,headline,approved_at&status=eq.approved&order=id.asc'
+      `stories?select=id,headline,approved_at&status=eq.approved${qualityFilter}&order=id.asc`
     );
-    if (result.error) errors.push({ source: 'stories', error: result.error });
+    if (result.error) errors.push({ source: type, error: result.error });
     result.data.forEach(story => {
       if (!story.id || !story.headline) return;
       urls.push(urlBlock(`${SITE_URL}/story/${story.id}-${slugify(story.headline)}`, {

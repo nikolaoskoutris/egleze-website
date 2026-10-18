@@ -3,6 +3,7 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap?type=index" },
     { "source": "/sitemap-static.xml", "destination": "/api/sitemap?type=static" },
     { "source": "/sitemap-stories.xml", "destination": "/api/sitemap?type=stories" },
+    { "source": "/sitemap-current-stories.xml", "destination": "/api/sitemap?type=current-stories" },
     { "source": "/sitemap-episodes.xml", "destination": "/api/sitemap?type=episodes" },
     { "source": "/sitemap-shows.xml", "destination": "/api/sitemap?type=shows" },
     { "source": "/sitemap-topics.xml", "destination": "/api/sitemap?type=topics" },
