@@ -261,7 +261,45 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
+  function installStoreFooter() {
+    var footer = document.querySelector('footer');
+    if (!footer) return;
+
+    var block = footer.querySelector('.eg-install');
+    if (!block) {
+      block = document.createElement('section');
+      block.className = 'eg-install';
+      footer.insertBefore(block, footer.firstChild);
+    }
+
+    block.setAttribute('aria-label', 'Download the Egleze app');
+    block.style.cssText = 'box-sizing:border-box;width:100%;max-width:1284px;margin:0 auto;padding:26px 28px;border-bottom:1px solid #2a2018;background:#0e0a07;color:#fff;text-align:left;text-transform:none;letter-spacing:normal;font-style:normal';
+    block.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:220px">' +
+          '<div style="font-family:Roboto Condensed,Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#fff;text-transform:uppercase;margin-bottom:7px;font-weight:700">Egleze on your phone</div>' +
+          '<div style="font-family:DM Sans,Arial,sans-serif;font-size:13px;line-height:1.55;color:#bcb09a;max-width:520px">Download the Egleze app for iPhone, iPad, or Android.</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+          '<a data-eg-app-store="apple" href="https://apps.apple.com/ie/app/egleze/id6783092510" target="_blank" rel="noopener" aria-label="Download Egleze on the App Store" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:10px;height:50px;min-width:168px;background:#050505;color:#fff;border:1px solid #4b4b4b;border-radius:8px;padding:6px 13px;text-decoration:none">' +
+            '<svg width="28" height="32" viewBox="0 0 24 24" aria-hidden="true" style="display:block;flex-shrink:0"><path fill="currentColor" d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.26-.07 2.14.69 2.88.69.95 0 2.54-.86 4.16-.73.68.03 2.59.27 3.82 2.07-3.31 1.99-2.64 6.35.51 7.62-.63 1.65-1.44 3.28-2.37 4.32zM12.03 7.25C11.88 4.8 13.86 2.78 16.15 2.58c.32 2.83-2.57 4.94-4.12 4.67z"/></svg>' +
+            '<span style="display:flex;flex-direction:column;line-height:1.05"><span style="font-family:DM Sans,Arial,sans-serif;font-size:9px;letter-spacing:.2px;color:#e7e7e7">Download on the</span><strong style="font-family:DM Sans,Arial,sans-serif;font-size:18px;font-weight:500;letter-spacing:-.25px">App Store</strong></span>' +
+          '</a>' +
+          '<a data-eg-app-store="google" href="https://play.google.com/store/apps/details?id=com.egleze.app" target="_blank" rel="noopener" aria-label="Get Egleze on Google Play" style="box-sizing:border-box;display:inline-flex;align-items:center;gap:10px;height:50px;min-width:176px;background:#050505;color:#fff;border:1px solid #4b4b4b;border-radius:8px;padding:6px 13px;text-decoration:none">' +
+            '<svg width="27" height="30" viewBox="0 0 27 30" aria-hidden="true" style="display:block;flex-shrink:0"><path d="M1.7 1.6c-.44.5-.7 1.27-.7 2.27v22.27c0 1 .26 1.77.7 2.27l.09.09 12.47-12.47v-.3L1.79 1.51z" fill="#00d7fe"/><path d="M18.41 20.2l-4.15-4.16v-.3l4.16-4.16.09.05 4.93 2.8c1.41.8 1.41 2.12 0 2.92l-4.93 2.8z" fill="#ffce00"/><path d="M18.51 20.15l-4.25-4.26L1.7 28.45c.7.74 1.86.83 3.17.09l13.64-7.74z" fill="#ff3a44"/><path d="M18.51 11.63L4.87 3.89C3.56 3.15 2.4 3.24 1.7 3.98l12.56 12.06z" fill="#00f076"/></svg>' +
+            '<span style="display:flex;flex-direction:column;line-height:1.05"><span style="font-family:Roboto Condensed,Arial,sans-serif;font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:#e7e7e7">Get it on</span><strong style="font-family:DM Sans,Arial,sans-serif;font-size:18px;font-weight:500;letter-spacing:-.25px">Google Play</strong></span>' +
+          '</a>' +
+        '</div>' +
+      '</div>';
+
+    block.addEventListener('click', function (event) {
+      var link = event.target.closest && event.target.closest('[data-eg-app-store]');
+      if (link) send('app_store_open', { store: link.getAttribute('data-eg-app-store') });
+    });
+  }
+
   function ready() {
+    installStoreFooter();
     installConsentBanner();
     ensureGoogleAnalytics();
     installInteractionTracking();
